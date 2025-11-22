@@ -1,0 +1,30 @@
+{
+  "name": "lamsalcn",
+  "bin": {
+    "lamsalcn": "lamsalcn.ts"
+  },
+  "repository": "romanlamsal/lamsalcn",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild --bundle --platform=node --outfile=lamsalcn.js --format=esm lamsalcn.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/degit": "^2.8.6",
+    "@types/node": "22",
+    "biome": "^0.3.3",
+    "esbuild": "^0.27.0",
+    "typescript": "^5.9.3",
+    "zod": "4"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.0.1",
+    "degit": "^2.8.4"
+  }
+}

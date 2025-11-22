@@ -1,0 +1,20 @@
+[
+  {
+    "name": "typed-event-emitter",
+    "entry": "/registry/typed-event-emitter.ts",
+    "dependencies": ["zod@4"]
+  },
+  {
+    "name": "consume-generator",
+    "entry": "/registry/consume-generator.ts"
+  },
+  {
+    "name": "biome-config",
+    "entry": "/biome.config.ts",
+    "copyTo": "./biome.config.ts"
+  },
+  {
+    "name": "superset",
+    "entry": "/registry/superset"
+  }
+]
