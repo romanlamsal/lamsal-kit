@@ -8,9 +8,9 @@ import process from "node:process"
 import { checkbox, confirm } from "@inquirer/prompts"
 import degit from "degit"
 import type { RegistryEntry } from "../registry"
+import { compareDeps } from "./compare-deps"
 import { CONFIG_FILENAME, type LamsalcnConfig } from "./config-file"
 import { cwdPath } from "./cwd-path"
-import { getConflictingDeps } from "./get-conflicting-deps"
 
 const configPath = cwdPath(CONFIG_FILENAME)
 if (!existsSync(configPath)) {
@@ -23,11 +23,18 @@ const verbose = process.argv.includes("--verbose")
 
 const lamsalCnConfig = JSON.parse(readFileSync(configPath, "utf8")) as LamsalcnConfig
 
-const registry = await fetch("https://raw.githubusercontent.com/romanlamsal/lamsalcn/refs/heads/main/registry.json")
-    .then(async res => {
-        const json = (await res.json()) as RegistryEntry[]
-        return json.sort((a, b) => a.name.localeCompare(b.name))
-    })
+async function getRegistry() {
+    if (process.env["REGISTRY_JSON"]) {
+        return JSON.parse(readFileSync(process.env["REGISTRY_JSON"], "utf8")) as RegistryEntry[]
+    }
+
+    return fetch("https://raw.githubusercontent.com/romanlamsal/lamsalcn/refs/heads/main/registry.json").then(
+        res => res.json() as Promise<RegistryEntry[]>,
+    )
+}
+
+const registry = await getRegistry()
+    .then(async res => res.sort((a, b) => a.name.localeCompare(b.name)))
     .catch(err => {
         console.error("Could not fetch registry:", err)
         process.exit(1)
@@ -109,6 +116,26 @@ async function copySources(added: string[]) {
             process.exit(1)
         }
 
+        const comparedDeps = compareDeps(config, packageJson)
+
+        if (comparedDeps.some(d => d.conflictWith)) {
+            const conflictsString = comparedDeps
+                .filter(d => d.conflictWith)
+                .map(({ name, nextVersion, conflictWith }) => `${name}: ${conflictWith} -> ${nextVersion}`)
+                .join("\n")
+
+            if (
+                !(await confirm({
+                    message: `Overwrite the following dependencies?\n${conflictsString}`,
+                }).catch(() => process.exit(1)))
+            ) {
+                continue
+            }
+        }
+
+        overallDeps.push(...comparedDeps.filter(d => !d.dev && d.install).map(d => d.name + "@" + d.nextVersion))
+        overallDevDeps.push(...comparedDeps.filter(d => d.dev && d.install).map(d => d.name + "@" + d.nextVersion))
+
         await clone(config.entry, async outputLocation => {
             const outputDir = (() => {
                 // copyTo is undefined or a directory
@@ -145,27 +172,6 @@ async function copySources(added: string[]) {
         }).then(() => {
             console.log("Done.")
         })
-
-        // CHECK FROM HERE AGAIN
-        const conflictingDeps = getConflictingDeps(config, packageJson, "dependencies") ?? []
-        const conflictingDevDeps = getConflictingDeps(config, packageJson, "devDependencies") ?? []
-
-        if (conflictingDeps.length || conflictingDevDeps.length) {
-            const conflictsString = [...conflictingDeps, ...conflictingDevDeps]
-                .map(({ name, current, next }) => `${name}: ${current} -> ${next}`)
-                .join("\n")
-            const confirmed = await confirm({
-                message: `Overwrite the following dependencies?\n${conflictsString}`,
-            }).catch(() => process.exit(1))
-
-            if (!confirmed) {
-                console.log("Not confirmed. Skipping.")
-                continue
-            }
-        }
-
-        overallDeps.push(...(config?.dependencies ?? []))
-        overallDevDeps.push(...(config?.devDependencies ?? []))
     }
 
     const packageManager = lamsalCnConfig.packageManager
