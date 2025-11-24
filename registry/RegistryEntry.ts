@@ -9,3 +9,5 @@ export const RegistryEntrySchema = z.object({
 })
 
 export type RegistryEntry = z.infer<typeof RegistryEntrySchema>
+
+export type RegistryEntryEmbedding = { name: string; vector: number[] }[]

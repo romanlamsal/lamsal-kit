@@ -9,7 +9,7 @@
   "main": "build/lamsal-kit.js",
   "types": "build/lamsal-kit.d.ts",
   "scripts": {
-    "release": "node build.js && npm publish",
+    "release": "node scripts/build.js && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
@@ -29,6 +29,7 @@
     "zod": "^4.1.12"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.8.0",
     "@inquirer/prompts": "^8.0.1",
     "degit": "^2.8.4",
     "minimist": "^1.2.8"

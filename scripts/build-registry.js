@@ -3,9 +3,11 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs"
 import { writeFile } from "node:fs/promises"
 import process from "node:process"
+import { pipeline } from "@huggingface/transformers"
+import { pathToFileURL } from "url"
 import { z } from "zod"
-import packageJson from "./package.json" with { type: "json" }
-import { RegistryEntrySchema } from "./registry/RegistryEntry.ts"
+import packageJson from "../package.json" with { type: "json" }
+import { RegistryEntrySchema } from "../registry/RegistryEntry.ts"
 
 const registryEntries = [
     {
@@ -50,7 +52,7 @@ const schemaFileName = `schema.json`
 
 export async function buildAndValidate() {
     for (const registryEntry of registryEntries) {
-        if (!existsSync(new URL("." + registryEntry.entry, import.meta.url))) {
+        if (!existsSync(new URL(".." + registryEntry.entry, import.meta.url))) {
             console.error(`Registry entry ${registryEntry.name} not found at ${registryEntry.entry}`)
             process.exit(1)
         }
@@ -79,17 +81,46 @@ export async function buildAndValidate() {
     return RegistrySchema.parse(data)
 }
 
+/**
+ * @returns {Promise<import("../registry/RegistryEntry.ts").RegistryEntryEmbedding>}
+ */
+async function generateEmbeddings() {
+    const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", { dtype: "fp32" })
+    const indexedData = []
+
+    for (const item of registryEntries) {
+        // Combine the name and path into a single string for better context
+        const text = `${item.name} (${item.entry})`
+
+        // Generate the vector (embedding)
+        // The result is a high-dimensional tensor. We convert it to a simple array.
+        const output = await embedder(text, { pooling: "mean", normalize: true })
+
+        // Convert the tensor to a flat array of numbers
+        const vector = Object.values(output.data)
+
+        indexedData.push({ name: item.name, vector })
+    }
+    return indexedData
+}
+
 /** @param {string} outputDirectory */
 export async function writeFiles(outputDirectory) {
-    const outputDirectoryUrl = new URL(outputDirectory.replaceAll("\/*$", "") + "/", import.meta.url)
+    const outputDirectoryUrl = new URL(outputDirectory.replaceAll("\/*$", "") + "/", pathToFileURL(process.cwd()) + "/")
+    console.log(outputDirectoryUrl.toString())
 
     rmSync(outputDirectoryUrl, { recursive: true, force: true })
     mkdirSync(outputDirectoryUrl, { recursive: true })
 
-    const registry = await buildAndValidate()
-
     await Promise.all([
-        writeFile(new URL("registry.json", outputDirectoryUrl), JSON.stringify(registry, null, 2)),
+        buildAndValidate().then(registry =>
+            Promise.all([
+                writeFile(new URL("registry.json", outputDirectoryUrl), JSON.stringify(registry, null, 2)),
+                generateEmbeddings().then(embeddings =>
+                    writeFile(new URL("embeddings.json", outputDirectoryUrl), JSON.stringify(embeddings)),
+                ),
+            ]),
+        ),
         writeFile(new URL(schemaFileName, outputDirectoryUrl), JSON.stringify(z.toJSONSchema(RegistrySchema), null, 2)),
     ])
 }
@@ -97,4 +128,6 @@ export async function writeFiles(outputDirectory) {
 const outputDirectoryArg = process.argv[2]
 if (outputDirectoryArg) {
     await writeFiles(outputDirectoryArg)
+} else {
+    console.log("No output dir.")
 }

@@ -13,6 +13,7 @@ import type { RegistryEntry } from "../registry/RegistryEntry"
 import { compareDeps } from "./compare-deps"
 import { CONFIG_FILENAME, type LamsalcnConfig } from "./config-file"
 import { cwdPath } from "./cwd-path"
+import { initEmbeddings, searchVectors } from "./search-vector"
 
 const configPath = cwdPath(CONFIG_FILENAME)
 if (!existsSync(configPath)) {
@@ -52,13 +53,24 @@ const registry = await getRegistry()
         console.error("Could not fetch registry:", err)
         process.exit(1)
     })
+initEmbeddings().catch(err => console.debug("Could not init embeddings:", err))
 
 async function getAdded(): Promise<string[]> {
     const registeredSources = registry.map(regEntry => regEntry.name)
     if (entriesToAdd.length) {
-        const notFound = entriesToAdd.filter(candidate => !registeredSources.includes(candidate))
-        if (notFound.length) {
-            console.log(`Unknown option${notFound.length !== 1 ? "s" : ""}: "${notFound.join(", ")}"`)
+        for (const candidate of entriesToAdd) {
+            if (registeredSources.includes(candidate)) {
+                continue
+            }
+
+            const searchResult = (await searchVectors(candidate, 1))[0]
+
+            if (searchResult && searchResult.similarity > 0.5) {
+                console.log(`Unknown option "${candidate}". Did you mean ${JSON.stringify(searchResult.name)}?`)
+            } else {
+                console.log(`Unknown option "${candidate}". Aborting.`)
+            }
+
             process.exit(1)
         }
 
