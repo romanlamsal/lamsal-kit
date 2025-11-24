@@ -5,16 +5,16 @@
   },
   "repository": "romanlamsal/lamsal-kit",
   "type": "module",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "main": "build/lamsal-kit.js",
   "types": "build/lamsal-kit.d.ts",
   "scripts": {
-    "release": "node scripts/build.js && npm publish",
+    "release": "tsup --clean --out-dir build --format esm --minify terser lamsal-kit.ts && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
     "package.json",
-    "build/lamsal-kit.js"
+    "build"
   ],
   "author": "Roman Lamsal <roman@lamsal.de>",
   "license": "ISC",
@@ -24,6 +24,8 @@
     "@types/minimist": "^1.2.5",
     "@types/node": "22",
     "esbuild": "^0.27.0",
+    "terser": "^5.44.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.13",
     "zod": "^4.1.12"
