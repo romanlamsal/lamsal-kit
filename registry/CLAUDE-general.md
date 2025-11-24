@@ -31,3 +31,28 @@ database connection, make sure to actually find the provided type for that.
 
 Again, you will lose everything you have when you start using `any`. It's okay to ask for help when you are really stuck,
 that's still better than using `any`.
+
+
+# Testing
+
+- tests for files in the main source directory should be placed at the exact same path but in ./test, e.g. the test file for `./src/lib/foo/bar.ts` should be `./test/lib/foo/bar.test.ts`
+- vitest is the test framework used in this repo and must always be imported (not available as global)
+- each test should have
+    - three comments "given", "when", "then"
+    - `it("should xyz...")` description
+    - most of the time exactly ONE operation in the WHEN, seldomly two. Prefer `it.each([/* ... */] as const)`.
+    - most of the time exactly ONE assertion in the THEN, seldomly two. Prefer `it.each([/* ... */] as const)`.
+
+E.g.:
+```ts
+it("should return null", () => {
+    // given
+    /* multiple lines of setup */
+    
+    // when
+    /* one thing that happens */
+    
+    // then
+    /* asserting one thing */
+})
+```

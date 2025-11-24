@@ -14,12 +14,12 @@
     "dependencies": ["zod@^4.1.12"]
   },
   {
-    "name": "claude.md-general",
+    "name": "CLAUDE.md (general)",
     "entry": "/registry/CLAUDE-general.md",
     "copyTo": "./CLAUDE-general.md"
   },
   {
-    "name": "claude.md-webapp",
+    "name": "CLAUDE.md (webapp)",
     "entry": "/registry/CLAUDE-webapp.md",
     "copyTo": "./CLAUDE-webapp.md"
   }
