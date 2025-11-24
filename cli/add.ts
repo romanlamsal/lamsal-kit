@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto"
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from "node:fs"
 import { readFile } from "node:fs/promises"
 import * as os from "node:os"
-import { dirname, join } from "node:path"
+import { basename, dirname, join } from "node:path"
 import process from "node:process"
 import { checkbox, confirm } from "@inquirer/prompts"
 import degit from "degit"
@@ -154,12 +154,12 @@ async function copySources(added: string[]) {
                 mkdirSync(outputDir, { recursive: true })
             }
 
-            const outputPath = join(outputDir, copyTo ?? config.entry.replace("/registry/", "")) // will be a directory
+            const outputPath = join(outputDir, basename(copyTo ?? config.entry))
             console.log(`Copying ${regEntryName} to ${outputPath}`)
 
             // files can be copied as-is to their output directory
             if (statSync(outputLocation).isFile()) {
-                execSync(`mv ${outputLocation} ${outputPath}`)
+                execSync(`mv ${outputLocation} ${outputPath}`, { stdio: "inherit" })
                 return
             }
 
@@ -169,7 +169,7 @@ async function copySources(added: string[]) {
                     ? join(outputLocation, "*")
                     : outputLocation
 
-            execSync(`mv ${copySource} ${outputPath}`)
+            execSync(`mv ${copySource} ${outputPath}`, { stdio: "inherit" })
             return
         }).then(() => {
             console.log("Done.")

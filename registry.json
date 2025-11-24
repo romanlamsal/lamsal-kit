@@ -26,6 +26,6 @@
   {
     "name": "gueterbahnhof build&deploy",
     "entry": "/registry/github-actions/pnpm-build-and-deploy.yml",
-    "copyTo": "./.github/workflows/build-and-deploy.yml"
+    "copyTo": ".github/workflows/build-and-deploy.yml"
   }
 ]
