@@ -125,6 +125,9 @@ async function copySources(added: string[]) {
             process.exit(1)
         }
 
+        /**
+         * DEPENDENCIES
+         */
         const comparedDeps = compareDeps(config, packageJson)
 
         if (comparedDeps.some(d => d.conflictWith)) {
@@ -147,14 +150,24 @@ async function copySources(added: string[]) {
 
         const copyTo = out ?? config.copyTo
 
+        /**
+         * CLONING SOURCES
+         */
         await clone(config.entry, async outputLocation => {
-            const outputDir = dirname(cwdPath(copyTo ?? lamsalCnConfig.srcDirectory))
+            let outputDir = cwdPath(copyTo ?? lamsalCnConfig.srcDirectory.replace(/\/+$/, "") + "/")
+
+            if (!outputDir.endsWith("/")) {
+                outputDir = dirname(outputDir)
+            }
 
             if (!existsSync(outputDir)) {
                 mkdirSync(outputDir, { recursive: true })
             }
 
-            const outputPath = join(outputDir, basename(copyTo ?? config.entry))
+            let outputPath = join(outputDir, basename(copyTo ?? config.entry))
+            if (copyTo?.endsWith("/")) {
+                outputPath = join(outputDir, basename(config.entry))
+            }
             console.log(`Copying ${regEntryName} to ${outputPath}`)
 
             // files can be copied as-is to their output directory
@@ -164,10 +177,7 @@ async function copySources(added: string[]) {
             }
 
             // if output location is already an existing directory, copy only the contents
-            const copySource =
-                existsSync(outputPath) && statSync(outputLocation).isDirectory()
-                    ? join(outputLocation, "*")
-                    : outputLocation
+            const copySource = statSync(outputDir).isDirectory() ? join(outputLocation, "*") : outputLocation
 
             execSync(`mv ${copySource} ${outputPath}`, { stdio: "inherit" })
             return
