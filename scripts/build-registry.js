@@ -6,39 +6,7 @@ import process from "node:process"
 import { pathToFileURL } from "url"
 import { z } from "zod"
 import packageJson from "../package.json" with { type: "json" }
-import { RegistryEntrySchema } from "../registry/RegistryEntry.ts"
-
-const registryEntries = [
-    {
-        name: "biome-config",
-        entry: "/biome.json",
-        copyTo: "./biome.json",
-    },
-    {
-        name: "consume-generator",
-        entry: "/registry/consume-generator.ts",
-    },
-    {
-        name: "typed-event-emitter",
-        entry: "/registry/typed-event-emitter.ts",
-        dependencies: ["zod"],
-    },
-    {
-        name: "CLAUDE.md (general)",
-        entry: "/registry/CLAUDE-general.md",
-        copyTo: "./CLAUDE-general.md",
-    },
-    {
-        name: "CLAUDE.md (webapp)",
-        entry: "/registry/CLAUDE-webapp.md",
-        copyTo: "./CLAUDE-webapp.md",
-    },
-    {
-        name: "gueterbahnhof build&deploy",
-        entry: "/registry/github-actions/pnpm-build-and-deploy.yml",
-        copyTo: ".github/workflows/build-and-deploy.yml",
-    },
-]
+import { RegistryEntrySchema, registryEntries } from "../registry/RegistryEntry.ts"
 
 export const RegistrySchema = z.object({
     $schema: z.string(),
@@ -93,6 +61,11 @@ export async function writeFiles(outputDirectory) {
         writeFile(new URL("registry.json", outputDirectoryUrl), JSON.stringify(registry, null, 2)),
         writeFile(new URL(schemaFileName, outputDirectoryUrl), JSON.stringify(z.toJSONSchema(RegistrySchema), null, 2)),
     ])
+}
+
+if (process.argv[2] === "--validate") {
+    await buildAndValidate().then(() => console.log("Registry validation successful."))
+    process.exit(0)
 }
 
 const outputDirectoryArg = process.argv[2]
