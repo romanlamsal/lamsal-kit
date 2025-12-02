@@ -44,7 +44,10 @@
         "noUnreachableSuper": "error",
         "noUnsafeFinally": "error",
         "noUnsafeOptionalChaining": "error",
-        "noUnusedImports": "error",
+        "noUnusedImports": {
+          "level": "error",
+          "fix": "safe"
+        },
         "noUnusedLabels": "error",
         "noUnusedVariables": "error",
         "useIsNan": "error",
