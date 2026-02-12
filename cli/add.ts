@@ -13,12 +13,10 @@ import type { RegistryEntry } from "../registry/RegistryEntry"
 import { compareDeps } from "./compare-deps"
 import { CONFIG_FILENAME, type LamsalcnConfig } from "./config-file"
 import { cwdPath } from "./cwd-path"
+import { detectPackageManager } from "./detect-package-manager"
+import type { PackageManager } from "./package-manager"
 
 const configPath = cwdPath(CONFIG_FILENAME)
-if (!existsSync(configPath)) {
-    console.error(`Need to call "init" first.`)
-    process.exit(1)
-}
 
 const ArgsSchema = z
     .object({
@@ -33,8 +31,6 @@ const ArgsSchema = z
     )
 
 const { _: entriesToAdd, force, verbose, out } = ArgsSchema.parse(minimist(process.argv.slice(3)))
-
-const lamsalCnConfig = JSON.parse(readFileSync(configPath, "utf8")) as LamsalcnConfig
 
 async function getRegistry() {
     if (process.env["REGISTRY_JSON"] && !URL.canParse(process.env["REGISTRY_JSON"])) {
@@ -80,6 +76,31 @@ async function getAdded(): Promise<string[]> {
 
 const added = await getAdded()
 console.log("Adding:", added)
+
+const selectedEntries = added.map(name => registry.find(r => r.name === name)!)
+const needsSrcDir = !out && selectedEntries.some(e => !e.copyTo)
+const hasDeps = selectedEntries.some(e => (e.dependencies?.length ?? 0) > 0 || (e.devDependencies?.length ?? 0) > 0)
+
+let packageManager: PackageManager | undefined
+let srcDirectory: string | undefined
+
+if (existsSync(configPath)) {
+    const lamsalCnConfig = JSON.parse(readFileSync(configPath, "utf8")) as LamsalcnConfig
+    packageManager = lamsalCnConfig.packageManager
+    srcDirectory = lamsalCnConfig.srcDirectory
+} else {
+    packageManager = detectPackageManager()
+
+    if (needsSrcDir) {
+        console.error(`At least one selected entry has no default output location. Need to call "init" first.`)
+        process.exit(1)
+    }
+
+    if (hasDeps && !packageManager) {
+        console.error(`Could not detect package manager. Need to call "init" first.`)
+        process.exit(1)
+    }
+}
 
 async function clone(entry: string, cb: (outputLocation: string) => Promise<void>): Promise<void> {
     const { repository } = await import("../package.json")
@@ -154,7 +175,7 @@ async function copySources(added: string[]) {
          * CLONING SOURCES
          */
         await clone(config.entry, async outputLocation => {
-            let outputDir = cwdPath(copyTo ?? lamsalCnConfig.srcDirectory.replace(/\/+$/, "") + "/")
+            let outputDir = cwdPath(copyTo ?? srcDirectory!.replace(/\/+$/, "") + "/")
 
             if (!outputDir.endsWith("/")) {
                 outputDir = dirname(outputDir)
@@ -186,7 +207,9 @@ async function copySources(added: string[]) {
         })
     }
 
-    const packageManager = lamsalCnConfig.packageManager
+    if (!packageManager) {
+        return
+    }
 
     if (overallDeps.length) {
         console.log("Adding deps:", overallDeps.join(","))

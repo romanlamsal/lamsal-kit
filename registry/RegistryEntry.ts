@@ -44,4 +44,9 @@ export const registryEntries: RegistryEntry[] = [
         name: "zod-parse-list",
         entry: "/registry/parse-list.ts",
     },
+    {
+        name: "code-architecture",
+        entry: "/registry/code-architecture.md",
+        copyTo: "./docs/code-architecture.md",
+    },
 ]

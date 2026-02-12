@@ -1,8 +1,9 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, writeFileSync } from "node:fs"
 import * as process from "node:process"
 import { input, select } from "@inquirer/prompts"
 import { CONFIG_FILENAME, type LamsalcnConfig } from "./config-file"
 import { cwdPath } from "./cwd-path"
+import { detectPackageManager } from "./detect-package-manager"
 import { type PackageManager, packageManagers } from "./package-manager"
 
 const configFilePath = cwdPath(CONFIG_FILENAME)
@@ -21,27 +22,12 @@ if (configExists && force) {
 }
 
 async function getPackageManager(): Promise<PackageManager> {
+    const detected = detectPackageManager()
+    if (detected) {
+        return detected
+    }
+
     const flatPackageManagers = Object.entries(packageManagers).map(([k, v]) => ({ ...v, name: k as PackageManager }))
-
-    try {
-        const { packageManager } = JSON.parse(readFileSync(cwdPath("package.json"), "utf-8"))
-        if (packageManager) {
-            return packageManager.split("@")[0]
-        }
-    } catch {}
-
-    for (const candidate of flatPackageManagers) {
-        if (existsSync(cwdPath(candidate.lockfile))) {
-            console.log(`Found lockfile for ${candidate.name}.`)
-            return candidate.name
-        }
-    }
-
-    for (const candidate of flatPackageManagers) {
-        if (process.argv0 === candidate.execBinary) {
-            return candidate.name
-        }
-    }
 
     try {
         return await select({
