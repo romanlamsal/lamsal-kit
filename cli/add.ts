@@ -124,19 +124,22 @@ async function clone(entry: string, cb: (outputLocation: string) => Promise<void
 }
 
 async function copySources(added: string[]) {
-    const packageJson = await readFile(cwdPath("package.json"), "utf8").then(contents => {
-        try {
-            return JSON.parse(contents) as {
-                dependencies?: Record<string, string>
-                devDependencies?: Record<string, string>
-            }
-        } catch {
-            return {}
-        }
-    })
+    let packageJson: { dependencies?: Record<string, string>; devDependencies?: Record<string, string> } | undefined
+    const overallDeps: string[] = []
+    const overallDevDeps: string[] = []
 
-    const overallDeps = []
-    const overallDevDeps = []
+    if (hasDeps) {
+        packageJson = await readFile(cwdPath("package.json"), "utf8").then(contents => {
+            try {
+                return JSON.parse(contents) as {
+                    dependencies?: Record<string, string>
+                    devDependencies?: Record<string, string>
+                }
+            } catch {
+                return {}
+            }
+        })
+    }
 
     for (const regEntryName of added) {
         const config: RegistryEntry | undefined = registry.find(regEntry => regEntry.name === regEntryName)
@@ -146,28 +149,31 @@ async function copySources(added: string[]) {
             process.exit(1)
         }
 
-        /**
-         * DEPENDENCIES
-         */
-        const comparedDeps = compareDeps(config, packageJson)
+        if (hasDeps && packageJson) {
+            const comparedDeps = compareDeps(config, packageJson)
 
-        if (comparedDeps.some(d => d.conflictWith)) {
-            const conflictsString = comparedDeps
-                .filter(d => d.conflictWith)
-                .map(({ name, nextVersion, conflictWith }) => `${name}: ${conflictWith} -> ${nextVersion}`)
-                .join("\n")
+            if (comparedDeps.some(d => d.conflictWith)) {
+                const conflictsString = comparedDeps
+                    .filter(d => d.conflictWith)
+                    .map(({ name, nextVersion, conflictWith }) => `${name}: ${conflictWith} -> ${nextVersion}`)
+                    .join("\n")
 
-            if (
-                !(await confirm({
-                    message: `Overwrite the following dependencies?\n${conflictsString}`,
-                }).catch(() => process.exit(1)))
-            ) {
-                continue
+                if (
+                    !(await confirm({
+                        message: `Overwrite the following dependencies?\n${conflictsString}`,
+                    }).catch(() => process.exit(1)))
+                ) {
+                    continue
+                }
             }
-        }
 
-        overallDeps.push(...comparedDeps.filter(d => !d.dev && d.install).map(d => d.name + "@" + d.nextVersion))
-        overallDevDeps.push(...comparedDeps.filter(d => d.dev && d.install).map(d => d.name + "@" + d.nextVersion))
+            overallDeps.push(
+                ...comparedDeps.filter(d => !d.dev && d.install).map(d => d.name + "@" + d.nextVersion),
+            )
+            overallDevDeps.push(
+                ...comparedDeps.filter(d => d.dev && d.install).map(d => d.name + "@" + d.nextVersion),
+            )
+        }
 
         const copyTo = out ?? config.copyTo
 
@@ -207,21 +213,19 @@ async function copySources(added: string[]) {
         })
     }
 
-    if (!packageManager) {
-        return
-    }
+    if (hasDeps && packageManager) {
+        if (overallDeps.length) {
+            console.log("Adding deps:", overallDeps.join(","))
+            execSync(`${packageManager} add ${overallDeps.join(" ")}`, { cwd: process.cwd(), stdio: "inherit" })
+        }
 
-    if (overallDeps.length) {
-        console.log("Adding deps:", overallDeps.join(","))
-        execSync(`${packageManager} add ${overallDeps.join(" ")}`, { cwd: process.cwd(), stdio: "inherit" })
-    }
-
-    if (overallDevDeps.length) {
-        console.log("Adding devDeps:", overallDeps.join(","))
-        execSync(
-            `${packageManager} add ${packageManager === "npm" ? "--save-dev" : "-D"} ${overallDevDeps.join(" ")}`,
-            { cwd: process.cwd(), stdio: "inherit" },
-        )
+        if (overallDevDeps.length) {
+            console.log("Adding devDeps:", overallDevDeps.join(","))
+            execSync(
+                `${packageManager} add ${packageManager === "npm" ? "--save-dev" : "-D"} ${overallDevDeps.join(" ")}`,
+                { cwd: process.cwd(), stdio: "inherit" },
+            )
+        }
     }
 }
 

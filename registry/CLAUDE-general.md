@@ -11,7 +11,7 @@ Implement the given phase/plan.
 
 Check if everything is good by running
 - typechecks
-- eslint
+- linter (biome or eslint)
 
 When you are finished implementing, do not commit immediately after finishing a phase. Instead, tell me that you are
 done and that you wait for my approval.
