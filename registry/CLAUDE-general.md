@@ -36,6 +36,7 @@ that's still better than using `any`.
 # Testing
 
 - tests for files in the main source directory should be placed at the exact same path but in ./test, e.g. the test file for `./src/lib/foo/bar.ts` should be `./test/lib/foo/bar.test.ts`
+- monorepo packages/apps have their own ./tests directory; there should be no tests at monorepo root
 - vitest is the test framework used in this repo and must always be imported (not available as global)
 - each test should have
     - three comments "given", "when", "then"
