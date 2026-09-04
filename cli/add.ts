@@ -34,7 +34,7 @@ const { _: entriesToAdd, force, verbose, out } = ArgsSchema.parse(minimist(proce
 
 async function getRegistry() {
     if (process.env["REGISTRY_JSON"] && !URL.canParse(process.env["REGISTRY_JSON"])) {
-        return JSON.parse(readFileSync(process.env["REGISTRY_JSON"], "utf8")) as RegistryEntry[]
+        return JSON.parse(readFileSync(process.env["REGISTRY_JSON"], "utf8")).entries as RegistryEntry[]
     }
 
     return fetch(process.env["REGISTRY_JSON"] ?? "https://romanlamsal.github.io/lamsal-kit/registry.json")
@@ -167,12 +167,8 @@ async function copySources(added: string[]) {
                 }
             }
 
-            overallDeps.push(
-                ...comparedDeps.filter(d => !d.dev && d.install).map(d => d.name + "@" + d.nextVersion),
-            )
-            overallDevDeps.push(
-                ...comparedDeps.filter(d => d.dev && d.install).map(d => d.name + "@" + d.nextVersion),
-            )
+            overallDeps.push(...comparedDeps.filter(d => !d.dev && d.install).map(d => d.name + "@" + d.nextVersion))
+            overallDevDeps.push(...comparedDeps.filter(d => d.dev && d.install).map(d => d.name + "@" + d.nextVersion))
         }
 
         const copyTo = out ?? config.copyTo

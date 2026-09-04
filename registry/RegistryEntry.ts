@@ -49,4 +49,9 @@ export const registryEntries: RegistryEntry[] = [
         entry: "/registry/code-architecture.md",
         copyTo: "./docs/code-architecture.md",
     },
+    {
+        name: "Agent Docs (components, layers, tanstack)",
+        entry: "/registry/docs/agents/",
+        copyTo: "./docs/agents/",
+    },
 ]

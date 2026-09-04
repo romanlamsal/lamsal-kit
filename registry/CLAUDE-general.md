@@ -1,6 +1,12 @@
 - In all interactions and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
+- commit messages should follow conventional commits
+- PR titles and descriptions should follow conventional commits
+
 
 ## Plans
+
+This section applies only to actual plan modes. They are not true for mattpocock-skills; their skill definition overrules
+whatever is stated in this section and it's subsections.
 
 - At the end of each plan, give me a list of unresolved questions, if any. Make the questions extremely concise.
   Sacrifice grammar for the sake of concision.
@@ -35,16 +41,16 @@ that's still better than using `any`.
 
 # Testing
 
-- tests for files in the main source directory should be placed at the exact same path but in ./test, e.g. the test file for `./src/lib/foo/bar.ts` should be `./test/lib/foo/bar.test.ts`
+- tests for files in the main source directory should be placed at the exact same path but in ./test, 
+e.g. the test file for `./src/lib/foo/bar.ts` should be `./test/lib/foo/bar.test.ts`
 - monorepo packages/apps have their own ./tests directory; there should be no tests at monorepo root
-- vitest is the test framework used in this repo and must always be imported (not available as global)
 - each test should have
     - three comments "given", "when", "then"
     - `it("should xyz...")` description
     - most of the time exactly ONE operation in the WHEN, seldomly two. Prefer `it.each([/* ... */] as const)`.
     - most of the time exactly ONE assertion in the THEN, seldomly two. Prefer `it.each([/* ... */] as const)`.
 
-E.g.:
+E.g. for a good test:
 ```ts
 it("should return null", () => {
     // given
@@ -57,3 +63,4 @@ it("should return null", () => {
     /* asserting one thing */
 })
 ```
+
