@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process"
 import { randomUUID } from "node:crypto"
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from "node:fs"
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs"
 import { readFile } from "node:fs/promises"
 import * as os from "node:os"
 import { basename, dirname, join } from "node:path"
@@ -177,32 +177,28 @@ async function copySources(added: string[]) {
          * CLONING SOURCES
          */
         await clone(config.entry, async outputLocation => {
-            let outputDir = cwdPath(copyTo ?? srcDirectory!.replace(/\/+$/, "") + "/")
+            const target = copyTo ?? srcDirectory!.replace(/\/+$/, "") + "/"
+            const sourceIsFile = statSync(outputLocation).isFile()
 
-            if (!outputDir.endsWith("/")) {
-                outputDir = dirname(outputDir)
+            if (!sourceIsFile && !readdirSync(outputLocation).length) {
+                console.error(
+                    `FATAL: entry ${config.entry} resolved to nothing. Is it pushed to the repository's default branch? Aborted.`,
+                )
+                process.exit(1)
             }
+
+            // a directory entry fills the target directory; a file entry with a directory target lands inside it
+            const outputPath =
+                sourceIsFile && target.endsWith("/") ? cwdPath(target, basename(config.entry)) : cwdPath(target)
+            const outputDir = sourceIsFile ? dirname(outputPath) : outputPath
 
             if (!existsSync(outputDir)) {
                 mkdirSync(outputDir, { recursive: true })
             }
 
-            let outputPath = join(outputDir, basename(copyTo ?? config.entry))
-            if (copyTo?.endsWith("/")) {
-                outputPath = join(outputDir, basename(config.entry))
-            }
             console.log(`Copying ${regEntryName} to ${outputPath}`)
 
-            // files can be copied as-is to their output directory
-            if (statSync(outputLocation).isFile()) {
-                execSync(`mv ${outputLocation} ${outputPath}`, { stdio: "inherit" })
-                return
-            }
-
-            // if output location is already an existing directory, copy only the contents
-            const copySource = statSync(outputDir).isDirectory() ? join(outputLocation, "*") : outputLocation
-
-            execSync(`mv ${copySource} ${outputPath}`, { stdio: "inherit" })
+            cpSync(outputLocation, outputPath, { recursive: true, force: true })
             return
         }).then(() => {
             console.log("Done.")
