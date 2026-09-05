@@ -5,7 +5,7 @@
   },
   "repository": "romanlamsal/lamsal-kit",
   "type": "module",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "main": "build/lamsal-kit.js",
   "types": "build/lamsal-kit.d.ts",
   "scripts": {
