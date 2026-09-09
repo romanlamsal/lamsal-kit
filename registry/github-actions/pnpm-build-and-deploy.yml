@@ -2,55 +2,57 @@ name: build-and-deploy
 
 on:
   push:
+    branches:
+      - main
     paths-ignore:
       - README.md
       - '**/CLAUDE.md'
   workflow_dispatch:
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 # defaults:
 #   run:
 #     working-directory: webapp
 
 env:
-  NODE_VERSION: 22.21.1
-  PNPM_VERSION: 9.15.9
-  OUT_DIR: "build"
+  NODE_VERSION: 24
+  PNPM_VERSION: 10
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "$NODE_VERSION"
+      - uses: actions/checkout@v7
 
-      # Node
-      - name: Cache node_modules
-        uses: actions/cache@v3
+      - uses: pnpm/action-setup@v6
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          version: ${{ env.PNPM_VERSION }}
 
-      - name: Install deps
-        run: |
-          npm install -g pnpm@"$PNPM_VERSION"
-          pnpm install
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
 
       - name: Build
-        run: |
-          pnpm build
-          mkdir bundle
-          cp package.json bundle/package.json
-          cp pnpm-lock.yaml bundle/pnpm-lock.yaml
-          mv "$OUT_DIR" "bundle/$OUT_DIR"
+        run: pnpm build
+        # Nitro's node-server output is self-contained (no node_modules needed):
+        #   .output/server/index.mjs  +  .output/public/
+        # gueterbahnhof entry command for such an app: `node server/index.mjs`
 
-      - uses: romanlamsal/gueterbahnhof/action@main
-        if: github.ref == 'refs/heads/main'
+      - name: Deploy to gueterbahnhof
+        uses: romanlamsal/gueterbahnhof/action@main
         with:
           host: https://gueterbahnhof.lamsal.de
-          app_name: dieseltoolbar
-          path: app/bundle
+          app_name: TODO
+          path: .output
           api_key: ${{ secrets.GUETERBAHNHOF_API_KEY }}
