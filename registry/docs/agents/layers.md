@@ -23,16 +23,29 @@ they are about what a function *does* rather than where it imports from.
 
 | layer | what it is | may import | must not |
 | --- | --- | --- | --- |
-| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules — and nothing outside itself | the store, an adapter, an implementation of any port |
+| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process |
 | **repository** | adapters for this system's own store. One aggregate each, composes nothing | the store client, the domain | another repository, and a service above all |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and other services' driving ports | build its own dependencies, or write a table with its own queries |
 | **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth | domain | a service |
 | **controllers** | boundary adapters: entry points, their validators | services, domain, session infrastructure | repositories, the store, the query builder |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
-all of it: everyone may import it, it imports nobody. Repository and infrastructure are both
+all of it: every layer may import it, it imports no layer. Repository and infrastructure are both
 adapter layers; they differ only in subject matter, one implementing ports for this system's own
 store and the other for somebody else's.
+
+**"Imports no layer" is about this system's modules, not about packages.** The test for a package
+in the domain is whether calling it can reach outside the process: a store client, an HTTP client,
+a mailer SDK, `node:fs` and a clock all can, so they stay behind ports. A validation library
+cannot — it computes from its arguments and returns — so it is allowed, and so is any other
+library of the same shape. Runtime validation is not an exception carved out for one package; it
+falls out of the test.
+
+A schema is a rule, not a description of one. `Invoice` — which fields exist, that an amount is a
+positive integer, that a status is one of four — is the same statement as the functions beside it,
+written in a form that also holds at runtime. Putting it in the domain is what keeps a single
+constructor (question 3) possible: the controller validating input and the repository mapping a
+row parse against the same schema instead of two drifting copies of it.
 
 In the vocabulary of domain-driven design, **domain** is the model, **service** is the
 application layer, **infrastructure** and **repository** are both infrastructure, and
