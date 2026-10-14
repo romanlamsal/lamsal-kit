@@ -16,6 +16,10 @@ A *port* is an interface. A *driven port* is something the code calls: store an 
 a mail, put a file somewhere. A *driving port* is the interface to a use case: something a
 controller calls. An *adapter* implements a driven port.
 
+A *system* is one bounded context: code with its own domain and its own glossary, laid out by
+this document. A repository may hold several. Another bounded context is another system, even
+when it is imported in-process as a package.
+
 This document is written for review. The faults below are the ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
 
@@ -25,8 +29,8 @@ they are about what a function *does* rather than where it imports from.
 | --- | --- | --- | --- |
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process |
 | **repository** | adapters for this system's own store. One aggregate each, composes nothing | the store client, the domain | another repository, and a service above all |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and other services' driving ports | build its own dependencies, or write a table with its own queries |
-| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth | domain | a service |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and driving ports of other services in the same system | build its own dependencies, or write a table with its own queries |
+| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, another bounded context | domain | a service of this system |
 | **controllers** | boundary adapters: entry points, their validators | services, domain, session infrastructure | repositories, the store, the query builder |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
@@ -63,6 +67,10 @@ names no implementation and imports none.
 **Driving ports live beside the service that satisfies them.** A use case is not a domain
 concept, so the domain never learns the name of one. This is what keeps the arrow pointing in one
 direction.
+
+**Another bounded context is reached through a driven port.** To use another bounded context,
+declare a driven port in this domain and implement it in infrastructure by calling that bounded
+context's driving port.
 
 **A service is a factory.** It takes its dependencies as arguments and returns its driving port.
 Nothing inside it constructs anything.
