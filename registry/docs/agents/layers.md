@@ -27,10 +27,10 @@ they are about what a function *does* rather than where it imports from.
 
 | layer | what it is | may import | must not |
 | --- | --- | --- | --- |
-| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process |
+| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process, anything of one runtime — `node:*`, `Buffer`, `process`, the DOM |
 | **repository** | adapters for this system's own store. One aggregate each, composes nothing | the store client, the domain | another repository, and a service above all |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and driving ports of other services in the same system | build its own dependencies, or write a table with its own queries |
-| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, another bounded context | domain | a service of this system |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the driving port of a system it conforms to | build its own dependencies, or write a table with its own queries |
+| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain | a service of this system |
 | **controllers** | boundary adapters: entry points, their validators | services, domain, session infrastructure | repositories, the store, the query builder |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
@@ -44,6 +44,12 @@ a mailer SDK, `node:fs` and a clock all can, so they stay behind ports. A valida
 cannot — it computes from its arguments and returns — so it is allowed, and so is any other
 library of the same shape. Runtime validation is not an exception carved out for one package; it
 falls out of the test.
+
+**Nor does the domain assume a runtime.** It imports no `node:*` module and reads no runtime's
+globals — `Buffer`, `process`, `window`, the DOM — even where they cannot reach out of the
+process: `node:path` is pure, and still breaks in a browser. Every other layer runs on one
+runtime; the domain runs on any, which is what lets a browser and another system import it.
+Importing the domain loads only the domain: no service, no adapter, no assembly.
 
 A schema is a rule, not a description of one. `Invoice` — which fields exist, that an amount is a
 positive integer, that a status is one of four — is the same statement as the functions beside it,
@@ -67,10 +73,6 @@ names no implementation and imports none.
 **Driving ports live beside the service that satisfies them.** A use case is not a domain
 concept, so the domain never learns the name of one. This is what keeps the arrow pointing in one
 direction.
-
-**Another bounded context is reached through a driven port.** To use another bounded context,
-declare a driven port in this domain and implement it in infrastructure by calling that bounded
-context's driving port.
 
 **A service is a factory.** It takes its dependencies as arguments and returns its driving port.
 Nothing inside it constructs anything.
@@ -102,9 +104,28 @@ await tx.run(async (ctx) => {
 })
 ```
 
+## Other systems
+
+**How two systems relate is chosen per relationship, in the terms of DDD's context map.** Two
+choices decide where code goes:
+
+- **Conformist.** This system adopts the other's model: its terms, schemas and errors are used as
+  they are, in any layer that may import a domain, and its driving port is a dependency a service
+  receives like any other. The default when the other system publishes its model on purpose — an
+  open host service with a published language.
+- **Anti-corruption layer.** This domain declares a driven port in its own terms; an adapter in
+  infrastructure implements it by calling the other system and translating. For a model that is
+  foreign, unstable or not yours — a third-party API always gets one.
+
+The other context-map patterns describe how teams cooperate; in code, each lands as one of these
+two.
+
+Either way, the other system's services, adapters and assembly are never imported. Its factory is
+called in assembly, as every factory is.
+
 ## The review checklist
 
-Seven questions, each answerable from a diff. The snippets are illustrative pseudo-code.
+Eight questions, each answerable from a diff. The snippets are illustrative pseudo-code.
 
 ### 1. Does a service write a table another aggregate owns?
 
@@ -212,6 +233,26 @@ const orders = createPostgresOrderRepository(db)
 export const createOrderService = ({ orders }: { orders: OrderRepository }) => ...
 ```
 
+### 8. Does the boundary match the relationship?
+
+**In a diff:** a driven port whose types copy another system's field for field, and an adapter
+mapping each field to itself. Or, behind an anti-corruption layer, one of the other system's terms
+in this domain or a service.
+
+A translation that changes nothing is not an anti-corruption layer; conform instead. A term that
+crosses an anti-corruption layer untranslated means there is no layer.
+
+```
+// infrastructure/shipping.ts — the fault: a translation that changes nothing
+quote: async (parcel) => {
+  const { price, eta } = await carrier.quote(parcel)
+  return { price, eta }
+}
+
+// the fix: conform, and the service receives the carrier's driving port
+export const createOrderService = ({ carrier }: { carrier: Carrier }) => ...
+```
+
 ## Tests
 
 One section, deliberately self-contained.
@@ -267,6 +308,7 @@ anything the module did not return.
   breach of one mutation per use case.
 - **A port with one implementation is not premature.** The second implementation is the fake, and
   it is what the default suite runs against.
+- **Using a conformed system's terms directly is the design working**, not a leak.
 - **Not everything gets a layer.** Code that asserts about the source tree rather than about the
   application sits outside these layers, and so does the module that assembles them.
 - **The checklist is a prompt to look.** Concluding that a case is fine is a complete answer.
