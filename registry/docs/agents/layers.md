@@ -120,8 +120,8 @@ choices decide where code goes:
 The other context-map patterns describe how teams cooperate; in code, each lands as one of these
 two.
 
-Either way, the other system's services, adapters and assembly are never imported. Its factory is
-called in assembly, as every factory is.
+Either way, of the other system's services only the driving port is named; its service modules,
+adapters and assembly are never imported. Its factory is called in assembly, as every factory is.
 
 ## The review checklist
 
@@ -243,14 +243,14 @@ A translation that changes nothing is not an anti-corruption layer; conform inst
 crosses an anti-corruption layer untranslated means there is no layer.
 
 ```
-// infrastructure/shipping.ts — the fault: a translation that changes nothing
-quote: async (parcel) => {
-  const { price, eta } = await carrier.quote(parcel)
-  return { price, eta }
+// infrastructure/pricing.ts — the fault: a translation that changes nothing
+quote: async (cart) => {
+  const { total, currency } = await pricing.quote(cart)
+  return { total, currency }
 }
 
-// the fix: conform, and the service receives the carrier's driving port
-export const createOrderService = ({ carrier }: { carrier: Carrier }) => ...
+// the fix: conform, and the service receives the pricing system's driving port
+export const createOrderService = ({ pricing }: { pricing: Pricing }) => ...
 ```
 
 ## Tests
