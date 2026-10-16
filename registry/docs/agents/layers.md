@@ -7,18 +7,27 @@ document says *transaction*, it assumes the store can apply several writes atomi
 cannot, question 5 does not apply. *Table*, *row* and *aggregate* are used in the relational
 sense — substitute your store's equivalents.
 
-**Terms.** A *controller* is a boundary adapter: it resolves the caller, validates, calls into
+**Terms.** A *controller* is a driving adapter: it resolves the caller, validates, calls into
 one thing, and returns. It holds no rules of its own. `components.md` applies the same role to
 route files on the client; the difference is writes — a server controller passes a write through
 to one service, a route controller does not carry writes at all.
 
-A *port* is an interface. A *driven port* is something the code calls: store an aggregate, send
-a mail, put a file somewhere. A *driving port* is the interface to a use case: something a
-controller calls. An *adapter* implements a driven port.
+A *port* is an interface, never the code behind it. A *driving port* is the interface to a use
+case — the way in, something a controller calls. A *driven port* is something the code needs from
+outside — the way out: store an aggregate, send a mail, put a file somewhere. Who starts the call
+decides which: the outside starts it, driving; this system starts it, driven. An *adapter* sits on
+the far side of a port: a *driving adapter* calls a driving port, a *driven adapter* implements a
+driven port. Controllers are driving adapters; repositories and infrastructure are driven
+adapters. This is ports and adapters as Vernon joins it to DDD; where this document narrows a
+term, the narrowing applies.
 
 A *system* is one bounded context: code with its own domain and its own glossary, laid out by
 this document. A repository may hold several. Another bounded context is another system, even
 when it is imported in-process as a package.
+
+A *shared kernel* is a package with no bounded context of its own that every system may import:
+the transaction port and its implementations, low-level store clients. DDD's shared kernel is a
+slice of model two contexts co-own; this one shares plumbing and holds no model.
 
 This document is written for review. The faults below are the ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
@@ -27,16 +36,16 @@ they are about what a function *does* rather than where it imports from.
 
 | layer | what it is | may import | must not |
 | --- | --- | --- | --- |
-| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process, anything of one runtime — `node:*`, `Buffer`, `process`, the DOM |
-| **repository** | adapters for this system's own store. One aggregate each, composes nothing | the store client, the domain | another repository, and a service above all |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the driving port of a system it conforms to | build its own dependencies, or write a table with its own queries |
-| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain | a service of this system |
-| **controllers** | boundary adapters: entry points, their validators | services, domain, session infrastructure | repositories, the store, the query builder |
+| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the shared kernel's ports, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process, anything of one runtime — `node:*`, `Buffer`, `process`, the DOM |
+| **repository** | adapters for this system's own store. One aggregate each, composes nothing | the store client, the shared kernel, the domain | another repository, and a service above all |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the public models of a system it conforms to | build its own dependencies, or write a table with its own queries |
+| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the shared kernel, and the public models of a system it translates | a service of this system |
+| **controllers** | driving adapters: entry points, their validators | services, domain, session infrastructure | repositories, the store, the query builder |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
 all of it: every layer may import it, it imports no layer. Repository and infrastructure are both
-adapter layers; they differ only in subject matter, one implementing ports for this system's own
-store and the other for somebody else's.
+driven-adapter layers; they differ only in subject matter, one implementing ports for this
+system's own store and the other for somebody else's.
 
 **"Imports no layer" is about this system's modules, not about packages.** The test for a package
 in the domain is whether calling it can reach outside the process: a store client, an HTTP client,
@@ -53,9 +62,10 @@ Importing the domain loads only the domain: no service, no adapter, no assembly.
 
 A schema is a rule, not a description of one. `Invoice` — which fields exist, that an amount is a
 positive integer, that a status is one of four — is the same statement as the functions beside it,
-written in a form that also holds at runtime. Putting it in the domain is what keeps a single
-constructor (question 3) possible: the controller validating input and the repository mapping a
-row parse against the same schema instead of two drifting copies of it.
+written in a form that also holds at runtime. Types are inferred from it, never written beside it.
+Putting it in the domain is what keeps a single constructor (question 3) possible: the controller
+validating input and the repository mapping a row parse against the same schema instead of two
+drifting copies of it.
 
 In the vocabulary of domain-driven design, **domain** is the model, **service** is the
 application layer, **infrastructure** and **repository** are both infrastructure, and
@@ -83,7 +93,7 @@ export const createOrderService = (deps: {
   orders: OrderRepository        // driven port, from the domain
   invoices: InvoiceRepository    // driven port, from the domain
   mailer: Mailer                 // driven port, from the domain
-  tx: TransactionRunner          // driven port, from the domain
+  tx: TransactionRunner          // driven port, from the shared kernel
 }): OrderService => ({ ... })    // driving port, declared here
 ```
 
@@ -96,6 +106,12 @@ ready-made instance beside it, because an exported instance is a dependency nobo
 a transaction; repository methods take the context it hands back. The context is opaque in the
 domain, so nothing there names the store or its client.
 
+The transaction port belongs to the shared kernel, so one transaction may span aggregates of
+several systems on the same store. Whether its context is passed explicitly, as below, or held
+ambient — a unit of work in `AsyncLocalStorage`, implemented in the shared kernel — is each
+codebase's choice; say which. Explicit context keeps every join visible in a diff. Ambient
+context keeps it out of the driving ports another system calls.
+
 ```
 // service: two aggregates, one transaction
 await tx.run(async (ctx) => {
@@ -106,22 +122,64 @@ await tx.run(async (ctx) => {
 
 ## Other systems
 
+**A system's public face is two entries: public models and a public factory.** Everything else
+of it is inside. This pair is how this document reads DDD's open host service.
+
+- **Public models** — its driving ports, and the schemas and types those ports mention: its
+  published language. Its driven ports stay inside, because they are its needs, not its offer.
+- **Public factory** — takes configuration and shared-kernel pieces, returns a driving port. It is
+  the system's own assembly, offered to others, and asks for none of its internals.
+
+**Public models is a module of re-exports, not a layer.** Like assembly, it sits outside the
+table. It re-exports driving ports type-only, so importing it loads no service; schemas it
+re-exports from the domain, which loads nothing else.
+
+```
+// billing's public models — the file name is the codebase's
+export type { BillingService } from "./service/billing"
+export { Invoice, InvoiceStatus } from "./domain/invoice"
+```
+
+Another system imports public models in any layer that may import a domain, and the public
+factory only in its assembly. Nothing else of the other system is imported anywhere. Both rules
+read from import paths alone, so a linter can hold them.
+
+**One system's driving port is the other's driven port.** To B, `BillingService` is the way in; to
+A's service it is a dependency it receives — a way out, like a mailer. A service calling it is not
+one use case calling another; it is a use case calling a port. What sits behind the port is
+assembly's decision: B's service in-process, or an HTTP client in A's infrastructure implementing
+the same port. Moving B out of process changes assembly and nothing else.
+
+**A driving port another system calls takes its caller as an argument.** A consumer reaches B's
+service without passing B's controllers, so whatever those controllers resolve — who is calling,
+on whose behalf — cannot come from them, and B's authorization lives in its service or domain.
+
 **How two systems relate is chosen per relationship, in the terms of DDD's context map.** Two
 choices decide where code goes:
 
-- **Conformist.** This system adopts the other's model: its terms, schemas and errors are used as
-  they are, in any layer that may import a domain, and its driving port is a dependency a service
-  receives like any other. The default when the other system publishes its model on purpose — an
-  open host service with a published language.
-- **Anti-corruption layer.** This domain declares a driven port in its own terms; an adapter in
-  infrastructure implements it by calling the other system and translating. For a model that is
-  foreign, unstable or not yours — a third-party API always gets one.
+- **Conformist.** This system adopts the other's published language: its terms, schemas and
+  errors are used as they are, in any layer that may import a domain, and its driving port is a
+  driven port a service receives like any other. The default for an open host — a system that
+  publishes its model on purpose.
+- **Anti-corruption layer.** This system's domain declares a driven port in its own terms; an
+  adapter in infrastructure implements it by calling the other system's driving port and
+  translating. For a model that is foreign, unstable or not yours — a third-party API always gets
+  one.
 
-The other context-map patterns describe how teams cooperate; in code, each lands as one of these
-two.
+The shared kernel is used for plumbing only (Terms). The other context-map patterns describe how
+teams cooperate; in code, each lands as one of these two.
 
-Either way, of the other system's services only the driving port is named; its service modules,
-adapters and assembly are never imported. Its factory is called in assembly, as every factory is.
+**The consumer assembles by default; escalate when that stops being true.** A's assembly calls
+B's public factory, and nothing else of A learns how B is built. Move that call up into a
+composition root that wires both systems once, when:
+
+- a second consumer would build B again, and B holds something that must exist once — a cache, a
+  pool, a subscription;
+- B needs systems of its own, and A would end up assembling B's upstreams;
+- two systems would assemble each other — a cycle in the context map, which usually means a
+  boundary is drawn wrong.
+
+Until one of these holds, a root is ceremony.
 
 ## The review checklist
 
@@ -192,11 +250,11 @@ shared transaction is the half that gets missed.
 
 ### 5. Did one transaction quietly become several?
 
-**In a diff:** a function that opens its own transaction instead of taking the context it was
-given; a loop that calls a write per item.
+**In a diff:** a function that opens its own transaction instead of joining the one it was
+given, passed or ambient; a loop that calls a write per item.
 
-Moving a write out of a function tends to give it its own transaction. A repository method takes
-the caller's context and opens nothing. Writes that must land together run inside one `run`; a
+Moving a write out of a function tends to give it its own transaction. A repository method joins
+the caller's transaction and opens nothing. Writes that must land together run inside one `run`; a
 loop that calls `run` per item is one transaction per item, and a failure halfway leaves the use
 case half-applied.
 
@@ -309,8 +367,15 @@ anything the module did not return.
 - **A port with one implementation is not premature.** The second implementation is the fake, and
   it is what the default suite runs against.
 - **Using a conformed system's terms directly is the design working**, not a leak.
+- **A service calling another system's driving port is calling a port**, not a use case nested in
+  another.
+- **A consumer assembling another system itself is correct** until one of the reasons to escalate
+  holds.
+- **One transaction across two systems on one store is a choice**, not a breach of their
+  boundary.
 - **Not everything gets a layer.** Code that asserts about the source tree rather than about the
-  application sits outside these layers, and so does the module that assembles them.
+  application sits outside these layers, and so do the module that assembles them, a public
+  models module and the shared kernel.
 - **The checklist is a prompt to look.** Concluding that a case is fine is a complete answer.
 
 ## What this does not cover
