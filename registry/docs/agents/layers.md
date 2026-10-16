@@ -56,8 +56,9 @@ falls out of the test.
 
 **Nor does the domain assume a runtime.** It imports no `node:*` module and reads no runtime's
 globals — `Buffer`, `process`, `window`, the DOM — even where they cannot reach out of the
-process: `node:path` is pure, and still breaks in a browser. Every other layer runs on one
-runtime; the domain runs on any, which is what lets a browser and another system import it.
+process: `node:path` is pure, and still breaks in a browser. This holds through imports: a
+shared-kernel module that imports `node:async_hooks` brings the runtime with it. Every other
+layer runs on one runtime; the domain runs on any, which is what lets a browser and another system import it.
 Importing the domain loads only the domain: no service, no adapter, no assembly.
 
 A schema is a rule, not a description of one. `Invoice` — which fields exist, that an amount is a
@@ -119,6 +120,19 @@ await tx.run(async (ctx) => {
   await invoices.clearDunning(ctx, orderId)
 })
 ```
+
+**Any driven port may be held ambient**, not only the transaction port; a logger is the common
+case. Each one holds to four conditions:
+
+- The port and its accessor live in the shared kernel.
+- Only assembly, or a driving adapter, puts an implementation into the context.
+- The accessor never builds an implementation. With nothing in the context, it returns a no-op
+  or throws.
+- The domain reads no ambient context: a domain function's result depends only on its arguments.
+  It may import an ambient port's type, as it imports any port, but never its accessor.
+
+Say which ports are held ambient, as for the transaction context. A service that reads one still
+receives it — assembly decided what is in the context (question 7).
 
 ## Other systems
 
@@ -277,11 +291,13 @@ parked in a repository.
 
 **In a diff:** a concrete adapter imported into a service file, or constructed inside a service
 body or a factory body, rather than passed in. Also: a module exporting a ready-made instance
-next to the factory that produces it.
+next to the factory that produces it. Also: an ambient accessor that builds an implementation when
+the context is empty.
 
 This one is invisible to the other six — the code sits in the right layer and imports nothing the
 arrow forbids. What it breaks is substitution: the service can no longer be given a different
-implementation, so its tests need the real one.
+implementation, so its tests need the real one. An ambient port that assembly fills is received,
+not built.
 
 ```
 // service/order.ts — the fault
