@@ -23,11 +23,13 @@ term, the narrowing applies.
 
 A *system* is one bounded context: code with its own domain and its own glossary, laid out by
 this document. A repository may hold several. Another bounded context is another system, even
-when it is imported in-process as a package.
+when it is imported in-process as a package. So is a product with a model of its own — a CMS, an
+auth library — even when its tables sit in this system's database.
 
-A *shared kernel* is a package with no bounded context of its own that every system may import:
-the transaction port and its implementations, low-level store clients. DDD's shared kernel is a
-slice of model two contexts co-own; this one shares plumbing and holds no model.
+A *common library* is a package with no bounded context and no model that every system may
+import: the transaction port and its implementations, low-level store clients. It holds plumbing
+only. It is not DDD's *shared kernel*, which is a slice of model two systems co-own (Other
+systems).
 
 This document is written for review. The faults below are the ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
@@ -36,10 +38,10 @@ they are about what a function *does* rather than where it imports from.
 
 | layer | what it is | may import | must not |
 | --- | --- | --- | --- |
-| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the shared kernel's ports, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process, anything of one runtime — `node:*`, `Buffer`, `process`, the DOM |
-| **repository** | adapters for this system's own store. One aggregate each, composes nothing | the store client, the shared kernel, the domain | another repository, and a service above all |
+| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process, anything of one runtime — `node:*`, `Buffer`, `process`, the DOM |
+| **repository** | adapters for this system's own store. One aggregate each, composes nothing | the store client, the common library, the domain | another repository, and a service above all |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the public models of a system it conforms to | build its own dependencies, or write a table with its own queries |
-| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the shared kernel, and the public models of a system it translates | a service of this system |
+| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the public models of a system it translates | a service of this system |
 | **controllers** | driving adapters: entry points, their validators | services, domain, session infrastructure | repositories, the store, the query builder |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
@@ -57,7 +59,7 @@ falls out of the test.
 **Nor does the domain assume a runtime.** It imports no `node:*` module and reads no runtime's
 globals — `Buffer`, `process`, `window`, the DOM — even where they cannot reach out of the
 process: `node:path` is pure, and still breaks in a browser. This holds through imports: a
-shared-kernel module that imports `node:async_hooks` brings the runtime with it. Every other
+common-library module that imports `node:async_hooks` brings the runtime with it. Every other
 layer runs on one runtime; the domain runs on any, which is what lets a browser and another system import it.
 Importing the domain loads only the domain: no service, no adapter, no assembly.
 
@@ -94,7 +96,7 @@ export const createOrderService = (deps: {
   orders: OrderRepository        // driven port, from the domain
   invoices: InvoiceRepository    // driven port, from the domain
   mailer: Mailer                 // driven port, from the domain
-  tx: TransactionRunner          // driven port, from the shared kernel
+  tx: TransactionRunner          // driven port, from the common library
 }): OrderService => ({ ... })    // driving port, declared here
 ```
 
@@ -107,9 +109,9 @@ ready-made instance beside it, because an exported instance is a dependency nobo
 a transaction; repository methods take the context it hands back. The context is opaque in the
 domain, so nothing there names the store or its client.
 
-The transaction port belongs to the shared kernel, so one transaction may span aggregates of
+The transaction port belongs to the common library, so one transaction may span aggregates of
 several systems on the same store. Whether its context is passed explicitly, as below, or held
-ambient — a unit of work in `AsyncLocalStorage`, implemented in the shared kernel — is each
+ambient — a unit of work in `AsyncLocalStorage`, implemented in the common library — is each
 codebase's choice; say which. Explicit context keeps every join visible in a diff. Ambient
 context keeps it out of the driving ports another system calls.
 
@@ -124,8 +126,9 @@ await tx.run(async (ctx) => {
 **Any driven port may be held ambient**, not only the transaction port; a logger is the common
 case. Each one holds to four conditions:
 
-- The port and its accessor live in the shared kernel.
-- Only assembly, or a driving adapter, puts an implementation into the context.
+- The port and its accessor live in the common library.
+- Only assembly, or a driving adapter, puts an implementation into the context. A driving
+  adapter puts one it received from assembly; it never builds one.
 - The accessor never builds an implementation. With nothing in the context, it returns a no-op
   or throws.
 - The domain reads no ambient context: a domain function's result depends only on its arguments.
@@ -141,7 +144,7 @@ of it is inside. This pair is how this document reads DDD's open host service.
 
 - **Public models** — its driving ports, and the schemas and types those ports mention: its
   published language. Its driven ports stay inside, because they are its needs, not its offer.
-- **Public factory** — takes configuration and shared-kernel pieces, returns a driving port. It is
+- **Public factory** — takes configuration and common-library pieces, returns a driving port. It is
   the system's own assembly, offered to others, and asks for none of its internals.
 
 **Public models is a module of re-exports, not a layer.** Like assembly, it sits outside the
@@ -168,7 +171,7 @@ the same port. Moving B out of process changes assembly and nothing else.
 service without passing B's controllers, so whatever those controllers resolve — who is calling,
 on whose behalf — cannot come from them, and B's authorization lives in its service or domain.
 
-**How two systems relate is chosen per relationship, in the terms of DDD's context map.** Two
+**How two systems relate is chosen per relationship, in the terms of DDD's context map.** Three
 choices decide where code goes:
 
 - **Conformist.** This system adopts the other's published language: its terms, schemas and
@@ -179,21 +182,32 @@ choices decide where code goes:
   adapter in infrastructure implements it by calling the other system's driving port and
   translating. For a model that is foreign, unstable or not yours — a third-party API always gets
   one.
+- **Shared kernel.** A module of model two systems co-own: both import it, neither changes it
+  alone. The tightest coupling there is, chosen only where translating costs more than agreeing.
+  Never for plumbing — that is the common library (Terms).
 
-The shared kernel is used for plumbing only (Terms). The other context-map patterns describe how
-teams cooperate; in code, each lands as one of these two.
+The other context-map patterns describe how teams cooperate; in code, each lands as one of these
+three, or as no integration at all.
 
-**The consumer assembles by default; escalate when that stops being true.** A's assembly calls
-B's public factory, and nothing else of A learns how B is built. Move that call up into a
-composition root that wires both systems once, when:
+**The consuming system's assembly builds the other system, by default; escalate when that stops
+being true.** A's assembly calls B's public factory, and nothing else of A learns how B is built.
+Move that call up into a composition root that wires both systems once, when:
 
-- a second consumer would build B again, and B holds something that must exist once — a cache, a
-  pool, a subscription;
+- a second consuming system would build B again, and B holds something that must exist once — a
+  cache, a pool, a subscription;
 - B needs systems of its own, and A would end up assembling B's upstreams;
 - two systems would assemble each other — a cycle in the context map, which usually means a
-  boundary is drawn wrong.
+  boundary is drawn wrong. A product that calls back is the exception, below.
 
 Until one of these holds, a root is ceremony.
+
+**A product that calls back sits on both sides, by design.** Its hooks and scheduled tasks are
+driving adapters calling this system's services; this system's adapters call the product. So its
+config needs the hooks, the hooks need services, the services need adapters over the product's
+instance, and the instance needs the config. That cycle is the product's, not a wrong boundary.
+Assembly breaks it once, by late binding: an adapter receives a function that returns the
+instance and calls it only when it does work, so the instance can be built last. No hook, service
+or adapter builds the instance or a service itself (question 7).
 
 ## The review checklist
 
@@ -385,13 +399,13 @@ anything the module did not return.
 - **Using a conformed system's terms directly is the design working**, not a leak.
 - **A service calling another system's driving port is calling a port**, not a use case nested in
   another.
-- **A consumer assembling another system itself is correct** until one of the reasons to escalate
-  holds.
+- **A system's assembly building another system itself is correct** until one of the reasons to
+  escalate holds.
 - **One transaction across two systems on one store is a choice**, not a breach of their
   boundary.
 - **Not everything gets a layer.** Code that asserts about the source tree rather than about the
   application sits outside these layers, and so do the module that assembles them, a public
-  models module and the shared kernel.
+  models module and the common library.
 - **The checklist is a prompt to look.** Concluding that a case is fine is a complete answer.
 
 ## What this does not cover
