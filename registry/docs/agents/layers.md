@@ -24,7 +24,10 @@ term, the narrowing applies.
 A *system* is one bounded context: code with its own domain and its own glossary, laid out by
 this document. A repository may hold several. Another bounded context is another system, even
 when it is imported in-process as a package. So is a product with a model of its own — a CMS, an
-auth library — even when its tables sit in this system's database.
+auth library — even when its tables sit in this system's database. Data the product's own use
+cases write is the product's; an aggregate this system's use cases write is this system's,
+wherever it is stored. This document lays out this system; for a product, it describes how this
+system relates to it.
 
 A *common library* is a package with no bounded context and no model that every system may
 import: the transaction port and its implementations, low-level store clients. It holds plumbing
@@ -39,7 +42,7 @@ they are about what a function *does* rather than where it imports from.
 | layer | what it is | may import | must not |
 | --- | --- | --- | --- |
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process, anything of one runtime — `node:*`, `Buffer`, `process`, the DOM |
-| **repository** | adapters for this system's own store. One aggregate each, composes nothing | the store client, the common library, the domain | another repository, and a service above all |
+| **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | another repository, and a service above all |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the public models of a system it conforms to | build its own dependencies, or write a table with its own queries |
 | **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the public models of a system it translates | a service of this system |
 | **controllers** | driving adapters: entry points, their validators | services, domain, session infrastructure | repositories, the store, the query builder |
@@ -47,7 +50,7 @@ they are about what a function *does* rather than where it imports from.
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
 all of it: every layer may import it, it imports no layer. Repository and infrastructure are both
 driven-adapter layers; they differ only in subject matter, one implementing ports for this
-system's own store and the other for somebody else's.
+system's aggregates and the other for somebody else's.
 
 **"Imports no layer" is about this system's modules, not about packages.** The test for a package
 in the domain is whether calling it can reach outside the process: a store client, an HTTP client,
@@ -76,6 +79,10 @@ application layer, **infrastructure** and **repository** are both infrastructure
 
 A controller resolves the caller, validates, calls **one** service function, and returns what it
 gives back. Needing two is the signal that a use case has grown inside a controller.
+
+A driving adapter that answers a question about a rule — an access check, a validation the
+product runs on its own doors — calls a *specification*: a domain function that takes the
+candidate and returns the answer. A driving adapter that acts calls one service.
 
 ## Ports and factories
 
@@ -113,7 +120,8 @@ The transaction port belongs to the common library, so one transaction may span 
 several systems on the same store. Whether its context is passed explicitly, as below, or held
 ambient — a unit of work in `AsyncLocalStorage`, implemented in the common library — is each
 codebase's choice; say which. Explicit context keeps every join visible in a diff. Ambient
-context keeps it out of the driving ports another system calls.
+context keeps it out of the driving ports another system calls. An implementation over a
+product's own unit of work lives with that product's adapters.
 
 ```
 // service: two aggregates, one transaction
@@ -128,7 +136,8 @@ case. Each one holds to four conditions:
 
 - The port and its accessor live in the common library.
 - Only assembly, or a driving adapter, puts an implementation into the context. A driving
-  adapter puts one it received from assembly; it never builds one.
+  adapter puts in one it received: from assembly, or from its caller, as the unit of work a
+  product hands its hook.
 - The accessor never builds an implementation. With nothing in the context, it returns a no-op
   or throws.
 - The domain reads no ambient context: a domain function's result depends only on its arguments.
@@ -206,8 +215,8 @@ driving adapters calling this system's services; this system's adapters call the
 config needs the hooks, the hooks need services, the services need adapters over the product's
 instance, and the instance needs the config. That cycle is the product's, not a wrong boundary.
 Assembly breaks it once, by late binding: an adapter receives a function that returns the
-instance and calls it only when it does work, so the instance can be built last. No hook, service
-or adapter builds the instance or a service itself (question 7).
+instance and calls it only when it does work, so the instance can be built last. Assembly builds
+the instance and every service; hooks, services and adapters receive them (question 7).
 
 ## The review checklist
 
