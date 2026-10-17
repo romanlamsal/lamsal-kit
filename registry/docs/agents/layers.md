@@ -8,7 +8,7 @@ cannot, question 5 does not apply. *Table*, *row* and *aggregate* are used in th
 sense — substitute your store's equivalents.
 
 **Terms.** A *controller* is a driving adapter: it resolves the caller, validates, calls into
-one thing, and returns. It holds no rules of its own. `components.md` applies the same role to
+one thing, and returns. It takes its rules from the domain. `components.md` applies the same role to
 route files on the client; the difference is writes — a server controller passes a write through
 to one service, a route controller does not carry writes at all.
 
@@ -24,10 +24,12 @@ term, the narrowing applies.
 A *system* is one bounded context: code with its own domain and its own glossary, laid out by
 this document. A repository may hold several. Another bounded context is another system, even
 when it is imported in-process as a package. So is a product with a model of its own — a CMS, an
-auth library — even when its tables sit in this system's database. Data the product's own use
-cases write is the product's; an aggregate this system's use cases write is this system's,
-wherever it is stored. This document lays out this system; for a product, it describes how this
-system relates to it.
+auth library — even when its tables sit in this system's database. Each aggregate is owned by one
+system's use cases: data the product's own use cases write is the product's; an aggregate this
+system's use cases write is this system's, wherever it is stored. This document lays out this
+system; for a product, it describes how this system relates to it. Where the product's doors show
+this system's aggregate, they read it; a change is an action on those doors — a button, an
+endpoint — whose driving adapter calls this system's service.
 
 A *common library* is a package with no bounded context and no model that every system may
 import: the transaction port and its implementations, low-level store clients. It holds plumbing
@@ -39,13 +41,13 @@ they are about what a function *does* rather than where it imports from.
 
 ## The layers
 
-| layer | what it is | may import | must not |
+| layer | what it is | may import | does |
 | --- | --- | --- | --- |
-| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, and pure libraries — validation, date and money arithmetic | the store, an adapter, an implementation of any port, any library that reaches out of the process, anything of one runtime — `node:*`, `Buffer`, `process`, the DOM |
-| **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | another repository, and a service above all |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the public models of a system it conforms to | build its own dependencies, or write a table with its own queries |
-| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the public models of a system it translates | a service of this system |
-| **controllers** | driving adapters: entry points, their validators | services, domain, session infrastructure | repositories, the store, the query builder |
+| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
+| **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the public models of a system it conforms to | receives its dependencies; writes through repositories |
+| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the public models of a system it translates | translates between this system's ports and the other system |
+| **controllers** | driving adapters: entry points, their validators | services, domain, session infrastructure | reaches the store only through a service |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
 all of it: every layer may import it, it imports no layer. Repository and infrastructure are both
@@ -59,19 +61,24 @@ cannot — it computes from its arguments and returns — so it is allowed, and 
 library of the same shape. Runtime validation is not an exception carved out for one package; it
 falls out of the test.
 
-**Nor does the domain assume a runtime.** It imports no `node:*` module and reads no runtime's
-globals — `Buffer`, `process`, `window`, the DOM — even where they cannot reach out of the
-process: `node:path` is pure, and still breaks in a browser. This holds through imports: a
-common-library module that imports `node:async_hooks` brings the runtime with it. Every other
-layer runs on one runtime; the domain runs on any, which is what lets a browser and another system import it.
-Importing the domain loads only the domain: no service, no adapter, no assembly.
+**The domain runs on any runtime.** It uses what every runtime has: the language and pure
+libraries. `node:*` modules and a runtime's globals — `Buffer`, `process`, `window`, the DOM —
+belong to the layers that run on one runtime, even where they cannot reach out of the process:
+`node:path` is pure, and still breaks in a browser. This holds through imports: a common-library
+module that imports `node:async_hooks` brings the runtime with it. Running on any runtime is what
+lets a browser and another system import the domain, and importing it loads only the domain.
 
 A schema is a rule, not a description of one. `Invoice` — which fields exist, that an amount is a
 positive integer, that a status is one of four — is the same statement as the functions beside it,
-written in a form that also holds at runtime. Types are inferred from it, never written beside it.
+written in a form that also holds at runtime. Types are inferred from it.
 Putting it in the domain is what keeps a single constructor (question 3) possible: the controller
 validating input and the repository mapping a row parse against the same schema instead of two
 drifting copies of it.
+
+**An aggregate refers to another aggregate, and to another system's data, by id.** What it needs
+of the other at the time — a price, a title — it copies as its own value. A reference that loads
+the other's whole record, such as a populated relationship, carries the other's model into this
+aggregate.
 
 In the vocabulary of domain-driven design, **domain** is the model, **service** is the
 application layer, **infrastructure** and **repository** are both infrastructure, and
@@ -88,7 +95,7 @@ candidate and returns the answer. A driving adapter that acts calls one service.
 
 **Driven ports live in the domain.** The rules declare what they need — store this order, send
 this mail — and adapters in the repository and infrastructure layers implement it. The domain
-names no implementation and imports none.
+names ports only; assembly picks their implementations.
 
 **Driving ports live beside the service that satisfies them.** A use case is not a domain
 concept, so the domain never learns the name of one. This is what keeps the arrow pointing in one
@@ -109,12 +116,16 @@ export const createOrderService = (deps: {
 
 **Assembly is not a layer.** One module builds the adapters, calls the factories, and hands the
 result to the controllers. It is the only place that knows both a port and its implementation.
-Keep it separate from the factories: a service module exports a factory and nothing else, never a
-ready-made instance beside it, because an exported instance is a dependency nobody declared.
+Keep it separate from the factories: a service module exports only its factory, and assembly
+holds the instances, so every dependency is one a factory declared.
 
 **Atomicity crosses ports through a transaction port.** The service asks to run something inside
 a transaction; repository methods take the context it hands back. The context is opaque in the
 domain, so nothing there names the store or its client.
+
+A transaction covers the repositories over its store. A call to another store runs outside it —
+before, with an idempotency key, or after, from a record written inside it — so a rollback leaves
+nothing half-done.
 
 The transaction port belongs to the common library, so one transaction may span aggregates of
 several systems on the same store. Whether its context is passed explicitly, as below, or held
@@ -138,10 +149,10 @@ case. Each one holds to four conditions:
 - Only assembly, or a driving adapter, puts an implementation into the context. A driving
   adapter puts in one it received: from assembly, or from its caller, as the unit of work a
   product hands its hook.
-- The accessor never builds an implementation. With nothing in the context, it returns a no-op
-  or throws.
-- The domain reads no ambient context: a domain function's result depends only on its arguments.
-  It may import an ambient port's type, as it imports any port, but never its accessor.
+- The accessor returns what assembly or a driving adapter put into the context. With an empty
+  context, it returns a no-op or throws.
+- A domain function's result depends only on its arguments. The domain imports an ambient port's
+  type, as it imports any port's; the accessor belongs to the layers that read the context.
 
 Say which ports are held ambient, as for the transaction context. A service that reads one still
 receives it — assembly decided what is in the context (question 7).
@@ -190,7 +201,9 @@ choices decide where code goes:
 - **Anti-corruption layer.** This system's domain declares a driven port in its own terms; an
   adapter in infrastructure implements it by calling the other system's driving port and
   translating. For a model that is foreign, unstable or not yours — a third-party API always gets
-  one.
+  one. A product's model gets one by default, even where this system configures it: the
+  configuration is written in the product's terms. Conform only where its model is already the
+  one this system would write.
 - **Shared kernel.** A module of model two systems co-own: both import it, neither changes it
   alone. The tightest coupling there is, chosen only where translating costs more than agreeing.
   Never for plumbing — that is the common library (Terms).
@@ -357,7 +370,7 @@ One section, deliberately self-contained.
 **An integration test is one that uses a real external dependency** — a database, a broker, a
 third-party API. Everything else is not, whatever it covers.
 
-**The default suite uses no external dependency.** It must be fast enough that nobody thinks
+**The default suite runs on fakes.** It must be fast enough that nobody thinks
 about running it. Where a real dependency would appear, a fake implementation of the port appears
 instead.
 
@@ -388,8 +401,7 @@ Make switching between them a flag rather than an edit: the fast run is the defa
 one is what you reach for when a failure makes you doubt the fake.
 
 **What makes a good test here** is that it survives a rewrite of the thing it tests. It names
-inputs and observable results. It does not name private functions, call counts, or the shape of
-anything the module did not return.
+inputs and observable results.
 
 ## When to leave it alone
 
