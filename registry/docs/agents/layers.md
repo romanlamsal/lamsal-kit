@@ -31,10 +31,8 @@ system; for a product, it describes how this system relates to it. Where the pro
 this system's aggregate, they read it; a change is an action on those doors — a button, an
 endpoint — whose driving adapter calls this system's service.
 
-A *common library* is a package with no bounded context and no model that every system may
-import: the transaction port and its implementations, low-level store clients. It holds plumbing
-only. It is not DDD's *shared kernel*, which is a slice of model two systems co-own (Other
-systems).
+A *common library* is plumbing every system may import: the transaction port, store clients, a
+logger, the outbox relay. It holds no model.
 
 This document is written for review. The faults below are the ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
@@ -136,19 +134,10 @@ await tx.run(async (ctx) => {
 })
 ```
 
-**Any driven port may be held ambient**, not only the transaction port; a logger is the common
-case. Each one holds to four conditions:
-
-- The port and its accessor live in the common library.
-- Only assembly, or a driving adapter, puts an implementation into the context. A driving
-  adapter puts in one it received from assembly.
-- The accessor returns what assembly or a driving adapter put into the context. With an empty
-  context, it returns a no-op or throws.
-- A domain function's result depends only on its arguments. The domain imports an ambient port's
-  type, as it imports any port's; the accessor belongs to the layers that read the context.
-
-Say which ports are held ambient, as for the transaction context. A service that reads one still
-receives it — assembly decided what is in the context (question 7).
+**A per-request value may be held ambient** — Fowler's registry, scoped per request; the
+transaction context and a request id are the common cases. A driving adapter puts it in;
+services, repositories and infrastructure read it; the domain takes everything as arguments. Say
+which values are held ambient.
 
 ## Other systems
 
@@ -202,9 +191,8 @@ choices decide where code goes:
   one. A product's model gets one by default, even where this system configures it: the
   configuration is written in the product's terms. Conform only where its model is already the
   one this system would write.
-- **Shared kernel.** A module of model two systems co-own: both import it, neither changes it
-  alone. The tightest coupling there is, chosen only where translating costs more than agreeing.
-  Never for plumbing — that is the common library (Terms).
+- **Shared kernel.** Model two systems share, such as `Money`, goes in a module both import and
+  neither changes alone.
 
 The other context-map patterns describe how teams cooperate; in code, each lands as one of these
 three, or as no integration at all.
@@ -251,6 +239,8 @@ of data the use case touches, answer in order:
 **An outbox, wherever it is used:**
 
 - A relay delivers each message after the commit, at least once.
+- The relay is common-library plumbing. Which handler receives which message is wired once, above
+  the systems.
 - The receiver handles it in its own transaction, through a driving adapter that calls one
   service. Handling the same message twice changes nothing the second time.
 - When a later step fails, new steps undo the earlier ones — a saga. Nothing rolls back.
@@ -361,8 +351,9 @@ the context is empty.
 
 This one is invisible to the other six — the code sits in the right layer and imports nothing the
 arrow forbids. What it breaks is substitution: the service can no longer be given a different
-implementation, so its tests need the real one. An ambient port that assembly fills is received,
-not built.
+implementation, so its tests need the real one. An ambient value a driving adapter puts in is
+received, not built. Plumbing with one fixed configuration, such as a logger, may be a ready-made
+instance: nobody substitutes it.
 
 ```
 // service/order.ts — the fault
