@@ -77,12 +77,12 @@ In the vocabulary of domain-driven design, **domain** is the model, **service** 
 application layer, **infrastructure** and **repository** are both infrastructure, and
 **controllers** are the interface layer.
 
-A controller resolves the caller, validates, calls **one** service function, and returns what it
-gives back. Needing two is the signal that a use case has grown inside a controller.
-
-A driving adapter that answers a question about a rule — an access check, a validation the
-product runs on its own doors — calls a *specification*: a domain function that takes the
-candidate and returns the answer. A driving adapter that acts calls one service.
+**A driving adapter acts through one service and asks through the domain.** To act, it calls one
+service function; needing two is the signal that a use case has grown inside it. To answer a
+question about a rule — may this caller do this, is this input valid — it calls a
+*specification*: a domain function that takes the candidate and returns the answer. When the
+answer needs data the adapter does not hold, a service of its system loads the data and asks the
+specification.
 
 ## Ports and factories
 
