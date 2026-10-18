@@ -123,16 +123,10 @@ holds the instances, so every dependency is one a factory declared.
 a transaction; repository methods take the context it hands back. The context is opaque in the
 domain, so nothing there names the store or its client.
 
-A transaction covers the repositories over its store. A call to another store runs outside it —
-before, with an idempotency key, or after, from a record written inside it — so a rollback leaves
-nothing half-done.
-
-The transaction port belongs to the common library, so one transaction may span aggregates of
-several systems on the same store. Whether its context is passed explicitly, as below, or held
-ambient — a unit of work in `AsyncLocalStorage`, implemented in the common library — is each
-codebase's choice; say which. Explicit context keeps every join visible in a diff. Ambient
-context keeps it out of the driving ports another system calls. An implementation over a
-product's own unit of work lives with that product's adapters.
+The transaction port belongs to the common library. Whether its context is passed explicitly, as
+below, or held ambient — a unit of work in `AsyncLocalStorage`, implemented in the common library
+— is each codebase's choice; say which. Explicit context keeps every join visible in a diff.
+Ambient context keeps it out of every port's signature.
 
 ```
 // service: two aggregates, one transaction
@@ -147,8 +141,7 @@ case. Each one holds to four conditions:
 
 - The port and its accessor live in the common library.
 - Only assembly, or a driving adapter, puts an implementation into the context. A driving
-  adapter puts in one it received: from assembly, or from its caller, as the unit of work a
-  product hands its hook.
+  adapter puts in one it received from assembly.
 - The accessor returns what assembly or a driving adapter put into the context. With an empty
   context, it returns a no-op or throws.
 - A domain function's result depends only on its arguments. The domain imports an ambient port's
@@ -230,6 +223,36 @@ instance, and the instance needs the config. That cycle is the product's, not a 
 Assembly breaks it once, by late binding: an adapter receives a function that returns the
 instance and calls it only when it does work, so the instance can be built last. Assembly builds
 the instance and every service; hooks, services and adapters receive them (question 7).
+
+## Transactions
+
+**One use case is one transaction, and the transaction stays inside its system.** For each piece
+of data the use case touches, answer in order:
+
+1. **Does it change data another system owns?** → **Outbox, required.** Write a message to this
+   system's outbox in the same transaction. The owner changes its data when the message arrives.
+2. **Does it read data another system owns?** → **Call the owner's open host service.** If it
+   offers no fitting read, keep a copy in this system, updated by the owner's messages. In this
+   case, the owner publishes.
+3. **Does it write several aggregates of this system?** → **One transaction, by default.** This is
+   this document's choice; Vernon and Khononov keep one aggregate per transaction. An outbox is
+   also valid here. Good tells for one:
+   - the aggregates are often written at the same time, and one transaction would block or
+     conflict;
+   - the rule between them may hold a moment later.
+4. **Otherwise** → one transaction.
+
+**An outbox, wherever it is used:**
+
+- A relay delivers each message after the commit, at least once.
+- The receiver handles it in its own transaction, through a driving adapter that calls one
+  service. Handling the same message twice changes nothing the second time.
+- When a later step fails, new steps undo the earlier ones — a saga. Nothing rolls back.
+
+**Act on a product's change only once the product has committed it.** A product's hook may run
+inside the product's transaction, whatever its name. Where it does, the hook leaves its work to a
+handler that first checks the change through the product. Changes that get lost in between are
+repaired by reconciliation.
 
 ## The review checklist
 
@@ -411,7 +434,7 @@ inputs and observable results.
   controller naming a symbol.
 - **A read across aggregates in a repository is a reporting read, not a use case**, as long as it
   writes nothing.
-- **A service passing its transaction context into another aggregate's repository is the design
+- **A service passing its transaction context into another repository of its system is the design
   working.** That is how several tables stay one transaction.
 - **A use case touching three aggregates and naming three invalidations is correct**, not a
   breach of one mutation per use case.
@@ -422,8 +445,8 @@ inputs and observable results.
   another.
 - **A system's assembly building another system itself is correct** until one of the reasons to
   escalate holds.
-- **One transaction across two systems on one store is a choice**, not a breach of their
-  boundary.
+- **Another system catching up a moment later is the design working.** Between systems,
+  consistency is eventual.
 - **Not everything gets a layer.** Code that asserts about the source tree rather than about the
   application sits outside these layers, and so do the module that assembles them, a public
   models module and the common library.
