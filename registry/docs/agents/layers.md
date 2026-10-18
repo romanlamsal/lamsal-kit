@@ -23,13 +23,8 @@ term, the narrowing applies.
 
 A *system* is one bounded context: code with its own domain and its own glossary, laid out by
 this document. A repository may hold several. Another bounded context is another system, even
-when it is imported in-process as a package. So is a product with a model of its own — a CMS, an
-auth library — even when its tables sit in this system's database. Each aggregate is owned by one
-system's use cases: data the product's own use cases write is the product's; an aggregate this
-system's use cases write is this system's, wherever it is stored. This document lays out this
-system; for a product, it describes how this system relates to it. Where the product's doors show
-this system's aggregate, they read it; a change is an action on those doors — a button, an
-endpoint — whose driving adapter calls this system's service.
+when it is imported in-process as a package; so is a product (Products). An aggregate belongs to
+the system whose use cases write it, wherever it is stored.
 
 A *common library* is plumbing every system may import: the transaction port, store clients, a
 logger, the outbox relay. It holds no model.
@@ -188,9 +183,7 @@ choices decide where code goes:
 - **Anti-corruption layer.** This system's domain declares a driven port in its own terms; an
   adapter in infrastructure implements it by calling the other system's driving port and
   translating. For a model that is foreign, unstable or not yours — a third-party API always gets
-  one. A product's model gets one by default, even where this system configures it: the
-  configuration is written in the product's terms. Conform only where its model is already the
-  one this system would write.
+  one.
 - **Shared kernel.** Model two systems share, such as `Money`, goes in a module both import and
   neither changes alone.
 
@@ -206,17 +199,26 @@ Move that call up into a composition root that wires both systems once, when:
   cache, a pool, a subscription;
 - B needs systems of its own, and A would end up assembling B's upstreams;
 - two systems would assemble each other — a cycle in the context map, which usually means a
-  boundary is drawn wrong. A product that calls back is the exception, below.
+  boundary is drawn wrong. A product that calls back is the exception (Products).
 
 Until one of these holds, a root is ceremony.
 
-**A product that calls back sits on both sides, by design.** Its hooks and scheduled tasks are
-driving adapters calling this system's services; this system's adapters call the product. So its
-config needs the hooks, the hooks need services, the services need adapters over the product's
-instance, and the instance needs the config. That cycle is the product's, not a wrong boundary.
-Assembly breaks it once, by late binding: an adapter receives a function that returns the
-instance and calls it only when it does work, so the instance can be built last. Assembly builds
-the instance and every service; hooks, services and adapters receive them (question 7).
+### Products
+
+**A product with a model of its own — a CMS, an auth library — is another system**, even when its
+tables sit in this system's database.
+
+- **Where this system stores an aggregate in a product, the product's screens may read it.** A
+  change made there is an action — a button, an endpoint — whose driving adapter calls this
+  system's service.
+- **A product's hooks and scheduled tasks are driving adapters.** Act on a product's change only
+  once the product has committed it: a hook may run inside the product's transaction, whatever its
+  name. Where it does, the hook leaves its work to a handler that first checks the change through
+  the product. Changes lost in between are repaired by reconciliation.
+- **A product that calls back is a cycle by design.** Its config needs the hooks, the hooks need
+  services, the services need adapters over the product's instance, and the instance needs the
+  config. Assembly breaks it by late binding: an adapter receives a function that returns the
+  instance, and calls it only when it does work.
 
 ## Transactions
 
@@ -244,11 +246,6 @@ of data the use case touches, answer in order:
 - The receiver handles it in its own transaction, through a driving adapter that calls one
   service. Handling the same message twice changes nothing the second time.
 - When a later step fails, new steps undo the earlier ones — a saga. Nothing rolls back.
-
-**Act on a product's change only once the product has committed it.** A product's hook may run
-inside the product's transaction, whatever its name. Where it does, the hook leaves its work to a
-handler that first checks the change through the product. Changes that get lost in between are
-repaired by reconciliation.
 
 ## The review checklist
 
