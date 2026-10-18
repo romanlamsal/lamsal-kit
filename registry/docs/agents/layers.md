@@ -45,8 +45,8 @@ they are about what a function *does* rather than where it imports from.
 | --- | --- | --- | --- |
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
 | **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the public models of a system it conforms to | receives its dependencies; writes through repositories |
-| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the public models of a system it translates | translates between this system's ports and the other system |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the open host service of a system it conforms to | receives its dependencies; writes through repositories |
+| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the open host service of a system it translates | translates between this system's ports and the other system |
 | **controllers** | driving adapters: entry points, their validators | services, domain, session infrastructure | reaches the store only through a service |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
@@ -152,27 +152,32 @@ receives it — assembly decided what is in the context (question 7).
 
 ## Other systems
 
-**A system's public face is two entries: public models and a public factory.** Everything else
-of it is inside. This pair is how this document reads DDD's open host service.
+**A system offers an open host service: its driving ports, and their *published language* — the
+schemas and types those ports take and return.** Its driven ports stay inside; they are its needs,
+not its offer. Export three things:
 
-- **Public models** — its driving ports, and the schemas and types those ports mention: its
-  published language. Its driven ports stay inside, because they are its needs, not its offer.
-- **Public factory** — takes configuration and common-library pieces, returns a driving port. It is
-  the system's own assembly, offered to others, and asks for none of its internals.
+- the published language, for other systems to import;
+- the driving port types, for other systems to import;
+- a function that takes configuration and builds the open host service, for another system's
+  assembly to call.
 
-**Public models is a module of re-exports, not a layer.** Like assembly, it sits outside the
-table. It re-exports driving ports type-only, so importing it loads no service; schemas it
-re-exports from the domain, which loads nothing else.
+Give the published language and the port types an entry that loads only the domain, so another
+system imports them without loading any service. Other systems import these three and nothing
+else of the system, which a linter can hold from import paths alone.
 
 ```
-// billing's public models — the file name is the codebase's
-export type { BillingService } from "./service/billing"
+// billing's entries — file names are the codebase's
+// published language and port types: loads only the domain
+export type { BillingService } from "./service/billing.port"
 export { Invoice, InvoiceStatus } from "./domain/invoice"
+
+// builds the open host service: for another system's assembly
+export const createBilling = (config: BillingConfig): BillingService => ...
 ```
 
-Another system imports public models in any layer that may import a domain, and the public
-factory only in its assembly. Nothing else of the other system is imported anywhere. Both rules
-read from import paths alone, so a linter can hold them.
+**The published language is the domain's own schemas, by default.** A separate language is
+allowed where the domain must change without breaking other systems; record the reason in an ADR.
+Khononov keeps the two apart from the start; re-exporting the domain is this document's choice.
 
 **One system's driving port is the other's driven port.** To B, `BillingService` is the way in; to
 A's service it is a dependency it receives — a way out, like a mailer. A service calling it is not
@@ -205,7 +210,8 @@ The other context-map patterns describe how teams cooperate; in code, each lands
 three, or as no integration at all.
 
 **The consuming system's assembly builds the other system, by default; escalate when that stops
-being true.** A's assembly calls B's public factory, and nothing else of A learns how B is built.
+being true.** A's assembly calls the function B exports to build its open host service, and nothing else of A
+learns how B is built.
 Move that call up into a composition root that wires both systems once, when:
 
 - a second consuming system would build B again, and B holds something that must exist once — a
@@ -448,8 +454,8 @@ inputs and observable results.
 - **Another system catching up a moment later is the design working.** Between systems,
   consistency is eventual.
 - **Not everything gets a layer.** Code that asserts about the source tree rather than about the
-  application sits outside these layers, and so do the module that assembles them, a public
-  models module and the common library.
+  application sits outside these layers, and so do the module that assembles them, a system's
+  exported entries and the common library.
 - **The checklist is a prompt to look.** Concluding that a case is fine is a complete answer.
 
 ## What this does not cover
