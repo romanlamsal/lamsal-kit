@@ -24,10 +24,11 @@ term, the narrowing applies.
 A *system* is one bounded context: code with its own domain and its own glossary, laid out by
 this document. A repository may hold several. Another bounded context is another system, even
 when it is imported in-process as a package; so is a product (Products). An aggregate belongs to
-the system whose use cases write it, wherever it is stored.
+the system whose use cases write it, wherever it is stored; a record two systems write is two
+aggregates sharing an id.
 
 A *common library* is plumbing every system may import: the transaction port, store clients, a
-logger, the outbox relay. It holds no model.
+logger, a tracer, the outbox relay. It holds no model.
 
 This document is written for review. The faults below are the ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
@@ -82,7 +83,8 @@ service function; needing two is the signal that a use case has grown inside it.
 question about a rule — may this caller do this, is this input valid — it calls a
 *specification*: a domain function that takes the candidate and returns the answer. When the
 answer needs data the adapter does not hold, a service of its system loads the data and asks the
-specification.
+specification. Where its caller delivers at least once — a relay, a webhook, a product's hook —
+handling the same delivery twice changes nothing the second time.
 
 ## Ports and factories
 
@@ -107,10 +109,10 @@ export const createOrderService = (deps: {
 }): OrderService => ({ ... })    // driving port, declared here
 ```
 
-**Assembly is not a layer.** One module builds the adapters, calls the factories, and hands the
-result to the controllers. It is the only place that knows both a port and its implementation.
-Keep it separate from the factories: a service module exports only its factory, and assembly
-holds the instances, so every dependency is one a factory declared.
+**Assembly is not a layer.** One module per process builds the adapters, calls the factories, and
+hands the result to the controllers. It is the only place that knows both a port and its
+implementation. Keep it separate from the factories: a service module exports only its factory,
+and assembly holds the instances, so every dependency is one a factory declared.
 
 **Atomicity crosses ports through a transaction port.** The service asks to run something inside
 a transaction; repository methods take the context it hands back. The context is opaque in the
@@ -137,8 +139,8 @@ which values are held ambient.
 ## Other systems
 
 **A system offers an open host service: its driving ports, and their *published language* — the
-schemas and types those ports take and return.** Its driven ports stay inside; they are its needs,
-not its offer. Export three things:
+schemas, types and errors those ports take, return and raise.** Its driven ports stay inside; they
+are its needs, not its offer. Export three things:
 
 - the published language, for other systems to import;
 - the driving port types, for other systems to import;
@@ -150,20 +152,20 @@ system imports them without loading any service. Other systems import these thre
 else of the system, which a linter can hold from import paths alone.
 
 ```
-// billing's entries — file names are the codebase's
+// pricing's entries — file names are the codebase's
 // published language and port types: loads only the domain
-export type { BillingService } from "./service/billing.port"
-export { Invoice, InvoiceStatus } from "./domain/invoice"
+export type { Pricing } from "./service/pricing.port"
+export { Quote, PriceList } from "./domain/quote"
 
 // builds the open host service: for another system's assembly
-export const createBilling = (config: BillingConfig): BillingService => ...
+export const createPricing = (config: PricingConfig): Pricing => ...
 ```
 
 **The published language is the domain's own schemas, by default.** A separate language is
 allowed where the domain must change without breaking other systems; record the reason in an ADR.
 Khononov keeps the two apart from the start; re-exporting the domain is this document's choice.
 
-**One system's driving port is the other's driven port.** To B, `BillingService` is the way in; to
+**One system's driving port is the other's driven port.** To B, `Pricing` is the way in; to
 A's service it is a dependency it receives — a way out, like a mailer. A service calling it is not
 one use case calling another; it is a use case calling a port. What sits behind the port is
 assembly's decision: B's service in-process, or an HTTP client in A's infrastructure implementing
@@ -326,10 +328,10 @@ case half-applied.
 
 ```
 // the fault
-for (const line of lines) await tx.run((ctx) => lines.insert(ctx, line))
+for (const line of lines) await tx.run((ctx) => orderLines.insert(ctx, line))
 
 // the fix
-await tx.run((ctx) => lines.insertMany(ctx, lines))
+await tx.run((ctx) => orderLines.insertMany(ctx, lines))
 ```
 
 ### 6. Does a repository import a service?
@@ -349,8 +351,8 @@ the context is empty.
 This one is invisible to the other six — the code sits in the right layer and imports nothing the
 arrow forbids. What it breaks is substitution: the service can no longer be given a different
 implementation, so its tests need the real one. An ambient value a driving adapter puts in is
-received, not built. Plumbing with one fixed configuration, such as a logger, may be a ready-made
-instance: nobody substitutes it.
+received, not built. Plumbing with one fixed configuration, such as a logger or a tracer, may be a
+ready-made instance: nobody substitutes it.
 
 ```
 // service/order.ts — the fault
@@ -426,8 +428,8 @@ inputs and observable results.
   indirection. A controller's only door is a service, even when the service exports the same name
   again, so that deleting a repository fails inside the service that names it rather than at a
   controller naming a symbol.
-- **A read across aggregates in a repository is a reporting read, not a use case**, as long as it
-  writes nothing.
+- **A read across its system's aggregates in a repository is a reporting read, not a use case**,
+  as long as it writes nothing.
 - **A service passing its transaction context into another repository of its system is the design
   working.** That is how several tables stay one transaction.
 - **A use case touching three aggregates and naming three invalidations is correct**, not a
