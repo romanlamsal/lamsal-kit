@@ -36,7 +36,7 @@ retry safe and the saga already exists for the failure window.
 
 ## B. Where the outbox's handler wiring lives
 
-**Status:** ready
+**Status:** ready, resolved into `16-relay-wiring.md`
 
 **Context.** In `domain.md`, shop's outbox carries `OrderPaid` to billing and fulfillment.
 

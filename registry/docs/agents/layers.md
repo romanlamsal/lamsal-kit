@@ -147,7 +147,8 @@ publishes, if any.** Its driven ports stay inside; they are its needs, not its o
 - a function that takes configuration and builds the open host service, for another system's
   assembly to call;
 - where it handles messages, a function that takes configuration and builds its message handler,
-  for the assembly that hands it to the relay.
+  for the assembly that hands it to the relay. Whether one function builds both is each codebase's
+  choice.
 
 Give the published language and the port types an entry that loads only the domain, so another
 system imports them without loading any service. Other systems reach a system only through these
@@ -256,8 +257,7 @@ system.** For each piece of data the use case touches, answer in order:
 - A relay delivers each message after the commit, at least once, and not necessarily in order —
   possibly to a handler older or newer than the code that wrote it, so a message's schema stays
   backward and forward compatible.
-- The relay is common-library plumbing. The receiver decides which messages it handles; handing
-  each receiver's handler to the relay is wired once, above the systems.
+- The relay is common-library plumbing. The receiver decides which messages it handles.
 - The receiver handles it in its own transaction, through a driving adapter that calls one
   service. Handling the same message twice changes nothing the second time.
 - When a later step fails, new steps undo the earlier ones — a saga, here the whole sequence

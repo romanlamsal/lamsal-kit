@@ -9,7 +9,7 @@ consuming repository's choice. Done when every row below is closed or ruled out.
 
 1. Open question A, then tickets 12 and 11: A decides the exception in the rule 12 extends, and
    whether a saga step may answer synchronously.
-2. Ticket 09, then open question B: both settle how messages travel between systems.
+2. Ticket 09, then open question B (ticket 16): both settle how messages travel between systems.
 3. Tickets 15, 13 and 10, in any order.
 4. Ticket 14 (generality test first), then open question D: both are about product hooks.
 5. Open question C.
@@ -36,8 +36,9 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `13-two-store-clients.md` | ready | |
 | `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
 | `15-ambient-transaction-scope.md` | ready | argue the derivation test |
+| `16-relay-wiring.md` | ready | resolves open question B |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
-| `open-questions.md` B | ready | grill; relates to 08; takes the wiring placement from 11 |
+| `open-questions.md` B | ready | resolved into 16 |
 | `open-questions.md` C | ready | grill |
 | `open-questions.md` D | ready | grill; after 14 |
 
