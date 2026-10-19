@@ -35,7 +35,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `12-side-effects-through-outbox.md` | closed (bef2a8d) | absorbs open question A |
 | `13-two-store-clients.md` | ready | |
 | `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
-| `15-ambient-transaction-scope.md` | ready | argue the derivation test |
+| `15-ambient-transaction-scope.md` | closed (3aa71b4) | retitled: what may be held ambient |
 | `16-relay-wiring.md` | closed (d6ee97c) | resolves open question B |
 | `17-fakes-of-other-systems.md` | closed (97e2dc2) | resolves open question C |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
@@ -72,4 +72,5 @@ Khononov's "assume the worst; use the outbox" heuristic was not found in any sou
 
 Checked against Evans's final manuscript (April 15, 2003; pages run about 100 below the hardcover):
 the two-way anti-corruption layer (pp. 258–259, ticket 10), the conformist copying the upstream
-model (p. 256, ticket 09), the published language's definition (p. 264).
+model (p. 256, ticket 09), the published language's definition (p. 264), integration across a
+bounded context's boundary as explicit translation (p. 111, ticket 15).
