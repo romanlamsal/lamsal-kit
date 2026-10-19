@@ -52,3 +52,10 @@ Ask one decision per question; walk a choice of order or mechanism through a con
   choice") rather than leaving it unsaid.
 - Say when a term is coined rather than taken from a book.
 - Challenge a design the author brings against the sources before asking about wording.
+- A sentence already in `layers.md` is no argument for itself; it may be several decisions old.
+  Keep it only for a reason that still holds.
+- Draw a line by what a thing does, not by its technology or kind; a rule that lists cases breaks
+  on the next one.
+- A deletion is tested too: check what the removed text reconciled, and run the four tests on
+  what remains.
+- Before asking for approval, show the full before and after of every change.
