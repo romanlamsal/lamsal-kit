@@ -35,3 +35,12 @@ Open the first round with context the author may not hold: the rule in `layers.m
 touches, the `domain.md` case that breaks it, and what each ticket it blocks or relates to says.
 Ask one decision per question; walk a choice of order or mechanism through a concrete failure in
 `domain.md`.
+
+- Ask about the general concept; use `domain.md` to test it, not to frame it.
+- Run the derivation test before proposing a sentence.
+- Ask what `layers.md` will say. Only `layers.md` ships: a choice the consuming repository must
+  make has to be stated there, not only in a ticket's Decision.
+- Leave to the consuming repository what it should decide: no fixed counts, no required code
+  structure, no mechanism.
+- Say when a term is coined rather than taken from a book.
+- Challenge a design the author brings against the sources before asking about wording.

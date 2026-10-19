@@ -46,6 +46,8 @@ billing).
   - Scheduled dunning runs.
 - **fulfillment**
   - Reserves stock on `OrderPlaced`; releases it on `OrderCancelled`.
+  - `OrderPaid` or `OrderCancelled` can arrive before `OrderPlaced`; a dropped cancel leaves
+    stock reserved for a dead order.
   - 3PL webhooks report shipments in the 3PL's terms.
   - Its worker process has its own entry point and its own assembly.
 - **common library**

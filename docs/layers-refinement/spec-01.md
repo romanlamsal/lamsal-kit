@@ -63,5 +63,6 @@ Gaps the review found and dropped; reopen only with a new failure.
 
 Every Evans, Vernon and Khononov citation in the tickets is from memory; the books were not
 reachable online. Check them against the books before quoting them in `layers.md`; the least
-certain is Evans's two-way anti-corruption layer (ticket 10). Fallback citations (Fowler,
+certain are Evans's two-way anti-corruption layer (ticket 10) and Khononov's saga as one
+coordinating component, which `layers.md` already relies on (ticket 11). Fallback citations (Fowler,
 Richardson) are from memory too.
