@@ -138,9 +138,9 @@ which values are held ambient.
 
 ## Other systems
 
-**A system offers an open host service: its driving ports, and their *published language* — the
-schemas, types and errors those ports take, return and raise.** Its driven ports stay inside; they
-are its needs, not its offer. Export:
+**A system offers an open host service: its driving ports and its *published language* — the
+schemas, types and errors those ports take, return and raise, and the messages the system
+publishes, if any.** Its driven ports stay inside; they are its needs, not its offer. Export:
 
 - the published language, for other systems to import;
 - the driving port types, for other systems to import;
@@ -157,7 +157,7 @@ exports, which a linter can hold from import paths alone.
 // pricing's entries — file names are the codebase's
 // published language and port types: loads only the domain
 export type { Pricing } from "./service/pricing.port"
-export { Quote, PriceList } from "./domain/quote"
+export { Quote, PriceList, PriceListChanged } from "./domain/quote"
 
 // builds the open host service: for another system's assembly
 export const createPricing = (config: PricingConfig): Pricing => ...
@@ -253,7 +253,9 @@ system.** For each piece of data the use case touches, answer in order:
 
 **An outbox, wherever it is used:**
 
-- A relay delivers each message after the commit, at least once, and not necessarily in order.
+- A relay delivers each message after the commit, at least once, and not necessarily in order —
+  possibly to a handler older or newer than the code that wrote it, so a message's schema stays
+  backward and forward compatible.
 - The relay is common-library plumbing. The receiver decides which messages it handles; handing
   each receiver's handler to the relay is wired once, above the systems.
 - The receiver handles it in its own transaction, through a driving adapter that calls one
@@ -267,7 +269,7 @@ system.** For each piece of data the use case touches, answer in order:
 
 ## The review checklist
 
-Eight questions, each answerable from a diff. The snippets are illustrative pseudo-code.
+Nine questions, each answerable from a diff. The snippets are illustrative pseudo-code.
 
 ### 1. Does a service write a table another aggregate owns?
 
@@ -381,8 +383,9 @@ export const createOrderService = ({ orders }: { orders: OrderRepository }) => .
 ### 8. Does the boundary match the relationship?
 
 **In a diff:** a driven port whose types copy another system's field for field, and an adapter
-mapping each field to itself. Or, behind an anti-corruption layer, one of the other system's terms
-in this domain or a service.
+mapping each field to itself. Or a message schema copied field for field from the system that
+publishes it. Or, behind an anti-corruption layer, one of the other system's terms in this domain
+or a service.
 
 A translation that changes nothing is not an anti-corruption layer; conform instead. A term that
 crosses an anti-corruption layer untranslated means there is no layer.
@@ -396,6 +399,20 @@ quote: async (cart) => {
 
 // the fix: conform, and the service receives the pricing system's driving port
 export const createOrderService = ({ pricing }: { pricing: Pricing }) => ...
+```
+
+### 9. Does a message schema change break a message in flight?
+
+**In a diff:** a field renamed, removed, made required, or narrowed in the schema of a message —
+including a domain schema the published language re-exports.
+
+A message written before the deploy is handled after it, and a handler on older code may read one
+written after. The type checker sees neither: the stored row is not in the program.
+
+```
+// domain/order.ts — OrderPaid, the fault
+- total: Money
++ amount: Money   // an OrderPaid still in the outbox has no amount
 ```
 
 ## Tests
