@@ -1,6 +1,6 @@
 # Side effects at third parties
 
-**Status:** ready
+**Status:** closed (bef2a8d)
 
 **Kind:** real gap · **Touches:**
 Transactions (headline, rule 1) · **Absorbs:** `open-questions.md` A (the same sentence needed its

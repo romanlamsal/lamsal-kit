@@ -6,7 +6,7 @@ reviewer's, not a decision.
 
 ## A. A change at another system whose result the use case needs now
 
-**Status:** resolved into `12-side-effects-through-outbox.md`; closes with it
+**Status:** closed (bef2a8d), resolved into `12-side-effects-through-outbox.md`
 
 **Context.** In `domain.md`, checkout creates a Stripe PaymentIntent and must return its
 `client_secret` in the same request.

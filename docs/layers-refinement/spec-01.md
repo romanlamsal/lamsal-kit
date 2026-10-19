@@ -32,11 +32,11 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `09-messages-in-published-language.md` | ready | |
 | `10-inbound-translation.md` | ready | may split a ticket for the controllers row |
 | `11-saga-state.md` | ready | check against ticket 12's exception in rule 1 |
-| `12-side-effects-through-outbox.md` | ready | absorbs open question A |
+| `12-side-effects-through-outbox.md` | closed (bef2a8d) | absorbs open question A |
 | `13-two-store-clients.md` | ready | |
 | `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
 | `15-ambient-transaction-scope.md` | ready | argue the derivation test |
-| `open-questions.md` A | ready | resolved into 12; closes with it |
+| `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
 | `open-questions.md` B | ready | grill; relates to 08 |
 | `open-questions.md` C | ready | grill |
 | `open-questions.md` D | ready | grill; after 14 |
