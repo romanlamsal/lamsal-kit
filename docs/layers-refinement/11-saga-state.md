@@ -3,7 +3,8 @@
 **Status:** ready
 
 **Kind:** real gap · **Touches:** Transactions (the outbox bullets,
-"a saga") · **Related:** `open-questions.md` A (a saga step that must answer synchronously)
+"a saga") · **Related:** `12-side-effects-through-outbox.md` (rule 1's exception for a waiting
+caller)
 
 ## Context
 
@@ -39,5 +40,5 @@ stays its choice. Decide whether to say "say which", as the transaction paragrap
 
 ## Done when
 
-The clause passes the four tests; open question A is checked for a conflict (a synchronous step
-inside the saga); presented for approval.
+The clause passes the four tests; ticket 12's exception in rule 1 is checked for a conflict (a
+synchronous step inside the saga); presented for approval.

@@ -224,11 +224,20 @@ tables sit in this system's database.
 
 ## Transactions
 
-**One use case is one transaction, and the transaction stays inside its system.** For each piece
-of data the use case touches, answer in order:
+**Writes that must land together share one transaction, and the transaction stays inside its
+system.** For each piece of data the use case touches, answer in order:
 
-1. **Does it change data another system owns?** → **Outbox, required.** Write a message to this
-   system's outbox in the same transaction. The owner changes its data when the message arrives.
+1. **Does it change data another system owns — a third party's included, such as a mail sent or
+   a payment created?** → **Outbox, required.** Write a message to this system's outbox in the
+   same transaction. The owner changes its data when the message arrives.
+
+   Where the use case's caller waits for the other system's answer, call the other system
+   instead, once the transaction has committed, and record the answer, if this system keeps it,
+   in a transaction of its own. Make the call safe to repeat: the other system recognises a
+   repeat however it can — a key it dedupes on, this system's id stored on its side and looked
+   up first. Where it cannot, a repeat may duplicate. A failure after the commit, and a
+   duplicate, are repaired by the saga or by reconciliation. This exception is this document's
+   choice; the sources do not cover it.
 2. **Does it read data another system owns?** → **Call the owner's open host service.** If it
    offers no fitting read, keep a copy in this system, updated by the owner's messages. In this
    case, the owner publishes.

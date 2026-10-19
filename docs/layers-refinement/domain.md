@@ -32,12 +32,14 @@ billing).
   - Payload's config needs the hooks, the hooks need services, the services need the Payload
     instance: a cycle.
 - **shop**
-  - Checkout must return a Stripe `client_secret` in the same request.
+  - Checkout must return a Stripe `client_secret` in the same request; payment creates it.
   - One use case writes Drizzle tables and Payload documents: two store clients, one database.
   - Sends an order-confirmation mail once the order commits.
   - Calls billing's open host service in-process while holding its own ambient transaction.
 - **payment**
   - Stripe is behind an anti-corruption layer on the way out.
+  - Creates a Stripe PaymentIntent when shop's checkout calls it, and returns its `client_secret`
+    in the same call.
   - Stripe webhooks arrive at least once, out of order, in Stripe's terms.
 - **billing**
   - Creates an invoice on shop's `OrderPaid` message.
@@ -54,7 +56,8 @@ billing).
 ## The checkout saga
 
 1. shop places the order and writes `ReserveStock` to its outbox.
-2. shop creates a Stripe PaymentIntent and returns its `client_secret` to the browser.
+2. shop calls payment, which creates a Stripe PaymentIntent; shop returns its `client_secret` to
+   the browser.
 3. Stripe's webhook reaches payment, which publishes `PaymentSucceeded` or `PaymentFailed`.
 4. On success, shop marks the order paid and publishes `OrderPaid`; billing issues the invoice,
    fulfillment ships.
