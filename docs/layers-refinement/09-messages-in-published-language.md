@@ -1,6 +1,6 @@
 # Messages missing from the published language
 
-**Status:** ready
+**Status:** closed (dedd87d)
 
 **Kind:** real gap · **Touches:** Other systems (the open host
 service definition and its snippet); Transactions (the outbox bullets); review checklist
