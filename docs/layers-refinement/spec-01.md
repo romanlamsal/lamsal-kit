@@ -33,7 +33,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `10-inbound-translation.md` | closed (c30b656) | controllers row settled here |
 | `11-saga-state.md` | closed (746cb5a) | |
 | `12-side-effects-through-outbox.md` | closed (bef2a8d) | absorbs open question A |
-| `13-two-store-clients.md` | ready | |
+| `13-two-store-clients.md` | closed (879dfc1) | a store is what one transaction port reaches |
 | `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
 | `15-ambient-transaction-scope.md` | closed (3aa71b4) | retitled: what may be held ambient |
 | `16-relay-wiring.md` | closed (d6ee97c) | resolves open question B |
@@ -68,9 +68,15 @@ reachable online. Check them against the books before quoting them in `layers.md
 certain is Khononov's saga as one coordinating component, which `layers.md` already relies on
 (ticket 11). Fallback citations (Fowler, Richardson) are from memory too. Ticket 09 adds: Vernon
 ch. 13 versioned media types, Richardson ch. 3 compatible message schemas, all from memory;
-Khononov's "assume the worst; use the outbox" heuristic was not found in any source.
+Khononov's "assume the worst; use the outbox" heuristic was not found in any source. Ticket 13 adds:
+Khononov's outbox committing state and events in one atomic transaction, and events embedded in
+the aggregate's record for stores without multi-document transactions, both from secondary
+summaries and a reader's highlight.
 
 Checked against Evans's final manuscript (April 15, 2003; pages run about 100 below the hardcover):
 the two-way anti-corruption layer (pp. 258–259, ticket 10), the conformist copying the upstream
 model (p. 256, ticket 09), the published language's definition (p. 264), integration across a
 bounded context's boundary as explicit translation (p. 111, ticket 15).
+
+Checked against O'Reilly's preview of Vernon, *IDDD* ch. 10: "Lack of Technical Mechanisms" and
+"Global Transactions" are reasons to break one aggregate per transaction (ticket 13).
