@@ -45,7 +45,7 @@ billing).
   - Creates an invoice on shop's `OrderPaid` message.
   - Scheduled dunning runs.
 - **fulfillment**
-  - Reserves stock on checkout; releases it when payment fails or times out.
+  - Reserves stock on `OrderPlaced`; releases it on `OrderCancelled`.
   - 3PL webhooks report shipments in the 3PL's terms.
   - Its worker process has its own entry point and its own assembly.
 - **common library**
@@ -55,13 +55,14 @@ billing).
 
 ## The checkout saga
 
-1. shop places the order and writes `ReserveStock` to its outbox.
+1. shop places the order and publishes `OrderPlaced`; fulfillment reserves the stock.
 2. shop calls payment, which creates a Stripe PaymentIntent; shop returns its `client_secret` to
    the browser.
 3. Stripe's webhook reaches payment, which publishes `PaymentSucceeded` or `PaymentFailed`.
 4. On success, shop marks the order paid and publishes `OrderPaid`; billing issues the invoice,
    fulfillment ships.
-5. On failure or timeout, fulfillment releases the reservation and shop cancels the order.
+5. shop's Order holds the payment deadline. On `PaymentFailed`, or once the deadline passes, shop
+   cancels the order and publishes `OrderCancelled`; fulfillment releases the reservation.
 
 ## Cross-cutting reads
 

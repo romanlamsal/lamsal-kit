@@ -40,9 +40,10 @@ retry safe and the saga already exists for the failure window.
 
 **Context.** In `domain.md`, shop's outbox carries `OrderPaid` to billing and fulfillment.
 
-**Question.** The outbox bullet says "Which handler receives which message is wired once, above
-the systems". Other systems says "Until one of these holds, a root is ceremony", and none of the
-three escalation reasons is "systems exchange messages". Where is the wiring?
+**Question.** The outbox bullet says "The receiver decides which messages it handles; handing each
+receiver's handler to the relay is wired once, above the systems" (ticket 11). Other systems says
+"Until one of these holds, a root is ceremony", and none of the three escalation reasons is
+"systems exchange messages". Where are the handlers handed to the relay?
 
 **Options.**
 
@@ -73,12 +74,12 @@ export a fake?
 1. The consumer writes both, per Tests ("one suite per driven port … run it twice"). The second
    run uses billing in-process. This follows from the current text; each consumer repeats the
    fake.
-2. The provider exports a fake and its contract suite from a test-only entry: a fourth export,
-   which changes "Other systems import these three and nothing else".
+2. The provider exports a fake and its contract suite from a test-only entry: another item in
+   Other systems' export list.
 
 **Why unresolved.** Cockburn only says to substitute a test adapter for a secondary actor
 (verified); the books do not assign ownership. It trades duplicated, drifting fakes against a
-wider export surface and a looser linter rule. Also unsettled: is the second run an integration
+wider export surface. Also unsettled: is the second run an integration
 test? Billing in-process is not an external dependency, but its own adapters may hit the
 database.
 

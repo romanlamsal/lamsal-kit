@@ -84,7 +84,7 @@ question about a rule — may this caller do this, is this input valid — it ca
 *specification*: a domain function that takes the candidate and returns the answer. When the
 answer needs data the adapter does not hold, a service of its system loads the data and asks the
 specification. Where its caller delivers at least once — a relay, a webhook, a product's hook —
-handling the same delivery twice changes nothing the second time.
+handling the same delivery twice changes nothing the second time, however late the second comes.
 
 ## Ports and factories
 
@@ -140,16 +140,18 @@ which values are held ambient.
 
 **A system offers an open host service: its driving ports, and their *published language* — the
 schemas, types and errors those ports take, return and raise.** Its driven ports stay inside; they
-are its needs, not its offer. Export three things:
+are its needs, not its offer. Export:
 
 - the published language, for other systems to import;
 - the driving port types, for other systems to import;
 - a function that takes configuration and builds the open host service, for another system's
-  assembly to call.
+  assembly to call;
+- where it handles messages, a function that takes configuration and builds its message handler,
+  for the assembly that hands it to the relay.
 
 Give the published language and the port types an entry that loads only the domain, so another
-system imports them without loading any service. Other systems import these three and nothing
-else of the system, which a linter can hold from import paths alone.
+system imports them without loading any service. Other systems reach a system only through these
+exports, which a linter can hold from import paths alone.
 
 ```
 // pricing's entries — file names are the codebase's
@@ -251,12 +253,17 @@ system.** For each piece of data the use case touches, answer in order:
 
 **An outbox, wherever it is used:**
 
-- A relay delivers each message after the commit, at least once.
-- The relay is common-library plumbing. Which handler receives which message is wired once, above
-  the systems.
+- A relay delivers each message after the commit, at least once, and not necessarily in order.
+- The relay is common-library plumbing. The receiver decides which messages it handles; handing
+  each receiver's handler to the relay is wired once, above the systems.
 - The receiver handles it in its own transaction, through a driving adapter that calls one
   service. Handling the same message twice changes nothing the second time.
-- When a later step fails, new steps undo the earlier ones — a saga. Nothing rolls back.
+- When a later step fails, new steps undo the earlier ones — a saga, here the whole sequence
+  rather than Khononov's coordinating component. Nothing rolls back. A step that waits on
+  something that may never happen, such as a payment never made, has one system waiting for it:
+  that system holds the deadline in its aggregate and acts once it passes. How the systems
+  coordinate is each codebase's choice: each reacts to the others' events (choreography), or one
+  system's process manager sends commands (orchestration). Say which.
 
 ## The review checklist
 

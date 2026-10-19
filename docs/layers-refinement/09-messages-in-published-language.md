@@ -7,8 +7,8 @@ service definition and its export list); Transactions (rules 1 and 2, the outbox
 
 ## Context
 
-In `domain.md`, shop publishes `OrderPaid`; billing and fulfillment react. Shop also writes
-`ReserveStock` to its outbox, asking fulfillment to act.
+In `domain.md`, shop publishes `OrderPlaced` and `OrderPaid`; billing and fulfillment react.
+Under orchestration, a process manager would send commands instead, asking another system to act.
 
 ## Problem
 
@@ -26,11 +26,11 @@ Extend the open host service definition:
 > schemas, types and errors those ports take, return and raise, and the messages the system
 > publishes.**
 
-The export list then needs no fourth entry: messages ride in "the published language".
+The export list then needs no new entry: messages ride in "the published language".
 
 Whose language a command belongs to follows already: the receiver handles it through a driving
-adapter calling one service, so `ReserveStock` is fulfillment's published language and shop
-conforms to it. Run the derivation test on that; add a clause only if it fails.
+adapter calling one service, so a command such as `ReserveStock` is the receiver's published
+language and the sender conforms to it. Run the derivation test on that; add a clause only if it fails.
 
 ## Grounding
 
@@ -46,5 +46,5 @@ conforms to it. Run the derivation test on that; add a clause only if it fails.
 ## Done when
 
 The clause passes the four tests; the sweep finds no sentence that limits the published language
-to port input and output (Terms, Other systems, the linter sentence "these three and nothing
-else", question 8); presented for approval.
+to port input and output (Terms, Other systems, the linter sentence "reach a system only
+through these exports", question 8); presented for approval.

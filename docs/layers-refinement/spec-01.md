@@ -37,7 +37,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
 | `15-ambient-transaction-scope.md` | ready | argue the derivation test |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
-| `open-questions.md` B | ready | grill; relates to 08 |
+| `open-questions.md` B | ready | grill; relates to 08; takes the wiring placement from 11 |
 | `open-questions.md` C | ready | grill |
 | `open-questions.md` D | ready | grill; after 14 |
 
