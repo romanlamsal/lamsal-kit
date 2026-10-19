@@ -1,6 +1,6 @@
 # Fakes of another system's driving port
 
-**Status:** ready
+**Status:** closed (97e2dc2)
 
 **Kind:** real gap · **Touches:** Tests (services, adapters, contract tests); Other systems (the
 export list); When to leave it alone · **Related:** `16-relay-wiring.md` (the export list);

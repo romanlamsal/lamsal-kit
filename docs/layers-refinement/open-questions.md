@@ -61,7 +61,7 @@ process falls under "One module per process" (ticket 08).
 
 ## C. Who owns the fake of another system's driving port
 
-**Status:** ready, resolved into `17-fakes-of-other-systems.md`
+**Status:** closed (97e2dc2), resolved into `17-fakes-of-other-systems.md`
 
 **Context.** In `domain.md`, shop's service receives billing's `BillingService` as a driven
 port; shop's default suite needs a fake of it.
