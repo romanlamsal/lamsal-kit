@@ -2,10 +2,13 @@
 
 Where server code goes and what it is allowed to touch.
 
-**Preconditions.** The repository layer assumes a store that can be read and written. Where this
-document says *transaction*, it assumes the store can apply several writes atomically; if yours
-cannot, question 5 does not apply. *Table*, *row* and *aggregate* are used in the relational
-sense — substitute your store's equivalents.
+**Preconditions.** The repository layer assumes a store that can be read and written. Store
+clients are one store where one transaction port makes their writes atomic together; two clients
+of one database are two stores until one port reaches both, which is each codebase's choice. Where
+this document says *transaction*, it assumes the store can apply several writes atomically; where
+one cannot, question 5 ("Did one transaction quietly become several?") does not apply to it, and an
+aggregate's outgoing messages are embedded in its own record. *Table*, *row* and *aggregate* are
+used in the relational sense — substitute your store's equivalents.
 
 **Terms.** A *controller* is a driving adapter: it resolves the caller (a session, a signature, a
 key), validates, calls into one thing, and returns. It takes its rules from the domain.
@@ -234,7 +237,8 @@ system.** For each piece of data the use case touches, answer in order:
 
 1. **Does it change data another system owns — a third party's included, such as a mail sent or
    a payment created?** → **Outbox, required.** Write a message to this system's outbox in the
-   same transaction. The owner changes its data when the message arrives.
+   same transaction; a system writing several stores has an outbox in each it sends from. The
+   owner changes its data when the message arrives.
 
    Where the use case's caller waits for the other system's answer, call the other system
    instead, once the transaction has committed, and record the answer, if this system keeps it,
@@ -248,7 +252,8 @@ system.** For each piece of data the use case touches, answer in order:
    case, the owner publishes.
 3. **Does it write several aggregates of this system?** → **One transaction, by default.** This is
    this document's choice; Vernon and Khononov keep one aggregate per transaction. An outbox is
-   also valid here. Good tells for one:
+   also valid here, and required where no one transaction reaches them all, as for aggregates in
+   different stores. Good tells for one:
    - the aggregates are often written at the same time, and one transaction would block or
      conflict;
    - the rule between them may hold a moment later.
@@ -339,7 +344,8 @@ shared transaction is the half that gets missed.
 ### 5. Did one transaction quietly become several?
 
 **In a diff:** a function that opens its own transaction instead of joining the one it was
-given; a loop that calls a write per item.
+given; a repository method that takes the context and writes without it; a loop that calls a write
+per item.
 
 Moving a write out of a function tends to give it its own transaction. A repository method joins
 the caller's transaction and opens nothing. Writes that must land together run inside one `run`; a
