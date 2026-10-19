@@ -47,7 +47,9 @@ departs from a book, it says so in one clause, as it does for *repository* as a 
    contradiction to fix before drafting. Done when every proposed sentence passes all four and
    misplaces no edge case.
 4. **Draft the smallest change.** Reword before adding; add a clause before a sentence, a sentence
-   before a section. For wording, follow the `mattpocock-skills:writing-for-agents` skill.
+   before a section. State the property the code has, not an instruction: "a message's schema
+   stays backward and forward compatible", not "change a message's schema so that …". For
+   wording, follow the `mattpocock-skills:writing-for-agents` skill.
 5. **Sweep for consistency.** Grep every term the change touches across Terms, the table, the
    sections, the checklist, "When to leave it alone", and the sibling docs in
    `registry/docs/agents/`. Done when no sentence contradicts the change.

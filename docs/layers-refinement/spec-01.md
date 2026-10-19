@@ -65,4 +65,6 @@ Every Evans, Vernon and Khononov citation in the tickets is from memory; the boo
 reachable online. Check them against the books before quoting them in `layers.md`; the least
 certain are Evans's two-way anti-corruption layer (ticket 10) and Khononov's saga as one
 coordinating component, which `layers.md` already relies on (ticket 11). Fallback citations (Fowler,
-Richardson) are from memory too.
+Richardson) are from memory too. Ticket 09 adds: Evans on a conformist copying the upstream model,
+Vernon ch. 13 versioned media types, Richardson ch. 3 compatible message schemas, all from memory;
+Khononov's "assume the worst; use the outbox" heuristic was not found in any source.

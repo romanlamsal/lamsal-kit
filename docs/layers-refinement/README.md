@@ -37,7 +37,9 @@ Ask one decision per question; walk a choice of order or mechanism through a con
 `domain.md`.
 
 - Ask about the general concept; use `domain.md` to test it, not to frame it.
-- Run the derivation test before proposing a sentence.
+- Run the four tests on every proposed sentence before asking about it, and show the results.
+- Name a checklist question by its title, not only its number.
+- Where a rule forces a flow the author may not see, walk the flow step by step before asking.
 - Ask what `layers.md` will say. Only `layers.md` ships: a choice the consuming repository must
   make has to be stated there, not only in a ticket's Decision.
 - Leave to the consuming repository what it should decide: no fixed counts, no required code

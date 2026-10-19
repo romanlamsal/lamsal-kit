@@ -78,7 +78,7 @@ bullets, not in the published language, because private messages break the same 
 **Two checklist tells.** Question 8 gains "a message schema copied field for field from the
 system that publishes it": a translation that changes nothing. "Field for field" keeps a reader
 that takes only the fields it needs, in its own terms, out of the fault (Vernon's notification
-reader, Fowler's tolerant reader); that is translation, ticket 10. A new question 9 asks whether a
+reader, Fowler's tolerant reader, from his bliki, not *PoEAA*); that is translation, ticket 10. A new question 9 asks whether a
 message schema change breaks a message in flight. The property follows from the relay bullet, but
 not the tell: under the default, renaming a field of `OrderPaid` is a domain edit, the type
 checker passes, and the failure shows at runtime in another system.
