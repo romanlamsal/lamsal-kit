@@ -30,7 +30,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `07-errors-in-published-language.md` | closed (c40be8e) | |
 | `08-assembly-per-process.md` | closed (c40be8e) | |
 | `09-messages-in-published-language.md` | closed (dedd87d) | |
-| `10-inbound-translation.md` | ready | controllers row settled here |
+| `10-inbound-translation.md` | closed (c30b656) | controllers row settled here |
 | `11-saga-state.md` | closed (746cb5a) | |
 | `12-side-effects-through-outbox.md` | closed (bef2a8d) | absorbs open question A |
 | `13-two-store-clients.md` | ready | |

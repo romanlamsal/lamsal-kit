@@ -1,6 +1,6 @@
 # Anti-corruption layer on the way in
 
-**Status:** ready
+**Status:** closed (c30b656)
 
 **Kind:** real gap · **Touches:** Other systems (the
 anti-corruption-layer bullet); The layers (controllers row); question 8
