@@ -7,10 +7,11 @@ document says *transaction*, it assumes the store can apply several writes atomi
 cannot, question 5 does not apply. *Table*, *row* and *aggregate* are used in the relational
 sense — substitute your store's equivalents.
 
-**Terms.** A *controller* is a driving adapter: it resolves the caller, validates, calls into
-one thing, and returns. It takes its rules from the domain. `components.md` applies the same role to
-route files on the client; the difference is writes — a server controller passes a write through
-to one service, a route controller does not carry writes at all.
+**Terms.** A *controller* is a driving adapter: it resolves the caller (a session, a signature, a
+key), validates, calls into one thing, and returns. It takes its rules from the domain.
+`components.md` applies the same role to route files on the client; the difference is writes — a
+server controller passes a write through to one service, a route controller does not carry writes
+at all.
 
 A *port* is an interface, never the code behind it. A *driving port* is the interface to a use
 case — the way in, something a controller calls. A *driven port* is something the code needs from
@@ -41,7 +42,7 @@ they are about what a function *does* rather than where it imports from.
 | **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the open host service of a system it conforms to | receives its dependencies; writes through repositories |
 | **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the open host service of a system it translates | translates between this system's ports and the other system |
-| **controllers** | driving adapters: entry points, their validators | services, domain, session infrastructure | reaches the store only through a service |
+| **controllers** | driving adapters: entry points, their validators | services, domain, and infrastructure that resolves or translates its caller | reaches the store only through a service |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
 all of it: every layer may import it, it imports no layer. Repository and infrastructure are both
@@ -190,7 +191,10 @@ choices decide where code goes:
 - **Anti-corruption layer.** This system's domain declares a driven port in its own terms; an
   adapter in infrastructure implements it by calling the other system's driving port and
   translating. For a model that is foreign, unstable or not yours — a third-party API always gets
-  one.
+  one. On the way in — a webhook, a product's hook, a message — the driving adapter that receives
+  the other system's call translates it into this system's terms before it calls a service. The
+  other system's schema and the translation live in that adapter, or in infrastructure shared with
+  the outbound adapter; never in the domain.
 - **Shared kernel.** Model two systems share, such as `Money`, goes in a module both import and
   neither changes alone.
 

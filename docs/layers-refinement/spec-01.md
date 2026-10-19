@@ -30,7 +30,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `07-errors-in-published-language.md` | closed (c40be8e) | |
 | `08-assembly-per-process.md` | closed (c40be8e) | |
 | `09-messages-in-published-language.md` | closed (dedd87d) | |
-| `10-inbound-translation.md` | ready | may split a ticket for the controllers row |
+| `10-inbound-translation.md` | ready | controllers row settled here |
 | `11-saga-state.md` | closed (746cb5a) | |
 | `12-side-effects-through-outbox.md` | closed (bef2a8d) | absorbs open question A |
 | `13-two-store-clients.md` | ready | |
@@ -65,8 +65,11 @@ Gaps the review found and dropped; reopen only with a new failure.
 
 Every Evans, Vernon and Khononov citation in the tickets is from memory; the books were not
 reachable online. Check them against the books before quoting them in `layers.md`; the least
-certain are Evans's two-way anti-corruption layer (ticket 10) and Khononov's saga as one
-coordinating component, which `layers.md` already relies on (ticket 11). Fallback citations (Fowler,
-Richardson) are from memory too. Ticket 09 adds: Evans on a conformist copying the upstream model,
-Vernon ch. 13 versioned media types, Richardson ch. 3 compatible message schemas, all from memory;
+certain is Khononov's saga as one coordinating component, which `layers.md` already relies on
+(ticket 11). Fallback citations (Fowler, Richardson) are from memory too. Ticket 09 adds: Vernon
+ch. 13 versioned media types, Richardson ch. 3 compatible message schemas, all from memory;
 Khononov's "assume the worst; use the outbox" heuristic was not found in any source.
+
+Checked against Evans's final manuscript (April 15, 2003; pages run about 100 below the hardcover):
+the two-way anti-corruption layer (pp. 258–259, ticket 10), the conformist copying the upstream
+model (p. 256, ticket 09), the published language's definition (p. 264).
