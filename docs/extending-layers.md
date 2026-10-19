@@ -22,8 +22,14 @@ The reader knows these. `layers.md` documents its reading of them, not their con
 | Khononov, *Learning Domain-Driven Design* (2021) | integration patterns, subdomain types, ownership vs physical boundaries, the outbox |
 | Cockburn, *Hexagonal Architecture* (2005) | ports, driving and driven, adapters on both sides |
 
-Fowler's *Patterns of Enterprise Application Architecture* supplies separated interface and unit of
-work.
+**Fallback sources.** Where the four are silent, check these before calling a sentence this
+document's choice. The reader is not assumed to know them, so `layers.md` still marks such a
+sentence as its own; the ticket records the fallback grounding.
+
+| source | what it grounds |
+| --- | --- |
+| Fowler, *Patterns of Enterprise Application Architecture* (2002) | separated interface, unit of work, registry; a business transaction spanning several system transactions |
+| Richardson, *Microservices Patterns* (2018) | saga steps: compensatable, pivot, retriable |
 
 Use a book's term in its book meaning. Where the books lack a concept, coin a plain term and
 define it in Terms (*system*, *common library*). Where `layers.md` narrows or
@@ -54,5 +60,5 @@ departs from a book, it says so in one clause, as it does for *repository* as a 
   does, the fix lies in the wording that hid the derivation, not in a new sentence.
 - **Generality test.** The sentence guides that decision in any codebase. What holds for one
   product or framework belongs to that repository.
-- **Source test.** Hold the sentence against the sources. Where it is stricter or looser than a
-  book, mark it as this document's choice.
+- **Source test.** Hold the sentence against the sources; where they are silent, against the
+  fallback sources. Where it is stricter or looser than a book, mark it as this document's choice.

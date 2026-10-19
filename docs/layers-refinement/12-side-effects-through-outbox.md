@@ -55,9 +55,12 @@ payment.
   use case of several transactions is normal there *(from memory)*.
 - Khononov, *Learning DDD* ch. 9, Outbox (p. 171 per the Sharif library table of contents): the
   outbox exists because a commit and a publish cannot be made atomic *(from memory)*.
-- Fowler, *PoEAA* ch. 5: a business transaction often spans several system transactions — the
-  nearest source for commit, call, record *(from memory)*.
 - None of the four sources addresses a synchronous answer from a change at another system.
+- Fallback: Fowler, *PoEAA* ch. 5: a business transaction often spans several system
+  transactions — the nearest source for commit, call, record *(from memory)*.
+- Fallback: Richardson, *Microservices Patterns* ch. 4: a saga's pivot transaction, the step it
+  cannot undo, is followed by retriable transactions that must eventually succeed — the call,
+  then recording its answer *(from memory)*.
 
 ## Done when
 

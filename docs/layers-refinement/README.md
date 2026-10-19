@@ -28,3 +28,10 @@ How documents in `registry/docs/agents/` get refined in this repository. The ste
 
 Done when the ticket's own "Done when" holds, its `## Decision` section is written, and both
 status places show the commit.
+
+## Grilling an open question
+
+Open the first round with context the author may not hold: the rule in `layers.md` the question
+touches, the `domain.md` case that breaks it, and what each ticket it blocks or relates to says.
+Ask one decision per question; walk a choice of order or mechanism through a concrete failure in
+`domain.md`.
