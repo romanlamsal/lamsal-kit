@@ -1,6 +1,8 @@
 # One assembly module, several processes
 
-**Status:** applied, uncommitted · **Kind:** misleading wording · **Touches:** Ports and
+**Status:** closed (c40be8e)
+
+**Kind:** misleading wording · **Touches:** Ports and
 factories ("Assembly is not a layer")
 
 ## Context

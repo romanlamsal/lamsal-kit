@@ -1,7 +1,7 @@
 # Teeladen — the review domain
 
 A made-up online tea shop, built to stress `registry/docs/agents/layers.md`. Every system carries
-at least one edge case the document has to place. `refinements.md` refers to it by system name.
+at least one edge case the document has to place. Tickets refer to it by system name.
 
 ## Systems
 

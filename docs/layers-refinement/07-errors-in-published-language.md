@@ -1,6 +1,8 @@
 # Errors missing from the published language
 
-**Status:** applied, uncommitted · **Kind:** contradiction · **Touches:** Other systems (the open
+**Status:** closed (c40be8e)
+
+**Kind:** contradiction · **Touches:** Other systems (the open
 host service definition, the conformist bullet)
 
 ## Context

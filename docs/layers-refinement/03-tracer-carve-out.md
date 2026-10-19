@@ -1,6 +1,8 @@
 # Question 7 flags the tracer
 
-**Status:** applied, uncommitted · **Kind:** misleading wording · **Touches:** Terms (common
+**Status:** closed (c40be8e)
+
+**Kind:** misleading wording · **Touches:** Terms (common
 library), question 7
 
 ## Context

@@ -1,6 +1,8 @@
 # One record written by two systems
 
-**Status:** applied, uncommitted · **Kind:** misleading wording · **Touches:** Terms (*system*)
+**Status:** closed (c40be8e)
+
+**Kind:** misleading wording · **Touches:** Terms (*system*)
 
 ## Context
 

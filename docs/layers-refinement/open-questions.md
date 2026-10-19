@@ -6,6 +6,8 @@ reviewer's, not a decision.
 
 ## A. A change at another system whose result the use case needs now
 
+**Status:** ready
+
 **Context.** In `domain.md`, checkout creates a Stripe PaymentIntent and must return its
 `client_secret` in the same request.
 
@@ -34,6 +36,8 @@ retry safe and the saga already exists for the failure window.
 
 ## B. Where the outbox's handler wiring lives
 
+**Status:** ready
+
 **Context.** In `domain.md`, shop's outbox carries `OrderPaid` to billing and fulfillment.
 
 **Question.** The outbox bullet says "Which handler receives which message is wired once, above
@@ -55,6 +59,8 @@ its own process).
 process falls under "One module per process" (ticket 08).
 
 ## C. Who owns the fake of another system's driving port
+
+**Status:** ready
 
 **Context.** In `domain.md`, shop's service receives billing's `BillingService` as a driven
 port; shop's default suite needs a fake of it.
@@ -79,6 +85,8 @@ database.
 **Recommendation.** 1 until a second consumer exists, then 2.
 
 ## D. A hook fires on this system's own write
+
+**Status:** ready
 
 **Context.** In `domain.md`, shop writes price through Payload's Local API, and Payload runs
 shop's own `afterChange` hook for that write.

@@ -1,6 +1,8 @@
 # An ambient transaction crosses into another system
 
-**Status:** ready to draft · **Kind:** real gap (the rule exists; the mechanism defeats it
+**Status:** ready
+
+**Kind:** real gap (the rule exists; the mechanism defeats it
 invisibly) · **Touches:** Ports and factories (the transaction port, "A per-request value may be
 held ambient"); Transactions; question 5
 

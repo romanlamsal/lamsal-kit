@@ -1,6 +1,8 @@
 # `lines` names both the repository and the array
 
-**Status:** applied, uncommitted · **Kind:** misleading wording · **Touches:** question 5's
+**Status:** closed (c40be8e)
+
+**Kind:** misleading wording · **Touches:** question 5's
 snippet
 
 ## Problem

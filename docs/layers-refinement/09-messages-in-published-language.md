@@ -1,6 +1,8 @@
 # Messages missing from the published language
 
-**Status:** ready to draft · **Kind:** real gap · **Touches:** Other systems (the open host
+**Status:** ready
+
+**Kind:** real gap · **Touches:** Other systems (the open host
 service definition and its export list); Transactions (rules 1 and 2, the outbox bullets)
 
 ## Context

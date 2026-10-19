@@ -1,6 +1,8 @@
 # Where a saga's state lives
 
-**Status:** ready to draft · **Kind:** real gap · **Touches:** Transactions (the outbox bullets,
+**Status:** ready
+
+**Kind:** real gap · **Touches:** Transactions (the outbox bullets,
 "a saga") · **Related:** `open-questions.md` A (a saga step that must answer synchronously)
 
 ## Context

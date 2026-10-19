@@ -1,6 +1,8 @@
 # One system behind two store clients
 
-**Status:** ready to draft · **Kind:** real gap · **Touches:** Preconditions; Transactions
+**Status:** ready
+
+**Kind:** real gap · **Touches:** Preconditions; Transactions
 (rule 3); Ports and factories (the transaction port)
 
 ## Context

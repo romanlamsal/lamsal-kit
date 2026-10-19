@@ -1,6 +1,8 @@
 # A hook writes the outbox inside the product's transaction
 
-**Status:** ready to draft, generality borderline · **Kind:** real gap · **Touches:** Products
+**Status:** ready
+
+**Kind:** real gap · **Touches:** Products
 (the hooks bullet)
 
 ## Context

@@ -1,6 +1,8 @@
 # Side effects at third parties
 
-**Status:** ready to draft, drafted with open question A · **Kind:** real gap · **Touches:**
+**Status:** blocked by `open-questions.md` A
+
+**Kind:** real gap · **Touches:**
 Transactions (rule 1) · **Blocked by:** `open-questions.md` A (the same sentence needs its answer)
 
 ## Context

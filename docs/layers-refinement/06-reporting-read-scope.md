@@ -1,6 +1,8 @@
 # Reporting reads across systems
 
-**Status:** applied, uncommitted · **Kind:** misleading wording · **Touches:** When to leave it
+**Status:** closed (c40be8e)
+
+**Kind:** misleading wording · **Touches:** When to leave it
 alone (the reporting-read bullet)
 
 ## Context

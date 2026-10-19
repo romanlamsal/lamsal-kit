@@ -1,6 +1,8 @@
 # Invoice belongs to two systems in the examples
 
-**Status:** applied, uncommitted · **Kind:** contradiction · **Touches:** Other systems (the
+**Status:** closed (c40be8e)
+
+**Kind:** contradiction · **Touches:** Other systems (the
 open host service example, "One system's driving port is the other's driven port")
 
 ## Context

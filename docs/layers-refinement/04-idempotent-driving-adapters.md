@@ -1,6 +1,8 @@
 # Idempotency stated for outbox receivers only
 
-**Status:** applied, uncommitted · **Kind:** real gap · **Touches:** "A driving adapter acts
+**Status:** closed (c40be8e)
+
+**Kind:** real gap · **Touches:** "A driving adapter acts
 through one service and asks through the domain"; Transactions (the outbox bullets)
 
 ## Context

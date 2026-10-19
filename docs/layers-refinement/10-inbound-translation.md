@@ -1,6 +1,8 @@
 # Anti-corruption layer on the way in
 
-**Status:** ready to draft · **Kind:** real gap · **Touches:** Other systems (the
+**Status:** ready
+
+**Kind:** real gap · **Touches:** Other systems (the
 anti-corruption-layer bullet); The layers (controllers row); question 8
 
 ## Context

@@ -36,7 +36,10 @@ departs from a book, it says so in one clause, as it does for *repository* as a 
 2. **Find the cause in `layers.md`.** Read the whole file. Quote the sentences that led to X, or
    confirm that none speaks to the case. Done when the issue is one of: misleading wording, a
    contradiction, a real gap, or specific to one repository.
-3. **Run the tests below.** Done when every proposed sentence passes all four.
+3. **Run the tests below.** Then walk each proposed sentence through the review domain in
+   `docs/layers-refinement/domain.md`: an edge case there that it now places wrongly is a
+   contradiction to fix before drafting. Done when every proposed sentence passes all four and
+   misplaces no edge case.
 4. **Draft the smallest change.** Reword before adding; add a clause before a sentence, a sentence
    before a section. For wording, follow the `mattpocock-skills:writing-for-agents` skill.
 5. **Sweep for consistency.** Grep every term the change touches across Terms, the table, the
