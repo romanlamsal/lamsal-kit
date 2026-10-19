@@ -1,6 +1,6 @@
 # Where the outbox's handler wiring lives
 
-**Status:** ready
+**Status:** closed (d6ee97c)
 
 **Kind:** misleading wording · **Touches:** Transactions (the outbox bullets); Other systems (the
 export list) · **Related:** `08-assembly-per-process.md`, `11-saga-state.md`; resolves

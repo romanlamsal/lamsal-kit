@@ -36,9 +36,9 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `13-two-store-clients.md` | ready | |
 | `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
 | `15-ambient-transaction-scope.md` | ready | argue the derivation test |
-| `16-relay-wiring.md` | ready | resolves open question B |
+| `16-relay-wiring.md` | closed (d6ee97c) | resolves open question B |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
-| `open-questions.md` B | ready | resolved into 16 |
+| `open-questions.md` B | closed (d6ee97c) | resolved into 16 |
 | `open-questions.md` C | ready | grill |
 | `open-questions.md` D | ready | grill; after 14 |
 
