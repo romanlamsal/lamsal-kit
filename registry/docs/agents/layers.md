@@ -119,11 +119,6 @@ and assembly holds the instances, so every dependency is one a factory declared.
 a transaction; repository methods take the context it hands back. The context is opaque in the
 domain, so nothing there names the store or its client.
 
-The transaction port belongs to the common library. Whether its context is passed explicitly, as
-below, or held ambient — a unit of work in `AsyncLocalStorage`, implemented in the common library
-— is each codebase's choice; say which. Explicit context keeps every join visible in a diff.
-Ambient context keeps it out of every port's signature.
-
 ```
 // service: two aggregates, one transaction
 await tx.run(async (ctx) => {
@@ -132,10 +127,11 @@ await tx.run(async (ctx) => {
 })
 ```
 
-**A per-request value may be held ambient** — Fowler's registry, scoped per request; the
-transaction context and a request id are the common cases. A driving adapter puts it in;
-services, repositories and infrastructure read it; the domain takes everything as arguments. Say
-which values are held ambient.
+**A value that influences nothing a use case or domain function decides may be held ambient** —
+Fowler's registry, scoped per request: a request id, a trace context, the locale a mail is
+rendered in, the user an audit column records until a rule decides by it. The transaction context
+is not one: what a read returns depends on it. Say which values are held ambient; the line is this
+document's choice.
 
 ## Other systems
 
@@ -343,7 +339,7 @@ shared transaction is the half that gets missed.
 ### 5. Did one transaction quietly become several?
 
 **In a diff:** a function that opens its own transaction instead of joining the one it was
-given, passed or ambient; a loop that calls a write per item.
+given; a loop that calls a write per item.
 
 Moving a write out of a function tends to give it its own transaction. A repository method joins
 the caller's transaction and opens nothing. Writes that must land together run inside one `run`; a
@@ -369,14 +365,12 @@ parked in a repository.
 
 **In a diff:** a concrete adapter imported into a service file, or constructed inside a service
 body or a factory body, rather than passed in. Also: a module exporting a ready-made instance
-next to the factory that produces it. Also: an ambient accessor that builds an implementation when
-the context is empty.
+next to the factory that produces it.
 
 This one is invisible to the other six — the code sits in the right layer and imports nothing the
 arrow forbids. What it breaks is substitution: the service can no longer be given a different
-implementation, so its tests need the real one. An ambient value a driving adapter puts in is
-received, not built. Plumbing with one fixed configuration, such as a logger or a tracer, may be a
-ready-made instance: nobody substitutes it.
+implementation, so its tests need the real one. Plumbing with one fixed configuration, such as a
+logger or a tracer, may be a ready-made instance: nobody substitutes it.
 
 ```
 // service/order.ts — the fault
