@@ -146,6 +146,8 @@ publishes, if any.** Its driven ports stay inside; they are its needs, not its o
 - the driving port types, for other systems to import;
 - a function that takes configuration and builds the open host service, for another system's
   assembly to call;
+- where it exports one, a fake of its driving ports, for other systems' tests, from an entry
+  production does not load;
 - where it handles messages, a function that takes configuration and builds its message handler,
   for the assembly that hands it to the relay. Whether one function builds both is each codebase's
   choice.
@@ -429,19 +431,21 @@ instead.
 **Test the domain directly.** It is pure, it holds the rules, and it needs no fixtures, no fakes
 and no setup. Most of what is worth asserting lives here.
 
-**Test services against fakes.** A service receives ports, so a test hands it fakes and asserts
-what the service *did*: which port it called, with what, and what it returned. Assert observable
-behaviour, not the order of internal calls.
+**Test services and driving adapters against fakes.** Each receives ports, so a test hands it
+fakes and asserts what it *did*: which port it called, with what, and what it returned. Assert
+observable behaviour, not the order of internal calls.
 
-**Adapters are integration-tested by design.** An adapter's entire job is to talk to something
-external, so a unit test of one asserts a mock of the thing it exists to reach. Unit tests pay
-off there only for genuinely self-contained pieces — a query builder's output, a mapping
+**Driven adapters are integration-tested by design.** A driven adapter's entire job is to talk to
+something external, so a unit test of one asserts a mock of the thing it exists to reach. Unit
+tests pay off there only for genuinely self-contained pieces — a query builder's output, a mapping
 function.
 
 **Keep the fakes honest with contract tests.** Write one suite per driven port, against the port
 rather than any implementation, and run it twice: against the fake, and against the real adapter.
-The second run is the integration test, and it is what stops a fake from drifting into a fiction
-that passes while production breaks.
+For another system's driving port, the receiving system writes the suite, whether the fake is its
+own or one the other system exports, and runs it the second time against that system's open host
+service. The second run is the integration test, and it is what stops a fake from drifting into
+a fiction that passes while production breaks.
 
 ```
 // one suite, two runs
@@ -469,6 +473,9 @@ inputs and observable results.
   breach of one mutation per use case.
 - **A port with one implementation is not premature.** The second implementation is the fake, and
   it is what the default suite runs against.
+- **Several systems each faking the same port can be correct.** By default, each system writes its
+  own fake. One fake that the providing system exports fits only where its consumers need the same
+  things of it; a fake that needs configuration per consumer has outgrown that.
 - **Using a conformed system's terms directly is the design working**, not a leak.
 - **A service calling another system's driving port is calling a port**, not a use case nested in
   another.

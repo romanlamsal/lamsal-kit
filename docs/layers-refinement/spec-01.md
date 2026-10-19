@@ -12,7 +12,7 @@ consuming repository's choice. Done when every row below is closed or ruled out.
 2. Ticket 09, then open question B (ticket 16): both settle how messages travel between systems.
 3. Tickets 15, 13 and 10, in any order.
 4. Ticket 14 (generality test first), then open question D: both are about product hooks.
-5. Open question C.
+5. Open question C (ticket 17).
 
 ## Tickets
 
@@ -37,9 +37,10 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
 | `15-ambient-transaction-scope.md` | ready | argue the derivation test |
 | `16-relay-wiring.md` | closed (d6ee97c) | resolves open question B |
+| `17-fakes-of-other-systems.md` | ready | resolves open question C |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
 | `open-questions.md` B | closed (d6ee97c) | resolved into 16 |
-| `open-questions.md` C | ready | grill |
+| `open-questions.md` C | ready | resolved into 17 |
 | `open-questions.md` D | ready | grill; after 14 |
 
 Tickets 01–08 were applied before the `## Decision` convention; they carry none.
