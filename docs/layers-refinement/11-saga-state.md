@@ -1,6 +1,6 @@
 # Where a saga's state lives
 
-**Status:** ready
+**Status:** closed (746cb5a)
 
 **Kind:** real gap · **Touches:** Transactions (the outbox bullets); Other systems (the export
 list, the linter sentence); the driving-adapter sentence on at-least-once callers · **Related:**

@@ -31,7 +31,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `08-assembly-per-process.md` | closed (c40be8e) | |
 | `09-messages-in-published-language.md` | ready | |
 | `10-inbound-translation.md` | ready | may split a ticket for the controllers row |
-| `11-saga-state.md` | ready | check against ticket 12's exception in rule 1 |
+| `11-saga-state.md` | closed (746cb5a) | |
 | `12-side-effects-through-outbox.md` | closed (bef2a8d) | absorbs open question A |
 | `13-two-store-clients.md` | ready | |
 | `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
