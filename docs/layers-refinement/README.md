@@ -38,11 +38,17 @@ Ask one decision per question; walk a choice of order or mechanism through a con
 
 - Ask about the general concept; use `domain.md` to test it, not to frame it.
 - Run the four tests on every proposed sentence before asking about it, and show the results.
+  Run them again on the final wording of every decision before applying it.
+- Before proposing wording, read what the author already ruled in the text around it; a
+  distinction there may be deliberate.
+- Ask what a section is meant to achieve before fixing it; the text may predate the concepts that
+  now strain it.
 - Name a checklist question by its title, not only its number.
 - Where a rule forces a flow the author may not see, walk the flow step by step before asking.
 - Ask what `layers.md` will say. Only `layers.md` ships: a choice the consuming repository must
   make has to be stated there, not only in a ticket's Decision.
 - Leave to the consuming repository what it should decide: no fixed counts, no required code
-  structure, no mechanism.
+  structure, no mechanism. State such a choice positively ("can be correct", "each codebase's
+  choice") rather than leaving it unsaid.
 - Say when a term is coined rather than taken from a book.
 - Challenge a design the author brings against the sources before asking about wording.
