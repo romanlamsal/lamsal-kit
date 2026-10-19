@@ -36,6 +36,8 @@ touches, the `domain.md` case that breaks it, and what each ticket it blocks or 
 Ask one decision per question; walk a choice of order or mechanism through a concrete failure in
 `domain.md`.
 
+- Settle yourself what a fact, a derivation or a rule already here decides: whether a gap exists,
+  what follows from an answer just given. List those as settled; ask only decisions.
 - Ask about the general concept; use `domain.md` to test it, not to frame it.
 - Run the four tests on every proposed sentence before asking about it, and show the results.
   Run them again on the final wording of every decision before applying it.
