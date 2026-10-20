@@ -32,7 +32,7 @@ the system whose use cases write it, wherever it is stored; a record two systems
 aggregates sharing an id.
 
 A *common library* is plumbing every system may import: the transaction port, store clients, a
-logger, a tracer, the outbox relay. It holds no model.
+logger, a tracer, the outbox port and its relay. It holds no model.
 
 This document is written for review. The faults below are the ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
@@ -108,7 +108,7 @@ Nothing inside it constructs anything.
 export const createOrderService = (deps: {
   orders: OrderRepository        // driven port, from the domain
   invoices: InvoiceRepository    // driven port, from the domain
-  mailer: Mailer                 // driven port, from the domain
+  outbox: Outbox                 // driven port, from the common library
   tx: TransactionRunner          // driven port, from the common library
 }): OrderService => ({ ... })    // driving port, declared here
 ```
@@ -140,7 +140,8 @@ document's choice.
 
 **A system offers an open host service: its driving ports and its *published language* — the
 schemas, types and errors those ports take, return and raise, and the messages the system
-publishes, if any.** Its driven ports stay inside; they are its needs, not its offer. Export:
+publishes, if any; a message only this system handles is private and is not published.** Its
+driven ports stay inside; they are its needs, not its offer. Export:
 
 - the published language, for other systems to import;
 - the driving port types, for other systems to import;
@@ -168,7 +169,8 @@ export const createPricing = (config: PricingConfig): Pricing => ...
 
 **The published language is the domain's own schemas, by default.** A separate language is
 allowed where the domain must change without breaking other systems; record the reason in an ADR.
-Khononov keeps the two apart from the start; re-exporting the domain is this document's choice.
+Khononov keeps the two apart from the start; re-exporting the domain, messages included, is this
+document's choice.
 
 **One system's driving port is the other's driven port.** To B, `Pricing` is the way in; to
 A's service it is a dependency it receives — a way out, like a mailer. A service calling it is not
