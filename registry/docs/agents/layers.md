@@ -34,6 +34,14 @@ aggregates sharing an id.
 A *common library* is plumbing every system may import: the transaction port, store clients, a
 logger, a tracer, the outbox port and its relay. It holds no model.
 
+*Reconciliation* is a use case of the system that owns an aggregate: it compares what this
+system recorded with what another system holds, and repairs this system's record. A scheduled
+task of this system, or any driving adapter that finds the two apart, calls it. A scheduled task
+of this system is a driving adapter.
+
+The sources are Evans, Vernon, Khononov and Cockburn; where this document departs from one, it
+says so.
+
 This document is written for review. The faults below are the ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
 
@@ -41,10 +49,10 @@ they are about what a function *does* rather than where it imports from.
 
 | layer | what it is | may import | does |
 | --- | --- | --- | --- |
-| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
+| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, a conformed system's published language, a shared kernel, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
 | **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and the open host service of a system it conforms to | receives its dependencies; writes through repositories |
-| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the open host service of a system it translates | translates between this system's ports and the other system |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and the published language and driving-port types of a system it conforms to | receives its dependencies; writes through repositories |
+| **infrastructure** | adapters for other systems — mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer — and every other driven adapter: a clock, a cache, blob storage | domain, the common library, and the published language and driving-port types of a system it translates | translates between this system's ports and the other system |
 | **controllers** | driving adapters: entry points, their validators | services and domain; it receives ports of infrastructure that resolves or translates its caller, as it receives its service | reaches the store only through a service |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
@@ -145,9 +153,11 @@ await tx.run(async (ctx) => {
 
 **A value that influences nothing a use case or domain function decides may be held ambient** —
 Fowler's registry, scoped per request: a request id, a trace context, the locale a mail is
-rendered in, the user an audit column records until a rule decides by it. The transaction context
-is not one: what a read returns depends on it. Say which values are held ambient; the line is this
-document's choice.
+rendered in, the user an audit column records until a rule decides by it. A driving adapter puts
+it in; services and adapters read it; the domain takes arguments. A value a message's handler
+needs goes in the message, since the handler runs in another request. The transaction context
+is not ambient: what a read returns depends on it. The line is this document's choice; which
+values a codebase holds ambient, it says in an ADR.
 
 ## Other systems
 
@@ -163,8 +173,8 @@ driven ports stay inside; they are its needs, not its offer. Export:
 - where it exports one, a fake of its driving ports, for other systems' tests, from an entry
   production does not load;
 - where it handles messages, a function that takes configuration and builds its message handler,
-  for the assembly that hands it to the relay. Whether one function builds both is each codebase's
-  choice.
+  for the assembly that hands it to the relay. Whether one function builds both the open host
+  service and the handler, and which process runs the relay, is each codebase's choice.
 
 Give the published language and the port types an entry that loads only the domain, so another
 system imports them without loading any service. Other systems reach a system only through these
@@ -233,9 +243,10 @@ Until one of these holds, a root is ceremony.
 **A product with a model of its own — a CMS, an auth library — is another system**, even when its
 tables sit in this system's database.
 
-- **Where this system stores an aggregate in a product, the product's screens may read it.** A
-  change made there is an action — a button, an endpoint — whose driving adapter calls this
-  system's service.
+- **Where this system stores an aggregate in a product, the product's screens may read and
+  change it.** A change made there is this system's write, already stored; the product's hook is
+  the driving adapter that calls a service for the rest (below). An action there — a button, an
+  endpoint — is a driving adapter that calls this system's service.
 - **A product's hooks and scheduled tasks are driving adapters**, and the constraints on driving
   adapters apply to them. For a hook, answer in order:
   - **The product's caller is this system** → this system started the call, so it is not a
@@ -246,7 +257,8 @@ tables sit in this system's database.
     1. **The product has committed the change** → the hook acts through one service.
     2. **The product's caller needs this system's work before the product answers it**, such as a
        profile for a user signing up → the hook acts now, through one service, in this system's
-       own transaction. If the product rolls back, the saga or reconciliation undoes the work. A
+       own transaction, which touches no row the product's transaction holds. If the product
+       rolls back, reconciliation undoes the work. A
        hook the product runs after its commit does the same with nothing to undo, and is preferred
        where the product offers one.
     3. **The hook runs inside the product's transaction, and a write there commits and rolls
@@ -279,13 +291,14 @@ each piece of data the use case touches, answer in order:
    when the message arrives. A third party handles none: a handler of this system calls it when
    the message arrives, and the message is the retry.
 
-   Where the use case's caller waits for the other system's answer, call the other system
-   instead, once the transaction has committed, and record the answer, if this system keeps it,
-   in a transaction of its own. Make the call safe to repeat: the other system recognises a
-   repeat however it can — a key it dedupes on, this system's id stored on its side and looked
-   up first. Where it cannot, a repeat may duplicate. A failure after the commit, and a
-   duplicate, are repaired by the saga or by reconciliation. This exception is this document's
-   choice; the sources do not cover it.
+   Where the use case's caller needs the other system's answer in its response, call the other
+   system instead, once the transaction has committed, and record the answer, if this system
+   keeps it, in a transaction of its own; the aggregate holds a pending state until the answer
+   is recorded. Make the call safe to repeat: the other system recognises a repeat however it
+   can — a key it dedupes on, this system's id stored on its side and looked up first. A driving
+   port a system calls after its commit recognises a repeat. Where a third party cannot, a repeat
+   may duplicate. A failure after the commit, and a duplicate, are repaired by the saga or by
+   reconciliation. This exception is this document's choice; the sources do not cover it.
 2. **Does it read data another system owns?** → **Call the owner's open host service.** If it
    offers no fitting read, keep a copy in this system, updated by the owner's messages. In this
    case, the owner publishes.
@@ -495,8 +508,9 @@ function.
 rather than any implementation, and run it twice: against the fake, and against the real adapter.
 For another system's driving port, the receiving system writes the suite, whether the fake is its
 own or one the other system exports, and runs it the second time against that system's open host
-service. The second run is the integration test, and it is what stops a fake from drifting into
-a fiction that passes while production breaks.
+service. The second run is the integration test where the open host service reaches a real
+dependency, and it is what stops a fake from drifting into a fiction that passes while
+production breaks.
 
 ```
 // one suite, two runs
