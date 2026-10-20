@@ -236,8 +236,10 @@ tables sit in this system's database.
        where the product offers one.
     3. **The hook runs inside the product's transaction, and a write there commits and rolls
        back with the change** (the product hands the hook its transaction, and the outbox is in a
-       store that transaction reaches) → the hook writes only a message there, to this system's
-       outbox or the product's, as each codebase chooses. Nothing is lost.
+       store this system's transaction port reaches through that transaction) → the hook calls
+       one service, handing it the product's transaction as the context repositories take; the
+       service writes only a message there, to this system's outbox or the product's, as each
+       codebase chooses. Nothing is lost.
     4. **Otherwise**, inside the transaction or before it opens → the hook leaves its work to a
        handler that first checks the change through the product.
 
@@ -257,8 +259,10 @@ each piece of data the use case touches, answer in order:
 
 1. **Does it change data another system owns — a third party's included, such as a mail sent or
    a payment created?** → **Outbox, required.** Write a message to this system's outbox in the
-   same transaction; a system writing several stores has an outbox in each it sends from. The
-   owner changes its data when the message arrives.
+   same transaction; a system writing several stores has an outbox in each store whose
+   transaction writes the message. An owner that handles this system's messages changes its data
+   when the message arrives. A third party handles none: a handler of this system calls it when
+   the message arrives, and the message is the retry.
 
    Where the use case's caller waits for the other system's answer, call the other system
    instead, once the transaction has committed, and record the answer, if this system keeps it,
