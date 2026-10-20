@@ -205,13 +205,20 @@ seven fixed in the last commit. Left for a next round, all pre-existing:
 | R01-57 | hook step 4's hand-off mechanism unsaid | fixed as proposed |
 | R01-58 | assembly "one module per process" vs each system's exported builder; "every dependency is one a factory declared" vs ready-made plumbing in Q7 | fixed: "calls the factories and the build functions other systems export"; "every dependency but fixed plumbing (question 7)" |
 | R01-59 | repository row imports "the store client, the common library, the domain", but an aggregate stored in a product needs the product's instance and types, which only the infrastructure row may import (found by the R01-53 placement test) | needs a ruling: repository row "the store client, or the product the aggregate is stored in", or the Local API adapter is infrastructure |
+| R01-60 | "one module per process" (Assembly) vs "the consuming system's assembly builds the other system" and "a system's assembly building another system" (Systems, When to leave it alone): three systems in one process cannot have both one module per process and one assembly per system (found by the R01-58 placement test) | needs a ruling: assembly is per process and "a system's assembly" means the part of it that builds that system, or assembly is per system and the process module calls them |
+| R01-61 | Q1's tell "a service reaching for a store handle" covers Q7's snippet (`createPostgresOrderRepository(db)` in a service file), which Q7 calls "invisible to questions 1–6"; only "against any table" excludes it (found by the R01-58 placement test) | Q1: "reaching for a store handle to query it"; or Q7: "invisible to questions 1–6 but where question 1's tell fires" |
 
 ### Pickup for the next session
 
-- Branch `docs/layers-refinement`, HEAD `c19eb16`; everything above the table is applied. Line
-  numbers in the finding tables are stale; re-anchor by quoted text.
-- Start with R01-53: it needs the author's ruling before any edit. Then R01-54–58 in one S3-style
-  sweep, process doc steps 1–6 per change, commit per `CLAUDE.md` (no approval wait).
-- Rationale for the rulings is in the commit bodies (`git log d5df10a..c19eb16`), not here.
+- Branch `docs/layers-refinement`, HEAD `30ed865`; R01-53 (ruled: read-only, commit `38c38a6`)
+  and R01-54–58 (commit `30ed865`) are applied. Line numbers in the finding tables are stale;
+  re-anchor by quoted text.
+- Acceptance after those two commits: eight scenarios placed from `layers.md` alone at 4–5
+  (editor edits an owned field in Payload admin: 5; checkout retry after a failed call: 4;
+  assembly and the logger: 4; Q7 import case: 5; reporting read: 5). The 4s lost a point on
+  what the document leaves to the codebase.
+- Open: R01-59 and R01-60 need the author's ruling before any edit; R01-61 is wording. Process
+  doc steps 1–6 per change, commit per `CLAUDE.md` (no approval wait).
+- Rationale for the rulings is in the commit bodies (`git log d5df10a..30ed865`), not here.
 - Acceptance test after any `layers.md` change: a fresh agent with only `layers.md`, placing the
   `domain.md` scenarios the change touches, reporting confidence 1–5 and its guesses.
