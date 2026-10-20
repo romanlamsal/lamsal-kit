@@ -20,7 +20,8 @@ at all.
 A *port* is an interface, never the code behind it. A *driving port* is the interface to a use
 case — the way in, something a controller calls. A *driven port* is something the code needs from
 outside — the way out: store an aggregate, send a mail, put a file somewhere. Who starts the call
-decides which: the outside starts it, driving; this system starts it, driven. An *adapter* sits on
+decides which: the outside starts it, driving; this system starts it, driven. A clock is outside:
+a scheduled task is a driving adapter. An *adapter* sits on
 the far side of a port: a *driving adapter* calls a driving port, a *driven adapter* implements a
 driven port. Controllers are driving adapters; repositories and infrastructure hold driven
 adapters. This is ports and adapters as Vernon joins it to DDD; where this document narrows a
@@ -52,7 +53,7 @@ they are about what a function *does* rather than where it imports from.
 | --- | --- | --- | --- |
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, a conformed system's published language, a shared kernel, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
 | **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and the published language and driving-port types of a system it conforms to | receives its dependencies; writes through repositories |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, the common library's ports, and the published language and driving-port types of a system it conforms to | receives its dependencies; writes through repositories |
 | **infrastructure** | adapters for other systems — mail, rendering, third-party APIs, a system behind an anti-corruption layer — and every other driven adapter: a clock, a cache, blob storage | domain, the common library, and the published language and driving-port types of a system it translates | translates between this system's ports and the other system |
 | **controllers** | driving adapters: entry points, their validators | services and domain; it receives ports of infrastructure that resolves or translates its caller, as it receives its service | reaches the store only through a service |
 
@@ -109,7 +110,8 @@ may do three things. Each is a fault the adapter prevents:
   the cancellation is lost.
 - **Stop delivering.** A relay retries until the handler succeeds, so failing is safe there. A
   vendor's webhook stops after a few tries, and a product may not run a hook again, so a handler
-  of one records what it was given before anything that can fail. The fault: the handler throws
+  of one records what it was given, through its one service, before anything that can fail. The
+  fault: the handler throws
   on an early delivery, and the caller never sends it again. What is lost anyway, reconciliation
   finds by asking the other system, where it can be asked.
 
@@ -288,7 +290,7 @@ tables sit in this system's database.
 
 **Writes that must land together share one transaction, and the transaction stays inside its
 system**, except a message a product's hook writes in the product's transaction (Products). For
-each piece of data the use case touches, answer in order:
+each piece of data the use case touches, answer these rules in order:
 
 1. **Does it change data another system owns — a third party's included, such as a mail sent or
    a payment created?** → **Outbox, required.** Write a message to this system's outbox in the
@@ -326,7 +328,8 @@ each piece of data the use case touches, answer in order:
 
 - A relay delivers each message after the commit, at least once, and not necessarily in order. A
   message carries what its receiver needs to tell a repeat from an early arrival: an id, and the
-  version of the aggregate that wrote it.
+  version of the aggregate that wrote it; the receiver's aggregate records the last version it
+  handled.
 - A message is handled by code older or newer than the code that wrote it, so its schema stays
   backward and forward compatible.
 - The relay is common-library plumbing. The receiver decides which messages it handles.
@@ -345,7 +348,7 @@ each piece of data the use case touches, answer in order:
 
 Nine questions, each answerable from a diff. The snippets are illustrative pseudo-code.
 
-### 1. Does a service write a table another aggregate owns?
+### 1. Does a service write a table itself?
 
 **In a diff:** an insert, update or delete inside a service, or a service reaching for a store
 handle, against any table.
@@ -545,7 +548,7 @@ inputs and observable results.
 - **A service passing its transaction context into another repository of its system, in the same
   store, is the design working.** That is how several tables stay one transaction.
 - **A use case touching three aggregates and naming three invalidations is correct**, not a
-  breach of one mutation per use case.
+  breach of one mutation per use case (`components.md`).
 - **A port with one implementation is not premature.** The second implementation is the fake, and
   it is what the default suite runs against.
 - **Several systems each faking the same port can be correct.** By default, each system writes its
