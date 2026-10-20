@@ -23,6 +23,9 @@ import the web server's assembly and build adapters it never uses, or merges bot
 Process bootstrap (preloading OpenTelemetry instrumentation before any import) is the stack
 document's concern and stays out.
 
+*Superseded in part by `20-root-per-entry.md` (R01-60): one root per entry, not one module per
+process. The bootstrap ruling stands.*
+
 ## Grounding
 
 No source speaks to it; composition per process is the plain reading of a composition root.
