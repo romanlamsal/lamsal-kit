@@ -371,7 +371,7 @@ A controller that hands a repository a transaction and a callback has not delega
 it has inlined one: the deciding still happens in the controller.
 
 ```
-// controller — the fault
+// controller, a driving adapter — the fault
 await tx.run(async (ctx) => { /* seven writes, four aggregates */ })
 
 // the fix
@@ -467,7 +467,7 @@ A translation that changes nothing is not an anti-corruption layer; conform inst
 crosses an anti-corruption layer untranslated means there is no layer.
 
 ```
-// infrastructure/pricing.ts — the fault: a translation that changes nothing
+// adapters/pricing.ts — the fault: a translation that changes nothing
 quote: async (cart) => {
   const { total, currency } = await pricing.quote(cart)
   return { total, currency }
