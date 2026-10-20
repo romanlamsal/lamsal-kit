@@ -2,16 +2,17 @@
 
 Where server code goes and what it is allowed to touch.
 
-**Preconditions.** The repository layer assumes a store that can be read and written. Store
-clients are one store where one transaction port makes their writes atomic together; two clients
-of one database are two stores until one port reaches both, which is each codebase's choice. Where
+**Preconditions.** The repository layer assumes a store that can be read and written. A *store*,
+in this document's narrowing, is what one transaction port makes atomic: several clients are one
+store where one port makes their writes atomic together, and two clients of one database are two
+stores until one port reaches both. Which it is, is each codebase's choice. Where
 this document says *transaction*, it assumes the store can apply several writes atomically; where
 one cannot, question 5 ("Did one transaction quietly become several?") does not apply to it, and an
 aggregate's outgoing messages are embedded in its own record. *Table*, *row* and *aggregate* are
 used in the relational sense — substitute your store's equivalents.
 
 **Terms.** A *controller* is a driving adapter: it resolves the caller (a session, a signature, a
-key), validates, calls into one thing, and returns. It takes its rules from the domain.
+key), validates, acts through one service, and returns. It takes its rules from the domain.
 `components.md` applies the same role to route files on the client; the difference is writes — a
 server controller passes a write through to one service, a route controller does not carry writes
 at all.
@@ -21,7 +22,7 @@ case — the way in, something a controller calls. A *driven port* is something 
 outside — the way out: store an aggregate, send a mail, put a file somewhere. Who starts the call
 decides which: the outside starts it, driving; this system starts it, driven. An *adapter* sits on
 the far side of a port: a *driving adapter* calls a driving port, a *driven adapter* implements a
-driven port. Controllers are driving adapters; repositories and infrastructure are driven
+driven port. Controllers are driving adapters; repositories and infrastructure hold driven
 adapters. This is ports and adapters as Vernon joins it to DDD; where this document narrows a
 term, the narrowing applies.
 
@@ -42,7 +43,7 @@ of this system is a driving adapter.
 The sources are Evans, Vernon, Khononov and Cockburn; where this document departs from one, it
 says so.
 
-This document is written for review. The faults below are the ones a linter cannot see, because
+This document is written for review. Most faults below are ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
 
 ## The layers
@@ -52,7 +53,7 @@ they are about what a function *does* rather than where it imports from.
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, a conformed system's published language, a shared kernel, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
 | **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and the published language and driving-port types of a system it conforms to | receives its dependencies; writes through repositories |
-| **infrastructure** | adapters for other systems — mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer — and every other driven adapter: a clock, a cache, blob storage | domain, the common library, and the published language and driving-port types of a system it translates | translates between this system's ports and the other system |
+| **infrastructure** | adapters for other systems — mail, rendering, third-party APIs, a system behind an anti-corruption layer — and every other driven adapter: a clock, a cache, blob storage | domain, the common library, and the published language and driving-port types of a system it translates | translates between this system's ports and the other system |
 | **controllers** | driving adapters: entry points, their validators | services and domain; it receives ports of infrastructure that resolves or translates its caller, as it receives its service | reaches the store only through a service |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
@@ -87,7 +88,8 @@ the other's whole record, such as a populated relationship, carries the other's 
 aggregate.
 
 In the vocabulary of domain-driven design, **domain** is the model, **service** is the
-application layer, **infrastructure** and **repository** are both infrastructure, and
+application layer, **infrastructure** and **repository** are both infrastructure (Khononov's
+infrastructure also holds the driving adapters this document puts in controllers), and
 **controllers** are the interface layer.
 
 **A driving adapter acts through one service and asks through the domain.** To act, it calls one
@@ -113,7 +115,7 @@ may do three things. Each is a fault the adapter prevents:
 
 ## Ports and factories
 
-**Driven ports live in the domain.** The rules declare what they need — store this order, send
+**Driven ports this system declares live in its domain.** The rules declare what they need — store this order, send
 this mail — and adapters in the repository and infrastructure layers implement it. The domain
 names ports only; assembly picks their implementations.
 
@@ -170,14 +172,15 @@ driven ports stay inside; they are its needs, not its offer. Export:
 - the driving port types, for other systems to import;
 - a function that takes configuration and builds the open host service, for another system's
   assembly to call;
-- where it exports one, a fake of its driving ports, for other systems' tests, from an entry
-  production does not load;
 - where it handles messages, a function that takes configuration and builds its message handler,
   for the assembly that hands it to the relay. Whether one function builds both the open host
-  service and the handler, and which process runs the relay, is each codebase's choice.
+  service and the handler, and which process runs the relay, is each codebase's choice;
+- optionally, a fake of its driving ports, for other systems' tests, from an entry production
+  does not load.
 
 Give the published language and the port types an entry that loads only the domain, so another
-system imports them without loading any service. Other systems reach a system only through these
+system imports them without loading any service; the port types are exported type-only, or the
+entry loads the service that declares them. Other systems reach a system only through these
 exports, which a linter can hold from import paths alone.
 
 ```
@@ -199,7 +202,8 @@ document's choice.
 A's service it is a dependency it receives — a way out, like a mailer. A service calling it is not
 one use case calling another; it is a use case calling a port. What sits behind the port is
 assembly's decision: B's service in-process, or an HTTP client in A's infrastructure implementing
-the same port. Moving B out of process changes assembly and nothing else.
+the same port. Moving B out of process changes assembly and adds that adapter; no service or
+domain changes.
 
 **A driving port another system calls takes its caller as an argument.** A consumer reaches B's
 service without passing B's controllers, so whatever those controllers resolve — who is calling,
@@ -211,11 +215,11 @@ choices decide where code goes:
 - **Conformist.** This system adopts the other's published language: its terms, schemas and
   errors are used as they are, in any layer that may import a domain, and its driving port is a
   driven port a service receives like any other. The default for an open host — a system that
-  publishes its model on purpose.
+  publishes its model on purpose; the default is this document's choice.
 - **Anti-corruption layer.** This system's domain declares a driven port in its own terms; an
   adapter in infrastructure implements it by calling the other system's driving port and
-  translating. For a model that is foreign, unstable or not yours — a third-party API always gets
-  one. On the way in — a webhook, a product's hook, a message — the driving adapter that receives
+  translating. For a model that is foreign, unstable or not yours, as a third-party API's
+  usually is. On the way in — a webhook, a product's hook, a message — the driving adapter that receives
   the other system's call translates it into this system's terms before it calls a service. The
   other system's schema and the translation live in that adapter, or in infrastructure shared with
   the outbound adapter; never in the domain.
@@ -252,15 +256,15 @@ tables sit in this system's database.
   - **The product's caller is this system** → this system started the call, so it is not a
     driving call: the hook does nothing, and the use case that called the product handles the
     change. How the hook recognises this system as the caller is each codebase's choice.
-  - **It asks**, such as whether a change is valid → it asks, at any point.
+  - **It asks**, such as whether a change is valid → a specification answers it, before or
+    inside the product's transaction.
   - **It acts** → answer in order:
     1. **The product has committed the change** → the hook acts through one service.
     2. **The product's caller needs this system's work before the product answers it**, such as a
        profile for a user signing up → the hook acts now, through one service, in this system's
        own transaction, which touches no row the product's transaction holds. If the product
-       rolls back, reconciliation undoes the work. A
-       hook the product runs after its commit does the same with nothing to undo, and is preferred
-       where the product offers one.
+       rolls back, reconciliation undoes the work. Where the product offers a hook that runs
+       after its commit and before it answers, step 1 applies and nothing needs undoing.
     3. **The hook runs inside the product's transaction, and a write there commits and rolls
        back with the change** (the product hands the hook its transaction, and the outbox is in a
        store this system's transaction port reaches through that transaction) → the hook calls
@@ -326,12 +330,13 @@ each piece of data the use case touches, answer in order:
 - The relay is common-library plumbing. The receiver decides which messages it handles.
 - The receiver handles it in its own transaction, through a driving adapter that calls one
   service. Handling the same message twice changes nothing the second time.
-- When a later step fails, new steps undo the earlier ones — a saga, here the whole sequence
-  rather than Khononov's coordinating component. Nothing rolls back. A step that waits on
+- When a later step fails, new steps undo the earlier ones — a saga, here the whole sequence in
+  Richardson's sense rather than Khononov's coordinating component. Nothing rolls back. A step that waits on
   something that may never happen, such as a payment never made, has one system waiting for it:
   that system holds the deadline in its aggregate and acts once it passes. How the systems
   coordinate is each codebase's choice: each reacts to the others' events (choreography), or one
-  system's process manager sends commands (orchestration). Say which.
+  system's process manager, an aggregate of that system, sends commands (orchestration). Say
+  which, in an ADR.
 
 ## The review checklist
 
@@ -356,7 +361,8 @@ invoices.createForOrder(ctx, { orderId, total })
 ### 2. Is the new use case in a repository, or in a controller?
 
 **In a diff:** a repository module that gained an import of a sibling repository, of an
-infrastructure adapter, or of a service. Or a controller body that grew past "call one service".
+infrastructure adapter, or of a service. Or a controller body that grew past "call one service";
+resolving its caller and asking a specification are not growth.
 
 A controller that hands a repository a transaction and a callback has not delegated a use case,
 it has inlined one: the deciding still happens in the controller.
@@ -385,7 +391,8 @@ export const settledPatch = (at) => ({ status: "settled", settledAt: at, dunning
 
 ### 4. Does the write invalidate every aggregate its service wrote?
 
-**In a diff:** a write declaring one invalidation while the service it calls writes two tables.
+**In a diff:** a write declaring one invalidation (`components.md` defines the terms) while the
+service it calls writes two tables.
 
 Open the service and count the tables it touches — **including the ones reached through a
 transaction context it handed to another aggregate's repository**. Every aggregate written needs
@@ -424,7 +431,7 @@ await tx.run((ctx) => orderLines.insertMany(ctx, lines))
 
 **In a diff:** a service import inside a repository file.
 
-The first two faults seen from the other end, and the cheapest to spot. It means a use case is
+Question 2's fault seen from the other end, and the cheapest to spot. It means a use case is
 parked in a repository.
 
 ### 7. Does anything build its own dependency instead of receiving it?
@@ -433,7 +440,7 @@ parked in a repository.
 body or a factory body, rather than passed in. Also: a module exporting a ready-made instance
 next to the factory that produces it.
 
-This one is invisible to the other six — the code sits in the right layer and imports nothing the
+This one is invisible to questions 1–6 — the code sits in the right layer and imports nothing the
 arrow forbids. What it breaks is substitution: the service can no longer be given a different
 implementation, so its tests need the real one. Plumbing with one fixed configuration, such as a
 logger or a tracer, may be a ready-made instance: nobody substitutes it.
@@ -532,8 +539,8 @@ inputs and observable results.
   controller naming a symbol.
 - **A read across its system's aggregates in a repository is a reporting read, not a use case**,
   as long as it writes nothing.
-- **A service passing its transaction context into another repository of its system is the design
-  working.** That is how several tables stay one transaction.
+- **A service passing its transaction context into another repository of its system, in the same
+  store, is the design working.** That is how several tables stay one transaction.
 - **A use case touching three aggregates and naming three invalidations is correct**, not a
   breach of one mutation per use case.
 - **A port with one implementation is not premature.** The second implementation is the fake, and
