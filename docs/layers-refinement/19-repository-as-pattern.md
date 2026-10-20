@@ -1,6 +1,6 @@
 # Repository is a pattern, not a layer
 
-**Status:** ready
+**Status:** closed (3ee8bf9)
 
 **Kind:** contradiction, this document's narrowing the sources do not share · **Touches:**
 Preconditions, Terms, The layers (the table and the arrow), the DDD-vocabulary paragraph, Ports
