@@ -222,7 +222,10 @@ tables sit in this system's database.
   change made there is an action — a button, an endpoint — whose driving adapter calls this
   system's service.
 - **A product's hooks and scheduled tasks are driving adapters**, and the constraints on driving
-  adapters apply to them. For a hook:
+  adapters apply to them. For a hook, answer in order:
+  - **The product's caller is this system** → this system started the call, so it is not a
+    driving one: the hook does nothing, and the use case that called the product handles the
+    change. How the hook recognises this system as the caller is each codebase's choice.
   - **It asks**, such as whether a change is valid → it asks, at any point.
   - **It acts** → answer in order:
     1. **The product has committed the change** → the hook acts through one service.
