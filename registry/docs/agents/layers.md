@@ -45,7 +45,7 @@ they are about what a function *does* rather than where it imports from.
 | **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and the open host service of a system it conforms to | receives its dependencies; writes through repositories |
 | **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the open host service of a system it translates | translates between this system's ports and the other system |
-| **controllers** | driving adapters: entry points, their validators | services, domain, and infrastructure that resolves or translates its caller | reaches the store only through a service |
+| **controllers** | driving adapters: entry points, their validators | services and domain; it receives ports of infrastructure that resolves or translates its caller, as it receives its service | reaches the store only through a service |
 
 The arrow runs one way — controller → service → repository → store — and the domain sits beside
 all of it: every layer may import it, it imports no layer. Repository and infrastructure are both
@@ -87,8 +87,21 @@ service function; needing two is the signal that a use case has grown inside it.
 question about a rule — may this caller do this, is this input valid — it calls a
 *specification*: a domain function that takes the candidate and returns the answer. When the
 answer needs data the adapter does not hold, a service of its system loads the data and asks the
-specification. Where its caller delivers at least once — a relay, a webhook, a product's hook —
-handling the same delivery twice changes nothing the second time, however late the second comes.
+specification.
+
+Where its caller may deliver more than once — a relay, a webhook, a product's hook — the caller
+may do three things. Each is a fault the adapter prevents:
+
+- **Deliver the same thing again, however late.** Handling it a second time changes nothing. The
+  fault: a relay replays its whole outbox, and every change is applied twice.
+- **Deliver out of order.** A delivery about something this system has not recorded yet is not a
+  repeat. The fault: `OrderCancelled` arrives before `OrderPlaced`, is taken for a duplicate, and
+  the cancellation is lost.
+- **Stop delivering.** A relay retries until the handler succeeds, so failing is safe there. A
+  vendor's webhook stops after a few tries, and a product may not run a hook again, so a handler
+  of one records what it was given before anything that can fail. The fault: the handler throws
+  on an early delivery, and the caller never sends it again. What is lost anyway, reconciliation
+  finds by asking the other system, where it can be asked.
 
 ## Ports and factories
 
@@ -226,7 +239,7 @@ tables sit in this system's database.
 - **A product's hooks and scheduled tasks are driving adapters**, and the constraints on driving
   adapters apply to them. For a hook, answer in order:
   - **The product's caller is this system** → this system started the call, so it is not a
-    driving one: the hook does nothing, and the use case that called the product handles the
+    driving call: the hook does nothing, and the use case that called the product handles the
     change. How the hook recognises this system as the caller is each codebase's choice.
   - **It asks**, such as whether a change is valid → it asks, at any point.
   - **It acts** → answer in order:
@@ -292,8 +305,10 @@ each piece of data the use case touches, answer in order:
 
 **An outbox, wherever it is used:**
 
-- A relay delivers each message after the commit, at least once, and not necessarily in order —
-  possibly to a handler older or newer than the code that wrote it, so a message's schema stays
+- A relay delivers each message after the commit, at least once, and not necessarily in order. A
+  message carries what its receiver needs to tell a repeat from an early arrival: an id, and the
+  version of the aggregate that wrote it.
+- A message is handled by code older or newer than the code that wrote it, so its schema stays
   backward and forward compatible.
 - The relay is common-library plumbing. The receiver decides which messages it handles.
 - The receiver handles it in its own transaction, through a driving adapter that calls one
