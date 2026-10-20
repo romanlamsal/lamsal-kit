@@ -72,6 +72,9 @@ that meets one does not re-litigate it; it reopens the ticket named.
   repositories in one `run`, or the outbox (review 01, R01-11).
 - An editor changing shop's price in Payload admin: a field another system owns is read-only in
   the product; a change comes through an action that calls shop's service (review 01, R01-53).
+- Shop's price adapter over Payload's Local API placed as anything but a driven adapter: it is
+  one, and imports Payload's instance as any driven adapter imports what its port's
+  implementation needs; there is no repository layer to fit it into (ticket 19).
 
 ## The checkout saga
 

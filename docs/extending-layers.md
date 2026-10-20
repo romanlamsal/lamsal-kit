@@ -33,7 +33,7 @@ sentence as its own; the ticket records the fallback grounding.
 
 Use a book's term in its book meaning. Where the books lack a concept, coin a plain term and
 define it in Terms (*system*, *common library*). Where `layers.md` narrows or
-departs from a book, it says so in one clause, as it does for *repository* as a layer.
+departs from a book, it says so in one clause, as it does for *store* (Preconditions).
 
 ## Steps
 

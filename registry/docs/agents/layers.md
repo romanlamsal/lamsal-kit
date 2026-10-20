@@ -2,7 +2,7 @@
 
 Where server code goes and what it is allowed to touch.
 
-**Preconditions.** The repository layer assumes a store that can be read and written. A *store*,
+**Preconditions.** This document assumes a store that can be read and written. A *store*,
 in this document's narrowing, is what one transaction port makes atomic: several clients are one
 store where one port makes their writes atomic together, and two clients of one database are two
 stores until one port reaches both. Which it is, is each codebase's choice. Where
@@ -21,14 +21,13 @@ A *port* is an interface, never the code behind it. A *driving port* is the inte
 case — the way in, something a controller calls. A *driven port* is something the code needs from
 outside — the way out: store an aggregate, send a mail, put a file somewhere. Who starts the call
 decides which: the outside starts it, driving; this system starts it, driven. A clock is outside:
-a scheduled task is a driving adapter. An *adapter* sits on
-the far side of a port: a *driving adapter* calls a driving port, a *driven adapter* implements a
-driven port. Controllers are driving adapters; repositories and infrastructure hold driven
-adapters. This is ports and adapters as Vernon joins it to DDD; where this document narrows a
-term, the narrowing applies.
+a scheduled task is a driving adapter. An *adapter* sits on the far side of a port: a *driving
+adapter* calls a driving port, a *driven adapter* implements a driven port. A controller is a
+driving adapter; a *repository* is a driven port over one aggregate's storage, and its adapter is
+a driven adapter like a mailer's. This is ports and adapters as Vernon joins it to DDD.
 
 A *system* is one bounded context: code with its own domain and its own glossary, laid out by
-this document. A repository may hold several. Another bounded context is another system, even
+this document. A code repository may hold several. Another bounded context is another system, even
 when it is imported in-process as a package; so is a product (Products). An aggregate belongs to
 the system whose use cases write it, wherever it is stored; a record two systems write is two
 aggregates sharing an id.
@@ -52,15 +51,12 @@ they are about what a function *does* rather than where it imports from.
 | layer | what it is | may import | does |
 | --- | --- | --- | --- |
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, a conformed system's published language, a shared kernel, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
-| **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each for writes, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, the common library's ports, and the published language and driving-port types of a system it conforms to | receives its dependencies; writes through repositories |
-| **infrastructure** | adapters for other systems — mail, rendering, third-party APIs, a system behind an anti-corruption layer — and every other driven adapter: a clock, a cache, blob storage | domain, the common library, and the published language and driving-port types of a system it translates | translates between this system's ports and the other system |
-| **controllers** | driving adapters: entry points, their validators | services and domain; it receives ports of infrastructure that resolves or translates its caller, as it receives its service | reaches the store only through a service |
+| **driven adapters** | implementations of this system's driven ports: an aggregate's repository, a mailer, a clock, a cache, blob storage, another system behind an anti-corruption layer | whatever its port's implementation needs — a store client, a product's instance and its types, an HTTP client — the domain, the common library, and the published language and driving-port types of the system it calls | an adapter over this system's aggregate serves one aggregate for writes, composes nothing, and joins the caller's transaction; an adapter over another system translates between this system's ports and that system |
+| **driving adapters** | entry points: controllers, hooks, scheduled tasks, message handlers, their validators | services and domain; it receives ports that resolve or translate its caller, as it receives its service | reaches the store only through a service |
 
-The arrow runs one way — controller → service → repository → store — and the domain sits beside
-all of it: every layer may import it, it imports no layer. Repository and infrastructure are both
-driven-adapter layers; they differ only in subject matter, one implementing ports for this
-system's aggregates and the other for somebody else's.
+The arrow runs one way — driving adapter → service → driven adapter → the outside — and the
+domain sits beside all of it: every layer may import it, it imports no layer.
 
 **"Imports no layer" is about this system's modules, not about packages.** The test for a package
 in the domain is whether calling it can reach outside the process: a store client, an HTTP client,
@@ -89,9 +85,10 @@ the other's whole record, such as a populated relationship, carries the other's 
 aggregate.
 
 In the vocabulary of domain-driven design, **domain** is the model, **service** is the
-application layer, **infrastructure** and **repository** are both infrastructure (Khononov's
-infrastructure also holds the driving adapters this document puts in controllers), and
-**controllers** are the interface layer.
+application layer, **driving adapters** are Evans's interface layer and **driven adapters** his
+infrastructure layer; Khononov's infrastructure layer holds both. A *repository* is Evans's
+pattern: a driven port over one aggregate's storage, declared in the domain and implemented by a
+driven adapter.
 
 **A driving adapter acts through one service and asks through the domain.** To act, it calls one
 service function; needing two is the signal that a use case has grown inside it. To answer a
@@ -118,9 +115,8 @@ may do three things. Each is a fault the adapter prevents:
 ## Ports and factories
 
 **Driven ports this system declares live in its domain.** The rules declare what they need —
-store this order, send this mail — and adapters in the repository and infrastructure layers
-implement it. The domain
-names ports only; assembly picks their implementations.
+store this order, send this mail — and driven adapters implement it. The domain names ports
+only; assembly picks their implementations.
 
 **Driving ports live beside the service that satisfies them.** A use case is not a domain
 concept, so the domain never learns the name of one. This is what keeps the arrow pointing in one
@@ -205,9 +201,9 @@ document's choice.
 **One system's driving port is the other's driven port.** To B, `Pricing` is the way in; to
 A's service it is a dependency it receives — a way out, like a mailer. A service calling it is not
 one use case calling another; it is a use case calling a port. What sits behind the port is
-assembly's decision: B's service in-process, or an HTTP client in A's infrastructure implementing
-the same port. Moving B out of process changes assembly and adds that adapter; no service or
-domain changes.
+assembly's decision: B's service in-process, or an HTTP client, a driven adapter of A,
+implementing the same port. Moving B out of process changes assembly and adds that adapter; no
+service or domain changes.
 
 **A driving port another system calls takes its caller as an argument.** A consumer reaches B's
 service without passing B's controllers, so whatever those controllers resolve — who is calling,
@@ -220,14 +216,13 @@ choices decide where code goes:
   errors are used as they are, in any layer that may import a domain, and its driving port is a
   driven port a service receives like any other. The default for an open host — a system that
   publishes its model on purpose; the default is this document's choice.
-- **Anti-corruption layer.** This system's domain declares a driven port in its own terms; an
-  adapter in infrastructure implements it by calling the other system's driving port and
-  translating. For a model that is foreign, unstable or not yours, as a third-party API's
-  usually is. On the way in — a webhook, a product's hook, a message — the driving adapter that
-  receives the other system's call translates it into this system's terms before it calls a
-  service. The
-  other system's schema and the translation live in that adapter, or in infrastructure shared with
-  the outbound adapter; never in the domain.
+- **Anti-corruption layer.** This system's domain declares a driven port in its own terms; a
+  driven adapter implements it by calling the other system's driving port and translating. For a
+  model that is foreign, unstable or not yours, as a third-party API's usually is. On the way in —
+  a webhook, a product's hook, a message — the driving adapter that receives the other system's
+  call translates it into this system's terms before it calls a service. The other system's
+  schema and the translation live in that adapter, or in a module both adapters share; never in
+  the domain.
 - **Shared kernel.** Model two systems share, such as `Money`, goes in a module both import and
   neither changes alone.
 
@@ -366,11 +361,11 @@ ctx.insert(invoices).values({ orderId, total })
 invoices.createForOrder(ctx, { orderId, total })
 ```
 
-### 2. Is the new use case in a repository, or in a controller?
+### 2. Is the new use case in a driven adapter, or in a driving one?
 
-**In a diff:** a repository module that gained an import of a sibling repository, of an
-infrastructure adapter, or of a service. Or a controller body that grew past "call one service";
-resolving its caller and asking a specification are not growth.
+**In a diff:** a driven adapter that gained an import of another driven adapter or of a service.
+Or a driving adapter's body that grew past "call one service"; resolving its caller and asking a
+specification are not growth.
 
 A controller that hands a repository a transaction and a callback has not delegated a use case,
 it has inlined one: the deciding still happens in the controller.
@@ -435,12 +430,12 @@ for (const line of lines) await tx.run((ctx) => orderLines.insert(ctx, line))
 await tx.run((ctx) => orderLines.insertMany(ctx, lines))
 ```
 
-### 6. Does a repository import a service?
+### 6. Does a driven adapter import a service?
 
-**In a diff:** a service import inside a repository file.
+**In a diff:** a service import inside a driven adapter's file.
 
 Question 2's fault seen from the other end, and the cheapest to spot. It means a use case is
-parked in a repository.
+parked in a driven adapter.
 
 ### 7. Does anything build its own dependency instead of receiving it?
 
@@ -545,8 +540,8 @@ inputs and observable results.
   indirection. A controller's only door is a service, even when the service exports the same name
   again, so that deleting a repository fails inside the service that names it rather than at a
   controller naming a symbol.
-- **A read across its system's aggregates in a repository is a reporting read, not a use case**,
-  as long as it writes nothing.
+- **A read across its system's aggregates in a driven adapter is a reporting read, not a use
+  case**, as long as it writes nothing.
 - **A service passing its transaction context into another repository of its system, in the same
   store, is the design working.** That is how several tables stay one transaction.
 - **A use case touching three aggregates and naming three invalidations is correct**, not a
