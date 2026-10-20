@@ -22,7 +22,7 @@ How documents in `registry/docs/agents/` get refined in this repository. The ste
    ticket, written as an ADR in the `domain-modeling` skill's format (its `ADR-FORMAT.md`): what
    was decided, in what context, and why; considered options and consequences only where they
    add value. An open question resolves the same way, in the ticket it becomes.
-4. Present the change and wait for approval before committing, per `CLAUDE.md`.
+4. Commit, per `CLAUDE.md`, and report the change.
 5. Set the ticket's `**Status:**` line and its row in the spec to `closed (<commit>)`, and
    unblock whatever it blocked, in both places.
 
@@ -65,4 +65,4 @@ Ask one decision per question; walk a choice of order or mechanism through a con
 - For a rule with several cases, offer the "answer in order" shape early.
 - Where a specific rule overrides a general one elsewhere, give the general one a pointer;
   otherwise it reads as a contradiction.
-- Before asking for approval, show the full before and after of every change.
+- In the report, show the full before and after of every change.

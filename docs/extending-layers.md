@@ -53,7 +53,7 @@ departs from a book, it says so in one clause, as it does for *repository* as a 
 5. **Sweep for consistency.** Grep every term the change touches across Terms, the table, the
    sections, the checklist, "When to leave it alone", and the sibling docs in
    `registry/docs/agents/`. Done when no sentence contradicts the change.
-6. **Present, then commit on approval**, per `CLAUDE.md`.
+6. **Commit**, per `CLAUDE.md`, with the full before and after of every change in the report.
 
 ## The four tests
 
