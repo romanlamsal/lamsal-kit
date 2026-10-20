@@ -7,6 +7,7 @@ and `open-questions.md` as context.
 **Verdict:** not mergeable as is. Tickets 10, 12 (core), 13, 15, 18 and question 9 land cleanly.
 Tickets 09 and 14 did not fully land: the two highest findings are decisions recorded in those
 tickets that `layers.md` states the opposite of, or not at all.
+**Resolved:** every finding closed by `4abd487`; see After the fixes.
 
 Line numbers (`L`) refer to `layers.md` at `d5df10a`.
 
@@ -210,9 +211,9 @@ seven fixed in the last commit. Left for a next round, all pre-existing:
 
 ### Pickup for the next session
 
-- Branch `docs/layers-refinement`, HEAD `30ed865`; R01-53 (ruled: read-only, commit `38c38a6`)
-  and R01-54–58 (commit `30ed865`) are applied. Line numbers in the finding tables are stale;
-  re-anchor by quoted text.
+- Branch `docs/layers-refinement`; R01-53 (ruled: read-only, commit `38c38a6`) and R01-54–58
+  (commit `30ed865`) are applied. Line numbers in the finding tables are stale; re-anchor by
+  quoted text.
 - Acceptance after those two commits: eight scenarios placed from `layers.md` alone at 4–5
   (editor edits an owned field in Payload admin: 5; checkout retry after a failed call: 4;
   assembly and the logger: 4; Q7 import case: 5; reporting read: 5). The 4s lost a point on
