@@ -81,7 +81,7 @@ write, and separating the stores later forces a switch anyway.
 **Every message in this system's outbox is in this system's terms.** Recording the product's
 change in the product's terms was considered: it keeps translation out of the product's write
 path. It was rejected because messages in an outbox are the system's published language
-(ticket 09): another system subscribing would conform to the product without choosing to, past
+(ticket 09)[^09]: another system subscribing would conform to the product without choosing to, past
 this system's anti-corruption layer. The hook is an ordinary driving adapter: it translates where
 the relationship asks for it (ticket 10) and calls one service, which writes the message.
 
@@ -112,3 +112,7 @@ act after the commit is lost on a crash too.
   step-5 sweep ("hook", "Products").
 - Open question D, a hook firing on this system's own write, now shows up as a message in the
   outbox under step 3.
+
+[^09]: Ticket 09 splits messages into public and private; only public ones are published
+    language. The conclusion survives: a message in the product's terms would have to be private,
+    and the hook translates anyway, as review 01 (R01-51) notes.

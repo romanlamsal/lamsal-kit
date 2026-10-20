@@ -26,7 +26,7 @@ Outbox bullets:
 
 > - A relay delivers each message after the commit, at least once, and not necessarily in order.
 > - The relay is common-library plumbing. The receiver decides which messages it handles;
->   handing each receiver's handler to the relay is wired once, above the systems.
+>   handing each receiver's handler to the relay is wired once, above the systems.[^16]
 > - …
 > - When a later step fails, new steps undo the earlier ones — a saga, here the whole sequence
 >   rather than Khononov's coordinating component. Nothing rolls back. A step that waits on
@@ -47,9 +47,10 @@ the payment deadline and publishes `OrderCancelled`; fulfillment releases on it.
 
 ## Grounding
 
-- Khononov, *Learning DDD* ch. 9 (Saga p. 173, Process Manager p. 176 per the Sharif library
-  table of contents): a saga is a component that listens to events and issues commands; a process
-  manager keeps explicit state *(from memory)*.
+- Khononov, *Learning DDD* ch. 9, pp. 147, 150, 152 (print edition): "a saga matches events to
+  the corresponding commands"; a process manager is "a central processing unit that maintains the
+  state of the sequence and determines the next processing steps", and "process managers are
+  often implemented as aggregates" *(verified, review 01)*.
 - Vernon, *IDDD* ch. 4, "Long-Running Processes, aka Sagas": the process is owned by one bounded
   context and its state tracked there, timeouts included *(from memory)*.
 - Vernon, *IDDD* ch. 8: a domain event is a past-tense fact, published after commit; subscribers
@@ -100,3 +101,6 @@ codebase says which.
 - "What the next step needs is in a store": follows from the aggregate; the relay's own state
   may be lost.
 - A replay clause on the outbox bullet: follows from "however late".
+
+[^16]: Superseded by ticket 16: the consuming system's assembly hands the handler to the relay
+    by default, and a root wires it once only when one of the escalation reasons holds.

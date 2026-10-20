@@ -57,7 +57,9 @@ When to leave it alone:
 - Fallback: Richardson, *Microservices Patterns* ch. 10: consumer-driven contract tests; the
   consumer writes what it relies on *(from memory)*.
 - Not a listed source: Freeman & Pryce, *Growing Object-Oriented Software*, "only mock types you
-  own" *(from memory)*; leans toward a provider's fake.
+  own" *(from memory)*. Review 01 (R01-52): the maxim argues for consumer-owned interfaces, so it
+  leans *away* from a provider's fake, not toward it; the decision's "consumer writes fake and
+  suite" default is what it supports.
 
 ## Done when
 

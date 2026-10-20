@@ -39,6 +39,11 @@ payload's schema needs naming in that column. Settle it in this ticket, or split
 - Vernon, *IDDD* ch. 13: message listeners in the port-adapter layer read the other context's
   notifications through a reader over its published language and call the application service
   with this context's terms *(from memory)*.
+- Khononov, *Learning DDD* ch. 9 pp. 138–140 (print edition): stateless translation by a proxy
+  that interjects incoming and outgoing requests; "In an open-host service, translation to the
+  public language takes place when processing incoming requests, and in an anticorruption layer,
+  it occurs when calling the upstream"; asynchronous translation is a message proxy that
+  translates and filters *(verified, review 01)*.
 - Evans, *DDD* ch. 14 (final manuscript, April 2003): "Internally the layer translates in both
   directions as necessary between the two models" (p. 258); "An ANTICORRUPTION LAYER can be
   bi-directional, defining SERVICES on both interfaces with their own ADAPTERS, potentially using
@@ -66,7 +71,7 @@ schema is a rule" pulls Stripe's schema into the domain, which is question 8's f
 both directions share translators and calls placement an implementation decision, so either the
 driving adapter holds the schema as its validator, or infrastructure holds a translator the
 outbound adapter also uses. The controllers row's import column follows: "infrastructure that
-resolves or translates its caller" replaces "session infrastructure".
+resolves or translates its caller" replaces "session infrastructure".[^07]
 
 **A controller unpacks everything its driving port needs.** Resolving the caller includes a
 signature or a key, not only a session: a signature over the raw body is the input device's
@@ -87,3 +92,7 @@ system". Tests need nothing: a driving adapter's translation runs in the default
   extra module for nothing.
 - "Calls into exactly one thing": contradicts specifications and the translator.
 - A second snippet under question 8: the inbound clause already places the fix.
+
+[^07]: Review 01 (R01-07): a controller *receives* that infrastructure's ports from assembly, as it
+    receives its service, so Tests ("each receives ports") and question 7 hold for controllers
+    unchanged. The row now says so.

@@ -44,7 +44,7 @@ choice, "passed or ambient" in question 5, and question 7's two ambient sentence
   the book's process-, thread- and session-scoped registries are from memory.
 - Evans, *DDD* ch. 14 (final manuscript, April 2003), Bounded Context: "Integration across the
   boundaries necessarily will involve some translation, which you can analyze explicitly"
-  (p. 111) *(verified)*.
+  (manuscript p. 239, Bounded Context; review 01 corrected the earlier p. 111) *(verified)*.
 - Richardson, *Distributed tracing*: instrumentation "passes the external request id to all
   services that are involved in handling the request", possibly as part of a microservice chassis
   *(verified, https://microservices.io/patterns/observability/distributed-tracing.html)*.

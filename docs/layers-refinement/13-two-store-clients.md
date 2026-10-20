@@ -43,10 +43,11 @@ Question 5, "In a diff":
 
 ## Grounding
 
-- Khononov, *Learning DDD* ch. 9, Outbox: the aggregate's state and its outgoing events commit in
-  one atomic transaction; with a NoSQL database that lacks multi-document transactions, "the
-  outgoing domain events have to be embedded in the aggregate's record" *(secondary summaries and
-  a reader's highlight; not checked against the book)*.
+- Khononov, *Learning DDD* ch. 9 pp. 145–147 (print edition), Outbox: "Both the updated
+  aggregate's state and the new domain events are committed in the same atomic transaction";
+  "When using a NoSQL database that doesn't support multidocument transactions, the outgoing
+  domain events have to be embedded in the aggregate's record"; "the outbox pattern guarantees
+  delivery of the messages at least once" *(verified verbatim, review 01)*.
 - Vernon, *IDDD* ch. 10: one aggregate per transaction. "Lack of Technical Mechanisms" is one of
   his "Reasons to Break the Rules": with no messaging, timers or background threads, a team
   modifies several aggregates in one transaction *(verified against O'Reilly's preview)*. "Global

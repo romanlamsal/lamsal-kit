@@ -40,9 +40,11 @@ language and the sender conforms to it. Run the derivation test on that; add a c
   calls *(definition as summarized on Wikipedia; book wording from memory)*.
 - Vernon, *IDDD* ch. 13: notifications are published in a published language (media types)
   *(from memory)*.
-- Khononov, *Learning DDD* ch. 15 separates public events from private ones *(from memory; the
-  chapter's table of contents confirms "Types of Events" and "Designing Event-Driven
-  Integration", not the passage itself)*.
+- Khononov, *Learning DDD* ch. 9 p. 140 and ch. 15 p. 245 (print edition) separate "private
+  events that are intended for the bounded context's internal needs and public events that are
+  designed for integration"; "It's a common mistake to design and expose a published language for
+  the model's objects and allow domain events to be published as they are" *(verified, review
+  01)*.
 
 ## Done when
 
@@ -93,10 +95,10 @@ checker passes, and the failure shows at runtime in another system.
 
 **Grounding added**
 
-- Khononov, *Learning DDD*: the outbox publishes an aggregate's domain events reliably, state and
-  outbox row in one transaction; private events stay in the bounded context, public ones are
-  chosen for others *(secondary summaries: https://www.web-developpeur.com/en/library/learning-domain-driven-design/,
-  https://eda-visuals.boyney.io/visuals/internal-vs-external-events; book wording unchecked)*.
+- Khononov, *Learning DDD* ch. 9 pp. 145–147: the outbox publishes an aggregate's domain events
+  reliably, state and outbox row in one transaction; ch. 15 p. 245, "Assume the worst": "Events
+  will arrive out of order. Events will be duplicated." and "Use public and private events"
+  *(verified, review 01; the spec's "not found in any source" was wrong)*.
 - Vernon, *IDDD* ch. 13: versioned media types for notifications; consumers read them without
   the publisher's classes *(from memory)*.
 - Fallback: Richardson, *Microservices Patterns* ch. 3: message schemas evolve compatibly

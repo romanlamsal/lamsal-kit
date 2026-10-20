@@ -30,7 +30,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `07-errors-in-published-language.md` | closed (c40be8e) | |
 | `08-assembly-per-process.md` | closed (c40be8e) | |
 | `09-messages-in-published-language.md` | closed (dedd87d) | |
-| `10-inbound-translation.md` | closed (c30b656) | controllers row settled here |
+| `10-inbound-translation.md` | closed (c30b656) | controllers row settled here; review 01 made the infrastructure received, not imported |
 | `11-saga-state.md` | closed (746cb5a) | |
 | `12-side-effects-through-outbox.md` | closed (bef2a8d) | absorbs open question A |
 | `13-two-store-clients.md` | closed (879dfc1) | a store is what one transaction port reaches |
@@ -61,24 +61,36 @@ Gaps the review found and dropped; reopen only with a new failure.
 - Stale reads across systems in the UI: `components.md`'s concern, not this one's.
 - The caller of a cron job or webhook: the controller resolves the caller.
 - Migrations: the stack document, or the repository.
+- Auto-instrumentation load order: the stack document (ticket 08).
+- Payload's collection config re-declaring domain fields: the store schema is the store's; the
+  repository maps it (the second-constructor row above, applied to a product).
+- Request id and trace context crossing system boundaries: by ticket 15's rule nothing is decided
+  by an ambient value, so crossing changes nothing; deliberately unsaid.
 
 ## Grounding to verify
 
-Every Evans, Vernon and Khononov citation in the tickets is from memory; the books were not
-reachable online. Check them against the books before quoting them in `layers.md`; the least
-certain is Khononov's saga as one coordinating component, which `layers.md` already relies on
-(ticket 11). Fallback citations (Fowler, Richardson) are from memory too. Ticket 09 adds: Vernon
-ch. 13 versioned media types, Richardson ch. 3 compatible message schemas, all from memory;
-Khononov's "assume the worst; use the outbox" heuristic was not found in any source. Ticket 13 adds:
-Khononov's outbox committing state and events in one atomic transaction, and events embedded in
-the aggregate's record for stores without multi-document transactions, both from secondary
-summaries and a reader's highlight. Ticket 14 adds: Richardson ch. 4's compensatable step, from
-memory.
+Vernon citations in the tickets are from memory; the book was not reachable. Fallback citations
+(Fowler, Richardson) are from memory too: Richardson's consumer-driven contracts (ch. 9–10,
+ticket 17), compatible message schemas (ch. 3, ticket 09) and the compensatable step (ch. 4,
+ticket 14) are unchecked.
+
+Checked against Khononov, *Learning DDD* (print edition page numbers), in review 01: the saga and
+process manager (ch. 9 pp. 147–152, ticket 11); the outbox, embedded events and at-least-once
+(ch. 9 pp. 145–147, ticket 13, verbatim); private and public events (ch. 9 p. 140, ch. 15 p. 245,
+ticket 09); "Assume the worst": events arrive out of order and duplicated (ch. 15 p. 245, which
+an earlier version of this paragraph said was not found); stateless translation and the message
+proxy (ch. 9 pp. 138–140, ticket 10); one aggregate per transaction (ch. 6 p. 87); the
+application service as transaction script (ch. 6 p. 86); conformist and anti-corruption criteria
+(ch. 4 pp. 53–54); event-carried state transfer (ch. 15 pp. 237–238, 246).
 
 Checked against Evans's final manuscript (April 15, 2003; pages run about 100 below the hardcover):
 the two-way anti-corruption layer (pp. 258–259, ticket 10), the conformist copying the upstream
-model (p. 256, ticket 09), the published language's definition (p. 264), integration across a
-bounded context's boundary as explicit translation (p. 111, ticket 15).
+model (pp. 255–256, ticket 09), the published language's definition and its "essentially becomes
+frozen" warning (p. 264), integration across a bounded context's boundary as explicit translation
+(p. 239, Bounded Context, ticket 15; an earlier version said p. 111).
+
+Freeman & Pryce's "only mock types you own" (ticket 17) argues for consumer-owned interfaces, away
+from a provider's fake.
 
 Checked against O'Reilly's preview of Vernon, *IDDD* ch. 10: "Lack of Technical Mechanisms" and
 "Global Transactions" are reasons to break one aggregate per transaction (ticket 13).

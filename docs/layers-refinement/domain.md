@@ -55,6 +55,22 @@ billing).
   - Auto-instrumentation must load before any other import.
   - Request id and trace context should cross system boundaries; the transaction must not.
 
+## Placed as a fault
+
+Edge cases above that `layers.md` now places as something the codebase must not do. A ticket
+that meets one does not re-litigate it; it reopens the ticket named.
+
+- The common library's ambient unit of work in `AsyncLocalStorage`: the transaction context is
+  passed, never ambient (ticket 15).
+- Shop calling billing's open host service inside its own `tx.run`: the call moves outside the
+  transaction; billing's driving port takes no context (ticket 15).
+- The admin dashboard joining orders, invoices and shipments in one repository: a read across
+  systems goes through each owner's open host service or a copy (ticket 06).
+- Payload's `afterChange` hook calling shop services directly on shop's own write: the hook does
+  nothing when this system is the caller (ticket 18).
+- A service of one system calling another service of the same system: a second transaction;
+  repositories in one `run`, or the outbox (review 01, R01-11).
+
 ## The checkout saga
 
 1. shop places the order and publishes `OrderPlaced`; fulfillment reserves the stock.
