@@ -221,10 +221,26 @@ tables sit in this system's database.
 - **Where this system stores an aggregate in a product, the product's screens may read it.** A
   change made there is an action — a button, an endpoint — whose driving adapter calls this
   system's service.
-- **A product's hooks and scheduled tasks are driving adapters.** Act on a product's change only
-  once the product has committed it: a hook may run inside the product's transaction, whatever its
-  name. Where it does, the hook leaves its work to a handler that first checks the change through
-  the product. Changes lost in between are repaired by reconciliation.
+- **A product's hooks and scheduled tasks are driving adapters**, and the constraints on driving
+  adapters apply to them. For a hook:
+  - **It asks**, such as whether a change is valid → it asks, at any point.
+  - **It acts** → answer in order:
+    1. **The product has committed the change** → the hook acts through one service.
+    2. **The product's caller needs this system's work before the product answers it**, such as a
+       profile for a user signing up → the hook acts now, through one service, in this system's
+       own transaction. If the product rolls back, the saga or reconciliation undoes the work. A
+       hook the product runs after its commit does the same with nothing to undo, and is preferred
+       where the product offers one.
+    3. **The hook runs inside the product's transaction, and a write there commits and rolls
+       back with the change** (the product hands the hook its transaction, and the outbox is in a
+       store that transaction reaches) → the hook writes only a message there, to this system's
+       outbox or the product's, as each codebase chooses. Nothing is lost.
+    4. **Otherwise**, inside the transaction or before it opens → the hook leaves its work to a
+       handler that first checks the change through the product.
+
+  Steps 2 and 3 are this document's choice; the sources do not cover a product's transaction. A
+  hand-off, or an act after the commit, is lost when the process stops first and the product
+  does not run the hook again; reconciliation repairs it.
 - **A product that calls back is a cycle by design.** Its config needs the hooks, the hooks need
   services, the services need adapters over the product's instance, and the instance needs the
   config. Assembly breaks it by late binding: an adapter receives a function that returns the
@@ -233,7 +249,8 @@ tables sit in this system's database.
 ## Transactions
 
 **Writes that must land together share one transaction, and the transaction stays inside its
-system.** For each piece of data the use case touches, answer in order:
+system**, except a message a product's hook writes in the product's transaction (Products). For
+each piece of data the use case touches, answer in order:
 
 1. **Does it change data another system owns — a third party's included, such as a mail sent or
    a payment created?** → **Outbox, required.** Write a message to this system's outbox in the
