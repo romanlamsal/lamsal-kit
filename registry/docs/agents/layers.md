@@ -135,11 +135,20 @@ export const createOrderService = (deps: {
 }): OrderService => ({ ... })    // driving port, declared here
 ```
 
-**Assembly is not a layer.** One module per process builds the adapters, calls the factories and
-the build functions other systems export, and hands the result to the controllers. It is the only
-place that knows both a port and its implementation. Keep it separate from the factories: a
-service module exports only its factory, and assembly holds the instances, so every dependency
-but fixed plumbing (question 7) is one a factory declared.
+**Assembly is not a layer.** Each entry — a server's start, a relay worker, a product's config —
+has one root that builds what that entry runs: it builds the adapters, calls the factories and
+the build functions systems export, and hands the result to its driving adapters. One process
+may load two entries, such as a server and a product's config: each keeps its root, and what both
+need is built once by one root and imported by the other, as the reasons to escalate (Other
+systems) decide. Assembly is the only place that knows both a port and its implementation. Keep
+it separate from the factories: a service module exports only its factory, and assembly holds the
+instances, so every dependency but fixed plumbing (question 7) is one a factory declared.
+
+**A driving adapter receives its service from the root**: as an argument where the entry
+constructs the adapter; by importing the root where the framework constructs it, such as a
+server function or a product's hook. That import is the one place a driving adapter imports
+assembly. One root per entry is this document's choice; the sources say only that whoever
+starts the application wires it.
 
 **Atomicity crosses ports through a transaction port.** The service asks to run something inside
 a transaction; repository methods take the context it hands back. The context is opaque in the
@@ -170,8 +179,8 @@ driven ports stay inside; they are its needs, not its offer. Export:
 
 - the published language, for other systems to import;
 - the driving port types, for other systems to import;
-- a function that takes configuration and builds the open host service, for another system's
-  assembly to call;
+- a function that takes configuration and builds the open host service, for a root or another
+  system's build function to call. That function is the system's assembly;
 - where it handles messages, a function that takes configuration and builds its message handler,
   for the assembly that hands it to the relay. Whether one function builds both the open host
   service and the handler, and which process runs the relay, is each codebase's choice;
@@ -189,7 +198,7 @@ exports, which a linter can hold from import paths alone.
 export type { Pricing } from "./service/pricing.port"
 export { Quote, PriceList, PriceListChanged } from "./domain/quote"
 
-// builds the open host service: for another system's assembly
+// builds the open host service: for a root or another system's build function
 export const createPricing = (config: PricingConfig): Pricing => ...
 ```
 
@@ -229,10 +238,11 @@ choices decide where code goes:
 The other context-map patterns describe how teams cooperate; in code, each lands as one of these
 three, or as no integration at all.
 
-**The consuming system's assembly builds the other system, by default; escalate when that stops
-being true.** A's assembly calls the function B exports to build its open host service, and
-nothing else of A learns how B is built.
-Move that call up into a composition root that wires both systems once, when:
+**The consuming system's build function builds the other system, by default; escalate when that
+stops being true.** A's build function calls the function B exports to build its open host
+service, and nothing else of A learns how B is built.
+Move that call up into the entry's root, which builds B once and hands it to A's build function,
+when:
 
 - a second consuming system would build B again, and B holds something that must exist once — a
   cache, a pool, a subscription;
@@ -240,7 +250,7 @@ Move that call up into a composition root that wires both systems once, when:
 - two systems would assemble each other — a cycle in the context map, which usually means a
   boundary is drawn wrong. A product that calls back is the exception (Products).
 
-Until one of these holds, a root is ceremony.
+Until one of these holds, building B inside the root is ceremony.
 
 ### Products
 
@@ -554,12 +564,12 @@ inputs and observable results.
 - **Using a conformed system's terms directly is the design working**, not a leak.
 - **A service calling another system's driving port is calling a port**, not a use case nested in
   another.
-- **A system's assembly building another system itself is correct** until one of the reasons to
-  escalate holds.
+- **A system's build function building another system itself is correct** until one of the
+  reasons to escalate holds.
 - **Another system catching up a moment later is the design working.** Between systems,
   consistency is eventual.
 - **Not everything gets a layer.** Code that asserts about the source tree rather than about the
-  application sits outside these layers, and so do the module that assembles them, a system's
+  application sits outside these layers, and so do the roots that assemble them, a system's
   exported entries and the common library.
 - **The checklist is a prompt to look.** Concluding that a case is fine is a complete answer.
 

@@ -75,6 +75,8 @@ that meets one does not re-litigate it; it reopens the ticket named.
 - Shop's price adapter over Payload's Local API placed as anything but a driven adapter: it is
   one, and imports Payload's instance as any driven adapter imports what its port's
   implementation needs; there is no repository layer to fit it into (ticket 19).
+- A server function built as a factory with no caller, or importing a service instance from a
+  service module: a driving adapter the framework constructs imports the root (ticket 20).
 
 ## The checkout saga
 
