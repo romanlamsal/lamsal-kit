@@ -34,14 +34,14 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `11-saga-state.md` | closed (746cb5a) | |
 | `12-side-effects-through-outbox.md` | closed (bef2a8d) | absorbs open question A |
 | `13-two-store-clients.md` | closed (879dfc1) | a store is what one transaction port reaches |
-| `14-hook-writes-product-transaction.md` | ready | generality test may rule it out |
+| `14-hook-writes-product-transaction.md` | closed (badd398) | hook as a decision tree; only a message in the product's transaction |
 | `15-ambient-transaction-scope.md` | closed (3aa71b4) | retitled: what may be held ambient |
 | `16-relay-wiring.md` | closed (d6ee97c) | resolves open question B |
 | `17-fakes-of-other-systems.md` | closed (97e2dc2) | resolves open question C |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
 | `open-questions.md` B | closed (d6ee97c) | resolved into 16 |
 | `open-questions.md` C | closed (97e2dc2) | resolved into 17 |
-| `open-questions.md` D | ready | grill; after 14 |
+| `open-questions.md` D | ready | grill next |
 
 Tickets 01–08 were applied before the `## Decision` convention; they carry none.
 
@@ -71,7 +71,8 @@ ch. 13 versioned media types, Richardson ch. 3 compatible message schemas, all f
 Khononov's "assume the worst; use the outbox" heuristic was not found in any source. Ticket 13 adds:
 Khononov's outbox committing state and events in one atomic transaction, and events embedded in
 the aggregate's record for stores without multi-document transactions, both from secondary
-summaries and a reader's highlight.
+summaries and a reader's highlight. Ticket 14 adds: Richardson ch. 4's compensatable step, from
+memory.
 
 Checked against Evans's final manuscript (April 15, 2003; pages run about 100 below the hardcover):
 the two-way anti-corruption layer (pp. 258–259, ticket 10), the conformist copying the upstream
