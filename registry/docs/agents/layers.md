@@ -52,7 +52,7 @@ they are about what a function *does* rather than where it imports from.
 | layer | what it is | may import | does |
 | --- | --- | --- | --- |
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, a conformed system's published language, a shared kernel, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
-| **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
+| **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each for writes, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, the common library's ports, and the published language and driving-port types of a system it conforms to | receives its dependencies; writes through repositories |
 | **infrastructure** | adapters for other systems — mail, rendering, third-party APIs, a system behind an anti-corruption layer — and every other driven adapter: a clock, a cache, blob storage | domain, the common library, and the published language and driving-port types of a system it translates | translates between this system's ports and the other system |
 | **controllers** | driving adapters: entry points, their validators | services and domain; it receives ports of infrastructure that resolves or translates its caller, as it receives its service | reaches the store only through a service |
@@ -139,10 +139,11 @@ export const createOrderService = (deps: {
 }): OrderService => ({ ... })    // driving port, declared here
 ```
 
-**Assembly is not a layer.** One module per process builds the adapters, calls the factories, and
-hands the result to the controllers. It is the only place that knows both a port and its
-implementation. Keep it separate from the factories: a service module exports only its factory,
-and assembly holds the instances, so every dependency is one a factory declared.
+**Assembly is not a layer.** One module per process builds the adapters, calls the factories and
+the build functions other systems export, and hands the result to the controllers. It is the only
+place that knows both a port and its implementation. Keep it separate from the factories: a
+service module exports only its factory, and assembly holds the instances, so every dependency
+but fixed plumbing (question 7) is one a factory declared.
 
 **Atomicity crosses ports through a transaction port.** The service asks to run something inside
 a transaction; repository methods take the context it hands back. The context is opaque in the
@@ -234,8 +235,8 @@ The other context-map patterns describe how teams cooperate; in code, each lands
 three, or as no integration at all.
 
 **The consuming system's assembly builds the other system, by default; escalate when that stops
-being true.** A's assembly calls the function B exports to build its open host service, and nothing else of A
-learns how B is built.
+being true.** A's assembly calls the function B exports to build its open host service, and
+nothing else of A learns how B is built.
 Move that call up into a composition root that wires both systems once, when:
 
 - a second consuming system would build B again, and B holds something that must exist once — a
@@ -274,8 +275,8 @@ tables sit in this system's database.
        one service, handing it the product's transaction as the context repositories take; the
        service writes only a message there, to this system's outbox or the product's, as each
        codebase chooses. Nothing is lost.
-    4. **Otherwise**, inside the transaction or before it opens → the hook leaves its work to a
-       handler that first checks the change through the product.
+    4. **Otherwise**, inside the transaction or before it opens → the hook hands its work,
+       in-process, to a handler that first checks the change through the product.
 
   Steps 2 and 3 are this document's choice; the sources do not cover a product's transaction. A
   hand-off, or an act after the commit, is lost when the process stops first and the product
@@ -304,8 +305,10 @@ each piece of data the use case touches, answer these rules in order:
    is recorded. Make the call safe to repeat: the other system recognises a repeat however it
    can — a key it dedupes on, this system's id stored on its side and looked up first. A driving
    port a system calls after its commit recognises a repeat. Where a third party cannot, a repeat
-   may duplicate. A failure after the commit, and a duplicate, are repaired by the saga or by
-   reconciliation. This exception is this document's choice; the sources do not cover it.
+   may duplicate. The pending state is the retry: a handler or scheduled task of this system
+   repeats the call until the answer is recorded or a deadline passes. A duplicate is repaired
+   by the saga or by reconciliation. This exception is this document's choice; the sources do
+   not cover it.
 2. **Does it read data another system owns?** → **Call the owner's open host service.** If it
    offers no fitting read, keep a copy in this system, updated by the owner's messages. In this
    case, the owner publishes.
@@ -445,10 +448,10 @@ parked in a repository.
 body or a factory body, rather than passed in. Also: a module exporting a ready-made instance
 next to the factory that produces it.
 
-This one is invisible to questions 1–6 — the code sits in the right layer and imports nothing the
-arrow forbids. What it breaks is substitution: the service can no longer be given a different
-implementation, so its tests need the real one. Plumbing with one fixed configuration, such as a
-logger or a tracer, may be a ready-made instance: nobody substitutes it.
+Constructed in place, this one is invisible to questions 1–6 — the code sits in the right layer
+and calls along the arrow. What it breaks is substitution: the service can no longer be given a
+different implementation, so its tests need the real one. Plumbing with one fixed configuration,
+such as a logger or a tracer, may be a ready-made instance: nobody substitutes it.
 
 ```
 // service/order.ts — the fault

@@ -199,11 +199,12 @@ seven fixed in the last commit. Left for a next round, all pre-existing:
 | id | finding | note |
 | --- | --- | --- |
 | R01-53 | Products: a product screen's change of this system's aggregate bypasses "the only entry for doing something" and "an aggregate belongs to the system whose use cases write it" | ruled: field read-only in the product; a change comes through an action that calls this system's service. Naming an exception would keep a second writer with no use case behind it, skipping the aggregate's rules (a derived price). R01-13's "already stored" dropped |
-| R01-54 | Q7 "a concrete adapter imported into a service file" is a linter-visible import, yet Q7 says it is "invisible to questions 1–6"; "the arrow" reads as import direction | drop the import clause from Q7's tell, or say the arrow is the call path |
-| R01-55 | repository row "one aggregate each, composes nothing" vs reporting read across aggregates | "one aggregate each for writes" |
-| R01-56 | rule 1's exception: who retries a failed call after the commit; reconciliation repairs records, it does not make the call | "the pending state is the retry: a handler or scheduled task repeats the call until the answer is recorded or the deadline passes" |
-| R01-57 | hook step 4's hand-off mechanism unsaid | "in-process" |
-| R01-58 | assembly "one module per process" vs each system's exported builder; "every dependency is one a factory declared" vs ready-made plumbing in Q7 | "one module per process, calling each system's builder"; "but fixed plumbing" |
+| R01-54 | Q7 "a concrete adapter imported into a service file" is a linter-visible import, yet Q7 says it is "invisible to questions 1–6"; "the arrow" reads as import direction | fixed: "constructed in place, this one is invisible … and calls along the arrow" |
+| R01-55 | repository row "one aggregate each, composes nothing" vs reporting read across aggregates | fixed as proposed |
+| R01-56 | rule 1's exception: who retries a failed call after the commit; reconciliation repairs records, it does not make the call | fixed as proposed |
+| R01-57 | hook step 4's hand-off mechanism unsaid | fixed as proposed |
+| R01-58 | assembly "one module per process" vs each system's exported builder; "every dependency is one a factory declared" vs ready-made plumbing in Q7 | fixed: "calls the factories and the build functions other systems export"; "every dependency but fixed plumbing (question 7)" |
+| R01-59 | repository row imports "the store client, the common library, the domain", but an aggregate stored in a product needs the product's instance and types, which only the infrastructure row may import (found by the R01-53 placement test) | needs a ruling: repository row "the store client, or the product the aggregate is stored in", or the Local API adapter is infrastructure |
 
 ### Pickup for the next session
 
