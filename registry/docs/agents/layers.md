@@ -2,50 +2,61 @@
 
 Where server code goes and what it is allowed to touch.
 
-**Preconditions.** The repository layer assumes a store that can be read and written. Where this
-document says *transaction*, it assumes the store can apply several writes atomically; if yours
-cannot, question 5 does not apply. *Table*, *row* and *aggregate* are used in the relational
-sense — substitute your store's equivalents.
+**Preconditions.** This document assumes a store that can be read and written. A *store*,
+in this document's narrowing, is what one transaction port makes atomic: several clients are one
+store where one port makes their writes atomic together, and two clients of one database are two
+stores until one port reaches both. Which it is, is each codebase's choice. Where
+this document says *transaction*, it assumes the store can apply several writes atomically; where
+one cannot, question 5 ("Did one transaction quietly become several?") does not apply to it, and an
+aggregate's outgoing messages are embedded in its own record. *Table*, *row* and *aggregate* are
+used in the relational sense — substitute your store's equivalents.
 
-**Terms.** A *controller* is a driving adapter: it resolves the caller, validates, calls into
-one thing, and returns. It takes its rules from the domain. `components.md` applies the same role to
-route files on the client; the difference is writes — a server controller passes a write through
-to one service, a route controller does not carry writes at all.
+**Terms.** A *controller* is a driving adapter: it resolves the caller (a session, a signature, a
+key), validates, acts through one service, and returns. It takes its rules from the domain.
+`components.md` applies the same role to route files on the client; the difference is writes — a
+server controller passes a write through to one service, a route controller does not carry writes
+at all.
 
 A *port* is an interface, never the code behind it. A *driving port* is the interface to a use
 case — the way in, something a controller calls. A *driven port* is something the code needs from
 outside — the way out: store an aggregate, send a mail, put a file somewhere. Who starts the call
-decides which: the outside starts it, driving; this system starts it, driven. An *adapter* sits on
-the far side of a port: a *driving adapter* calls a driving port, a *driven adapter* implements a
-driven port. Controllers are driving adapters; repositories and infrastructure are driven
-adapters. This is ports and adapters as Vernon joins it to DDD; where this document narrows a
-term, the narrowing applies.
+decides which: the outside starts it, driving; this system starts it, driven. A clock is outside:
+a scheduled task is a driving adapter. An *adapter* sits on the far side of a port: a *driving
+adapter* calls a driving port, a *driven adapter* implements a driven port. A controller is a
+driving adapter; a *repository* is a driven port over one aggregate's storage, and its adapter is
+a driven adapter like a mailer's. This is ports and adapters as Vernon joins it to DDD.
 
 A *system* is one bounded context: code with its own domain and its own glossary, laid out by
-this document. A repository may hold several. Another bounded context is another system, even
+this document. A code repository may hold several. Another bounded context is another system, even
 when it is imported in-process as a package; so is a product (Products). An aggregate belongs to
-the system whose use cases write it, wherever it is stored.
+the system whose use cases write it, wherever it is stored; a record two systems write is two
+aggregates sharing an id.
 
 A *common library* is plumbing every system may import: the transaction port, store clients, a
-logger, the outbox relay. It holds no model.
+logger, a tracer, the outbox port and its relay. It holds no model.
 
-This document is written for review. The faults below are the ones a linter cannot see, because
+*Reconciliation* is a use case of the system that owns an aggregate: it compares what this
+system recorded with what another system holds, and repairs this system's record. A scheduled
+task of this system, or any driving adapter that finds the two apart, calls it. A scheduled task
+of this system is a driving adapter.
+
+The sources are Evans, Vernon, Khononov and Cockburn; where this document departs from one, it
+says so.
+
+This document is written for review. Most faults below are ones a linter cannot see, because
 they are about what a function *does* rather than where it imports from.
 
 ## The layers
 
 | layer | what it is | may import | does |
 | --- | --- | --- | --- |
-| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
-| **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the open host service of a system it conforms to | receives its dependencies; writes through repositories |
-| **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the open host service of a system it translates | translates between this system's ports and the other system |
-| **controllers** | driving adapters: entry points, their validators | services, domain, session infrastructure | reaches the store only through a service |
+| **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, a conformed system's published language, a shared kernel, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, the common library's ports, and the published language and driving-port types of a system it conforms to | receives its dependencies; writes through repositories |
+| **driven adapters** | implementations of this system's driven ports: an aggregate's repository, a mailer, a clock, a cache, blob storage, another system behind an anti-corruption layer | whatever its port's implementation needs — a store client, a product's instance and its types, an HTTP client — the domain, the common library, and the published language and driving-port types of the system it calls | an adapter over this system's aggregate serves one aggregate for writes, composes nothing, and joins the caller's transaction; an adapter over another system translates between this system's ports and that system |
+| **driving adapters** | entry points: controllers, hooks, scheduled tasks, message handlers, their validators | services and domain; it receives ports that resolve or translate its caller, as it receives its service | reaches the store only through a service |
 
-The arrow runs one way — controller → service → repository → store — and the domain sits beside
-all of it: every layer may import it, it imports no layer. Repository and infrastructure are both
-driven-adapter layers; they differ only in subject matter, one implementing ports for this
-system's aggregates and the other for somebody else's.
+The arrow runs one way — driving adapter → service → driven adapter → the outside — and the
+domain sits beside all of it: every layer may import it, it imports no layer.
 
 **"Imports no layer" is about this system's modules, not about packages.** The test for a package
 in the domain is whether calling it can reach outside the process: a store client, an HTTP client,
@@ -74,8 +85,10 @@ the other's whole record, such as a populated relationship, carries the other's 
 aggregate.
 
 In the vocabulary of domain-driven design, **domain** is the model, **service** is the
-application layer, **infrastructure** and **repository** are both infrastructure, and
-**controllers** are the interface layer.
+application layer, **driving adapters** are Evans's interface layer and **driven adapters** his
+infrastructure layer; Khononov's infrastructure layer holds both. A *repository* is Evans's
+pattern: a driven port over one aggregate's storage, declared in the domain and implemented by a
+driven adapter.
 
 **A driving adapter acts through one service and asks through the domain.** To act, it calls one
 service function; needing two is the signal that a use case has grown inside it. To answer a
@@ -84,11 +97,26 @@ question about a rule — may this caller do this, is this input valid — it ca
 answer needs data the adapter does not hold, a service of its system loads the data and asks the
 specification.
 
+Where its caller may deliver more than once — a relay, a webhook, a product's hook — the caller
+may do three things. Each is a fault the adapter prevents:
+
+- **Deliver the same thing again, however late.** Handling it a second time changes nothing. The
+  fault: a relay replays its whole outbox, and every change is applied twice.
+- **Deliver out of order.** A delivery about something this system has not recorded yet is not a
+  repeat. The fault: `OrderCancelled` arrives before `OrderPlaced`, is taken for a duplicate, and
+  the cancellation is lost.
+- **Stop delivering.** A relay retries until the handler succeeds, so failing is safe there. A
+  vendor's webhook stops after a few tries, and a product may not run a hook again, so a handler
+  of one records what it was given, through its one service, before anything that can fail. The
+  fault: the handler throws
+  on an early delivery, and the caller never sends it again. What is lost anyway, reconciliation
+  finds by asking the other system, where it can be asked.
+
 ## Ports and factories
 
-**Driven ports live in the domain.** The rules declare what they need — store this order, send
-this mail — and adapters in the repository and infrastructure layers implement it. The domain
-names ports only; assembly picks their implementations.
+**Driven ports this system declares live in its domain.** The rules declare what they need —
+store this order, send this mail — and driven adapters implement it. The domain names ports
+only; assembly picks their implementations.
 
 **Driving ports live beside the service that satisfies them.** A use case is not a domain
 concept, so the domain never learns the name of one. This is what keeps the arrow pointing in one
@@ -102,24 +130,29 @@ Nothing inside it constructs anything.
 export const createOrderService = (deps: {
   orders: OrderRepository        // driven port, from the domain
   invoices: InvoiceRepository    // driven port, from the domain
-  mailer: Mailer                 // driven port, from the domain
+  outbox: Outbox                 // driven port, from the common library
   tx: TransactionRunner          // driven port, from the common library
 }): OrderService => ({ ... })    // driving port, declared here
 ```
 
-**Assembly is not a layer.** One module builds the adapters, calls the factories, and hands the
-result to the controllers. It is the only place that knows both a port and its implementation.
-Keep it separate from the factories: a service module exports only its factory, and assembly
-holds the instances, so every dependency is one a factory declared.
+**Assembly is not a layer.** Each entry — a server's start, a relay worker, a product's config —
+has one root that builds what that entry runs: it builds the adapters, calls the factories and
+the build functions systems export, and hands the result to its driving adapters. One process
+may load two entries, such as a server and a product's config: each keeps its root, and what both
+need is built once by one root and imported by the other, as the reasons to escalate (Other
+systems) decide. Assembly is the only place that knows both a port and its implementation. Keep
+it separate from the factories: a service module exports only its factory, and assembly holds the
+instances, so every dependency but fixed plumbing (question 7) is one a factory declared.
+
+**A driving adapter receives its service from the root**: as an argument where the entry
+constructs the adapter; by importing the root where the framework constructs it, such as a
+server function or a product's hook. That import is the one place a driving adapter imports
+assembly. One root per entry is this document's choice; the sources say only that whoever
+starts the application wires it.
 
 **Atomicity crosses ports through a transaction port.** The service asks to run something inside
 a transaction; repository methods take the context it hands back. The context is opaque in the
 domain, so nothing there names the store or its client.
-
-The transaction port belongs to the common library. Whether its context is passed explicitly, as
-below, or held ambient — a unit of work in `AsyncLocalStorage`, implemented in the common library
-— is each codebase's choice; say which. Explicit context keeps every join visible in a diff.
-Ambient context keeps it out of every port's signature.
 
 ```
 // service: two aggregates, one transaction
@@ -129,45 +162,57 @@ await tx.run(async (ctx) => {
 })
 ```
 
-**A per-request value may be held ambient** — Fowler's registry, scoped per request; the
-transaction context and a request id are the common cases. A driving adapter puts it in;
-services, repositories and infrastructure read it; the domain takes everything as arguments. Say
-which values are held ambient.
+**A value that influences nothing a use case or domain function decides may be held ambient** —
+Fowler's registry, scoped per request: a request id, a trace context, the locale a mail is
+rendered in, the user an audit column records until a rule decides by it. A driving adapter puts
+it in; services and adapters read it; the domain takes arguments. A value a message's handler
+needs goes in the message, since the handler runs in another request. The transaction context
+is not ambient: what a read returns depends on it. The line is this document's choice; which
+values a codebase holds ambient, it says in an ADR.
 
 ## Other systems
 
-**A system offers an open host service: its driving ports, and their *published language* — the
-schemas and types those ports take and return.** Its driven ports stay inside; they are its needs,
-not its offer. Export three things:
+**A system offers an open host service: its driving ports and its *published language* — the
+schemas, types and errors those ports take, return and raise, and the messages the system
+publishes, if any; a message only this system handles is private and is not published.** Its
+driven ports stay inside; they are its needs, not its offer. Export:
 
 - the published language, for other systems to import;
 - the driving port types, for other systems to import;
-- a function that takes configuration and builds the open host service, for another system's
-  assembly to call.
+- a function that takes configuration and builds the open host service, for a root or another
+  system's build function to call. That function is the system's assembly;
+- where it handles messages, a function that takes configuration and builds its message handler,
+  for the assembly that hands it to the relay. Whether one function builds both the open host
+  service and the handler, and which process runs the relay, is each codebase's choice;
+- optionally, a fake of its driving ports, for other systems' tests, from an entry production
+  does not load.
 
 Give the published language and the port types an entry that loads only the domain, so another
-system imports them without loading any service. Other systems import these three and nothing
-else of the system, which a linter can hold from import paths alone.
+system imports them without loading any service; the port types are exported type-only, or the
+entry loads the service that declares them. Other systems reach a system only through these
+exports, which a linter can hold from import paths alone.
 
 ```
-// billing's entries — file names are the codebase's
+// pricing's entries — file names are the codebase's
 // published language and port types: loads only the domain
-export type { BillingService } from "./service/billing.port"
-export { Invoice, InvoiceStatus } from "./domain/invoice"
+export type { Pricing } from "./service/pricing.port"
+export { Quote, PriceList, PriceListChanged } from "./domain/quote"
 
-// builds the open host service: for another system's assembly
-export const createBilling = (config: BillingConfig): BillingService => ...
+// builds the open host service: for a root or another system's build function
+export const createPricing = (config: PricingConfig): Pricing => ...
 ```
 
 **The published language is the domain's own schemas, by default.** A separate language is
 allowed where the domain must change without breaking other systems; record the reason in an ADR.
-Khononov keeps the two apart from the start; re-exporting the domain is this document's choice.
+Khononov keeps the two apart from the start; re-exporting the domain, messages included, is this
+document's choice.
 
-**One system's driving port is the other's driven port.** To B, `BillingService` is the way in; to
+**One system's driving port is the other's driven port.** To B, `Pricing` is the way in; to
 A's service it is a dependency it receives — a way out, like a mailer. A service calling it is not
 one use case calling another; it is a use case calling a port. What sits behind the port is
-assembly's decision: B's service in-process, or an HTTP client in A's infrastructure implementing
-the same port. Moving B out of process changes assembly and nothing else.
+assembly's decision: B's service in-process, or an HTTP client, a driven adapter of A,
+implementing the same port. Moving B out of process changes assembly and adds that adapter; no
+service or domain changes.
 
 **A driving port another system calls takes its caller as an argument.** A consumer reaches B's
 service without passing B's controllers, so whatever those controllers resolve — who is calling,
@@ -179,21 +224,25 @@ choices decide where code goes:
 - **Conformist.** This system adopts the other's published language: its terms, schemas and
   errors are used as they are, in any layer that may import a domain, and its driving port is a
   driven port a service receives like any other. The default for an open host — a system that
-  publishes its model on purpose.
-- **Anti-corruption layer.** This system's domain declares a driven port in its own terms; an
-  adapter in infrastructure implements it by calling the other system's driving port and
-  translating. For a model that is foreign, unstable or not yours — a third-party API always gets
-  one.
+  publishes its model on purpose; the default is this document's choice.
+- **Anti-corruption layer.** This system's domain declares a driven port in its own terms; a
+  driven adapter implements it by calling the other system's driving port and translating. For a
+  model that is foreign, unstable or not yours, as a third-party API's usually is. On the way in —
+  a webhook, a product's hook, a message — the driving adapter that receives the other system's
+  call translates it into this system's terms before it calls a service. The other system's
+  schema and the translation live in that adapter, or in a module both adapters share; never in
+  the domain.
 - **Shared kernel.** Model two systems share, such as `Money`, goes in a module both import and
   neither changes alone.
 
 The other context-map patterns describe how teams cooperate; in code, each lands as one of these
 three, or as no integration at all.
 
-**The consuming system's assembly builds the other system, by default; escalate when that stops
-being true.** A's assembly calls the function B exports to build its open host service, and nothing else of A
-learns how B is built.
-Move that call up into a composition root that wires both systems once, when:
+**The consuming system's build function builds the other system, by default; escalate when that
+stops being true.** A's build function calls the function B exports to build its open host
+service, and nothing else of A learns how B is built.
+Move that call up into the entry's root, which builds B once and hands it to A's build function,
+when:
 
 - a second consuming system would build B again, and B holds something that must exist once — a
   cache, a pool, a subscription;
@@ -201,20 +250,42 @@ Move that call up into a composition root that wires both systems once, when:
 - two systems would assemble each other — a cycle in the context map, which usually means a
   boundary is drawn wrong. A product that calls back is the exception (Products).
 
-Until one of these holds, a root is ceremony.
+Until one of these holds, building B inside the root is ceremony.
 
 ### Products
 
 **A product with a model of its own — a CMS, an auth library — is another system**, even when its
 tables sit in this system's database.
 
-- **Where this system stores an aggregate in a product, the product's screens may read it.** A
-  change made there is an action — a button, an endpoint — whose driving adapter calls this
-  system's service.
-- **A product's hooks and scheduled tasks are driving adapters.** Act on a product's change only
-  once the product has committed it: a hook may run inside the product's transaction, whatever its
-  name. Where it does, the hook leaves its work to a handler that first checks the change through
-  the product. Changes lost in between are repaired by reconciliation.
+- **Where this system stores an aggregate in a product, the product's screens may read it; a
+  field this system owns is read-only there.** A change comes through an action there — a
+  button, an endpoint — which is a driving adapter that calls this system's service.
+- **A product's hooks and scheduled tasks are driving adapters**, and the constraints on driving
+  adapters apply to them. For a hook, answer in order:
+  - **The product's caller is this system** → this system started the call, so it is not a
+    driving call: the hook does nothing, and the use case that called the product handles the
+    change. How the hook recognises this system as the caller is each codebase's choice.
+  - **It asks**, such as whether a change is valid → a specification answers it, before or
+    inside the product's transaction.
+  - **It acts** → answer in order:
+    1. **The product has committed the change** → the hook acts through one service.
+    2. **The product's caller needs this system's work before the product answers it**, such as a
+       profile for a user signing up → the hook acts now, through one service, in this system's
+       own transaction, which touches no row the product's transaction holds. If the product
+       rolls back, reconciliation undoes the work. Where the product offers a hook that runs
+       after its commit and before it answers, step 1 applies and nothing needs undoing.
+    3. **The hook runs inside the product's transaction, and a write there commits and rolls
+       back with the change** (the product hands the hook its transaction, and the outbox is in a
+       store this system's transaction port reaches through that transaction) → the hook calls
+       one service, handing it the product's transaction as the context repositories take; the
+       service writes only a message there, to this system's outbox or the product's, as each
+       codebase chooses. Nothing is lost.
+    4. **Otherwise**, inside the transaction or before it opens → the hook hands its work,
+       in-process, to a handler that first checks the change through the product.
+
+  Steps 2 and 3 are this document's choice; the sources do not cover a product's transaction. A
+  hand-off, or an act after the commit, is lost when the process stops first and the product
+  does not run the hook again; reconciliation repairs it.
 - **A product that calls back is a cycle by design.** Its config needs the hooks, the hooks need
   services, the services need adapters over the product's instance, and the instance needs the
   config. Assembly breaks it by late binding: an adapter receives a function that returns the
@@ -222,39 +293,72 @@ tables sit in this system's database.
 
 ## Transactions
 
-**One use case is one transaction, and the transaction stays inside its system.** For each piece
-of data the use case touches, answer in order:
+**Writes that must land together share one transaction, and the transaction stays inside its
+system**, except a message a product's hook writes in the product's transaction (Products). For
+each piece of data the use case touches, answer these rules in order:
 
-1. **Does it change data another system owns?** → **Outbox, required.** Write a message to this
-   system's outbox in the same transaction. The owner changes its data when the message arrives.
+1. **Does it change data another system owns — a third party's included, such as a mail sent or
+   a payment created?** → **Outbox, required.** Write a message to this system's outbox in the
+   same transaction; a system writing several stores has an outbox in each store whose
+   transaction writes the message. An owner that handles this system's messages changes its data
+   when the message arrives. A third party handles none: a handler of this system calls it when
+   the message arrives, and the message is the retry.
+
+   Where the use case's caller needs the other system's answer in its response, call the other
+   system instead, once the transaction has committed, and record the answer, if this system
+   keeps it, in a transaction of its own; the aggregate holds a pending state until the answer
+   is recorded. Make the call safe to repeat: the other system recognises a repeat however it
+   can — a key it dedupes on, this system's id stored on its side and looked up first. A driving
+   port a system calls after its commit recognises a repeat. Where a third party cannot, a repeat
+   may duplicate. The pending state is the retry: a handler or scheduled task of this system
+   repeats the call until the answer is recorded or a deadline passes. A duplicate is repaired
+   by the saga or by reconciliation. This exception is this document's choice; the sources do
+   not cover it.
 2. **Does it read data another system owns?** → **Call the owner's open host service.** If it
    offers no fitting read, keep a copy in this system, updated by the owner's messages. In this
    case, the owner publishes.
 3. **Does it write several aggregates of this system?** → **One transaction, by default.** This is
    this document's choice; Vernon and Khononov keep one aggregate per transaction. An outbox is
-   also valid here. Good tells for one:
+   also valid here, and required where no one transaction reaches them all, as for aggregates in
+   different stores. Good tells for an outbox:
    - the aggregates are often written at the same time, and one transaction would block or
      conflict;
    - the rule between them may hold a moment later.
+
+   A service does not call another service of its system: the call is a second transaction, and
+   the outbox is the one that retries. Khononov's application service is the transaction. Writes
+   two use cases share go through the repositories, inside one `run`; deciding they share goes
+   in the domain.
 4. **Otherwise** → one transaction.
 
 **An outbox, wherever it is used:**
 
-- A relay delivers each message after the commit, at least once.
-- The relay is common-library plumbing. Which handler receives which message is wired once, above
-  the systems.
+- A relay delivers each message after the commit, at least once, and not necessarily in order. A
+  message carries what its receiver needs to tell a repeat from an early arrival: an id, and the
+  version of the aggregate that wrote it; the receiver's aggregate records the last version it
+  handled.
+- A message is handled by code older or newer than the code that wrote it, so its schema stays
+  backward and forward compatible.
+- The relay is common-library plumbing. The receiver decides which messages it handles.
 - The receiver handles it in its own transaction, through a driving adapter that calls one
   service. Handling the same message twice changes nothing the second time.
-- When a later step fails, new steps undo the earlier ones — a saga. Nothing rolls back.
+- When a later step fails, new steps undo the earlier ones — a saga, here the whole sequence in
+  Richardson's sense rather than Khononov's coordinating component. Nothing rolls back. A step
+  that waits on something that may never happen, such as a payment never made, has one system
+  waiting for it:
+  that system holds the deadline in its aggregate and acts once it passes. How the systems
+  coordinate is each codebase's choice: each reacts to the others' events (choreography), or one
+  system's process manager, an aggregate of that system, sends commands (orchestration). Say
+  which, in an ADR.
 
 ## The review checklist
 
-Eight questions, each answerable from a diff. The snippets are illustrative pseudo-code.
+Nine questions, each answerable from a diff. The snippets are illustrative pseudo-code.
 
-### 1. Does a service write a table another aggregate owns?
+### 1. Does a service write a table itself?
 
 **In a diff:** an insert, update or delete inside a service, or a service reaching for a store
-handle, against a table the file is not named after.
+handle to query it, against any table.
 
 The write belongs to the repository that owns the table. The service hands that repository its
 transaction context and keeps the deciding.
@@ -267,16 +371,17 @@ ctx.insert(invoices).values({ orderId, total })
 invoices.createForOrder(ctx, { orderId, total })
 ```
 
-### 2. Is the new use case in a repository, or in a controller?
+### 2. Is the new use case in a driven adapter, or in a driving one?
 
-**In a diff:** a repository module that gained an import of a sibling repository, of an
-infrastructure adapter, or of a service. Or a controller body that grew past "call one service".
+**In a diff:** a driven adapter that gained an import of another driven adapter or of a service.
+Or a driving adapter's body that grew past "call one service"; resolving its caller and asking a
+specification are not growth.
 
 A controller that hands a repository a transaction and a callback has not delegated a use case,
 it has inlined one: the deciding still happens in the controller.
 
 ```
-// controller — the fault
+// controller, a driving adapter — the fault
 await tx.run(async (ctx) => { /* seven writes, four aggregates */ })
 
 // the fix
@@ -299,7 +404,8 @@ export const settledPatch = (at) => ({ status: "settled", settledAt: at, dunning
 
 ### 4. Does the write invalidate every aggregate its service wrote?
 
-**In a diff:** a write declaring one invalidation while the service it calls writes two tables.
+**In a diff:** a write declaring one invalidation (`components.md` defines the terms) while the
+service it calls writes two tables.
 
 Open the service and count the tables it touches — **including the ones reached through a
 transaction context it handed to another aggregate's repository**. Every aggregate written needs
@@ -317,7 +423,9 @@ shared transaction is the half that gets missed.
 ### 5. Did one transaction quietly become several?
 
 **In a diff:** a function that opens its own transaction instead of joining the one it was
-given, passed or ambient; a loop that calls a write per item.
+given, except the one rule 1 records an answer in or hook step 2 opens (Transactions, Products);
+a repository method that takes the context and writes without it; a loop that calls a write per
+item.
 
 Moving a write out of a function tends to give it its own transaction. A repository method joins
 the caller's transaction and opens nothing. Writes that must land together run inside one `run`; a
@@ -326,31 +434,29 @@ case half-applied.
 
 ```
 // the fault
-for (const line of lines) await tx.run((ctx) => lines.insert(ctx, line))
+for (const line of lines) await tx.run((ctx) => orderLines.insert(ctx, line))
 
 // the fix
-await tx.run((ctx) => lines.insertMany(ctx, lines))
+await tx.run((ctx) => orderLines.insertMany(ctx, lines))
 ```
 
-### 6. Does a repository import a service?
+### 6. Does a driven adapter import a service?
 
-**In a diff:** a service import inside a repository file.
+**In a diff:** a service import inside a driven adapter's file.
 
-The first two faults seen from the other end, and the cheapest to spot. It means a use case is
-parked in a repository.
+Question 2's fault seen from the other end, and the cheapest to spot. It means a use case is
+parked in a driven adapter.
 
 ### 7. Does anything build its own dependency instead of receiving it?
 
 **In a diff:** a concrete adapter imported into a service file, or constructed inside a service
 body or a factory body, rather than passed in. Also: a module exporting a ready-made instance
-next to the factory that produces it. Also: an ambient accessor that builds an implementation when
-the context is empty.
+next to the factory that produces it.
 
-This one is invisible to the other six — the code sits in the right layer and imports nothing the
-arrow forbids. What it breaks is substitution: the service can no longer be given a different
-implementation, so its tests need the real one. An ambient value a driving adapter puts in is
-received, not built. Plumbing with one fixed configuration, such as a logger, may be a ready-made
-instance: nobody substitutes it.
+Constructed in place, this one is invisible to questions 1–6 — the code sits in the right layer
+and calls along the arrow. What it breaks is substitution: the service can no longer be given a
+different implementation, so its tests need the real one. Plumbing with one fixed configuration,
+such as a logger or a tracer, may be a ready-made instance: nobody substitutes it.
 
 ```
 // service/order.ts — the fault
@@ -363,14 +469,15 @@ export const createOrderService = ({ orders }: { orders: OrderRepository }) => .
 ### 8. Does the boundary match the relationship?
 
 **In a diff:** a driven port whose types copy another system's field for field, and an adapter
-mapping each field to itself. Or, behind an anti-corruption layer, one of the other system's terms
-in this domain or a service.
+mapping each field to itself. Or a message schema copied field for field from the system that
+publishes it. Or, behind an anti-corruption layer, one of the other system's terms in this domain
+or a service.
 
 A translation that changes nothing is not an anti-corruption layer; conform instead. A term that
 crosses an anti-corruption layer untranslated means there is no layer.
 
 ```
-// infrastructure/pricing.ts — the fault: a translation that changes nothing
+// adapters/pricing.ts — the fault: a translation that changes nothing
 quote: async (cart) => {
   const { total, currency } = await pricing.quote(cart)
   return { total, currency }
@@ -378,6 +485,20 @@ quote: async (cart) => {
 
 // the fix: conform, and the service receives the pricing system's driving port
 export const createOrderService = ({ pricing }: { pricing: Pricing }) => ...
+```
+
+### 9. Does a message schema change break a message in flight?
+
+**In a diff:** a field renamed, removed, made required, or narrowed in the schema of a message —
+including a domain schema the published language re-exports.
+
+A message written before the deploy is handled after it, and a handler on older code may read one
+written after. The type checker sees neither: the stored row is not in the program.
+
+```
+// domain/order.ts — OrderPaid, the fault
+- total: Money
++ amount: Money   // an OrderPaid still in the outbox has no amount
 ```
 
 ## Tests
@@ -394,19 +515,22 @@ instead.
 **Test the domain directly.** It is pure, it holds the rules, and it needs no fixtures, no fakes
 and no setup. Most of what is worth asserting lives here.
 
-**Test services against fakes.** A service receives ports, so a test hands it fakes and asserts
-what the service *did*: which port it called, with what, and what it returned. Assert observable
-behaviour, not the order of internal calls.
+**Test services and driving adapters against fakes.** Each receives ports, so a test hands it
+fakes and asserts what it *did*: which port it called, with what, and what it returned. Assert
+observable behaviour, not the order of internal calls.
 
-**Adapters are integration-tested by design.** An adapter's entire job is to talk to something
-external, so a unit test of one asserts a mock of the thing it exists to reach. Unit tests pay
-off there only for genuinely self-contained pieces — a query builder's output, a mapping
+**Driven adapters are integration-tested by design.** A driven adapter's entire job is to talk to
+something external, so a unit test of one asserts a mock of the thing it exists to reach. Unit
+tests pay off there only for genuinely self-contained pieces — a query builder's output, a mapping
 function.
 
 **Keep the fakes honest with contract tests.** Write one suite per driven port, against the port
 rather than any implementation, and run it twice: against the fake, and against the real adapter.
-The second run is the integration test, and it is what stops a fake from drifting into a fiction
-that passes while production breaks.
+For another system's driving port, the receiving system writes the suite, whether the fake is its
+own or one the other system exports, and runs it the second time against that system's open host
+service. The second run is the integration test where the open host service reaches a real
+dependency, and it is what stops a fake from drifting into a fiction that passes while
+production breaks.
 
 ```
 // one suite, two runs
@@ -426,23 +550,26 @@ inputs and observable results.
   indirection. A controller's only door is a service, even when the service exports the same name
   again, so that deleting a repository fails inside the service that names it rather than at a
   controller naming a symbol.
-- **A read across aggregates in a repository is a reporting read, not a use case**, as long as it
-  writes nothing.
-- **A service passing its transaction context into another repository of its system is the design
-  working.** That is how several tables stay one transaction.
+- **A read across its system's aggregates in a driven adapter is a reporting read, not a use
+  case**, as long as it writes nothing.
+- **A service passing its transaction context into another repository of its system, in the same
+  store, is the design working.** That is how several tables stay one transaction.
 - **A use case touching three aggregates and naming three invalidations is correct**, not a
-  breach of one mutation per use case.
+  breach of one mutation per use case (`components.md`).
 - **A port with one implementation is not premature.** The second implementation is the fake, and
   it is what the default suite runs against.
+- **Several systems each faking the same port can be correct.** By default, each system writes its
+  own fake. One fake that the providing system exports fits only where its consumers need the same
+  things of it; a fake that needs configuration per consumer has outgrown that.
 - **Using a conformed system's terms directly is the design working**, not a leak.
 - **A service calling another system's driving port is calling a port**, not a use case nested in
   another.
-- **A system's assembly building another system itself is correct** until one of the reasons to
-  escalate holds.
+- **A system's build function building another system itself is correct** until one of the
+  reasons to escalate holds.
 - **Another system catching up a moment later is the design working.** Between systems,
   consistency is eventual.
 - **Not everything gets a layer.** Code that asserts about the source tree rather than about the
-  application sits outside these layers, and so do the module that assembles them, a system's
+  application sits outside these layers, and so do the roots that assemble them, a system's
   exported entries and the common library.
 - **The checklist is a prompt to look.** Concluding that a case is fine is a complete answer.
 

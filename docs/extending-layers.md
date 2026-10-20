@@ -22,12 +22,18 @@ The reader knows these. `layers.md` documents its reading of them, not their con
 | Khononov, *Learning Domain-Driven Design* (2021) | integration patterns, subdomain types, ownership vs physical boundaries, the outbox |
 | Cockburn, *Hexagonal Architecture* (2005) | ports, driving and driven, adapters on both sides |
 
-Fowler's *Patterns of Enterprise Application Architecture* supplies separated interface and unit of
-work.
+**Fallback sources.** Where the four are silent, check these before calling a sentence this
+document's choice. The reader is not assumed to know them, so `layers.md` still marks such a
+sentence as its own; the ticket records the fallback grounding.
+
+| source | what it grounds |
+| --- | --- |
+| Fowler, *Patterns of Enterprise Application Architecture* (2002) | separated interface, unit of work, registry; a business transaction spanning several system transactions |
+| Richardson, *Microservices Patterns* (2018) | saga steps: compensatable, pivot, retriable |
 
 Use a book's term in its book meaning. Where the books lack a concept, coin a plain term and
 define it in Terms (*system*, *common library*). Where `layers.md` narrows or
-departs from a book, it says so in one clause, as it does for *repository* as a layer.
+departs from a book, it says so in one clause, as it does for *store* (Preconditions).
 
 ## Steps
 
@@ -36,13 +42,18 @@ departs from a book, it says so in one clause, as it does for *repository* as a 
 2. **Find the cause in `layers.md`.** Read the whole file. Quote the sentences that led to X, or
    confirm that none speaks to the case. Done when the issue is one of: misleading wording, a
    contradiction, a real gap, or specific to one repository.
-3. **Run the tests below.** Done when every proposed sentence passes all four.
+3. **Run the tests below.** Then walk each proposed sentence through the review domain in
+   `docs/layers-refinement/domain.md`: an edge case there that it now places wrongly is a
+   contradiction to fix before drafting. Done when every proposed sentence passes all four and
+   misplaces no edge case.
 4. **Draft the smallest change.** Reword before adding; add a clause before a sentence, a sentence
-   before a section. For wording, follow the `mattpocock-skills:writing-for-agents` skill.
+   before a section. State the property the code has, not an instruction: "a message's schema
+   stays backward and forward compatible", not "change a message's schema so that …". For
+   wording, follow the `mattpocock-skills:writing-for-agents` skill.
 5. **Sweep for consistency.** Grep every term the change touches across Terms, the table, the
    sections, the checklist, "When to leave it alone", and the sibling docs in
    `registry/docs/agents/`. Done when no sentence contradicts the change.
-6. **Present, then commit on approval**, per `CLAUDE.md`.
+6. **Commit**, per `CLAUDE.md`, with the full before and after of every change in the report.
 
 ## The four tests
 
@@ -51,5 +62,5 @@ departs from a book, it says so in one clause, as it does for *repository* as a 
   does, the fix lies in the wording that hid the derivation, not in a new sentence.
 - **Generality test.** The sentence guides that decision in any codebase. What holds for one
   product or framework belongs to that repository.
-- **Source test.** Hold the sentence against the sources. Where it is stricter or looser than a
-  book, mark it as this document's choice.
+- **Source test.** Hold the sentence against the sources; where they are silent, against the
+  fallback sources. Where it is stricter or looser than a book, mark it as this document's choice.
