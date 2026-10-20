@@ -115,8 +115,9 @@ may do three things. Each is a fault the adapter prevents:
 
 ## Ports and factories
 
-**Driven ports this system declares live in its domain.** The rules declare what they need — store this order, send
-this mail — and adapters in the repository and infrastructure layers implement it. The domain
+**Driven ports this system declares live in its domain.** The rules declare what they need —
+store this order, send this mail — and adapters in the repository and infrastructure layers
+implement it. The domain
 names ports only; assembly picks their implementations.
 
 **Driving ports live beside the service that satisfies them.** A use case is not a domain
@@ -219,8 +220,9 @@ choices decide where code goes:
 - **Anti-corruption layer.** This system's domain declares a driven port in its own terms; an
   adapter in infrastructure implements it by calling the other system's driving port and
   translating. For a model that is foreign, unstable or not yours, as a third-party API's
-  usually is. On the way in — a webhook, a product's hook, a message — the driving adapter that receives
-  the other system's call translates it into this system's terms before it calls a service. The
+  usually is. On the way in — a webhook, a product's hook, a message — the driving adapter that
+  receives the other system's call translates it into this system's terms before it calls a
+  service. The
   other system's schema and the translation live in that adapter, or in infrastructure shared with
   the outbound adapter; never in the domain.
 - **Shared kernel.** Model two systems share, such as `Money`, goes in a module both import and
@@ -331,8 +333,9 @@ each piece of data the use case touches, answer in order:
 - The receiver handles it in its own transaction, through a driving adapter that calls one
   service. Handling the same message twice changes nothing the second time.
 - When a later step fails, new steps undo the earlier ones — a saga, here the whole sequence in
-  Richardson's sense rather than Khononov's coordinating component. Nothing rolls back. A step that waits on
-  something that may never happen, such as a payment never made, has one system waiting for it:
+  Richardson's sense rather than Khononov's coordinating component. Nothing rolls back. A step
+  that waits on something that may never happen, such as a payment never made, has one system
+  waiting for it:
   that system holds the deadline in its aggregate and acts once it passes. How the systems
   coordinate is each codebase's choice: each reacts to the others' events (choreography), or one
   system's process manager, an aggregate of that system, sends commands (orchestration). Say
