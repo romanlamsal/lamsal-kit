@@ -358,7 +358,7 @@ Nine questions, each answerable from a diff. The snippets are illustrative pseud
 ### 1. Does a service write a table itself?
 
 **In a diff:** an insert, update or delete inside a service, or a service reaching for a store
-handle, against any table.
+handle to query it, against any table.
 
 The write belongs to the repository that owns the table. The service hands that repository its
 transaction context and keeps the deciding.
