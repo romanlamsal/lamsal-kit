@@ -251,10 +251,9 @@ Until one of these holds, a root is ceremony.
 **A product with a model of its own — a CMS, an auth library — is another system**, even when its
 tables sit in this system's database.
 
-- **Where this system stores an aggregate in a product, the product's screens may read and
-  change it.** A change made there is this system's write, already stored; the product's hook is
-  the driving adapter that calls a service for the rest (below). An action there — a button, an
-  endpoint — is a driving adapter that calls this system's service.
+- **Where this system stores an aggregate in a product, the product's screens may read it; a
+  field this system owns is read-only there.** A change comes through an action there — a
+  button, an endpoint — which is a driving adapter that calls this system's service.
 - **A product's hooks and scheduled tasks are driving adapters**, and the constraints on driving
   adapters apply to them. For a hook, answer in order:
   - **The product's caller is this system** → this system started the call, so it is not a

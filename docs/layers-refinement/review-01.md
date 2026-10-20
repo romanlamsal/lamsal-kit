@@ -198,7 +198,7 @@ seven fixed in the last commit. Left for a next round, all pre-existing:
 
 | id | finding | note |
 | --- | --- | --- |
-| R01-53 | Products: a product screen's change of this system's aggregate bypasses "the only entry for doing something" and "an aggregate belongs to the system whose use cases write it" | needs a ruling: name the exception in the service row, or make the field read-only in the product |
+| R01-53 | Products: a product screen's change of this system's aggregate bypasses "the only entry for doing something" and "an aggregate belongs to the system whose use cases write it" | ruled: field read-only in the product; a change comes through an action that calls this system's service. Naming an exception would keep a second writer with no use case behind it, skipping the aggregate's rules (a derived price). R01-13's "already stored" dropped |
 | R01-54 | Q7 "a concrete adapter imported into a service file" is a linter-visible import, yet Q7 says it is "invisible to questions 1–6"; "the arrow" reads as import direction | drop the import clause from Q7's tell, or say the arrow is the call path |
 | R01-55 | repository row "one aggregate each, composes nothing" vs reporting read across aggregates | "one aggregate each for writes" |
 | R01-56 | rule 1's exception: who retries a failed call after the commit; reconciliation repairs records, it does not make the call | "the pending state is the retry: a handler or scheduled task repeats the call until the answer is recorded or the deadline passes" |

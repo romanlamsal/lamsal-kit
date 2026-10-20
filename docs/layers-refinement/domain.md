@@ -70,6 +70,8 @@ that meets one does not re-litigate it; it reopens the ticket named.
   nothing when this system is the caller (ticket 18).
 - A service of one system calling another service of the same system: a second transaction;
   repositories in one `run`, or the outbox (review 01, R01-11).
+- An editor changing shop's price in Payload admin: a field another system owns is read-only in
+  the product; a change comes through an action that calls shop's service (review 01, R01-53).
 
 ## The checkout saga
 
