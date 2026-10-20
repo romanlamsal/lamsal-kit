@@ -87,7 +87,7 @@ database.
 
 ## D. A hook fires on this system's own write
 
-**Status:** ready
+**Status:** closed (8deed33), resolved into `18-hook-on-own-write.md`
 
 **Context.** In `domain.md`, shop writes price through Payload's Local API, and Payload runs
 shop's own `afterChange` hook for that write.
