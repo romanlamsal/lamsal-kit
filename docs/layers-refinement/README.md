@@ -10,6 +10,10 @@ How documents in `registry/docs/agents/` get refined in this repository. The ste
 - `NN-<slug>.md`: one ticket, self-contained: status, context, problem, resolution, grounding,
   done when. Its `**Status:**` line and its row in the spec always agree.
 - `open-questions.md`: decisions not made yet; each becomes a ticket once grilled.
+- `review-NN.md`: one deep review of `layers.md` at a commit: method (independent passes by
+  fresh agents, merged), findings by severity with proposed fixes, source check, pickup notes,
+  and what each finding became. `review-01.md` is the template; a finding too large for a
+  wording fix becomes a ticket.
 - `domain.md`: the review domain whose edge cases tickets refer to.
 
 ## Picking up a ticket
