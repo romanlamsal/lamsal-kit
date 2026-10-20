@@ -43,7 +43,7 @@ they are about what a function *does* rather than where it imports from.
 | --- | --- | --- | --- |
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
 | **repository** | adapters for this system's aggregates, wherever they are stored. One aggregate each, composes nothing | the store client, the common library, the domain | serves one aggregate; joins the caller's transaction |
-| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, driving ports of other services in this system, and the open host service of a system it conforms to | receives its dependencies; writes through repositories |
+| **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, and the open host service of a system it conforms to | receives its dependencies; writes through repositories |
 | **infrastructure** | adapters for other systems: mail, rendering, third-party APIs, auth, a system behind an anti-corruption layer | domain, the common library, and the open host service of a system it translates | translates between this system's ports and the other system |
 | **controllers** | driving adapters: entry points, their validators | services, domain, and infrastructure that resolves or translates its caller | reaches the store only through a service |
 
@@ -279,10 +279,15 @@ each piece of data the use case touches, answer in order:
 3. **Does it write several aggregates of this system?** → **One transaction, by default.** This is
    this document's choice; Vernon and Khononov keep one aggregate per transaction. An outbox is
    also valid here, and required where no one transaction reaches them all, as for aggregates in
-   different stores. Good tells for one:
+   different stores. Good tells for an outbox:
    - the aggregates are often written at the same time, and one transaction would block or
      conflict;
    - the rule between them may hold a moment later.
+
+   A service does not call another service of its system: the call is a second transaction, and
+   the outbox is the one that retries. Khononov's application service is the transaction. Writes
+   two use cases share go through the repositories, inside one `run`; deciding they share goes
+   in the domain.
 4. **Otherwise** → one transaction.
 
 **An outbox, wherever it is used:**
@@ -307,7 +312,7 @@ Nine questions, each answerable from a diff. The snippets are illustrative pseud
 ### 1. Does a service write a table another aggregate owns?
 
 **In a diff:** an insert, update or delete inside a service, or a service reaching for a store
-handle, against a table the file is not named after.
+handle, against any table.
 
 The write belongs to the repository that owns the table. The service hands that repository its
 transaction context and keeps the deciding.
@@ -370,8 +375,9 @@ shared transaction is the half that gets missed.
 ### 5. Did one transaction quietly become several?
 
 **In a diff:** a function that opens its own transaction instead of joining the one it was
-given; a repository method that takes the context and writes without it; a loop that calls a write
-per item.
+given, except the one rule 1 records an answer in or hook step 2 opens (Transactions, Products);
+a repository method that takes the context and writes without it; a loop that calls a write per
+item.
 
 Moving a write out of a function tends to give it its own transaction. A repository method joins
 the caller's transaction and opens nothing. Writes that must land together run inside one `run`; a
