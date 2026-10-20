@@ -53,6 +53,8 @@ Ask one decision per question; walk a choice of order or mechanism through a con
   structure, no mechanism. State such a choice positively ("can be correct", "each codebase's
   choice") rather than leaving it unsaid.
 - Say when a term is coined rather than taken from a book.
+- Before coining a term, search `layers.md` for a phrase that already draws the line. Test a
+  phrase the author prefers against the case it must exclude.
 - Challenge a design the author brings against the sources before asking about wording.
 - A sentence already in `layers.md` is no argument for itself; it may be several decisions old.
   Keep it only for a reason that still holds.
