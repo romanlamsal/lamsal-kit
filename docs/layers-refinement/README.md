@@ -60,4 +60,7 @@ Ask one decision per question; walk a choice of order or mechanism through a con
   on the next one.
 - A deletion is tested too: check what the removed text reconciled, and run the four tests on
   what remains.
+- For a rule with several cases, offer the "answer in order" shape early.
+- Where a specific rule overrides a general one elsewhere, give the general one a pointer;
+  otherwise it reads as a contradiction.
 - Before asking for approval, show the full before and after of every change.
