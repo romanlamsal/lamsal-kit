@@ -205,7 +205,7 @@ seven fixed in the last commit. Left for a next round, all pre-existing:
 | R01-57 | hook step 4's hand-off mechanism unsaid | fixed as proposed |
 | R01-58 | assembly "one module per process" vs each system's exported builder; "every dependency is one a factory declared" vs ready-made plumbing in Q7 | fixed: "calls the factories and the build functions other systems export"; "every dependency but fixed plumbing (question 7)" |
 | R01-59 | repository row imports "the store client, the common library, the domain", but an aggregate stored in a product needs the product's instance and types, which only the infrastructure row may import (found by the R01-53 placement test) | ruled, larger than proposed: the repository layer goes; repository stays as Evans's pattern, layers become domain, service, driven adapters, driving adapters. `19-repository-as-pattern.md` holds the decision and the inventory; applied in `3ee8bf9` |
-| R01-60 | "one module per process" (Assembly) vs "the consuming system's assembly builds the other system" and "a system's assembly building another system" (Systems, When to leave it alone): three systems in one process cannot have both one module per process and one assembly per system (found by the R01-58 placement test) | ruled, in `20-root-per-entry.md`: one root per entry; a system's assembly is its build function; a driving adapter receives its service from the root, by argument or by import. Apply in a fresh session |
+| R01-60 | "one module per process" (Assembly) vs "the consuming system's assembly builds the other system" and "a system's assembly building another system" (Systems, When to leave it alone): three systems in one process cannot have both one module per process and one assembly per system (found by the R01-58 placement test) | ruled, in `20-root-per-entry.md`: one root per entry; a system's assembly is its build function; a driving adapter receives its service from the root, by argument or by import. Applied in `800a7b3` |
 | R01-61 | Q1's tell "a service reaching for a store handle" covers Q7's snippet (`createPostgresOrderRepository(db)` in a service file), which Q7 calls "invisible to questions 1–6"; only "against any table" excludes it (found by the R01-58 placement test) | Q1: "reaching for a store handle to query it"; or Q7: "invisible to questions 1–6 but where question 1's tell fires" |
 
 ### Pickup for the next session
@@ -220,7 +220,10 @@ seven fixed in the last commit. Left for a next round, all pre-existing:
 - Ticket 19 applied in `3ee8bf9`: four layers (domain, service, driven adapters, driving
   adapters); repository stays as the pattern. Acceptance: a fresh agent placed the Payload price
   adapter, Q1, Q2, Q5, Q6 and the Stripe anti-corruption case at 4–5.
-- Next: apply `20-root-per-entry.md` (ruled, carries before/after wording); then R01-61 (wording).
+- Ticket 20 applied in `800a7b3`: one root per entry; a system's assembly is its build function;
+  a driving adapter imports the root where the framework constructs it. Acceptance at 4–5 after
+  one sentence added for two roots in one process (a server and a product's config).
+- Next: R01-61 (wording).
   Process doc steps 1–6 per change, commit per `CLAUDE.md` (no approval wait).
 - Rationale for the rulings is in the commit bodies (`git log d5df10a..30ed865`), not here.
 - Acceptance test after any `layers.md` change: a fresh agent with only `layers.md`, placing the

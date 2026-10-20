@@ -1,6 +1,6 @@
 # Assembly is one root per entry
 
-**Status:** ready
+**Status:** closed (800a7b3)
 
 **Kind:** contradiction, and a gap a fresh agent fills wrongly · **Touches:** Ports and factories
 (the Assembly paragraph), Other systems (the export list, the escalation paragraph), When to leave
