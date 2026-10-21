@@ -94,7 +94,7 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 - controllers — Terms: "A *controller* is a driving adapter"
 - hooks — Products: "**A product's hooks and scheduled tasks are driving adapters**"
 - scheduled tasks — Terms: "a scheduled task is a driving adapter"
-- message handlers — Transactions: "The receiver handles it in its own transaction, through a driving adapter that calls one service."
+- handlers — Terms: "A *handler* is a driving adapter: the relay calls it with a message — an event or a command — and it acts through one service."
 - their validators — Terms: "it resolves the caller (a session, a signature, a key) through a port it receives, validates, acts through one service, and returns"
 - inbound translation — Other systems: "the driving adapter that receives the other system's call translates it into this system's terms before it calls a service"
 
@@ -109,7 +109,7 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 - receives its service from the root, as an argument or from the registry or the framework's context, and never imports assembly — Ports and factories: "**A driving adapter receives its service from the root.**"; "It never imports assembly."
 - a repeat changes nothing — The layers: "**Deliver the same thing again, however late.** Handling it a second time changes nothing."
 - an early arrival is not a repeat — The layers: "**Deliver out of order.** A delivery about something this system has not recorded yet is not a repeat."
-- where the caller stops retrying it records before anything can fail — The layers: "a handler of one records what it was given, through its one service, before anything that can fail"
+- where the caller stops retrying it records before anything can fail — The layers: "a driving adapter for such a caller records what it was given, through its one service, before anything that can fail"
 - a product's hook answers in order: this system called → nothing, it asks → a specification, it acts → one service as Products orders — Products: "For a hook, answer in order:"; "**The product's caller is this system** → this system started the call, so it is not a driving call: the hook does nothing"; "**It asks**, such as whether a change is valid → a specification answers it"; "**It acts** → answer in order:"
 - translates another system's call into this system's terms before it calls a service — Other systems: "the driving adapter that receives the other system's call translates it into this system's terms before it calls a service"
 - puts per-request ambient values in — Ports and factories: "A driving adapter puts it in; services and adapters read it; the domain takes arguments."
@@ -135,7 +135,7 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 - "**A product that calls back is a cycle by design.**" — assembly; its late binding is cited in the driven-adapters row.
 - Products steps 1–4 and "**The product has committed the change**" etc. — the hook entry points at Products; the order of answers is the section's.
 - Transactions rule 3 "**Does it write several aggregates of this system?**" and 4 "**Otherwise**" — the service row's "one transaction" entry carries them; rule 3's outbox tells are the section's.
-- "**An outbox, wherever it is used:**" — binds the relay (common-library plumbing) and the receiver; the receiver's handler is in the driving-adapters row.
+- "**An outbox, wherever it is used:**" — binds the relay (common-library plumbing) and the receiver; the receiver's handler is in the driving-adapters row (Terms, *handler*).
 - Checklist "**In a diff:**" leads — tells for the rulings above, not rulings.
 - "**An integration test is one that uses a real external dependency**", "**The default suite runs on fakes.**", "**What makes a good test here**" — cross-cutting test rules.
 - "**Keep the fakes honest with contract tests.**" — cited under the driven-adapters row's test entry.

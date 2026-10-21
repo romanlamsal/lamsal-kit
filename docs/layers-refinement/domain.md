@@ -31,6 +31,8 @@ billing).
   - Payload's collection config re-declares fields the shop domain's schema already declares.
   - Payload's config needs the hooks, the hooks need services, the services need the Payload
     instance: a cycle.
+  - Payload's before-write hook may change the record it saves: an editor's change lands in hook
+    step 3 by embedding the message in the document (ticket 23).
 - **shop**
   - Checkout must return a Stripe `client_secret` in the same request; payment creates it.
   - One use case writes Drizzle tables and Payload documents: two store clients, one database.

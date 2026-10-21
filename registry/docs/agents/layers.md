@@ -12,10 +12,10 @@ aggregate's outgoing messages are embedded in its own record. *Table*, *row* and
 used in the relational sense — substitute your store's equivalents.
 
 **Terms.** A *controller* is a driving adapter: it resolves the caller (a session, a signature, a
-key) through a port it receives, validates, acts through one service, and returns. It takes its rules from the domain.
-`components.md` applies the same role to route files on the client; the difference is writes — a
-server controller passes a write through to one service, a route controller does not carry writes
-at all.
+key) through a port it receives, validates, acts through one service, and returns. It takes its
+rules from the domain. `components.md` applies the same role to route files on the client; the
+difference is writes — a server controller passes a write through to one service, a route
+controller does not carry writes at all.
 
 A *port* is an interface, never the code behind it. A *driving port* is the interface to a use
 case — the way in, something a controller calls. A *driven port* is something the code needs from
@@ -36,9 +36,12 @@ A *common library* is plumbing every system may import: the transaction port, st
 logger, a tracer, the outbox port and its relay, the ambient registry. It holds no model.
 
 *Reconciliation* is a use case of the system that owns an aggregate: it compares what this
-system recorded with what another system holds, and repairs this system's record. A scheduled
-task of this system, or any driving adapter that finds the two apart, calls it. A scheduled task
-of this system is a driving adapter.
+system recorded with what another system holds, and repairs this system's record, or starts the
+step that repairs the other's. A scheduled task of this system, or any driving adapter that finds
+the two apart, calls it. A scheduled task of this system is a driving adapter.
+
+A *handler* is a driving adapter: the relay calls it with a message — an event or a command —
+and it acts through one service.
 
 The sources are Evans, Vernon, Khononov and Cockburn; where this document departs from one, it
 says so.
@@ -55,7 +58,7 @@ they are about what a function *does* rather than where it imports from.
 | **domain** | the model: rules, schemas, specifications, and the driven ports the rules need | imported by every layer, by a browser and by another system; imports no layer, only other domain modules, the common library's ports, a shared kernel, a conformed system's published language and pure libraries → reaches nothing; computes from its arguments | runs on any runtime; a package that can reach outside the process stays behind a port; a schema is a rule, and types are inferred from it; refers to another aggregate and to another system's data by id; declares the driven ports and names no use case; its schemas are the published language, by default; tested directly | The layers, Ports and factories, Other systems, Tests |
 | **service** | the application layer: use cases, and the driving ports beside them | in through its driving port, called by a driving adapter or by another system → out through the driven ports it received: repositories, a mailer, another system's driving port | a factory: takes its dependencies, returns its driving port, constructs nothing; writes that must land together share one transaction, which stays inside its system; a change to another system's data is an outbox message, or a call after the commit; reads another system's data through its open host service, or a copy; calls no service of its system; its driving port takes what its use case decides by, the caller included, and a permission that needs this system's state is decided here or in the domain; only forwarding to a repository is correct; tested against fakes | Ports and factories, Other systems, Transactions, Tests, When to leave it alone |
 | **driven adapters** | implementations of this system's driven ports: a repository over one aggregate, a mailer, a clock, blob storage, another system behind an anti-corruption layer | implements a driven port the domain declared → the outside: a store, a mailer, a product's instance, another system's driving port | a repository method joins the caller's transaction and opens nothing; imports what is static and receives what is built, a product's instance late-bound; imports no service (question 6); behind an anti-corruption layer it translates, and a translation that changes nothing is conformist (question 8); a read across its system's aggregates is a reporting read; integration-tested by design, with one contract suite per port run against the fake and the real adapter | Terms, Ports and factories, Other systems, Products, Tests, When to leave it alone |
-| **driving adapters** | the ways in: controllers, hooks, scheduled tasks, message handlers, their validators and inbound translation | called by the outside: a request, a webhook, a product's hook, the clock, the relay → one service to act, a specification to ask about input it holds; its only door to the store is a service | decides nothing by this system's state: prepares one call — resolving its caller through a port it receives, validating, translating — and acts through one service; receives its service from the root, as an argument or from the registry or the framework's context, and never imports assembly; a repeat changes nothing, an early arrival is not a repeat, and where the caller stops retrying it records before anything can fail; a product's hook answers in order: this system called → nothing, it asks → a specification, it acts → one service as Products orders; translates another system's call into this system's terms before it calls a service; puts per-request ambient values in; tested against fakes, which fill the registry | Terms, The layers, Ports and factories, Other systems, Products, Tests |
+| **driving adapters** | the ways in: controllers, hooks, scheduled tasks, handlers, their validators and inbound translation | called by the outside: a request, a webhook, a product's hook, the clock, the relay → one service to act, a specification to ask about input it holds; its only door to the store is a service | decides nothing by this system's state: prepares one call — resolving its caller through a port it receives, validating, translating — and acts through one service; receives its service from the root, as an argument or from the registry or the framework's context, and never imports assembly; a repeat changes nothing, an early arrival is not a repeat, and where the caller stops retrying it records before anything can fail; a product's hook answers in order: this system called → nothing, it asks → a specification, it acts → one service as Products orders; translates another system's call into this system's terms before it calls a service; puts per-request ambient values in; tested against fakes, which fill the registry | Terms, The layers, Ports and factories, Other systems, Products, Tests |
 
 The arrow runs one way — driving adapter → service → driven adapter → the outside — and the
 domain sits beside all of it: every layer may import it, it imports no layer.
@@ -114,10 +117,10 @@ may do three things. Each is a fault the adapter prevents:
   repeat. The fault: `OrderCancelled` arrives before `OrderPlaced`, is taken for a duplicate, and
   the cancellation is lost.
 - **Stop delivering.** A relay retries until the handler succeeds, so failing is safe there. A
-  vendor's webhook stops after a few tries, and a product may not run a hook again, so a handler
-  of one records what it was given, through its one service, before anything that can fail. The
-  fault: the handler throws
-  on an early delivery, and the caller never sends it again. What is lost anyway, reconciliation
+  vendor's webhook stops after a few tries, and a product may not run a hook again, so a driving
+  adapter for such a caller records what it was given, through its one service, before anything
+  that can fail. The fault: the adapter throws on an early delivery, and the caller never sends
+  it again. What is lost anyway, reconciliation
   finds by asking the other system, where it can be asked.
 
 ## Ports and factories
@@ -198,8 +201,8 @@ driven ports stay inside; they are its needs, not its offer. Export:
 - the driving port types, for other systems to import;
 - a function that takes configuration and builds the open host service, for a root or another
   system's build function to call. That function is the system's assembly;
-- where it handles messages, a function that takes configuration and builds its message handler,
-  for the assembly that hands it to the relay. Whether one function builds both the open host
+- where it handles messages, a function that takes configuration and builds its handler, for the
+  assembly that hands it to the relay. Whether one function builds both the open host
   service and the handler, and which process runs the relay, is each codebase's choice;
 - optionally, a fake of its driving ports, for other systems' tests, from an entry production
   does not load.
@@ -287,24 +290,29 @@ tables sit in this system's database.
   - **It asks**, such as whether a change is valid → a specification answers it, before or
     inside the product's transaction.
   - **It acts** → answer in order:
-    1. **The product has committed the change** → the hook acts through one service.
+    1. **The product has committed the change.** The hook acts through one service.
     2. **The product's caller needs this system's work before the product answers it**, such as a
-       profile for a user signing up → the hook acts now, through one service, in this system's
+       profile for a user signing up. The hook acts now, through one service, in this system's
        own transaction, which touches no row the product's transaction holds. If the product
        rolls back, reconciliation undoes the work. Where the product offers a hook that runs
        after its commit and before it answers, step 1 applies and nothing needs undoing.
     3. **The hook runs inside the product's transaction, and a write there commits and rolls
-       back with the change** (the product hands the hook its transaction, and the outbox is in a
-       store this system's transaction port reaches through that transaction) → the hook calls
-       one service, handing it the product's transaction as the context repositories take; the
-       service writes only a message there, to this system's outbox or the product's, as each
-       codebase chooses. Nothing is lost.
-    4. **Otherwise**, inside the transaction or before it opens → the hook hands its work,
-       in-process, to a handler that first checks the change through the product.
+       back with the change.** That holds when the message is embedded in the record the product
+       is writing (Preconditions), when this system's outbox is in a store the product's
+       transaction reaches, or when the product has an outbox of its own. The hook calls one
+       service and passes on what the product handed it: the transaction, or the record. The
+       service writes only a message, through the outbox port, into that context. Nothing is
+       lost.
+    4. **Otherwise**, the hook can write nothing that commits with the change. The hook calls one
+       service. The service writes the message to this system's outbox, in this system's own
+       transaction. The handler receives the message; its service first checks through the
+       product that the change committed, then acts. Not yet is not a repeat (The layers): the
+       handler fails, the relay retries, until a deadline passes.
 
-  Steps 2 and 3 are this document's choice; the sources do not cover a product's transaction. A
-  hand-off, or an act after the commit, is lost when the process stops first and the product
-  does not run the hook again; reconciliation repairs it.
+  Steps 2 to 4 are this document's choice; the sources do not cover a product's transaction. An
+  act after the commit is lost when the process stops before it and the product does not run
+  the hook again. Reconciliation repairs that, and undoes step 2's work when the product rolls
+  back.
 - **A product that calls back is a cycle by design.** Its config needs the hooks, the hooks need
   services, the services need adapters over the product's instance, and the instance needs the
   config. Assembly breaks it by late binding: an adapter receives a function that returns the
@@ -320,19 +328,19 @@ each piece of data the use case touches, answer these rules in order:
    a payment created?** → **Outbox, required.** Write a message to this system's outbox in the
    same transaction; a system writing several stores has an outbox in each store whose
    transaction writes the message. An owner that handles this system's messages changes its data
-   when the message arrives. A third party handles none: a handler of this system calls it when
-   the message arrives, and the message is the retry.
+   when the message arrives. A third party reads no relay: a handler of this system receives the
+   message instead, and the message is the retry.
 
    Where the use case's caller needs the other system's answer in its response, call the other
-   system instead, once the transaction has committed, and record the answer, if this system
-   keeps it, in a transaction of its own; the aggregate holds a pending state until the answer
-   is recorded. Make the call safe to repeat: the other system recognises a repeat however it
-   can — a key it dedupes on, this system's id stored on its side and looked up first. A driving
-   port a system calls after its commit recognises a repeat. Where a third party cannot, a repeat
-   may duplicate. The pending state is the retry: a handler or scheduled task of this system
-   repeats the call until the answer is recorded or a deadline passes. A duplicate is repaired
-   by the saga or by reconciliation. This exception is this document's choice; the sources do
-   not cover it.
+   system instead, once the transaction has committed, and record the answer, if this system keeps
+   it, in a transaction of its own; the aggregate holds a pending state until the answer is
+   recorded. Make the call safe to repeat: the other system recognises a repeat however it can — a
+   key it dedupes on, this system's id stored on its side and looked up first. A driving port a
+   system calls after its commit recognises a repeat. Where a third party cannot, a repeat may
+   duplicate. The pending state is the retry: a scheduled task of this system repeats it until the
+   answer is recorded or a deadline passes. A duplicate is undone by a compensating call, a saga
+   step, which reconciliation starts when it finds one. This exception is this document's choice;
+   the sources do not cover it.
 2. **Does it read data another system owns?** → **Call the owner's open host service.** If it
    offers no fitting read, keep a copy in this system, updated by the owner's messages. In this
    case, the owner publishes.
@@ -443,9 +451,9 @@ shared transaction is the half that gets missed.
 ### 5. Did one transaction quietly become several?
 
 **In a diff:** a function that opens its own transaction instead of joining the one it was
-given, except the one rule 1 records an answer in or hook step 2 opens (Transactions, Products);
-a repository method that takes the context and writes without it; a loop that calls a write per
-item.
+given, except the one rule 1 records an answer in or hook step 2 or 4 opens (Transactions,
+Products); a repository method that takes the context and writes without it; a loop that calls a
+write per item.
 
 Moving a write out of a function tends to give it its own transaction. A repository method joins
 the caller's transaction and opens nothing. Writes that must land together run inside one `run`; a

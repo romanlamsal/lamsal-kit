@@ -20,6 +20,9 @@ product's transaction and lose nothing.
 
 ## Resolution
 
+Steps 3 and 4 below are superseded by ticket 23: step 3 names three ways a write commits with the
+change, embedding first; step 4 defers through this system's outbox, not in memory.
+
 Products, the hooks bullet:
 
 > - **A product's hooks and scheduled tasks are driving adapters**, and the constraints on driving
