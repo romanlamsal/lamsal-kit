@@ -181,7 +181,7 @@ here and in `review-01.md`.
 
 **Assembly is one root per entry, not one module per process.** An entry is where a process
 starts running this code or where a framework loads it: a server's start, a relay worker, a
-product's config. Each root builds what its entry runs. Ticket 16 had already allowed the
+product's config.[^24] Each root builds what its entry runs. Ticket 16 had already allowed the
 handler's assembly to differ from the open host service's; this names the unit. The sources say
 only that whoever starts the application wires it, so the choice is marked.
 
@@ -219,8 +219,11 @@ document's.
 - Two roots in one process (a web server and a product's config loaded by it) are the escalation
   rule's first reason applied inside one process: the server's root builds the shared system
   once, the product's config reaches it. Nothing new is needed; the placement test should show
-  an agent deriving it.
+  an agent deriving it.[^24]
 - Ticket 19's rename of controllers to driving adapters is assumed in every "after".
 
 [^21]: The "by import" half is superseded by `21-service-registry.md`: a driving adapter reads the
     registry or the framework's context, and never imports assembly.
+[^24]: The entry list and the two-roots consequence are superseded by `24-one-root-per-process.md`:
+    an entry is where a deployable starts, a product's config is not one, and a product is built
+    by a build function this system exports, called by the one root of the process.

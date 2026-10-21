@@ -272,7 +272,8 @@ both; typed or not; `AsyncLocalStorage` or a module-level object; and when the r
   superseded.
 - Two roots in one process no longer import each other; the first to build a system puts it in,
   the other reads it. Which root builds what is still each codebase's, and R02-16's proposed
-  "root of the entry the other loads" is not needed.
+  "root of the entry the other loads" is not needed. Superseded by `24-one-root-per-process.md`:
+  one root per process; a product's config is no entry and no root reads the registry.
 - Tests on fakes hold for every driving adapter without module mocking.
 - The driving-adapters row gains "the registry" and nothing else from this ticket.
 - `tanstack-start.md` gains two sentences; the `.schema.ts` convention is now bound to question 3.

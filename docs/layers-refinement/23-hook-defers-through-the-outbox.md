@@ -252,7 +252,8 @@ reconciliation to "repairs this system's record, or starts the step that repairs
   product's collection config is R02-28's case, not a second constructor.
 - The relay reads the product's records through an outbox adapter over the product's store, a
   second implementation of the outbox port under the same contract suite; R02-38's wording for
-  "the product's outbox" follows.
+  "the product's outbox" follows. Since `24-one-root-per-process.md`, that reader is this
+  system's exported outbox reader, handed to the relay by the root.
 - A message embedded in a record carries the record's version: Q7's ordering property without a
   separate sequence.
 - Whether the embedded message holds the product's raw change or this system's terms is Q19,

@@ -14,8 +14,8 @@ true; this one says what to type. Anything here that names a library or a filena
 | `<service>.queries.ts` | `queryOptions` and `mutationOptions` factories for one service |
 
 A `.fn.ts` reads its service inside the server function's body, from the registry or the server
-function's middleware context; it imports neither a service instance nor `assembly.ts` (`layers.md`, Ports
-and factories). A `.schema.ts` composes domain schemas — pick, extend — and declares no rule of
+function's middleware context (a courier, `layers.md` Terms); it imports neither a service
+instance nor `assembly.ts` (`layers.md`, Ports and factories). A `.schema.ts` composes domain schemas — pick, extend — and declares no rule of
 its own (`layers.md` question 3).
 
 One `.queries.ts` per service, and it is the only place cache keys are written. A route file is

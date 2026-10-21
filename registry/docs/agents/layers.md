@@ -33,7 +33,7 @@ the system whose use cases write it, wherever it is stored; a record two systems
 aggregates sharing an id.
 
 A *common library* is plumbing every system may import: the transaction port, store clients, a
-logger, a tracer, the outbox port and its relay, the ambient registry. It holds no model.
+logger, a tracer, the relay, the ambient registry. It holds no model.
 
 *Reconciliation* is a use case of the system that owns an aggregate: it compares what this
 system recorded with what another system holds, and repairs this system's record, or starts the
@@ -42,6 +42,23 @@ the two apart, calls it. A scheduled task of this system is a driving adapter.
 
 A *handler* is a driving adapter: the relay calls it with a message — an event or a command —
 and it acts through one service.
+
+An *outbox* is where a system's outgoing messages wait, written in the transaction that produced
+them. The outbox port is a driven port the system declares, like a repository; where the messages
+live — a table of its own, a store another transaction reaches, a field it owns on a product's
+record — is that system's, and so are the adapter that writes it and the reader of it.
+
+The *relay* reads every system's outbox, through the reader that system exports, and delivers
+each message to the handlers until it is taken. It is common library: it belongs to no system and
+imports none; the root of the process that runs it hands it the handlers and the readers. Whether
+it routes by message type or hands every message to every handler, what it orders by, and what
+counts as taken, is each codebase's.
+
+A *courier* carries what the root built to a driving adapter the root cannot construct because
+the framework collects it, such as a server function: the per-process registry (Ports and
+factories), or the framework's request context, which middleware the root installs fills per
+request. Which, the stack document says. A courier inside a build function is that function's
+detail and gets no rule here.
 
 The sources are Evans, Vernon, Khononov and Cockburn; where this document departs from one, it
 says so.
@@ -58,7 +75,7 @@ they are about what a function *does* rather than where it imports from.
 | **domain** | the model: rules, schemas, specifications, and the driven ports the rules need | imported by every layer, by a browser and by another system; imports no layer, only other domain modules, the common library's ports, a shared kernel, a conformed system's published language and pure libraries → reaches nothing; computes from its arguments | runs on any runtime; a package that can reach outside the process stays behind a port; a schema is a rule, and types are inferred from it; refers to another aggregate and to another system's data by id; declares the driven ports and names no use case; its schemas are the published language, by default; tested directly | The layers, Ports and factories, Other systems, Tests |
 | **service** | the application layer: use cases, and the driving ports beside them | in through its driving port, called by a driving adapter or by another system → out through the driven ports it received: repositories, a mailer, another system's driving port | a factory: takes its dependencies, returns its driving port, constructs nothing; writes that must land together share one transaction, which stays inside its system; a change to another system's data is an outbox message, or a call after the commit; reads another system's data through its open host service, or a copy; calls no service of its system; its driving port takes what its use case decides by, the caller included, and a permission that needs this system's state is decided here or in the domain; only forwarding to a repository is correct; tested against fakes | Ports and factories, Other systems, Transactions, Tests, When to leave it alone |
 | **driven adapters** | implementations of this system's driven ports: a repository over one aggregate, a mailer, a clock, blob storage, another system behind an anti-corruption layer | implements a driven port the domain declared → the outside: a store, a mailer, a product's instance, another system's driving port | a repository method joins the caller's transaction and opens nothing; imports what is static and receives what is built, a product's instance late-bound; imports no service (question 6); behind an anti-corruption layer it translates, and a translation that changes nothing is conformist (question 8); a read across its system's aggregates is a reporting read; integration-tested by design, with one contract suite per port run against the fake and the real adapter | Terms, Ports and factories, Other systems, Products, Tests, When to leave it alone |
-| **driving adapters** | the ways in: controllers, hooks, scheduled tasks, handlers, their validators and inbound translation | called by the outside: a request, a webhook, a product's hook, the clock, the relay → one service to act, a specification to ask about input it holds; its only door to the store is a service | decides nothing by this system's state: prepares one call — resolving its caller through a port it receives, validating, translating — and acts through one service; receives its service from the root, as an argument or from the registry or the framework's context, and never imports assembly; a repeat changes nothing, an early arrival is not a repeat, and where the caller stops retrying it records before anything can fail; a product's hook answers in order: this system called → nothing, it asks → a specification, it acts → one service as Products orders; translates another system's call into this system's terms before it calls a service; puts per-request ambient values in; tested against fakes, which fill the registry | Terms, The layers, Ports and factories, Other systems, Products, Tests |
+| **driving adapters** | the ways in: controllers, hooks, scheduled tasks, handlers, their validators and inbound translation | called by the outside: a request, a webhook, a product's hook, the clock, the relay → one service to act, a specification to ask about input it holds; its only door to the store is a service | decides nothing by this system's state: prepares one call — resolving its caller through a port it receives, validating, translating — and acts through one service; receives its service from the root, as an argument or from a courier where the root cannot construct it, and never imports assembly; a repeat changes nothing, an early arrival is not a repeat, and where the caller stops retrying it records before anything can fail; a product's hook answers in order: this system called → nothing, it asks → a specification, it acts → one service as Products orders; translates another system's call into this system's terms before it calls a service; puts per-request ambient values in; tested against fakes, which fill the courier | Terms, The layers, Ports and factories, Other systems, Products, Tests |
 
 The arrow runs one way — driving adapter → service → driven adapter → the outside — and the
 domain sits beside all of it: every layer may import it, it imports no layer.
@@ -141,31 +158,37 @@ Nothing inside it constructs anything.
 export const createOrderService = (deps: {
   orders: OrderRepository        // driven port, from the domain
   invoices: InvoiceRepository    // driven port, from the domain
-  outbox: Outbox                 // driven port, from the common library
+  outbox: Outbox                 // driven port, from the domain
   tx: TransactionRunner          // driven port, from the common library
 }): OrderService => ({ ... })    // driving port, declared here
 ```
 
-**Assembly is not a layer.** Each entry — a server's start, a relay worker, a product's config — has
-one root that builds what that entry runs: it builds the adapters, calls the factories and the build
-functions systems export, and hands the result to its driving adapters. One process may load two
-entries, such as a server and a product's config: each keeps its root, and what both need is built
-once, put in the registry by one root and read, not imported, by the other, as the reasons to
-escalate (Other systems) decide; which root builds it is each codebase's choice. Assembly is the
+**Assembly is not a layer.** An *entry* is where a deployable starts — a server, a job, a relay
+worker — and it has one *root*, which builds what that entry runs: it builds the adapters, calls
+the factories and, for each system, the build function that system exports for the way this
+entry uses it — its open host service for a server, its handler and its outbox reader for the
+process that runs the relay, both where one process does both (Other systems) — and hands the
+result to its driving adapters, or to the relay. A product is built the same way, by its build
+function (Products). Where the framework collects a driving adapter and the root cannot construct
+it, the root fills a courier (Terms) instead; that is the courier's only case. Assembly is the
 only place that knows both a port and its implementation. Keep it separate from the factories: a
 service module exports only its factory, and assembly holds the instances, so every dependency but
 fixed plumbing (question 7) is one a factory declared.
 
 **An adapter imports what is static and receives what is built.** The domain, a schema it
-validates with, port types: imported. A service, an adapter — its own, or one that resolves or
-translates its caller — a product's instance: received.
+validates with, port types: imported. A service — a driving adapter's own; for a driven adapter,
+only another system's driving port — an adapter that resolves or translates its caller, a
+product's instance: received. That adapters are received is Khononov's (p. 128) and Cockburn's;
+the split is this document's.
 
-**A driving adapter receives its service from the root.** As an argument where the entry's code
-constructs the adapter — a route, a product's hook; where the framework collects it, such as a
-server function, from a courier the root fills once — the ambient registry (below) or the
-framework's request context. It never imports assembly. Which courier, the stack document says. One
-root per entry, and the registry, are this document's choices; the sources say only that whoever
-starts the application wires it.
+**A driving adapter receives its service from the root.** As an argument where the root
+constructs the adapter — a route, a server's handler, the adapters a product's build function
+takes. Where the framework collects the adapter and the root cannot construct it, such as a
+server function, from a courier (Terms). A driving adapter never imports assembly. One root per
+entry, that a driving adapter never imports it, and the courier are this document's choices. In
+Cockburn's example the driving adapter wires the application itself; Khononov resolves ports "in
+the infrastructure layer, either through dependency injection or by bootstrapping" (p. 128). A
+root apart from the driving adapters is this document's.
 
 **Atomicity crosses ports through a transaction port.** The service asks to run something inside
 a transaction; repository methods take the context it hands back. The context is opaque in the
@@ -180,15 +203,17 @@ await tx.run(async (ctx) => {
 ```
 
 **A value may be held ambient when no use case or domain function decides by it** — Fowler's
-registry, in two scopes. Per process: what the root built. The root puts it in before any adapter
-runs; a driving adapter reads it when it runs, not when it loads; a service reads nothing from that
-scope and receives its dependencies as arguments (question 7). Per request: a request id, a trace
-context, the locale a mail is rendered in, the user an audit column records; what a rule decides
-by, the port takes. A driving adapter puts it in; services and adapters read it; the domain takes
-arguments. A value a message's handler needs goes in the message, since the handler runs in
-another request. The transaction context is in neither scope: what a read returns depends on it.
-The line is this document's choice; which values a codebase holds ambient, it says in an ADR, and
-what carries them is the stack document's.
+registry, in two scopes; *ambient* is this document's word. Per process: what the root built, read
+as a courier by the driving adapters the root cannot construct — a service locator in Fowler's
+terms, and a departure from the injection the sources prefer, confined to that case. The root puts
+it in before any adapter runs; a driving adapter reads it when it runs, not when it loads; a service
+reads nothing from that scope and receives its dependencies as arguments (question 7). Per request:
+a request id, a trace context, the locale a mail is rendered in, the user an audit column records;
+what a rule decides by, the port takes. A driving adapter puts it in; services and adapters read it;
+the domain takes arguments. A value a message's handler needs goes in the message, since the handler
+runs in another request. The transaction context is in neither scope: what a read returns depends on
+it. Where the line between ambient and argument falls is this document's choice; which values a
+codebase holds ambient, it says in an ADR, and what carries them is the stack document's.
 
 ## Other systems
 
@@ -204,16 +229,18 @@ driven ports stay inside; they are its needs, not its offer. Export:
 - where it handles messages, a function that takes configuration and builds its handler, for the
   assembly that hands it to the relay. Whether one function builds both the open host
   service and the handler, and which process runs the relay, is each codebase's choice;
-- optionally, a fake of its driving ports, for other systems' tests, from an entry production
-  does not load.
+- where it publishes messages, a function that takes configuration and builds the reader of its
+  outbox, for the same assembly;
+- optionally, a fake of its driving ports, for other systems' tests, from an export path
+  production does not load.
 
-Give the published language and the port types an entry that loads only the domain, so another
-system imports them without loading any service; the port types are exported type-only, or the
-entry loads the service that declares them. Other systems reach a system only through these
-exports, which a linter can hold from import paths alone.
+Give the published language and the port types an export path that loads only the domain, so
+another system imports them without loading any service; the port types are exported type-only,
+or the export path loads the service that declares them. Other systems reach a system only
+through these exports, which a linter can hold from import paths alone.
 
 ```
-// pricing's entries — file names are the codebase's
+// pricing's export paths — file names are the codebase's
 // published language and port types: loads only the domain
 export type { Pricing } from "./service/pricing.port"
 export { Quote, PriceList, PriceListChanged } from "./domain/quote"
@@ -313,6 +340,12 @@ tables sit in this system's database.
   act after the commit is lost when the process stops before it and the product does not run
   the hook again. Reconciliation repairs that, and undoes step 2's work when the product rolls
   back.
+- **A product is built by a build function this system's product module exports**, as another
+  system is (Other systems). That function is the one place where the product learns of this
+  system, and the only place in this system that knows how the product is built. Where the
+  product takes its config from a call, the function builds it; where the framework imports the
+  config, the function carries what the product needs there another way, inside itself — a
+  courier of its own is one way — and nothing outside the function sees which.
 - **A product that calls back is a cycle by design.** Its config needs the hooks, the hooks need
   services, the services need adapters over the product's instance, and the instance needs the
   config. Assembly breaks it by late binding: an adapter receives a function that returns the
@@ -453,7 +486,8 @@ shared transaction is the half that gets missed.
 **In a diff:** a function that opens its own transaction instead of joining the one it was
 given, except the one rule 1 records an answer in or hook step 2 or 4 opens (Transactions,
 Products); a repository method that takes the context and writes without it; a loop that calls a
-write per item.
+write per item; a service that receives or imports another service of its system; a call to
+another system's writing port inside `run`.
 
 Moving a write out of a function tends to give it its own transaction. A repository method joins
 the caller's transaction and opens nothing. Writes that must land together run inside one `run`; a
@@ -477,9 +511,10 @@ parked in a driven adapter.
 
 ### 7. Does anything build its own dependency instead of receiving it?
 
-**In a diff:** a concrete adapter imported into a service file, or constructed inside a service
-body or a factory body, rather than passed in. Also: a module exporting a ready-made instance
-next to the factory that produces it.
+**In a diff:** a concrete adapter imported into a service file, constructed inside a service
+body or a factory body, or read from the per-process registry there, rather than passed in; a
+driving adapter importing an instance from the root, or reading a courier when its module loads.
+Also: a module exporting a ready-made instance next to the factory that produces it.
 
 Constructed in place, this one is invisible to questions 1–6 — the code sits in the right layer
 and calls along the arrow. What it breaks is substitution: the service can no longer be given a
@@ -544,10 +579,9 @@ instead.
 and no setup. Most of what is worth asserting lives here.
 
 **Test services and driving adapters against fakes.** Each receives ports — a driving adapter the
-framework collects reads them from the registry or the framework's context (Ports and factories),
-which the test fills with fakes — so a test hands it fakes and asserts what it *did*: which port it
-called, with what, and what it returned. Assert observable behaviour, not the order of internal
-calls.
+framework collects reads them from a courier (Terms), which the test fills with fakes — so a test
+hands it fakes and asserts what it *did*: which port it called, with what, and what it returned.
+Assert observable behaviour, not the order of internal calls.
 
 **Driven adapters are integration-tested by design.** A driven adapter's entire job is to talk to
 something external, so a unit test of one asserts a mock of the thing it exists to reach. Unit
@@ -593,14 +627,15 @@ inputs and observable results.
   things of it; a fake that needs configuration per consumer has outgrown that.
 - **Using a conformed system's terms directly is the design working**, not a leak.
 - **A service calling another system's driving port is calling a port**, not a use case nested in
-  another.
+  another — for a read. A write goes through the outbox or after the commit (Transactions, rule
+  1), never inside `run`.
 - **A system's build function building another system itself is correct** until one of the
   reasons to escalate holds.
 - **Another system catching up a moment later is the design working.** Between systems,
   consistency is eventual.
 - **Not everything gets a layer.** Code that asserts about the source tree rather than about the
   application sits outside these layers, and so do the roots that assemble them, a system's
-  exported entries and the common library.
+  export paths and the common library.
 - **The checklist is a prompt to look.** Concluding that a case is fine is a complete answer.
 
 ## What this does not cover

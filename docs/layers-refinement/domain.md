@@ -80,6 +80,9 @@ that meets one does not re-litigate it; it reopens the ticket named.
 - A server function built as a factory with no caller, or importing a service instance from a
   service module or from the root: a driving adapter the framework collects reads its service
   from the registry or the framework's context (ticket 21).
+- Two roots in one process, one building shop for the other: there is one root, the server's; it
+  builds Payload through shop's build function for it, handing over shop's hooks, and how the
+  function gets them into Payload's imported config is the function's (ticket 24).
 
 ## The checkout saga
 

@@ -106,14 +106,14 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 
 ### rules
 - decides nothing by this system's state: prepares one call — resolving its caller through a port it receives, validating, translating — and acts through one service — The layers: "**A driving adapter decides nothing by this system's state.** It prepares one call — resolving the caller, validating, translating, whatever else shapes the input — and acts through one service."; Terms: "it resolves the caller (a session, a signature, a key) through a port it receives"
-- receives its service from the root, as an argument or from the registry or the framework's context, and never imports assembly — Ports and factories: "**A driving adapter receives its service from the root.**"; "It never imports assembly."
+- receives its service from the root, as an argument or from a courier where the root cannot construct it, and never imports assembly — Ports and factories: "**A driving adapter receives its service from the root.**"; "Where the framework collects the adapter and the root cannot construct it, such as a server function, from a courier (Terms). A driving adapter never imports assembly."
 - a repeat changes nothing — The layers: "**Deliver the same thing again, however late.** Handling it a second time changes nothing."
 - an early arrival is not a repeat — The layers: "**Deliver out of order.** A delivery about something this system has not recorded yet is not a repeat."
 - where the caller stops retrying it records before anything can fail — The layers: "a driving adapter for such a caller records what it was given, through its one service, before anything that can fail"
 - a product's hook answers in order: this system called → nothing, it asks → a specification, it acts → one service as Products orders — Products: "For a hook, answer in order:"; "**The product's caller is this system** → this system started the call, so it is not a driving call: the hook does nothing"; "**It asks**, such as whether a change is valid → a specification answers it"; "**It acts** → answer in order:"
 - translates another system's call into this system's terms before it calls a service — Other systems: "the driving adapter that receives the other system's call translates it into this system's terms before it calls a service"
 - puts per-request ambient values in — Ports and factories: "A driving adapter puts it in; services and adapters read it; the domain takes arguments."
-- tested against fakes, which fill the registry — Tests: "**Test services and driving adapters against fakes.** Each receives ports — a driving adapter the framework collects reads them from the registry or the framework's context (Ports and factories), which the test fills with fakes"
+- tested against fakes, which fill the courier — Tests: "**Test services and driving adapters against fakes.** Each receives ports — a driving adapter the framework collects reads them from a courier (Terms), which the test fills with fakes"
 
 ### read
 - Terms, The layers, Ports and factories, Other systems, Products, Tests
@@ -124,6 +124,7 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 - "**Terms.**" — defines the rows; its sentences are cited above.
 - "**Assembly is not a layer.**" — Ports and factories: not a layer, by its own words; the root is where the rows meet.
 - "**A driving adapter receives its service from the root.**" — in the driving-adapters row; its root half is assembly.
+- "**A product is built by a build function this system's product module exports**" — Products: assembly; the product's hooks it takes are in the driving-adapters row already.
 - "**Atomicity crosses ports through a transaction port.**" — binds service and repository together; the service row's transaction entry and the driven row's "joins the caller's transaction" carry both halves.
 - "**A value may be held ambient when no use case or domain function decides by it**" — cross-cutting; the driving-adapters row carries its per-request half.
 - "**A system offers an open host service: …**" — Other systems: binds the system's exports, not a layer.
@@ -159,5 +160,5 @@ From the table as it stood before this pass (`what it is` / `may import` / `does
 - "a store client, a product's instance and its types, an HTTP client" (driven adapters, may import) — kinds; the sentence is "An adapter imports what is static and receives what is built", now an entry.
 - "services, domain and the registry" (driving adapters, may import) — the column is replaced; the service arrives, it is not imported ("A driving adapter receives its service from the root."), and the registry read is an entry.
 - "the published language and driving-port types of a system it conforms to" (service, may import) — column replaced; Other systems' export list and the Conformist bullet carry it.
-- "it receives ports that resolve or translate its caller, as it receives its service" (driving adapters, may import) — column replaced; since ticket 22 the rules entry carries it ("through a port it receives"), and Ports and factories says it in the body ("A service, an adapter — its own, or one that resolves or translates its caller — a product's instance: received").
+- "it receives ports that resolve or translate its caller, as it receives its service" (driving adapters, may import) — column replaced; since ticket 22 the rules entry carries it ("through a port it receives"), and Ports and factories says it in the body ("A service — a driving adapter's own; for a driven adapter, only another system's driving port — an adapter that resolves or translates its caller, a product's instance: received").
 - "reaches the store only through a service" (driving adapters, does) — reworded to "its only door to the store is a service", the sentence When to leave it alone has; review-02 R02-19's session resolver is that finding's.
