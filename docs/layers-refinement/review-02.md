@@ -89,7 +89,7 @@ Severity: **S1** contradiction or wrong instruction; **S2** gap a fresh agent fi
 
 | id | hits | where | finding | proposed fix |
 | --- | --- | --- | --- | --- |
-| R02-29 | 2 (A, R) | throughout | "entry" in three senses: the process entry with a root ("Each entry — a server's start, a relay worker, a product's config"), a package entry point ("an entry that loads only the domain", "a system's exported entries"), and driving adapters as "entry points". | keep *entry* for the process; "export path" for package files; row: "the ways in: controllers, hooks, …" |
+| R02-29 | 2 (A, R) | throughout | "entry" in three senses: the process entry with a root ("Each entry — a server's start, a relay worker, a product's config"), a package entry point ("an entry that loads only the domain", "a system's exported entries"), and driving adapters as "entry points". | row half closed (summarize-layers pass 2): "the ways in: controllers, hooks, …". Open: *entry* vs "export path" in the body |
 | R02-30 | 1 (A) | Other systems, export paragraph | "the port types are exported type-only, or the entry loads the service that declares them" — the "or" sanctions what the sentence forbids. | "the port types are exported type-only, so the entry still loads only the domain" |
 | R02-31 | 1 (A) | Q7 tell | "constructed inside a service body or a factory body" fires on a build function, which constructs adapters by design. | "inside a service factory's body" |
 | R02-32 | 1 (A) | Q5 tell | "a loop that calls a write per item" fires on a loop of repository calls inside one `run`; the body's fault is "a loop that calls `run` per item". | "a loop that opens a transaction per item" |

@@ -90,7 +90,8 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 ## driving adapters
 
 ### goes here
-- entry points: controllers — Terms: "A *controller* is a driving adapter"
+- the ways in — Terms: "A *driving port* is the interface to a use case — the way in, something a controller calls."
+- controllers — Terms: "A *controller* is a driving adapter"
 - hooks — Products: "**A product's hooks and scheduled tasks are driving adapters**"
 - scheduled tasks — Terms: "a scheduled task is a driving adapter"
 - message handlers — Transactions: "The receiver handles it in its own transaction, through a driving adapter that calls one service."
@@ -151,6 +152,8 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 
 From the table as it stood before this pass (`what it is` / `may import` / `does`):
 
+- "entry points" (driving adapters, goes here, pass 1) — no sentence; the body says "the way in" (Terms). Review-02 R02-29 keeps *entry* for the process.
+- "**The only entry for doing something.**" (service, what it is) — no sentence of its own; "**A driving adapter acts through one service and asks through the domain.**" and "A controller's only door is a service" carry it in the driving-adapters row.
 - "composes nothing" (driven adapters, does) — no sentence; review-02 R02-10 found it unmarked. Whether a cache over a repository is allowed is a decision for a ticket, not for the table.
 - "a cache" (driven adapters, what it is) — no sentence says a cache is a driven port; spec-01's ruling never landed (review-02 R02-22).
 - "a store client, a product's instance and its types, an HTTP client" (driven adapters, may import) — kinds; the sentence is "An adapter imports what is static and receives what is built", now an entry.
