@@ -1,5 +1,6 @@
 # Review 02: `layers.md` after tickets 19 and 20
 
+**Superseded by `review-03.md`** (HEAD `544055e`): every finding here is carried, closed or dropped there; Q3, Q5 and Q14 are settled, Q0 applied.
 **Reviewed:** `registry/docs/agents/layers.md` at `67bd22b` (branch `docs/layers-refinement`),
 with `docs/extending-layers.md`, `domain.md`, `spec-01.md`, `review-01.md`, tickets 01–20,
 `open-questions.md`, the sibling docs `components.md` and `tanstack-start.md`, and the books
