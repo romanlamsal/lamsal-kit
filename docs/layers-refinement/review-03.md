@@ -329,6 +329,11 @@ R03-17) are not grilled yet. Frontier drafted for B, one decision each, recommen
   Alternative: mark only the three that change what an agent does.
 - **B5, tells (R03-06, R02-11, Q18):** fold into questions 7 and 5. Alternative: a tenth question.
 
+**Grilled 2026-10-21, subgroup B:** became `24-one-root-per-process.md`. The ticket rules
+against the draft above: there is one root per process (an entry is where a deployable starts; a
+product's config is not one), so B1 and B2 dissolve rather than reword; B3 as drafted; B4 all
+five markers; B5 folded into questions 5 and 7. R02-29's module sense of *entry* is renamed there.
+
 Subgroup C, not drafted: import rule in the body with port types crossing (R02-42, Q20); the
 domain's common-library port types granted and the cell as the test not a list (R03-03, Q20);
 skill policy for uncited and ruling-carrying entries (R03-51, Q22); "composes nothing" back as a
