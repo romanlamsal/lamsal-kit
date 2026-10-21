@@ -338,10 +338,16 @@ library's, and the relay receives handlers and outbox readers from the root (the
 export list); R02-29's module sense of *entry* is renamed; R03-03's clause for subgroup C loses
 "the outbox".
 
-Subgroup C, not drafted: import rule in the body with port types crossing (R02-42, Q20); the
-domain's common-library port types granted and the cell as the test not a list (R03-03, Q20);
-skill policy for uncited and ruling-carrying entries (R03-51, Q22); "composes nothing" back as a
-question-1 tell, not a sentence (R03-17, R03-32). Ticket 22 settles R03-16 on the way.
+**Ruled 2026-10-21, subgroup C, not grilled:** the skill only. The author rules that the
+summary summarizes and nothing else: every line between the tags, the sentence under the table
+included, shortens a body sentence that states it; an entry the pass can only infer is not
+written; a dropped ruling stays dropped and is recorded under "Entries dropped". `SKILL.md`
+says so now (R03-51, Q22 answered against the recommendation: a pass never keeps or restores
+what the body lacks). The cells follow on the next pass, after ticket 24 lands: the arrow and
+import sentence (R02-42), "the common library's ports" (R03-03) and the two self-citing domain
+entries fall out unless the body gains the sentence, which is the author's choice and not the
+skill's; Q20 stays open as that choice. "Composes nothing" (R03-17, R03-32) stays dropped; a
+question-1 tell is a body change and is not drafted. Ticket 22 settled R03-16 on the way.
 
 Settled by the text or by a commit and not asked: review-02's Q0 (ticket 21), Q3 (the import
 column is gone; which root builds is each codebase's), Q5 (no import columns remain), Q14
