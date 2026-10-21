@@ -217,13 +217,14 @@ For the session that works through this review.
 - **Process:** `docs/extending-layers.md` steps 1–6 per change; commit per `CLAUDE.md`, no
   approval wait. One commit per finding or per group that touches one sentence; name the ids in
   the commit body.
-- **Order suggested:** S1 first. R02-06 and R02-02 together (both are the import table against
-  the body), then R02-03 with R02-16 (the product instance and the two roots), R02-04 with
+- **Order suggested:** ticket 21 (Q0) first; it closes R02-06, R02-08, R02-16, R02-47,
+  R02-49 and R02-63 (h), and narrows R02-03 to its product-instance half. Then S1: R02-02 (the
+  service row against question 7), R02-03 (the product instance, late-bound), R02-04 with
   R02-14 (record-first and early arrivals), R02-01 with R02-18 (asking and authorization), R02-05
   with R02-12 (who calls the third party, what reconciliation repairs). S2 next; R02-21, R02-22
   and R02-28 are each one sentence restoring a spec-01 ruling `layers.md` never carried. S3 is
   two sweeps: checklist tells (R02-26, R02-27, R02-31 to R02-35) and markers (R02-36, R02-37,
-  R02-39, R02-40, R02-51 to R02-62). Siblings (R02-45, R02-46, R02-49) with the S3 sweep. S4
+  R02-39, R02-40, R02-51 to R02-62). Siblings (R02-45, R02-46) with the S3 sweep. S4
   after `layers.md` is settled.
 - **Sources:** `~/Documents/*Khononov*.pdf`, `~/Documents/*Evans*.pdf` (filenames contain
   non-ASCII whitespace; use the globs); Cockburn at
@@ -244,6 +245,23 @@ For the session that works through this review.
 
 Settled by the text and not asked: the four layer names and the root per entry hold; every
 ticket decision landed; the S3 checklist-tell fixes and the S4 housekeeping are mechanical.
+
+❓ **Q0** - **A driving adapter never imports assembly (ticket 21)**: ticket 20's "by importing
+the root where the framework constructs it" is the cause of R02-06, R02-08, R02-16, R02-47 and
+R02-49, and of fault (h) being underivable (R02-63). The constraint is real only for a module the
+framework collects, a server function or a file-based route; a `node:http` handler, a Hono route
+and a Payload hook take a closure factory. Does the adapter instead read its service from a
+courier the root fills once — the ambient registry, as a second, per-process scope of the ambient
+rule the document already has, or the framework's request context — and never import assembly,
+with "an adapter imports what is static and receives what is built" as the line behind it?
+
+➡️ Yes; `21-service-registry.md` holds the wording. It passes the ambient test as written
+("nothing a use case or domain function decides by"), removes the two-roots cycle, keeps tests
+on fakes without module mocking, and sends the courier to the stack document. Q3's second half,
+Q5's driving-adapters row and Q14 are then settled by it: Q3 keeps only the product-instance
+half, Q5 adds "the registry" to the row, Q14 is dropped.
+
+---
 
 ❓ **Q1** - **Ask, then act (R02-01)**: an adapter that needs data to ask "may this caller do
 this" calls a service to ask, then a service to act: two calls, and Q2 fires. Does the acting

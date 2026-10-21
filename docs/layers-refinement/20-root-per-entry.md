@@ -191,7 +191,7 @@ the word. Derivation test: reworded, not added. "A's assembly builds B" becomes 
 function builds B"; the escalation rule and its three reasons stand unchanged, with the root as
 the place escalated to.
 
-**A driving adapter receives its service from the root, by argument or by import.** The
+**A driving adapter receives its service from the root, by argument or by import.**[^21] The
 document never said driving adapters are factories; only services are. Where the framework
 constructs the adapter, it imports the root, and that is the one place a driving adapter imports
 assembly. Question 7 stays sharp: its fault is a *service module* exporting a ready-made instance
@@ -221,3 +221,6 @@ document's.
   once, the product's config reaches it. Nothing new is needed; the placement test should show
   an agent deriving it.
 - Ticket 19's rename of controllers to driving adapters is assumed in every "after".
+
+[^21]: The "by import" half is superseded by `21-service-registry.md`: a driving adapter reads the
+    registry or the framework's context, and never imports assembly.
