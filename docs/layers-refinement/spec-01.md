@@ -14,6 +14,8 @@ consuming repository's choice. Done when every row below is closed or ruled out.
 4. Ticket 14 (generality test first), then open question D: both are about product hooks.
 5. Open question C (ticket 17).
 6. Ticket 21 (review 02, Q0), before any other review-02 finding: six of them close with it.
+7. Tickets 22 then 23 (review 03, subgroup A: Q1, Q2, Q4, Q10), before the rest of review 03;
+   23's step 4 uses 22's shape.
 
 ## Tickets
 
@@ -41,6 +43,8 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `17-fakes-of-other-systems.md` | closed (97e2dc2) | resolves open question C |
 | `18-hook-on-own-write.md` | closed (8deed33) | resolves open question D |
 | `21-service-registry.md` | closed (525c559) | from review 02, Q0; supersedes ticket 20's import half. Rows for 19 and 20: review 02, R02-64 |
+| `22-driving-adapter-prepares-and-acts.md` | ready | from review 03, Q1 and Q2; closes R02-01, R02-18, R03-01, R03-05, R02-07, R03-16 |
+| `23-hook-defers-through-the-outbox.md` | ready | from review 03, Q4 and Q10; closes R02-04, R02-12, R02-05, R03-39; supersedes ticket 14's steps 3 and 4 |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
 | `open-questions.md` B | closed (d6ee97c) | resolved into 16 |
 | `open-questions.md` C | closed (97e2dc2) | resolved into 17 |

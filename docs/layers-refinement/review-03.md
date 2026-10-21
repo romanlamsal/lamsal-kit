@@ -307,6 +307,14 @@ For the session that works through this review.
 
 ## Decisions the author has to make
 
+**Grilled 2026-10-21, subgroup A (the S1s):** Q1 and Q2 became
+`22-driving-adapter-prepares-and-acts.md`, Q4 and Q10 became `23-hook-defers-through-the-outbox.md`.
+The tickets rule where they differ from the recommendations below: Q1/Q2 generalize to "a
+driving adapter decides nothing by this system's state; a port takes what its use case decides
+by", and Q4 defers hook step 4 through the outbox rather than a pending row. Subgroups B
+(registry wording: Q13's registry part, Q18, Q21, R03-02) and C (table vs body: Q20, Q22,
+R03-17) are not grilled yet.
+
 Settled by the text or by a commit and not asked: review-02's Q0 (ticket 21), Q3 (the import
 column is gone; which root builds is each codebase's), Q5 (no import columns remain), Q14
 (dropped by ticket 21); Q6's first half, a driven adapter may receive another ("A service, an
