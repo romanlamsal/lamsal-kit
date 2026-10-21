@@ -176,12 +176,11 @@ layers)", where "Deliver out of order" lives. The sweep widened question 5's exc
 step 2 or 4 opens", since step 4 now opens this system's own transaction. The cold read placed
 the Payload before-write hook at 4 (step 3 settles the mechanism; that a handler acts later is
 inferred from Transactions), the write-nothing hook, the confirmation mail and the duplicate
-PaymentIntent at 5. It found no "handler" the relay does not call. Left for the next review:
-"any driving adapter that finds the two apart" (Terms, reconciliation) reads against "decides
-nothing by this system's state"; who relays a message embedded in a product's record is unstated
-(the Consequences name an outbox adapter over the product's store, R02-38); a third party's
-mailer has no "last version it handled" to dedupe by. Table pass in the same commit: "handlers"
-in the driving row, cited from Terms.
+PaymentIntent at 5. It found no "handler" the relay does not call. One leftover no review row covers, unverified:
+"any driving adapter that finds the two apart" (Terms, reconciliation) may read against "decides
+nothing by this system's state" (ticket 22), since finding them apart compares this system's
+record. What the read noticed inside open findings went to their rows as hints (R02-23, R02-38,
+R03-32). Table pass in the same commit: "handlers" in the driving row, cited from Terms.
 
 ## Grounding
 
