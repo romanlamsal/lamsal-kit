@@ -55,7 +55,7 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 - a change to another system's data is an outbox message, or a call after the commit — Transactions: "**Does it change data another system owns — a third party's included, such as a mail sent or a payment created?** → **Outbox, required.**"; "Where the use case's caller needs the other system's answer in its response, call the other system instead, once the transaction has committed"
 - reads another system's data through its open host service, or a copy — Transactions: "**Does it read data another system owns?** → **Call the owner's open host service.** If it offers no fitting read, keep a copy in this system, updated by the owner's messages."
 - calls no service of its system — Transactions: "A service does not call another service of its system: the call is a second transaction, and the outbox is the one that retries."
-- its driving port takes its caller, and authorization lives here or in the domain — Other systems: "**A driving port another system calls takes its caller as an argument.**"; "B's authorization lives in its service or domain"
+- its driving port takes what its use case decides by, the caller included, and a permission that needs this system's state is decided here or in the domain — The layers: "A driving port takes what its use case decides by, the caller included."; "A question that needs this system's state — may this caller do this — is the acting service's: it loads the data, asks the specification, and refuses."; Other systems: "B's authorization lives in its service or domain, as it does for every caller"
 - only forwarding to a repository is correct — When to leave it alone: "**A service that only forwards to its repository is correct here**"
 - tested against fakes — Tests: "**Test services and driving adapters against fakes.**"
 
@@ -95,17 +95,17 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 - hooks — Products: "**A product's hooks and scheduled tasks are driving adapters**"
 - scheduled tasks — Terms: "a scheduled task is a driving adapter"
 - message handlers — Transactions: "The receiver handles it in its own transaction, through a driving adapter that calls one service."
-- their validators — Terms: "it resolves the caller (a session, a signature, a key), validates, acts through one service, and returns"
+- their validators — Terms: "it resolves the caller (a session, a signature, a key) through a port it receives, validates, acts through one service, and returns"
 - inbound translation — Other systems: "the driving adapter that receives the other system's call translates it into this system's terms before it calls a service"
 
 ### in → out
 - called by the outside — Terms: "Who starts the call decides which: the outside starts it, driving; this system starts it, driven."
 - a request, a webhook, a product's hook, the clock, the relay — The layers: "Where its caller may deliver more than once — a relay, a webhook, a product's hook"; Terms: "A clock is outside: a scheduled task is a driving adapter."
-- one service to act, a specification to ask — The layers: "**A driving adapter acts through one service and asks through the domain.**"
+- one service to act, a specification to ask about input it holds — The layers: "To answer a question about input it holds — is this valid — it calls a *specification*"; "To act, the adapter calls one service function"
 - its only door to the store is a service — When to leave it alone: "A controller's only door is a service"
 
 ### rules
-- acts through one service and asks through the domain — The layers: "**A driving adapter acts through one service and asks through the domain.**"
+- decides nothing by this system's state: prepares one call — resolving its caller through a port it receives, validating, translating — and acts through one service — The layers: "**A driving adapter decides nothing by this system's state.** It prepares one call — resolving the caller, validating, translating, whatever else shapes the input — and acts through one service."; Terms: "it resolves the caller (a session, a signature, a key) through a port it receives"
 - receives its service from the root, as an argument or from the registry or the framework's context, and never imports assembly — Ports and factories: "**A driving adapter receives its service from the root.**"; "It never imports assembly."
 - a repeat changes nothing — The layers: "**Deliver the same thing again, however late.** Handling it a second time changes nothing."
 - an early arrival is not a repeat — The layers: "**Deliver out of order.** A delivery about something this system has not recorded yet is not a repeat."
@@ -153,11 +153,11 @@ body sentence it follows, quoted verbatim. Rebuilt by the `summarize-layers` ski
 From the table as it stood before this pass (`what it is` / `may import` / `does`):
 
 - "entry points" (driving adapters, goes here, pass 1) — no sentence; the body says "the way in" (Terms). Review-02 R02-29 keeps *entry* for the process.
-- "**The only entry for doing something.**" (service, what it is) — no sentence of its own; "**A driving adapter acts through one service and asks through the domain.**" and "A controller's only door is a service" carry it in the driving-adapters row.
+- "**The only entry for doing something.**" (service, what it is) — no sentence of its own; "To act, the adapter calls one service function" and "A controller's only door is a service" carry it in the driving-adapters row.
 - "composes nothing" (driven adapters, does) — no sentence; review-02 R02-10 found it unmarked. Whether a cache over a repository is allowed is a decision for a ticket, not for the table.
 - "a cache" (driven adapters, what it is) — no sentence says a cache is a driven port; spec-01's ruling never landed (review-02 R02-22).
 - "a store client, a product's instance and its types, an HTTP client" (driven adapters, may import) — kinds; the sentence is "An adapter imports what is static and receives what is built", now an entry.
 - "services, domain and the registry" (driving adapters, may import) — the column is replaced; the service arrives, it is not imported ("A driving adapter receives its service from the root."), and the registry read is an entry.
 - "the published language and driving-port types of a system it conforms to" (service, may import) — column replaced; Other systems' export list and the Conformist bullet carry it.
-- "it receives ports that resolve or translate its caller, as it receives its service" (driving adapters, may import) — column replaced; Terms' "resolves the caller" and the translation entry carry it.
+- "it receives ports that resolve or translate its caller, as it receives its service" (driving adapters, may import) — column replaced; since ticket 22 the rules entry carries it ("through a port it receives"), and Ports and factories says it in the body ("A service, an adapter — its own, or one that resolves or translates its caller — a product's instance: received").
 - "reaches the store only through a service" (driving adapters, does) — reworded to "its only door to the store is a service", the sentence When to leave it alone has; review-02 R02-19's session resolver is that finding's.

@@ -12,7 +12,7 @@ aggregate's outgoing messages are embedded in its own record. *Table*, *row* and
 used in the relational sense — substitute your store's equivalents.
 
 **Terms.** A *controller* is a driving adapter: it resolves the caller (a session, a signature, a
-key), validates, acts through one service, and returns. It takes its rules from the domain.
+key) through a port it receives, validates, acts through one service, and returns. It takes its rules from the domain.
 `components.md` applies the same role to route files on the client; the difference is writes — a
 server controller passes a write through to one service, a route controller does not carry writes
 at all.
@@ -53,9 +53,9 @@ they are about what a function *does* rather than where it imports from.
 | layer | goes here | in → out | rules | read |
 | --- | --- | --- | --- | --- |
 | **domain** | the model: rules, schemas, specifications, and the driven ports the rules need | imported by every layer, by a browser and by another system; imports no layer, only other domain modules, the common library's ports, a shared kernel, a conformed system's published language and pure libraries → reaches nothing; computes from its arguments | runs on any runtime; a package that can reach outside the process stays behind a port; a schema is a rule, and types are inferred from it; refers to another aggregate and to another system's data by id; declares the driven ports and names no use case; its schemas are the published language, by default; tested directly | The layers, Ports and factories, Other systems, Tests |
-| **service** | the application layer: use cases, and the driving ports beside them | in through its driving port, called by a driving adapter or by another system → out through the driven ports it received: repositories, a mailer, another system's driving port | a factory: takes its dependencies, returns its driving port, constructs nothing; writes that must land together share one transaction, which stays inside its system; a change to another system's data is an outbox message, or a call after the commit; reads another system's data through its open host service, or a copy; calls no service of its system; its driving port takes its caller, and authorization lives here or in the domain; only forwarding to a repository is correct; tested against fakes | Ports and factories, Other systems, Transactions, Tests, When to leave it alone |
+| **service** | the application layer: use cases, and the driving ports beside them | in through its driving port, called by a driving adapter or by another system → out through the driven ports it received: repositories, a mailer, another system's driving port | a factory: takes its dependencies, returns its driving port, constructs nothing; writes that must land together share one transaction, which stays inside its system; a change to another system's data is an outbox message, or a call after the commit; reads another system's data through its open host service, or a copy; calls no service of its system; its driving port takes what its use case decides by, the caller included, and a permission that needs this system's state is decided here or in the domain; only forwarding to a repository is correct; tested against fakes | Ports and factories, Other systems, Transactions, Tests, When to leave it alone |
 | **driven adapters** | implementations of this system's driven ports: a repository over one aggregate, a mailer, a clock, blob storage, another system behind an anti-corruption layer | implements a driven port the domain declared → the outside: a store, a mailer, a product's instance, another system's driving port | a repository method joins the caller's transaction and opens nothing; imports what is static and receives what is built, a product's instance late-bound; imports no service (question 6); behind an anti-corruption layer it translates, and a translation that changes nothing is conformist (question 8); a read across its system's aggregates is a reporting read; integration-tested by design, with one contract suite per port run against the fake and the real adapter | Terms, Ports and factories, Other systems, Products, Tests, When to leave it alone |
-| **driving adapters** | the ways in: controllers, hooks, scheduled tasks, message handlers, their validators and inbound translation | called by the outside: a request, a webhook, a product's hook, the clock, the relay → one service to act, a specification to ask; its only door to the store is a service | acts through one service and asks through the domain; receives its service from the root, as an argument or from the registry or the framework's context, and never imports assembly; a repeat changes nothing, an early arrival is not a repeat, and where the caller stops retrying it records before anything can fail; a product's hook answers in order: this system called → nothing, it asks → a specification, it acts → one service as Products orders; translates another system's call into this system's terms before it calls a service; puts per-request ambient values in; tested against fakes, which fill the registry | Terms, The layers, Ports and factories, Other systems, Products, Tests |
+| **driving adapters** | the ways in: controllers, hooks, scheduled tasks, message handlers, their validators and inbound translation | called by the outside: a request, a webhook, a product's hook, the clock, the relay → one service to act, a specification to ask about input it holds; its only door to the store is a service | decides nothing by this system's state: prepares one call — resolving its caller through a port it receives, validating, translating — and acts through one service; receives its service from the root, as an argument or from the registry or the framework's context, and never imports assembly; a repeat changes nothing, an early arrival is not a repeat, and where the caller stops retrying it records before anything can fail; a product's hook answers in order: this system called → nothing, it asks → a specification, it acts → one service as Products orders; translates another system's call into this system's terms before it calls a service; puts per-request ambient values in; tested against fakes, which fill the registry | Terms, The layers, Ports and factories, Other systems, Products, Tests |
 
 The arrow runs one way — driving adapter → service → driven adapter → the outside — and the
 domain sits beside all of it: every layer may import it, it imports no layer.
@@ -94,12 +94,16 @@ infrastructure layer; Khononov's infrastructure layer holds both. A *repository*
 pattern: a driven port over one aggregate's storage, declared in the domain and implemented by a
 driven adapter.
 
-**A driving adapter acts through one service and asks through the domain.** To act, it calls one
-service function; needing two is the signal that a use case has grown inside it. To answer a
-question about a rule — may this caller do this, is this input valid — it calls a
-*specification*: a domain function that takes the candidate and returns the answer. When the
-answer needs data the adapter does not hold, a service of its system loads the data and asks the
-specification.
+**A driving adapter decides nothing by this system's state.** It prepares one call — resolving
+the caller, validating, translating, whatever else shapes the input — and acts through one
+service. A driving port takes what its use case decides by, the caller included. To act, the
+adapter calls one service function; needing two is the signal that a use case has grown inside
+it. To answer a question about input it holds — is this valid — it calls a *specification*: a
+domain function that takes the candidate and returns the answer. A question that needs this
+system's state — may this caller do this — is the acting service's: it loads the data, asks the
+specification, and refuses. A service that only answers, for a screen that hides a button, is
+called instead of acting, never before it. The conversion is Cockburn's adapter; that the adapter
+reads no state of its own follows from its only door being a service.
 
 Where its caller may deliver more than once — a relay, a webhook, a product's hook — the caller
 may do three things. Each is a fault the adapter prevents:
@@ -150,7 +154,8 @@ service module exports only its factory, and assembly holds the instances, so ev
 fixed plumbing (question 7) is one a factory declared.
 
 **An adapter imports what is static and receives what is built.** The domain, a schema it
-validates with, port types: imported. A service, an adapter, a product's instance: received.
+validates with, port types: imported. A service, an adapter — its own, or one that resolves or
+translates its caller — a product's instance: received.
 
 **A driving adapter receives its service from the root.** As an argument where the entry's code
 constructs the adapter — a route, a product's hook; where the framework collects it, such as a
@@ -175,12 +180,12 @@ await tx.run(async (ctx) => {
 registry, in two scopes. Per process: what the root built. The root puts it in before any adapter
 runs; a driving adapter reads it when it runs, not when it loads; a service reads nothing from that
 scope and receives its dependencies as arguments (question 7). Per request: a request id, a trace
-context, the locale a mail is rendered in, the user an audit column records until a rule decides by
-it. A driving adapter puts it in; services and adapters read it; the domain takes arguments. A value
-a message's handler needs goes in the message, since the handler runs in another request. The
-transaction context is in neither scope: what a read returns depends on it. The line is this
-document's choice; which values a codebase holds ambient, it says in an ADR, and what carries them
-is the stack document's.
+context, the locale a mail is rendered in, the user an audit column records; what a rule decides
+by, the port takes. A driving adapter puts it in; services and adapters read it; the domain takes
+arguments. A value a message's handler needs goes in the message, since the handler runs in
+another request. The transaction context is in neither scope: what a read returns depends on it.
+The line is this document's choice; which values a codebase holds ambient, it says in an ADR, and
+what carries them is the stack document's.
 
 ## Other systems
 
@@ -226,9 +231,11 @@ assembly's decision: B's service in-process, or an HTTP client, a driven adapter
 implementing the same port. Moving B out of process changes assembly and adds that adapter; no
 service or domain changes.
 
-**A driving port another system calls takes its caller as an argument.** A consumer reaches B's
-service without passing B's controllers, so whatever those controllers resolve — who is calling,
-on whose behalf — cannot come from them, and B's authorization lives in its service or domain.
+**A driving port another system calls takes its caller as an argument**, as every driving port
+takes what its use case decides by (The layers). A consumer reaches B's service without passing
+B's controllers, so whatever those controllers resolve — who is calling, on whose behalf —
+arrives as an argument, and B's authorization lives in its service or domain, as it does for
+every caller.
 
 **How two systems relate is chosen per relationship, in the terms of DDD's context map.** Three
 choices decide where code goes:
@@ -386,8 +393,9 @@ invoices.createForOrder(ctx, { orderId, total })
 ### 2. Is the new use case in a driven adapter, or in a driving one?
 
 **In a diff:** a driven adapter that gained an import of another driven adapter or of a service.
-Or a driving adapter's body that grew past "call one service"; resolving its caller and asking a
-specification are not growth.
+Or a driving adapter's body that grew past "call one service"; preparing the call — resolving
+its caller, validating, translating, putting ambient values in, asking a specification — is not
+growth.
 
 A controller that hands a repository a transaction and a callback has not delegated a use case,
 it has inlined one: the deciding still happens in the controller.
