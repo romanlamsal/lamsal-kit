@@ -33,7 +33,7 @@ the system whose use cases write it, wherever it is stored; a record two systems
 aggregates sharing an id.
 
 A *common library* is plumbing every system may import: the transaction port, store clients, a
-logger, a tracer, the outbox port and its relay. It holds no model.
+logger, a tracer, the outbox port and its relay, the ambient registry. It holds no model.
 
 *Reconciliation* is a use case of the system that owns an aggregate: it compares what this
 system recorded with what another system holds, and repairs this system's record. A scheduled
@@ -53,7 +53,7 @@ they are about what a function *does* rather than where it imports from.
 | **domain** | pure rules, and the driven ports those rules need. No I/O | other domain modules, the common library's ports, a conformed system's published language, a shared kernel, and pure libraries — validation, date and money arithmetic | computes from its arguments, and runs on any runtime (below) |
 | **service** | use cases. **The only entry for doing something.** Receives what it needs | domain, the common library's ports, and the published language and driving-port types of a system it conforms to | receives its dependencies; writes through repositories |
 | **driven adapters** | implementations of this system's driven ports: an aggregate's repository, a mailer, a clock, a cache, blob storage, another system behind an anti-corruption layer | whatever its port's implementation needs — a store client, a product's instance and its types, an HTTP client — the domain, the common library, and the published language and driving-port types of the system it calls | an adapter over this system's aggregate serves one aggregate for writes, composes nothing, and joins the caller's transaction; an adapter over another system translates between this system's ports and that system |
-| **driving adapters** | entry points: controllers, hooks, scheduled tasks, message handlers, their validators | services and domain; it receives ports that resolve or translate its caller, as it receives its service | reaches the store only through a service |
+| **driving adapters** | entry points: controllers, hooks, scheduled tasks, message handlers, their validators | services, domain and the registry; it receives ports that resolve or translate its caller, as it receives its service | reaches the store only through a service |
 
 The arrow runs one way — driving adapter → service → driven adapter → the outside — and the
 domain sits beside all of it: every layer may import it, it imports no layer.
@@ -135,19 +135,24 @@ export const createOrderService = (deps: {
 }): OrderService => ({ ... })    // driving port, declared here
 ```
 
-**Assembly is not a layer.** Each entry — a server's start, a relay worker, a product's config —
-has one root that builds what that entry runs: it builds the adapters, calls the factories and
-the build functions systems export, and hands the result to its driving adapters. One process
-may load two entries, such as a server and a product's config: each keeps its root, and what both
-need is built once by one root and imported by the other, as the reasons to escalate (Other
-systems) decide. Assembly is the only place that knows both a port and its implementation. Keep
-it separate from the factories: a service module exports only its factory, and assembly holds the
-instances, so every dependency but fixed plumbing (question 7) is one a factory declared.
+**Assembly is not a layer.** Each entry — a server's start, a relay worker, a product's config — has
+one root that builds what that entry runs: it builds the adapters, calls the factories and the build
+functions systems export, and hands the result to its driving adapters. One process may load two
+entries, such as a server and a product's config: each keeps its root, and what both need is built
+once, put in the registry by one root and read, not imported, by the other, as the reasons to
+escalate (Other systems) decide; which root builds it is each codebase's choice. Assembly is the
+only place that knows both a port and its implementation. Keep it separate from the factories: a
+service module exports only its factory, and assembly holds the instances, so every dependency but
+fixed plumbing (question 7) is one a factory declared.
 
-**A driving adapter receives its service from the root**: as an argument where the entry
-constructs the adapter; by importing the root where the framework constructs it, such as a
-server function or a product's hook. That import is the one place a driving adapter imports
-assembly. One root per entry is this document's choice; the sources say only that whoever
+**An adapter imports what is static and receives what is built.** The domain, a schema it
+validates with, port types: imported. A service, an adapter, a product's instance: received.
+
+**A driving adapter receives its service from the root.** As an argument where the entry's code
+constructs the adapter — a route, a product's hook; where the framework collects it, such as a
+server function, from a courier the root fills once — the ambient registry (below) or the
+framework's request context. It never imports assembly. Which courier, the stack document says. One
+root per entry, and the registry, are this document's choices; the sources say only that whoever
 starts the application wires it.
 
 **Atomicity crosses ports through a transaction port.** The service asks to run something inside
@@ -162,13 +167,16 @@ await tx.run(async (ctx) => {
 })
 ```
 
-**A value that influences nothing a use case or domain function decides may be held ambient** —
-Fowler's registry, scoped per request: a request id, a trace context, the locale a mail is
-rendered in, the user an audit column records until a rule decides by it. A driving adapter puts
-it in; services and adapters read it; the domain takes arguments. A value a message's handler
-needs goes in the message, since the handler runs in another request. The transaction context
-is not ambient: what a read returns depends on it. The line is this document's choice; which
-values a codebase holds ambient, it says in an ADR.
+**A value may be held ambient when no use case or domain function decides by it** — Fowler's
+registry, in two scopes. Per process: what the root built. The root puts it in before any adapter
+runs; a driving adapter reads it when it runs, not when it loads; a service reads nothing from that
+scope and receives its dependencies as arguments (question 7). Per request: a request id, a trace
+context, the locale a mail is rendered in, the user an audit column records until a rule decides by
+it. A driving adapter puts it in; services and adapters read it; the domain takes arguments. A value
+a message's handler needs goes in the message, since the handler runs in another request. The
+transaction context is in neither scope: what a read returns depends on it. The line is this
+document's choice; which values a codebase holds ambient, it says in an ADR, and what carries them
+is the stack document's.
 
 ## Other systems
 
@@ -515,9 +523,11 @@ instead.
 **Test the domain directly.** It is pure, it holds the rules, and it needs no fixtures, no fakes
 and no setup. Most of what is worth asserting lives here.
 
-**Test services and driving adapters against fakes.** Each receives ports, so a test hands it
-fakes and asserts what it *did*: which port it called, with what, and what it returned. Assert
-observable behaviour, not the order of internal calls.
+**Test services and driving adapters against fakes.** Each receives ports — a driving adapter the
+framework collects reads them from the registry or the framework's context (Ports and factories),
+which the test fills with fakes — so a test hands it fakes and asserts what it *did*: which port it
+called, with what, and what it returned. Assert observable behaviour, not the order of internal
+calls.
 
 **Driven adapters are integration-tested by design.** A driven adapter's entire job is to talk to
 something external, so a unit test of one asserts a mock of the thing it exists to reach. Unit
