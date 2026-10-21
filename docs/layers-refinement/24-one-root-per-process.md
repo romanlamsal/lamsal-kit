@@ -77,8 +77,8 @@ After:
 > **Assembly is not a layer.** An *entry* is where a deployable starts — a server, a job, a relay
 > worker — and it has one *root*, which builds what that entry runs: it builds the adapters, calls
 > the factories and, for each system, the build function that system exports for the way this
-> entry uses it — its open host service for a server, its handler for a relay worker (Other
-> systems) — and hands the result to its driving adapters. A product's config is not an entry.
+> entry uses it — its open host service for a server, its handler for a relay worker, both where
+> one process runs both (Other systems) — and hands the result to its driving adapters. A product's config is not an entry.
 > Where the root builds it, through a factory that takes this system's services, its hooks close
 > over those arguments; where the framework loads it, its hooks are driving adapters the framework
 > collects and take their service as such adapters do (below). Assembly is the only place that
@@ -120,8 +120,7 @@ After:
 > the framework collects the adapter and the root cannot construct it, such as a server function,
 > from a courier the root fills: the per-process registry (below), filled once before any adapter
 > runs, or the framework's request context, filled per request by middleware the root installs.
-> The registry is the fallback for that case, not a third way. A driving adapter never imports
-> assembly. Which courier, the stack document says. One root per entry, that a driving adapter
+> A driving adapter never imports assembly. Which courier, the stack document says. One root per entry, that a driving adapter
 > never imports it, and the registry as the fallback are this document's choices. In Cockburn's
 > example the driving adapter wires the application itself; Khononov resolves ports "in the
 > infrastructure layer, either through dependency injection or by bootstrapping" (p. 128). A root
@@ -278,11 +277,11 @@ factory takes this system's services and its hooks close over them; where the fr
 it, its hooks are adapters the framework collects. The sentence about two roots sharing through
 the registry goes; nothing replaces it.
 
-**The per-process registry is the fallback, confined to one case.** It serves a driving adapter
+**The per-process registry serves one case.** It serves a driving adapter
 the root cannot construct, because the framework collects it: a server function. Everything the
 root can construct — a route, a `node:http` server's handler, a hook in a config the root builds —
-receives its service as an argument. The registry is not a third way beside the argument and the
-request context; the text says so.
+receives its service as an argument. In a stack where the framework collects every adapter, as
+TanStack Start does, that case is every adapter; the rule ranks nothing, it names who can construct.
 
 **The courier sentence names who fills what, and when.** The per-process registry, once, before
 any adapter runs; the framework's request context, per request, by middleware the root installs.
