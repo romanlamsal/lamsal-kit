@@ -40,7 +40,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `16-relay-wiring.md` | closed (d6ee97c) | resolves open question B |
 | `17-fakes-of-other-systems.md` | closed (97e2dc2) | resolves open question C |
 | `18-hook-on-own-write.md` | closed (8deed33) | resolves open question D |
-| `21-service-registry.md` | ready | from review 02, Q0; supersedes ticket 20's import half. Rows for 19 and 20: review 02, R02-64 |
+| `21-service-registry.md` | closed (525c559) | from review 02, Q0; supersedes ticket 20's import half. Rows for 19 and 20: review 02, R02-64 |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
 | `open-questions.md` B | closed (d6ee97c) | resolved into 16 |
 | `open-questions.md` C | closed (97e2dc2) | resolved into 17 |

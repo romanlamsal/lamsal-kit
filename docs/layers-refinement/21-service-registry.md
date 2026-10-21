@@ -1,6 +1,6 @@
 # A driving adapter never imports assembly
 
-**Status:** ready
+**Status:** closed (525c559)
 
 **Kind:** wrong instruction, and the gap behind five review-02 findings · **Touches:** Terms
 (common library), The layers (driving-adapters row), Ports and factories (the "receives its
@@ -165,6 +165,25 @@ Add after the table:
 The second sentence is the static half of pair 3 applied to the validator a server function takes
 at module level: the schema is domain, so the import is right, and the file that holds it must not
 become a second constructor.
+
+### Applied with tightenings
+
+The first placement test put the Payload hook at 3 (argument or registry?) and found the ambient
+paragraph's opening and "reads nothing there" hard to parse. Applied as:
+
+- pair 3: "As an argument where the entry's code constructs the adapter — a route, a product's
+  hook; where the framework collects it, such as a server function, from a courier …". The line
+  is who constructs the adapter; the hook is named on the argument side.
+- pair 4: "**A value may be held ambient when no use case or domain function decides by it**";
+  "a service reads nothing from that scope". The second cold read still parsed the ticket's
+  opening as a garden path.
+- pair 5: "a driving adapter the framework collects reads them from the registry or the
+  framework's context (Ports and factories), which the test fills with fakes" — generality test:
+  the test fills whichever courier the codebase chose.
+- sweep sentence: "built once, put in the registry by one root and read by the other, as the
+  reasons to escalate (Other systems) decide; which root builds it is each codebase's choice" —
+  the Decision's "which root builds what is still each codebase's", stated positively; "read, not
+  imported" after the second cold read derived "no cycle" only at 3.
 
 ### Checked, untouched
 
