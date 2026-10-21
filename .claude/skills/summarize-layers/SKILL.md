@@ -1,12 +1,14 @@
 ---
 name: summarize-layers
-description: Summarize `layers.md` into its layer table and cite every entry in `citations.md`. Use after changing any sentence of `registry/docs/agents/layers.md`, or when asked to check, redo or extend the table.
+description: Summarize `layers.md` into its layer table, inside `<layers-summary>`, and cite every entry in `citations.md`. Use after changing any sentence of `registry/docs/agents/layers.md`, or when asked to check, redo or extend the table.
 ---
 
 # Summarize layers
 
 The table at the top of `registry/docs/agents/layers.md` ("The layers") is a summary of the
-document for an agent that will not read all of it. Every entry in it follows a sentence of the
+document for an agent that will not read all of it. It sits between `<layers-summary>` and
+`</layers-summary>`, with the import-rule sentence under it, so an agent greps the summary out:
+`sed -n '/<layers-summary>/,/<\/layers-summary>/p' registry/docs/agents/layers.md`. Every entry in it follows a sentence of the
 body; the table states no rule of its own. `citations.md`, beside this file, holds the sentence
 behind every entry and is always complete.
 
@@ -28,7 +30,8 @@ previous citations and built from the body alone.
    every lead and every current entry is placed or listed.
 4. **Write the table.** Four rows, four columns, `rules` entries shortened from their leads,
    about five per cell as a guideline. The paragraph under the table carries the import rule
-   in one sentence; nothing else of the body moves. Done when every cell reads as a pointer, not
+   in one sentence; both stay inside the `<layers-summary>` tags, blank lines around each tag so
+   the table still renders; nothing else of the body moves. Done when every cell reads as a pointer, not
    a paragraph.
 5. **Write `citations.md`,** the whole file, per the format below. Done when every entry in the
    table has a citation whose quoted sentence you re-read in the body of step 1 verbatim.

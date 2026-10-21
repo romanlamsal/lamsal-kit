@@ -48,6 +48,8 @@ they are about what a function *does* rather than where it imports from.
 
 ## The layers
 
+<layers-summary>
+
 | layer | goes here | in → out | rules | read |
 | --- | --- | --- | --- | --- |
 | **domain** | the model: rules, schemas, specifications, and the driven ports the rules need | imported by every layer, by a browser and by another system; imports no layer, only other domain modules, the common library's ports, a shared kernel, a conformed system's published language and pure libraries → reaches nothing; computes from its arguments | runs on any runtime; a package that can reach outside the process stays behind a port; a schema is a rule, and types are inferred from it; refers to another aggregate and to another system's data by id; declares the driven ports and names no use case; its schemas are the published language, by default; tested directly | The layers, Ports and factories, Other systems, Tests |
@@ -57,6 +59,8 @@ they are about what a function *does* rather than where it imports from.
 
 The arrow runs one way — driving adapter → service → driven adapter → the outside — and the
 domain sits beside all of it: every layer may import it, it imports no layer.
+
+</layers-summary>
 
 **"Imports no layer" is about this system's modules, not about packages.** The test for a package
 in the domain is whether calling it can reach outside the process: a store client, an HTTP client,
