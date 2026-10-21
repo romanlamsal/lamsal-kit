@@ -1,6 +1,6 @@
 # A hook defers through the outbox; a handler is a driving adapter the relay calls
 
-**Status:** ready
+**Status:** closed (bac336c)
 
 **Kind:** contradiction (review 03, S1) and a term with no definition · **Touches:** Terms
 (reconciliation, new entry *handler*), The layers ("Stop delivering"), Other systems (export list),
@@ -168,6 +168,20 @@ the framework's callback and now collides with the term: "inside the server func
 The Transactions lead's exception "except a message a product's hook writes in the product's
 transaction (Products)" still holds. Ticket 14's Resolution gets a footnote: steps 3 and 4
 superseded here.
+
+### Applied
+
+The seven pairs went in as written, with one pointer fixed: step 4's "(Terms)" became "(The
+layers)", where "Deliver out of order" lives. The sweep widened question 5's exception to "hook
+step 2 or 4 opens", since step 4 now opens this system's own transaction. The cold read placed
+the Payload before-write hook at 4 (step 3 settles the mechanism; that a handler acts later is
+inferred from Transactions), the write-nothing hook, the confirmation mail and the duplicate
+PaymentIntent at 5. It found no "handler" the relay does not call. Left for the next review:
+"any driving adapter that finds the two apart" (Terms, reconciliation) reads against "decides
+nothing by this system's state"; who relays a message embedded in a product's record is unstated
+(the Consequences name an outbox adapter over the product's store, R02-38); a third party's
+mailer has no "last version it handled" to dedupe by. Table pass in the same commit: "handlers"
+in the driving row, cited from Terms.
 
 ## Grounding
 
