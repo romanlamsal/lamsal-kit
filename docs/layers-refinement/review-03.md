@@ -313,7 +313,26 @@ The tickets rule where they differ from the recommendations below: Q1/Q2 general
 driving adapter decides nothing by this system's state; a port takes what its use case decides
 by", and Q4 defers hook step 4 through the outbox rather than a pending row. Subgroups B
 (registry wording: Q13's registry part, Q18, Q21, R03-02) and C (table vs body: Q20, Q22,
-R03-17) are not grilled yet.
+R03-17) are not grilled yet. Frontier drafted for B, one decision each, recommendation first:
+
+- **B1, "built once" (R03-04, Q21):** conditional — a second root is a second consumer, so the
+  reasons to escalate decide; otherwise each root builds its own. Alternative: always share.
+- **B2, the other root reads late (R03-04, Q21):** it hands its adapters a function that reads
+  the registry, as the Products bullet hands an adapter a function returning the instance; no
+  start order. Alternative: the root that runs first builds (stack document's).
+- **B3, courier sentence (R03-02):** "the per-process registry, once, or a framework context that
+  middleware the root installs fills per request". Alternative: drop "once".
+- **B4, registry markers (R03-19, R03-20, R03-21, Q13 part):** mark all five (service locator in
+  Fowler's terms; "ambient" this document's word; the choices are one root per entry, never
+  importing it, the courier; "imports what is static" this document's; the root apart from the
+  drivers, Cockburn's driver named); no "(from memory)" in `layers.md`, that is the ticket's.
+  Alternative: mark only the three that change what an agent does.
+- **B5, tells (R03-06, R02-11, Q18):** fold into questions 7 and 5. Alternative: a tenth question.
+
+Subgroup C, not drafted: import rule in the body with port types crossing (R02-42, Q20); the
+domain's common-library port types granted and the cell as the test not a list (R03-03, Q20);
+skill policy for uncited and ruling-carrying entries (R03-51, Q22); "composes nothing" back as a
+question-1 tell, not a sentence (R03-17, R03-32). Ticket 22 settles R03-16 on the way.
 
 Settled by the text or by a commit and not asked: review-02's Q0 (ticket 21), Q3 (the import
 column is gone; which root builds is each codebase's), Q5 (no import columns remain), Q14
