@@ -45,7 +45,7 @@ Status is one of: ready, blocked, closed (commit), ruled out. Each row matches t
 | `21-service-registry.md` | closed (525c559) | from review 02, Q0; supersedes ticket 20's import half. Rows for 19 and 20: review 02, R02-64 |
 | `22-driving-adapter-prepares-and-acts.md` | closed (ac716ac) | from review 03, Q1 and Q2; closes R02-01, R02-18, R03-01, R03-05, R02-07, R03-16 |
 | `23-hook-defers-through-the-outbox.md` | closed (bac336c) | from review 03, Q4 and Q10; closes R02-04, R02-12, R02-05, R03-39; supersedes ticket 14's steps 3 and 4 |
-| `24-one-root-per-process.md` | ready | from review 03, subgroup B (Q13's registry part, Q18, Q21); closes R03-04, R03-02, R03-06, R03-19, R03-20, R03-21, R02-11, R02-29; defines *entry*, *courier*, *outbox*, *relay*; a product is built by a build function; the outbox port leaves the common library; supersedes ticket 21's two-roots consequence and ticket 20's config entry; narrows R03-03 |
+| `24-one-root-per-process.md` | closed (3f3b3ee) | from review 03, subgroup B (Q13's registry part, Q18, Q21); closes R03-04, R03-02, R03-06, R03-19, R03-20, R03-21, R02-11, R02-29; defines *entry*, *courier*, *outbox*, *relay*; a product is built by a build function; the outbox port leaves the common library; supersedes ticket 21's two-roots consequence and ticket 20's config entry; narrows R03-03 |
 | `open-questions.md` A | closed (bef2a8d) | resolved into 12 |
 | `open-questions.md` B | closed (d6ee97c) | resolved into 16 |
 | `open-questions.md` C | closed (97e2dc2) | resolved into 17 |

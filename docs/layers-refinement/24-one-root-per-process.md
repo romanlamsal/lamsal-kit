@@ -1,6 +1,6 @@
 # One root per process; a product is built by a build function; a courier, an outbox and the relay are terms
 
-**Status:** ready
+**Status:** closed (3f3b3ee)
 
 **Kind:** contradiction (review 03, R03-04), unmarked choices (R03-02, R03-19, R03-20, R03-21),
 three missing tells (R03-06, R02-11), and three terms the text used without defining (*courier*,
@@ -334,6 +334,20 @@ shop's reader, exported); a process running server and relay (one root, both bui
 `registry.get()` in a service body (question 7); a service receiving a sibling service (question
 5); a write to another system's port inside `run` (question 5, rule 1). Committed per
 `CLAUDE.md`; status set here, in `spec-01.md` and noted in `review-03.md`.
+
+## Applied
+
+Committed in 3f3b3ee, all fifteen pairs and the sweep. One clause beyond the Resolution's
+wording, in pair 9, taken from the Decision: "— a courier of its own is one way — and nothing
+outside the function sees which"; a cold read placed case 1's mechanism at 3 without it, reading
+Assembly's "the courier's only case" against the build function's inner courier.
+
+Cold read (fresh agent, `layers.md` only): the seven "Done when" cases at 5, case 1's mechanism
+at 3 (see above). Leftovers it noted, not this ticket's: Assembly's "for each system" reads as
+every system against "The consuming system's build function builds the other system, by
+default"; "the ambient registry" (Terms, common library) and "the per-process registry"
+(courier) are unsaid synonyms. Q11's "a store's own schema is not a second constructor" has not
+landed.
 
 ## Decision
 
