@@ -1,6 +1,6 @@
 # A driving adapter decides nothing by this system's state
 
-**Status:** ready
+**Status:** closed (ac716ac)
 
 **Kind:** contradiction (review 03, S1) and the unmarked choice behind it · **Touches:** Terms
 (controller), The layers ("acts through one service" paragraph), Ports and factories ("imports
@@ -131,6 +131,20 @@ Grep `caller`, `specification`, `authoriz`, `resolves`, `asks through`. The tabl
 row ("acts through one service and asks through the domain", "a specification to ask") follow the
 body through the `summarize-layers` skill. `components.md`'s controller sentence is R02-46, not
 this ticket's.
+
+### Applied
+
+The six pairs went in as written; the cold read placed all four cases at 5. It noted two
+stretch points, left as they are: "the caller included" can be read as unconditional (the
+Decision's "a port no rule decides by takes none" is the intended reading, and the ambient
+clause "what a rule decides by, the port takes" carries it); the service cell says "a permission
+that needs this system's state" while Other systems says "B's authorization" unqualified — a
+stateless permission is a specification either way, so both land in the service or the domain.
+Table pass in the same commit: service row "its driving port takes what its use case decides by,
+the caller included, and a permission that needs this system's state is decided here or in the
+domain"; driving row "decides nothing by this system's state: prepares one call — resolving its
+caller through a port it receives, validating, translating — and acts through one service", and
+"a specification to ask about input it holds".
 
 ## Grounding
 
