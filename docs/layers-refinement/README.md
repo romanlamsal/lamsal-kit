@@ -15,6 +15,9 @@ How documents in `registry/docs/agents/` get refined in this repository. The ste
   and what each finding became. `review-01.md` is the template; a finding too large for a
   wording fix becomes a ticket.
 - `domain.md`: the review domain whose edge cases tickets refer to.
+- The layer table at the top of `layers.md` is a summary, rebuilt by the `summarize-layers`
+  skill (`.claude/skills/summarize-layers/`), which keeps the sentence behind every entry in
+  `citations.md` there. A table change lands only with its citations.
 
 ## Picking up a ticket
 

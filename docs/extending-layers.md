@@ -50,9 +50,10 @@ departs from a book, it says so in one clause, as it does for *store* (Precondit
    before a section. State the property the code has, not an instruction: "a message's schema
    stays backward and forward compatible", not "change a message's schema so that …". For
    wording, follow the `mattpocock-skills:writing-for-agents` skill.
-5. **Sweep for consistency.** Grep every term the change touches across Terms, the table, the
+5. **Sweep for consistency.** Grep every term the change touches across Terms, the
    sections, the checklist, "When to leave it alone", and the sibling docs in
-   `registry/docs/agents/`. Done when no sentence contradicts the change.
+   `registry/docs/agents/`. The table is a summary of the body: run the `summarize-layers` skill,
+   which rebuilds it and its citations. Done when no sentence contradicts the change.
 6. **Commit**, per `CLAUDE.md`, with the full before and after of every change in the report.
 
 ## The four tests
