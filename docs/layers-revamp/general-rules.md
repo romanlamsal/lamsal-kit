@@ -223,9 +223,10 @@ request. Which courier a codebase uses is in the stack document. A courier insid
 is that builder's own business and gets no rule here.
 
 **ASM-5.** The relay is common library: it belongs to no system and imports none. The assembly of
-the process that runs it hands it the handlers and the outbox readers. Whether it routes by message
-type or hands every message to every handler, what order it delivers in, and what marks a message
-as delivered, is each codebase's choice.
+the process that runs it hands it the handlers and the outbox readers. It delivers each message at
+least once, until its handler reports it handled. Whether it routes by message type or hands every
+message to every handler, what order it delivers in, and what marks a message as handled, is each
+codebase's choice.
 
 **ASM-6.** The common library holds no model.
 
@@ -280,15 +281,18 @@ own database; Vernon (ch. 8) has the model and the messages share one persistenc
 the messages may live on a record, or in a store another system's transaction reaches, is this
 document's.
 
-**TX-5.** A message carries an id and the version of the aggregate that wrote it. The handler's
-aggregate records the last version it handled.
-*Why:* the relay delivers each message after the commit, at least once, and not necessarily in
-order. With the id and the version, a handler tells a repeat from an early arrival; with the id
-alone, an early arrival looks like a repeat and is dropped.
-*Looks like:* a message schema without an id or a version; a handler that remembers only which
-ids it has seen.
+**TX-5.** A message carries an id, and a handler handles each id once. Messages arrive in no
+guaranteed order (ASM-5), so a message about something the receiving system has not recorded yet
+is not handled now; the relay delivers it again (ASM-5). How the handler says "not yet" —
+failing, asking for a delay — is the codebase's.
+*Why:* the id makes a repeat harmless; redelivery makes an early arrival wait for what it depends
+on.
+*Looks like:* a message schema without an id; a handler that treats "not found" as "already
+handled".
+*Allowed:* a message carrying the version of the aggregate that wrote it, so a handler can ignore
+one staler than what it holds.
 *Provenance:* at-least-once delivery with the consumer de-duplicating is Vernon's (ch. 8) and
-Khononov's (ch. 9). Carrying the aggregate version is this document's choice.
+Khononov's (ch. 9).
 
 **TX-6.** A message is written to the outbox in the transaction that produced the change it tells
 of.
