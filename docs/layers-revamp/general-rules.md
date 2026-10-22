@@ -169,9 +169,9 @@ ports "in the infrastructure layer, either through dependency injection or by bo
 
 **DVN-1.** A driven adapter implements a driven port the domain declared (DOM-5).
 
-**DVN-2.** A driven adapter imports what is static and receives what is built. The domain, the
-schema it validates with and the port types are static: it imports them. Anything assembly built
-is received as an argument: the upstream's driving port it calls, and any other adapter it needs.
+**DVN-2.** A driven adapter imports what is static and gets what is built as arguments to its
+factory. Static: the domain, the schema it validates with, the port types. Built: a store client,
+an upstream's open host service it translates for, another adapter.
 *Provenance:* that adapters are received is Khononov's (p. 128) and Cockburn's; the split between
 imported and received is this document's.
 
