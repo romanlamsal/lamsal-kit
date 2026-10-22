@@ -237,7 +237,9 @@ the adapter that writes it and the reader of it. A system writing several stores
 each store whose transaction writes the message.
 
 **TX-5.** An outbox, wherever it is used: *(split in general-rules.md: bullet 1 → TX-5, bullet 2 →
-TX-7, bullet 3 → TX-8; the example and review question 9 below belong to TX-7)*
+TX-7, bullet 3 → TX-8; bullet 4 — saga, deadline, choreography vs orchestration — is specialized,
+see the extraction notes under Special cases; the example and review question 9 below belong to
+TX-7)*
 
 - A relay delivers each message after the commit, at least once, and not necessarily in order. A
   message carries what its receiver needs to tell a repeat from an early arrival (DRV-2): an id, and
@@ -396,6 +398,34 @@ results.
 ## Special cases
 
 Each narrows one general rule. Check here before inventing.
+
+*Extraction notes for the specialized tier (decided while writing general-rules.md):*
+
+- Shape: same labeled parts as a general rule (statement, Why, Looks like, Allowed, Provenance,
+  Examples), plus a *Narrows:* part naming the general rule's id. A specialized rule narrows the
+  statement of a general rule, never its other parts.
+- Groups that emerged, one file each under `docs/layers-revamp/`: `unreliable-callers.md`
+  (DRV-2's three faults; relay and hook), `other-systems.md` (SYS-2's narrowing: a separate
+  published language, ADR; the ACL tells "a translation that changes nothing is not an ACL" and
+  "a term crossing untranslated means there is no layer"; old TX-5 bullet 4: saga, the one system
+  holding the deadline in its aggregate, choreography vs orchestration in an ADR; S-TX-1;
+  S-TST-1), `stores.md` (S-TX-2, S-TX-3), `products.md` (PRD-1 to PRD-5, S-PRD-1, and DVN-2's
+  late-binding sentence, which belongs to PRD-5). Names are proposals.
+- What each narrows, by current general ids: DRV-2 → DRV-1 (and cites TX-5, ASM-5 for
+  at-least-once and redelivery, which are general now); SYS-2 narrowing → SYS-2; TX-5 bullet 4 →
+  TX-3 step 1; S-TX-1 → TX-3 step 1; S-TX-2 → TX-2, TX-6; S-TX-3 → TX-3 step 3; S-PRD-1 → DRV-1,
+  and TX-6 in step 3.4 only (see the notes under S-PRD-1); S-TST-1 → TST-6.
+- DRV-4 is absorbed by the glossary's Anti-corruption layer entry; whatever remains folds into
+  the ACL entry in `other-systems.md`.
+- PRD-3 is mostly the glossary's Hook and Scheduled task entries; what remains is the pointer to
+  S-PRD-1.
+- Retired general ids, not to be reused: DOM-2, DVN-3, SYS-4 (folded), DRV-2, DRV-4, PRD-1 to
+  PRD-5 (specialized). Specialized rules get their own ids.
+- Review checklist: the *Looks like* parts of general-rules.md absorbed its "in a diff" tells;
+  `layers-revised-review.md` is derived from them, not extracted. Question 4 belongs to
+  `components.md`.
+- Open, not yet an issue: where a model two systems share lives. Shared kernel was dropped from
+  the glossary; ASM-6 forbids the common library. TST-1 is a definition and a glossary candidate.
 
 **S-TX-1 — the caller needs another system's answer** (narrows TX-3 step 1). Where the use case's
 caller needs the other system's answer in its response, call the other system instead, once the
