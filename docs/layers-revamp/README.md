@@ -23,8 +23,10 @@ decided when it is first generated.
   Decision and Consequences when closed, closed with the commit that landed it. The issue files
   are the only bookkeeping; there is no index.
 
-A rule, general or specialized, is one unit: its id, its statement, its provenance (what source
-it follows or departs from) beside it, and references to examples by id.
+A rule, general or specialized, is one entry with labeled parts: its id and statement, then
+*Why*, *Looks like* (the breach as seen in a diff), *Allowed*, *Provenance* (what source it
+follows or departs from) and *Examples* (ids). Only the statement is required. Another rule
+narrows or references the statement, never the other parts.
 
 ## Tiers
 
