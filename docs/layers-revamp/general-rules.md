@@ -238,13 +238,13 @@ its own transaction.
 sees the whole use case, so only it can say which writes must land together. It opens the
 transaction through a port of the common library, so it names no store itself.
 
-**TX-2.** Writes that must land together share one transaction, and that transaction stays inside
-its system. A function that is handed a transaction joins it.
+**TX-2.** Writes that must land together share one transaction. A driven adapter that is handed a
+transaction writes inside it.
 *Why:* a loop that opens a transaction per item is many transactions, and a failure halfway
 through leaves the use case half done.
-*Looks like:* a function opening its own transaction although it was handed one; a repository
-method that takes the transaction and then writes without it; a loop with one write per
-iteration; a write moved out of a function, which tends to give it a transaction of its own.
+*Looks like:* a repository method that takes the transaction and then writes without it, or opens
+its own; a loop with one write per iteration; a write moved out of a function, which tends to
+give it a transaction of its own.
 *Allowed:* a service passing its transaction into another repository of its system, in the same
 store, is the design working. That is how several aggregates stay one transaction.
 
