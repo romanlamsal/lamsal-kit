@@ -126,9 +126,13 @@ aggregate the record is part of; the service keeps the deciding.
 extra layer. A driving adapter may only call a service (ARR-2). If the repository is deleted
 later, the compile error lands in the service that named it, not in a driving adapter.
 
-**SVC-5.** A service reads no per-process ambient value. Its dependencies arrive as arguments
-(ASM-2, ASM-3).
-*Looks like:* a service reading a dependency from a courier or a registry.
+**SVC-5.** A service reads no ambient value, of either scope. Its dependencies arrive as
+arguments (ASM-2), and what a use case decides by arrives through its driving port (ASM-3).
+*Why:* anything a service would read ambiently, it reads only to pass on. If it passes it to a
+driven adapter, the adapter can read it itself. If it passes it to the domain, the domain decides
+by it, so the port should have taken it. There is no third case.
+*Looks like:* a service reading a dependency from a courier or a registry; a service reading a
+request id, a locale or the current user from a request context instead of its arguments.
 
 ## Driving adapters
 
@@ -200,8 +204,10 @@ rule decides by, the port takes as an argument.
   read it, through a courier (DRV-3). Assembly puts it in before any adapter runs; an adapter reads
   it when it runs, not when its module loads; a service never reads it (SVC-5).
 - *Per request:* a request id, a trace context, the locale a mail is rendered in, the user an audit
-  column records. The driving adapter puts it in; services and adapters read it; the domain gets it
-  as an argument. A handler runs in another request, so what it needs goes into the message.
+  column records. The driving adapter puts it in. The common library's plumbing and driven
+  adapters read it, for what they record or forward without deciding by it. A service and the
+  domain never read it (SVC-5). A handler runs in another request, so what it needs goes into the
+  message.
 - A transaction is in neither scope, because what a read returns depends on it.
 
 Which values a codebase holds ambient, it says in an ADR; what carries them is the stack
