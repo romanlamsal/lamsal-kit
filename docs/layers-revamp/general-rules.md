@@ -341,11 +341,11 @@ message is not published.
 *Provenance:* Khononov keeps the published language and the domain apart from the start;
 re-exporting the domain, messages included, is this document's choice.
 
-**SYS-3.** What sits behind an upstream's driving port is assembly's decision: the upstream's
-service, in-process, or an HTTP client — a driven adapter of the downstream that implements the
-same port.
-*Why:* moving the upstream out of process then changes assembly and adds that adapter. No service
-or domain changes.
+**SYS-3.** The upstream's driving port is, to the downstream, a driven port like any other.
+*Why:* so assembly decides what implements it: in-process, the upstream's service itself; out of
+process, a driven adapter of the downstream, such as an HTTP client. Moving the upstream out of
+process changes assembly and adds that adapter. Nothing in the downstream's services or domain
+changes.
 
 **SYS-4.** A driving port that another system calls takes its caller as an argument (SVC-2), and
 the upstream authorizes in its service or domain, as it does for every caller.
