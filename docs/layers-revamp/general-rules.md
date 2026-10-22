@@ -378,8 +378,8 @@ builder — when one of these holds:
 *Why:* until one of these holds, building the upstream in assembly is ceremony. Two systems
 building each other is a cycle in the context map, which usually means a boundary is drawn wrong.
 
-**SYS-7.** Where this system keeps a record of another system's data, or changes another's through
-messages, it has a reconciliation for it.
+**SYS-7.** Where this system keeps a copy of another system's data, or changes another system's
+data through messages, it has a reconciliation for it.
 *Why:* consistency between systems is eventual (TX-3, TX-8): a change crosses by message, later. A
 moment's lag is the design working; a gap that stays is drift, and only a comparison after the
 fact finds it. The reconciliation is a use case of the system whose aggregate it repairs, called
