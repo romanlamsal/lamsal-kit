@@ -448,6 +448,32 @@ tells for choosing an outbox where one transaction would do:
 An act after the commit is lost when the process stops before it and the product does not run the
 hook again. Reconciliation repairs that, and undoes step 3.2's work when the product rolls back.
 
+*Notes for extraction (decided while writing general-rules.md):*
+
+- Assume a hook runs inside a transaction of the product's service. The product has layers of its
+  own, out of sight; its transaction reaches this system through the hook, a driving adapter, not
+  through a service.
+- Step 3.3 is not an exception any more. General TX-2 no longer says a transaction stays inside
+  its system (struck; it duplicated TX-3 step 1 and SYS-8). Where this system's outbox is in a
+  store the product's transaction reaches, TX-2 (a driven adapter handed a transaction writes
+  inside it) and TX-6 (message written in the transaction that produced the change) apply as
+  written. The entry narrows nothing there; it only reminds that the service writes nothing but
+  the message, since writing the product's record directly would breach TX-3 step 1.
+- Step 3.4 is the narrowing: TX-6 cannot hold when no transaction of ours reaches the change.
+  Options: the message rides on the product's record (S-TX-2), or this system's outbox in its
+  own transaction with reconciliation covering the gap (SYS-7).
+- Say plainly that the message tells of the product's change, not this system's. In the
+  sources' terms this is closer to an inbox than an outbox; do not let it read as publishing on
+  the product's behalf.
+- Being able to join the product's transaction at all is an accident of where its tables sit,
+  not a design goal. The question the entry answers is how to treat a hook's transaction, not
+  whether to share one.
+- Provenance: Vernon (ch. 2, ch. 13) and Evans (bounded context, shared kernel) keep a context's
+  schema inside its boundary and cross-boundary updates asynchronous; Khononov (ch. 9), Vernon
+  (ch. 8) and Richardson put the outbox row in the producer's store, in the producer's
+  transaction. The departure is PRD-1's shared store; a shared transaction is the same departure,
+  not a second one.
+
 **S-TST-1 — a contract suite for another system's driving port** (narrows TST-6). The receiving
 system writes the suite, whether the fake is its own or one the other system exports, and runs it
 the second time against that system's open host service. That run is the integration test where

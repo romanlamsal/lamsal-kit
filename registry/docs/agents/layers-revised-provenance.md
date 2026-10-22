@@ -18,4 +18,5 @@ Evans, Vernon, Khononov and Cockburn.
 | SYS-5 | Conformist as the default for an open host is this document's choice. The context-map patterns are DDD's. |
 | TX-3 step 3 | One transaction across several aggregates is this document's choice; Vernon and Khononov keep one aggregate per transaction. |
 | S-TX-1 | This document's choice; the sources do not cover a call after the commit. |
-| S-PRD-1 steps 3.2–3.4 | This document's choice; the sources do not cover a product's transaction. |
+| S-PRD-1 steps 3.2–3.4 | This document's choice; the sources do not cover a product's transaction. Vernon (ch. 2, 13) and Evans (bounded context, shared kernel) keep a context's schema inside its boundary and cross-boundary updates asynchronous; Khononov (ch. 9), Vernon (ch. 8) and Richardson (secondary) put the outbox row in the producer's store and transaction. The departure is PRD-1's shared store; a transaction shared with the product is the same departure. |
+| TX-2 (general-rules.md) | "The transaction stays inside its system" struck: it duplicated TX-3 step 1 and SYS-8. No primary source forbids one transaction over two contexts' own writes; Vernon's rule is one aggregate per transaction, and his ch. 8 commits model and messages in one local transaction. |
