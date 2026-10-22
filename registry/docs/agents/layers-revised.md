@@ -419,8 +419,12 @@ Each narrows one general rule. Check here before inventing.
   the ACL entry in `other-systems.md`.
 - PRD-3 is mostly the glossary's Hook and Scheduled task entries; what remains is the pointer to
   S-PRD-1.
-- Retired general ids, not to be reused: DOM-2, DVN-3, SYS-4 (folded), DRV-2, DRV-4, PRD-1 to
-  PRD-5 (specialized). Specialized rules get their own ids.
+- Retired general ids, not to be reused: DOM-2, DVN-3, SYS-4, SYS-6 (folded), DRV-2, DRV-4,
+  PRD-1 to PRD-5 (specialized). Specialized rules get their own ids.
+- SYS-6's default was inverted on the way into ASM-2: assembly builds every system, a system
+  builder builds no other system. PRD-4's "as another system is (SYS-1, SYS-6)" therefore means:
+  assembly calls the product's builder like any system's. PRD-5's cycle is a narrowing of ASM-2
+  (late binding), no longer of SYS-6.
 - Review checklist: the *Looks like* parts of general-rules.md absorbed its "in a diff" tells;
   `layers-revised-review.md` is derived from them, not extracted. Question 4 belongs to
   `components.md`.

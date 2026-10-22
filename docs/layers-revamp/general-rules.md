@@ -193,13 +193,18 @@ choice; see DRV-3.
 
 **ASM-2.** Nothing builds its own dependency instead of receiving it.
 *Why:* it breaks substitution. A service that builds its own adapter cannot be given a different
-one, so its tests need the real thing.
+one, so its tests need the real thing. A system builder is a factory for its system, and its
+upstreams are dependencies like any other: assembly builds them and hands them in, so each exists
+once, the graph is visible in one place, and a test hands the builder a fake upstream.
 *Looks like:* a concrete adapter imported into a service file, constructed inside a service body
 or a factory body, or read as a per-process ambient value there; a module exporting a ready-made
-instance next to the factory that produces it. Built in place, this breach is invisible to the
-other rules: the code sits in the right layer and calls in the right direction.
+instance next to the factory that produces it; a system builder calling another system's builder.
+Built in place, this breach is invisible to the other rules: the code sits in the right layer and
+calls in the right direction.
 *Allowed:* plumbing with one fixed configuration, such as a logger or a tracer, may be a ready-made
 instance: nobody substitutes it.
+*Provenance:* Seemann's composition root and Spring Modulith's one context per application. Pass 1
+had the downstream's builder build its upstreams; inverted here.
 
 **ASM-3.** A value may be ambient only when no use case and no domain function decides by it
 (SVC-2).
@@ -365,19 +370,6 @@ leak. Under an anti-corruption layer, one module holding the translation for bot
 *Provenance:* conformist as the default for an open host service is this document's choice. The
 context-map patterns are DDD's.
 
-**SYS-6.** By default the downstream's system builder builds the upstream: it calls the upstream's
-system builder, and nothing else in the downstream knows how the upstream is built. The call
-moves up into assembly — which then builds the upstream once and hands it to the downstream's
-builder — when one of these holds:
-
-- a second downstream would build the upstream again, and the upstream holds something that must
-  exist only once: a cache, a pool, a subscription;
-- the upstream has upstreams of its own, and the downstream would end up assembling those too;
-- the two systems would build each other.
-
-*Why:* until one of these holds, building the upstream in assembly is ceremony. Two systems
-building each other is a cycle in the context map, which usually means a boundary is drawn wrong.
-
 **SYS-7.** Where this system keeps a copy of another system's data, or changes another system's
 data through messages, it has a reconciliation for it.
 *Why:* consistency between systems is eventual (TX-3, TX-8): a change crosses by message, later. A
@@ -436,4 +428,5 @@ results.
 
 `DRV-2`, `DRV-4`, `PRD-1` to `PRD-5` were general ids in the pass-1 translation and are specialized
 rules now; they retire as general ids and are not reused. `DOM-2` was folded into `DOM-3`, `DVN-3`
-into `ARR-3`'s *Allowed*, `SYS-4` into `SVC-2`'s *Why*; all three are retired.
+into `ARR-3`'s *Allowed*, `SYS-4` into `SVC-2`'s *Why*, `SYS-6` into `ASM-2` with its default
+inverted; all four are retired.
