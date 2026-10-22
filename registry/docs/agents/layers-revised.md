@@ -236,7 +236,8 @@ another transaction reaches, a field it owns on a product's record — is that s
 the adapter that writes it and the reader of it. A system writing several stores has an outbox in
 each store whose transaction writes the message.
 
-**TX-5.** An outbox, wherever it is used:
+**TX-5.** An outbox, wherever it is used: *(split in general-rules.md: bullet 1 → TX-5, bullet 2 →
+TX-7, bullet 3 → TX-8; the example and review question 9 below belong to TX-7)*
 
 - A relay delivers each message after the commit, at least once, and not necessarily in order. A
   message carries what its receiver needs to tell a repeat from an early arrival (DRV-2): an id, and

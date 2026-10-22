@@ -268,29 +268,50 @@ and Khononov keep one aggregate per transaction.
 repository (DOM-5). Where the messages live is the system's choice — a table of its own, a store
 another transaction reaches, a field it owns on a record in another system's store — and so are
 the adapter that writes it and the reader that reads it. A system that writes to several stores
-has an outbox in each (TX-6).
+has an outbox in each.
+*Why:* a message is a record this system's use case writes, so it is this system's (SYS-8), and
+the service writes it the way it writes any record: through a driven port, never itself (SVC-4).
+Where it lives is left open because TX-6 fixes only one thing about it: the message must be
+reachable from the transaction that produced the change. That transaction is wherever the change
+is, so a system writing several stores needs an outbox in each.
+*Looks like:* a service inserting into an outbox table itself; one outbox table written by several
+systems; an outbox in a store the system's transactions do not reach.
+*Provenance:* Khononov (ch. 9) and Richardson put the outbox table in the publishing aggregate's
+own database; Vernon (ch. 8) has the model and the messages share one persistence instance. That
+the messages may live on a record, or in a store another system's transaction reaches, is this
+document's.
 
-**TX-5.** An outbox, wherever it is used:
-
-- The relay delivers each message after the commit, at least once, and not necessarily in order.
-  So a message carries what its handler needs to tell a repeat from an early arrival: an id, and
-  the version of the aggregate that wrote it. The handler's aggregate records the last version it
-  handled.
-- A message's schema stays backward and forward compatible: no field is renamed, removed, made
-  required or narrowed. That includes a domain schema the published language re-exports.
-- The receiving system decides which messages it handles. Its handler takes each message in its
-  own transaction and calls one service (DRV-1).
-
-*Why:* a message is handled by code older or newer than the code that wrote it. One written before
-a deploy is handled after it; a handler still on old code may read one written by new code. The
-type checker sees none of this, because the stored record is not in the program.
-*Looks like:* a field renamed, removed, made required or narrowed in the schema of a message.
+**TX-5.** A message carries an id and the version of the aggregate that wrote it. The handler's
+aggregate records the last version it handled.
+*Why:* the relay delivers each message after the commit, at least once, and not necessarily in
+order. With the id and the version, a handler tells a repeat from an early arrival; with the id
+alone, an early arrival looks like a repeat and is dropped.
+*Looks like:* a message schema without an id or a version; a handler that remembers only which
+ids it has seen.
+*Provenance:* at-least-once delivery with the consumer de-duplicating is Vernon's (ch. 8) and
+Khononov's (ch. 9). Carrying the aggregate version is this document's choice.
 
 **TX-6.** A message is written to the outbox in the transaction that produced the change it tells
 of.
 *Why:* written outside that transaction, the message either survives a rollback of the change, or
 the change commits and the message is never written.
 *Provenance:* Khononov's outbox pattern.
+
+**TX-7.** A message's schema stays backward and forward compatible: no field is renamed, removed,
+made required or narrowed. That includes a domain schema the published language re-exports.
+*Why:* a message is handled by code older or newer than the code that wrote it. One written before
+a deploy is handled after it; a handler still on old code may read one written by new code. The
+type checker sees none of this, because the stored record is not in the program.
+*Looks like:* a field renamed, removed, made required or narrowed in the schema of a message.
+
+**TX-8.** The receiving system decides which messages it handles. Its handler takes each message
+in its own transaction.
+*Why:* the writer does not know its readers; it publishes, and whoever handles the message is the
+reader's business (SYS-1). One transaction per message lets the relay retry a failed message
+alone, without undoing or repeating the others delivered with it.
+*Looks like:* a handler that handles several messages in one transaction; a publisher whose code
+names the systems that handle its message.
+*Provenance:* Vernon (ch. 10): subscribers execute in a separate transaction.
 
 ## Other systems
 
