@@ -378,14 +378,21 @@ builder — when one of these holds:
 *Why:* until one of these holds, building the upstream in assembly is ceremony. Two systems
 building each other is a cycle in the context map, which usually means a boundary is drawn wrong.
 
-**SYS-7.** Between systems, consistency is eventual. Where this system's record and another's have
-drifted apart, reconciliation repairs it. Reconciliation is a use case of the system that owns the
-aggregate (SYS-8). A scheduled task of that system calls it, or any driving adapter that notices
-the drift.
-*Allowed:* another system catching up a moment later is the design working, not a bug.
+**SYS-7.** Where this system keeps a record of another system's data, or changes another's through
+messages, it has a reconciliation for it.
+*Why:* consistency between systems is eventual (TX-3, TX-8): a change crosses by message, later. A
+moment's lag is the design working; a gap that stays is drift, and only a comparison after the
+fact finds it. The reconciliation is a use case of the system whose aggregate it repairs, called
+like any use case: by a scheduled task, or by whichever driving adapter notices the drift.
+*Looks like:* a copy of another system's data (TX-3 step 2) with nothing that compares it to the
+source; a message that changes another system with nothing that checks the change landed.
+*Allowed:* another system catching up a moment later.
 
-**SYS-8.** An aggregate belongs to the system whose use cases write it, wherever it is stored. A
-record that two systems write is two aggregates that share an id.
+**SYS-8.** A record that two systems write is two aggregates that share an id.
+*Why:* an aggregate belongs to the system whose use cases write it (glossary), so one record with
+two writers is two aggregates: each system's use cases write its own, and the fields of one are
+not the other's to change.
+*Looks like:* one system's use case writing a field the other system's rules decide.
 
 ## Tests
 
