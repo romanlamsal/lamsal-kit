@@ -102,8 +102,10 @@ in the domain.
 calling. When the decision depends on what this system has stored — whether this caller is
 allowed to do this, say — the service that acts makes it: it loads the data, asks the
 specification, and refuses if it must.
-*Why:* a service that only answers a question exists for screens, to hide a button for instance.
-It is not a gate in front of the acting service. If a driving adapter asked first and then called
+*Why:* a driving port does not know how it is reached, so a check made in a driving adapter
+protects only that one way in; another adapter, or a downstream calling the port directly,
+bypasses it. Only the service sees every call. A service that only answers a question exists for
+screens, to hide a button for instance. It is not a gate in front of the acting service. If a driving adapter asked first and then called
 the acting service, the acting service would have to check again anyway, because things may have
 changed in between. So the acting service checks, and the answering service is called on its own,
 never as a step before the act.
@@ -347,12 +349,6 @@ process, a driven adapter of the downstream, such as an HTTP client. Moving the 
 process changes assembly and adds that adapter. Nothing in the downstream's services or domain
 changes.
 
-**SYS-4.** A driving port that another system calls takes its caller as an argument (SVC-2), and
-the upstream authorizes in its service or domain, as it does for every caller.
-*Why:* a downstream calls the upstream's service directly, without passing through the upstream's
-driving adapters. Whatever those adapters would have worked out — who is calling, on whose
-behalf — has to arrive as an argument instead.
-
 **SYS-5.** How a downstream relates to an upstream is chosen per relationship, and the code
 boundary matches the choice.
 
@@ -439,4 +435,4 @@ results.
 
 `DRV-2`, `DRV-4`, `PRD-1` to `PRD-5` were general ids in the pass-1 translation and are specialized
 rules now; they retire as general ids and are not reused. `DOM-2` was folded into `DOM-3`, `DVN-3`
-into `ARR-3`'s *Allowed*; both are retired.
+into `ARR-3`'s *Allowed*, `SYS-4` into `SVC-2`'s *Why*; all three are retired.
