@@ -349,25 +349,19 @@ process, a driven adapter of the downstream, such as an HTTP client. Moving the 
 process changes assembly and adds that adapter. Nothing in the downstream's services or domain
 changes.
 
-**SYS-5.** How a downstream relates to an upstream is chosen per relationship, and the code
-boundary matches the choice.
-
-- *Conformist* is the default when the upstream offers an open host service: it publishes its
-  model on purpose, so use it.
-- *Anti-corruption layer* is for a model that is foreign, unstable or not yours, as a third-party
-  API's usually is. The downstream's domain declares a driven port in its own terms. A driven
-  adapter implements it by calling the upstream's driving port and translating. On the way in,
-  the driving adapter translates. The upstream's schema and the translation live in those
-  adapters, or in a module both adapters share, and never in the domain.
-
-*Why:* the other context-map patterns are about how teams cooperate. In code, each of them ends up
-as one of these two, or as no integration at all.
+**SYS-5.** How a downstream relates to an upstream is chosen per relationship. Conformist is the
+default where the upstream offers an open host service. An anti-corruption layer is for an
+upstream whose model is foreign, unstable or not yours, as a third-party API's usually is.
+*Why:* an open host service publishes its model on purpose; translating it changes nothing and
+costs a layer. A foreign model changes on terms this system does not control, and the adapters
+are where that change is absorbed. The other context-map patterns are about how teams cooperate;
+in code, each lands as one of these two, or as no integration at all.
 *Looks like:* a driven port whose types copy the upstream's field for field, with an adapter that
 maps each field to itself; a message schema copied field for field from the system that publishes
 it; behind an anti-corruption layer, one of the upstream's terms showing up in this domain or in a
 service.
 *Allowed:* under conformist, using the upstream's terms directly is the design working, not a
-leak.
+leak. Under an anti-corruption layer, one module holding the translation for both adapters.
 *Provenance:* conformist as the default for an open host service is this document's choice. The
 context-map patterns are DDD's.
 
