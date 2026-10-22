@@ -44,12 +44,13 @@ the system that wrote it.
 
 **Outbox.** Where a system's outgoing messages wait until they are delivered. The *outbox port* is
 the driven port a service writes messages through. The *outbox reader* is what the relay reads the
-outbox through; the system provides it.
+outbox through, and marks it by; the system provides it.
 
 **Handler.** A driving adapter that acts on messages delivered to its system.
 
-**Relay.** The mechanism that reads every system's outbox and delivers each message to the handlers
-of the systems it is meant for.
+**Bus.** What delivers a message to the handlers subscribed to it.
+
+**Relay.** The mechanism that reads outboxes and publishes each message to the bus.
 
 **Open host service.** The driving ports a system offers to outside callers.
 
@@ -72,11 +73,12 @@ others.
 ## Other systems
 
 **Upstream system.** Of two systems that talk, the one the other depends on: it offers the open
-host service the other calls, the messages the other handles, and the published language both are
-written in. It changes on its own terms.
+host service the other calls, the events the other handles, and the published language both are
+written in. It changes on its own terms. A command runs the other way: its type is in the
+published language of the system that handles it, so the sender is that system's downstream.
 
 **Downstream system.** The one that depends on the upstream: it calls the upstream's open host
-service, handles its messages, and adapts to its changes.
+service, handles its events, sends it commands, and adapts to its changes.
 
 **Conformist.** A downstream system that takes the upstream as it is: its ports become the
 downstream's driven ports and its published language is used untranslated, in any layer including
@@ -127,7 +129,7 @@ factory for a driving port; an adapter's constructor is a factory for a driven p
 
 **System builder.** Assembly for one system, or for one part of it: takes configuration, wires the
 services it needs to their adapters, and returns implementations of what that part offers — its
-open host service, its handlers, its outbox reader, or several of them. A system has as many
+open host service, its handlers, its outbox readers, or several of them. A system has as many
 builders as there are ways it is driven.
 
 **Assembly.** The one place in a process where every port gets its implementation, and the only
