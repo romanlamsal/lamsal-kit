@@ -240,13 +240,10 @@ transaction through a port of the common library, so it names no store itself.
 
 **TX-2.** Writes that must land together share one transaction. A driven adapter that is handed a
 transaction writes inside it.
-*Why:* a loop that opens a transaction per item is many transactions, and a failure halfway
-through leaves the use case half done.
+*Why:* a failure between two writes that must land together leaves the use case half done.
 *Looks like:* a repository method that takes the transaction and then writes without it, or opens
-its own; a loop with one write per iteration; a write moved out of a function, which tends to
-give it a transaction of its own.
-*Allowed:* a service passing its transaction into another repository of its system, in the same
-store, is the design working. That is how several aggregates stay one transaction.
+its own; a loop with one write per iteration, which is one transaction per item; a write moved
+out of a function, which tends to give it a transaction of its own.
 
 **TX-3.** For each piece of data a use case touches, answer in order:
 
@@ -262,15 +259,16 @@ store, is the design working. That is how several aggregates stay one transactio
    between them is also valid.
 4. *Otherwise* → one transaction.
 
-*Looks like:* a call to another system's writing port inside this system's transaction.
+*Looks like:* a call to another system's driving port that acts, inside this system's
+transaction.
 *Provenance:* one transaction across several aggregates (step 3) is this document's choice; Vernon
 and Khononov keep one aggregate per transaction.
 
 **TX-4.** The outbox belongs to its system. Its port is a driven port the system declares, like a
 repository (DOM-5). Where the messages live is the system's choice — a table of its own, a store
-another transaction reaches, a field it owns on a product's record — and so are the adapter that
-writes it and the reader that reads it. A system that writes to several stores has an outbox in
-each, so the message is written by the same transaction as the change.
+another transaction reaches, a field it owns on a record in another system's store — and so are
+the adapter that writes it and the reader that reads it. A system that writes to several stores
+has an outbox in each (TX-6).
 
 **TX-5.** An outbox, wherever it is used:
 
