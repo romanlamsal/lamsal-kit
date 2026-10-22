@@ -9,16 +9,16 @@ A rule is one entry with labeled parts, in this order. Only the statement is req
   else.
 - *Why:* what the statement protects, or what breaks without it.
 - *Looks like:* what a breach looks like in a diff.
-- *Allowed:* what the statement does not forbid, where that is easy to mistake for a breach.
+- *Allowed:* what the statement never forbade, where a reader may think it did. It carves nothing
+  out of the statement; a case that needs carving out is a specialized rule.
 - *Provenance:* which source the rule follows or departs from.
 - *Examples:* ids in `examples.md`.
 
 ## Scope
 
 This document assumes a store that can be read and written, and that the store can apply several
-writes atomically where it says *transaction*. What counts as one store is each codebase's choice.
-*Record* and *aggregate* are used in the relational sense, a record being a row; substitute your
-store's equivalents.
+writes atomically where it says *transaction*. *Record* and *aggregate* are used in the relational
+sense, a record being a row; substitute your store's equivalents.
 
 Not everything gets a layer. Code that asserts about the source tree rather than about the
 application sits outside these layers, and so do assembly, a system's export paths and the common
@@ -32,23 +32,22 @@ are the stack document's, and whether a module that straddles two layers should 
 ## Arrow
 
 **ARR-1.** The arrow runs one way — driving adapter → service → driven adapter → the outside — and
-the domain sits beside all of it: every layer may import it, it imports no layer.
+the domain sits beside all of it: every layer may import it, it imports no layer of its system.
 
-**ARR-2.** A driving adapter's only door to the store is a service.
+**ARR-2.** A driving adapter's only door to this system's store is a service.
 
 **ARR-3.** A driven adapter imports no service.
 *Why:* a use case found in a driven adapter is in the wrong layer; it belongs in a service.
-*Looks like:* a service import in a driven adapter's file; a driven adapter that gained an import
-of another driven adapter.
+*Looks like:* a service import in a driven adapter's file.
 *Allowed:* a read across its system's aggregates in a driven adapter is not a use case, as long as
 it writes nothing.
 
 ## Domain
 
 **DOM-1.** The domain is pure and knows no runtime. It computes from its arguments and imports no
-layer of this system: only other domain modules, the common library's ports, an upstream's
-published language where this system is a conformist, and pure libraries. It uses what every
-runtime has, the language and pure libraries.
+layer of this system: only other domain modules, the common library's ports, another system's
+published language, and pure libraries. It uses what every runtime has, the language and pure
+libraries.
 *Why:* the test for a package is: can calling it reach outside the process? A store client, an
 HTTP client, a mailer SDK, `node:fs` and a clock all can, so they stay behind ports. A validation
 library cannot — it takes arguments and returns — so it is fine, and so is any other library like
@@ -74,8 +73,8 @@ restates it.
 **DOM-4.** An aggregate refers to another aggregate, and to another system's data, by id. What it
 needs of the other at the time — a price, a title — it copies as its own value.
 *Why:* the copy is this aggregate's fact from then on. A reference that loads the other's whole
-record makes the two one aggregate, written by two sets of use cases (SYS-8), and carries the
-other's model into this one.
+record carries the other's model into this one, and every change to the other's record becomes a
+change to this aggregate that none of this system's use cases made.
 *Looks like:* a populated relationship.
 *Provenance:* Vernon's aggregate rule: reference other aggregates by identity only.
 
@@ -93,8 +92,9 @@ the domain.
 
 ## Service
 
-**SVC-1.** A service constructs nothing. It takes its dependencies as arguments and returns its
-driving port. The driving port is declared beside the service, not in the domain (DOM-5).
+**SVC-1.** A service builds none of its dependencies (ASM-2). It takes them as arguments and
+returns the implementation of its driving port. The driving port is declared beside the service,
+not in the domain (DOM-5).
 *Looks like:* a constructor call or an adapter import inside a service module; a driving port type
 in the domain.
 
@@ -118,19 +118,20 @@ its own. If two use cases need the same writes, both call the same repositories 
 transaction, and the domain decides what those writes are. If one use case must follow another,
 the outbox carries it, and the outbox is what retries.
 *Looks like:* a service that receives or imports another service of its system.
-*Allowed:* a service calling an upstream's driving port is calling a port, not nesting a use case
-in another — for a read. A write goes through TX-3, never inside the transaction.
+*Allowed:* a service calling an upstream's open host service is calling a driven port (SYS-3), not
+a service of its system; TX-3 says when.
 *Provenance:* Khononov's application service is the transaction.
 
-**SVC-4.** A service writes no record itself. The write belongs to the repository of the
-aggregate the record is part of; the service keeps the deciding.
+**SVC-4.** A service writes no record itself. It writes through driven ports — the repository of
+the aggregate the record is part of, the outbox port for a message — and keeps the deciding.
 *Looks like:* an insert, update or delete inside a service; a service holding a store client.
 *Allowed:* a service that does nothing but call its repository is fine, even if it looks like an
 extra layer. A driving adapter may only call a service (ARR-2). If the repository is deleted
 later, the compile error lands in the service that named it, not in a driving adapter.
 
 **SVC-5.** A service reads no ambient value, of either scope. Its dependencies arrive as
-arguments (ASM-2), and what a use case decides by arrives through its driving port (ASM-3).
+arguments (ASM-2), and what a use case decides by arrives through its driving port or through
+its driven ports (ASM-3).
 *Why:* anything a service would read ambiently, it reads only to pass on. If it passes it to a
 driven adapter, the adapter can read it itself. If it passes it to the domain, the domain decides
 by it, so the port should have taken it. There is no third case.
@@ -148,14 +149,15 @@ use case. It has written one, inside itself, and the decisions are still made in
 inside it; a driving adapter handing a repository a transaction and a callback; an adapter body
 that does more than call one service.
 *Allowed:* preparing the call: working out who the caller is (from a session, a signature, an API
-key) through a port the adapter receives; validating and translating the input; putting
-per-request ambient values in; asking a specification about the input it holds, such as whether
-it is valid. None of this is deciding by the system's state.
+key) through a port the adapter receives, since sessions and keys are not this system's store
+(ARR-2); validating and translating the input; putting per-request ambient values in; asking a
+specification about the input it holds, such as whether it is valid. None of this is deciding by
+the system's state.
 *Provenance:* the conversion is Cockburn's adapter; that the adapter reads no state of its own
 follows from its only door being a service.
 
 **DRV-3.** A driving adapter gets its service from assembly, never by importing it. Where
-assembly constructs the adapter — a route, the adapters a system builder takes — the service is an
+assembly constructs the adapter — a route, a handler a system builder returns — the service is an
 argument. Where the driving adapter is not part of assembly — the framework finds and calls it,
 as it does a server function — it reads its service from a courier, when it runs, not when its
 module loads.
@@ -172,24 +174,25 @@ ports "in the infrastructure layer, either through dependency injection or by bo
 
 **DVN-2.** A driven adapter imports what is static and gets what is built as arguments to its
 factory. Static: the domain, the schema it validates with, the port types. Built: a store client,
-an upstream's open host service it translates for, another adapter.
+the implementation of an upstream's open host service it translates for, another adapter.
+*Looks like:* a driven adapter importing another driven adapter, or a store client instance.
 *Provenance:* that adapters are received is Khononov's (p. 128) and Cockburn's; the split between
 imported and received is this document's.
 
 ## Assembly
 
-**ASM-1.** One assembly per process. It holds the instances; a service module exports its factory
-and nothing built.
+**ASM-1.** One assembly per process. It holds the instances and calls the system builders for what
+the process's driving adapters call into; a service module exports its factory and nothing built.
 *Why:* two assemblies in one process would be two places where a port meets its implementation,
-and two instances of what must exist once. With assembly apart from the factories, every
-dependency except fixed plumbing (ASM-2) is one a factory asked for. Which system builders
-assembly calls follows from how the process is driven: a server's assembly calls the open host
-service builders, the process running the relay calls the outbox reader builders, the process
-running handlers calls the handler builders, a process doing several calls all of them.
+and two instances of what must exist once. With assembly apart from the factories, every port
+implementation is one a factory asked for. Which builders that is follows from how the process is
+driven: a server's assembly calls the open host service builders, the process running the relay
+calls the outbox reader builders, the process running handlers calls the handler builders, a
+process doing several calls all of them.
 *Provenance:* one assembly per process, apart from the driving adapters, is this document's
 choice; see DRV-3.
 
-**ASM-2.** Nothing builds its own dependency instead of receiving it.
+**ASM-2.** Nothing builds or picks the implementation of a port it depends on; it receives it.
 *Why:* it breaks substitution. A service that builds its own adapter cannot be given a different
 one, so its tests need the real thing. A system builder is a factory for its system, and its
 upstreams are dependencies like any other: assembly builds them and hands them in, so each exists
@@ -199,19 +202,20 @@ or a factory body, or read as a per-process ambient value there; a module export
 instance next to the factory that produces it; a system builder calling another system's builder.
 Built in place, this breach is invisible to the other rules: the code sits in the right layer and
 calls in the right direction.
-*Allowed:* plumbing with one fixed configuration, such as a logger or a tracer, may be a ready-made
-instance: nobody substitutes it.
+*Allowed:* importing a common-library instance that stands behind no port, such as a logger or a
+tracer. Nothing substitutes it, so nothing is picked.
 *Provenance:* Seemann's composition root and Spring Modulith's one context per application. Pass 1
 had the downstream's builder build its upstreams; inverted here.
 
 **ASM-3.** A value may be ambient only when no use case and no domain function decides by it
 (SVC-2).
 
-- *Per process:* what assembly produced. Assembly fills it before any adapter runs. Only driving
+- *Per process:* what assembly produced. Assembly, or middleware it installed (ASM-4), fills it
+  before any adapter runs. Only driving
   adapters that are not part of assembly read it, through a courier (DRV-3); a service never does
   (SVC-5).
-- *Per request:* a request id, a trace context, the locale a mail is rendered in, the user an audit
-  column records. The driving adapter puts it in. Plumbing and driven adapters read it, for what
+- *Per request:* a request id, a trace context, the locale a response is rendered in. The driving
+  adapter puts it in. Plumbing and driven adapters read it, for what
   they record or forward; a service and the domain never do (SVC-5). A handler runs in another
   request, so what it needs goes into the message.
 - A transaction is in neither scope: what a read returns depends on it.
@@ -224,19 +228,22 @@ case. Where the line between ambient and argument falls is this document's choic
 
 **ASM-4.** The courier exists only for driving adapters that are not part of assembly (DRV-3). Where
 the courier is the framework's request context, middleware installed by assembly fills it per
-request. Which courier a codebase uses is in the stack document. A courier inside a system builder
-is that builder's own business and gets no rule here.
+request. Which courier a codebase uses is in the stack document.
 
 **ASM-6.** The common library holds no model.
+*Allowed:* the envelope the relay and the bus carry a message in — id, type, payload — is
+plumbing, not a model; the payload is opaque to both.
 
 ## Transactions
 
-**TX-1.** Where one use case writes several aggregates, the service holds the transaction: it
-opens it, hands it to each repository method, and commits it. A repository called on its own is
-its own transaction.
-*Why:* a repository saves one aggregate whole and knows nothing of the others. Only the service
-sees the whole use case, so only it can say which writes must land together. It opens the
-transaction through a port of the common library, so it names no store itself.
+**TX-1.** Where one use case makes several writes to one store — aggregates, messages, a handled
+id (MSG-3) — the service holds the transaction: it opens it through the common library's
+transaction port, hands it to each writing port method, and commits it. A single write is its own
+transaction.
+*Why:* a repository saves one aggregate whole and knows nothing of the others, and the outbox
+adapter knows nothing of either. Only the service sees the whole use case, so only it can say
+which writes must land together. Opening through the common library's port keeps the store's
+name out of the service (SVC-4).
 
 **TX-2.** Writes that must land together share one transaction. A driven adapter that is handed a
 transaction writes inside it.
@@ -248,21 +255,21 @@ out of a function, which tends to give it a transaction of its own.
 **TX-3.** For each piece of data a use case touches, answer in order:
 
 1. *Does it change data another system owns?* That includes a third party's: a mail sent, a
-   payment created. → **Outbox, required.** Write a message to this system's outbox (TX-6). If the
-   owner handles this system's messages, it changes its data when the message arrives. A third
-   party subscribes to no bus, so a handler of this system receives the message (MSG-7).
+   payment created. → **Not in this transaction.** Where this request needs the owner's answer
+   now, call the owner's open host service outside this transaction; a failed call fails this
+   request. Otherwise write a message to this system's outbox in this transaction (TX-6); the
+   change is made when the message is handled, by the owner where it handles this system's
+   messages, else by a handler of this system (MSG-7). What this system records of the owner's
+   answer is a change of its own.
 2. *Does it read data another system owns?* → **Call the owner's open host service.** If the owner
-   offers no fitting read, keep a copy here, updated by the owner's messages; then the owner has
-   to publish them.
-3. *Does it write several aggregates of this system?* → **One transaction**, by default. An outbox
-   between them is also valid.
+   offers no fitting read, keep a copy here, updated by the messages the owner publishes.
+3. *Does it write several aggregates of this system?* → **One transaction** (TX-1) where they
+   share a store; a message to this system's own handler where they do not, or where the second
+   write may follow later.
 4. *Otherwise* → one transaction.
 
 *Looks like:* a call to another system's driving port that acts, inside this system's
-transaction.
-*Allowed:* calling the owner's open host service to act, after this system's transaction has
-committed, where this request needs the answer now. A failed call fails this request; nothing
-retries it. What this system records of the answer is a change of its own (TX-1).
+transaction; a use case writing a record of another system.
 *Provenance:* one transaction across several aggregates (step 3) is this document's choice; Vernon
 and Khononov keep one aggregate per transaction. The synchronous call is Khononov's first saga
 (ch. 9); moving it to the outbox buys reliability, not legality.
@@ -292,42 +299,46 @@ the change commits and the message is never written.
 ## Between systems
 
 **MSG-1.** The relay is common library: it belongs to no system and imports none. It is handed
-the outbox readers and publishes each message to the bus at least once, until the bus has taken
-it; then it marks the message relayed.
+the outbox readers and hands each message to the bus at least once, until the bus has taken it;
+then it marks the message relayed.
 *Why:* a relay inside a system would import it and see only its outbox. Marking before the bus
 has taken the message loses it to a crash in between. The relay sees only whether the bus took
 the message; what happens to a handler behind it is the bus's (MSG-2).
 *Looks like:* a relay module importing a system; a relay that marks on fetch; a relay handed
 handlers.
-*Allowed:* an in-process bus. It holds nothing, so it takes a message only by running the
-handlers now, and refuses if one throws; the relay then retries the publish and the systems that
-already handled it dedup by id (MSG-3). Same rules, retry moves. An in-process bus has no
-set-aside (MSG-2): the relay retries until every handler succeeds.
-*Provenance:* Khononov's outbox relay (ch. 9), followed; at-least-once is his. He marks the message
-"published"; here that word is the message's (SYS-2).
+*Allowed:* an in-process bus. It holds nothing, so it takes a message by running the handlers now
+and refuses if one fails; the relay hands it over again, and the systems that already handled the
+message see its id (MSG-3).
+*Provenance:* Khononov's outbox relay (ch. 9), followed; at-least-once is his. He has the relay
+"publish" and marks the message "published"; here that word is the message's (glossary: message).
 
-**MSG-2.** The bus is handed the handlers and delivers each message at least once, in no
-guaranteed order, to every handler subscribed to it, until each reports it handled.
-*Why:* who starts the call decides driving from driven (glossary). On the publish side the relay
-starts it, so the bus is a driven port of the relay, with an in-memory adapter and broker
-adapters. On the consume side the bus starts it, so a handler is the driving adapter it calls and
-the use case is the driving port. Subscribing is wiring, done by assembly, not a driven port of
-the system. A process that is only relay, outbox readers and bus adapter is valid; handlers run
-wherever a subscriber process runs them.
-*Looks like:* a bus that marks on delivery; a handler reached from anything but the bus.
-*Allowed:* setting a message aside for a handler after the codebase's limit of deliveries, where
-something reads what is set aside. A broker that ships with this on is this *Allowed* used,
-provided the set-aside is read.
+**MSG-2.** Assembly subscribes the handlers to the bus. The bus delivers each message at least
+once, in no guaranteed order, to every subscribed handler of a system the message is meant for
+(MSG-6), until that handler reports it handled or the codebase's limit of deliveries is reached; a
+message that reaches the limit is set aside where something reads it.
+*Why:* who starts the call decides driving from driven (glossary). On the relay's side the relay
+starts it, so the bus is what the relay hands over to, in memory or a broker. On the consume
+side the bus starts it, so a handler is the driving adapter it calls and the use case is the
+driving port. A process that is only relay, outbox readers and bus is valid; handlers run wherever
+a subscriber process runs them. A limit without a reader of the set-aside loses the message.
+*Looks like:* a bus that marks on delivery; a handler reached from anything but the bus; a
+delivery limit whose set-aside nothing reads.
+*Allowed:* no limit, so the bus delivers until handled; a broker whose dead-letter queue is on,
+where something reads that queue.
 *Provenance:* Khononov has the bus as the broker's and wants events "always delivered
-consistently, no matter what" (ch. 15); he has no delivery limit. The set-aside is Hohpe & Woolf's
-Dead Letter Channel; a departure, confined to an *Allowed*.
+consistently, no matter what" (ch. 15); he has no delivery limit. The limit and set-aside are
+Hohpe & Woolf's Dead Letter Channel; a departure.
 
-**MSG-3.** A message carries an id, and the receiving system handles each id once. Messages arrive in no
-guaranteed order (MSG-2), so a message about something the receiving system has not recorded yet
-is not handled now; the bus delivers it again (MSG-2). How the handler says "not yet" —
-failing, asking for a delay — is the codebase's.
-*Why:* the id makes a repeat harmless: the service records it in the use case's transaction (TX-2),
-so a repeat finds it. Redelivery makes an early arrival wait for what it depends on.
+**MSG-3.** A message carries an id. Each use case of the receiving system acts on each id once: the
+service records the id in the use case's transaction and does not act on one it finds recorded.
+Messages arrive in no guaranteed order (MSG-2), so a message about something the receiving system
+has not recorded yet is not handled now; the service refuses it and the bus delivers it again
+(MSG-2). How the refusal reaches the bus — the handler failing, asking for a delay — is the
+codebase's.
+*Why:* the id makes a repeat harmless: recorded in the same transaction as the act (TX-2), it is
+there exactly when the act is. The service records it, not the handler, because the check depends
+on what this system has stored (DRV-1). Redelivery makes an early arrival wait for what it
+depends on.
 *Looks like:* a message schema without an id; a handler that treats "not found" as "already
 handled".
 *Allowed:* a message carrying the version of the aggregate that wrote it, so a handler can ignore
@@ -342,16 +353,15 @@ a deploy is handled after it; a handler still on old code may read one written b
 type checker sees none of this, because the stored record is not in the program.
 *Looks like:* a field renamed, removed, made required or narrowed in the schema of a message.
 
-**MSG-5.** The receiving system decides which messages it handles. Each message is handled in a
-transaction of its own.
+**MSG-5.** The receiving system decides which messages it handles, and reports a message it will
+never act on as handled. Each message is handled in a transaction of its own.
 *Why:* the writer does not know its readers; it publishes, and whoever handles the message is the
 reader's business. One transaction per message lets the bus retry a failed message
 alone, without undoing or repeating the others delivered with it.
 *Looks like:* a handler that handles several messages in one transaction; a writer of an event
 whose code names the systems that handle it.
 *Allowed:* the handler deciding on receipt, by a switch on the message type, or beforehand, by
-declaring the types it handles; a system exporting one handler or several. Either way the handler
-reports a message it chose not to act on as handled.
+declaring the types it handles; a system exporting one handler or several.
 *Provenance:* Vernon (ch. 10): subscribers execute in a separate transaction. Khononov's saga and
 process manager put the address of a command in the message (`target`, ch. 9) and have the relay
 execute it; here the address is implicit in which system exports the type (glossary: upstream
@@ -373,21 +383,24 @@ an internal bus; the open host service's message proxy forwards the public ones 
 language. Here one bus withholds instead of two buses and a proxy. His public events are
 translated types; here they are the same types, exported (SYS-2).
 
-**MSG-7.** The handler's service makes the call that the message asked for. It makes it through a
-driven port. It does not write a message for it.
-*Why:* TX-3 step 1 sends every call to another system through the outbox. The handler's service is
-making one of those calls. Without a named caller, step 1 would apply again, and the call would
-never happen. This rule names the caller and breaks the circle.
-*Looks like:* a handler's service writing the message it was handed back to the outbox.
+**MSG-7.** Where a message asks for a change in a system that does not handle this system's
+messages, the service handling it makes the call through a driven port before the transaction
+that records the id (MSG-3), and writes no message for that call. A failed call fails the
+handling.
+*Why:* this is TX-3 step 1's call, made where its answer is needed now: the handling cannot report
+the message handled without it. A failed handling is delivered again (MSG-2), which is the retry
+the outbox bought.
+*Looks like:* a handler's service writing the message it was handed back to the outbox; the call
+inside or after the handling's transaction.
 
 ## Other systems
 
 **SYS-1.** A system exports its offer and nothing of its needs: what downstream systems need to
-talk to it, and what assembly needs to build it. Other systems reach it only through these
-exports. Today the offer is:
+talk to it, and what assembly needs to build it. Another system imports nothing else of it. The
+offer is:
 
 - the published language and the driving port interfaces, for downstream systems;
-- its system builders, for assembly or a downstream's system builder to call;
+- its system builders, for assembly to call (ASM-2);
 - optionally, a fake of its driving ports for downstream tests, from an export path production
   never loads.
 
@@ -406,32 +419,33 @@ published.
 *Provenance:* Khononov keeps the published language and the domain apart from the start;
 re-exporting the domain, messages included, is this document's choice.
 
-**SYS-3.** The upstream's driving port is, to the downstream, a driven port like any other.
-*Why:* so assembly decides what implements it: in-process, the upstream's service itself; out of
-process, a driven adapter of the downstream, such as an HTTP client. Moving the upstream out of
-process changes assembly and adds that adapter. Nothing in the downstream's services or domain
-changes.
+**SYS-3.** A downstream reaches an upstream's open host service through a driven port of its own:
+as a conformist, the upstream's driving port itself; behind an anti-corruption layer, a port it
+declares, whose adapter calls the upstream's.
+*Why:* so assembly decides what implements it: in-process, the upstream's service itself, or the
+translating adapter handed it; out of process, a driven adapter of the downstream, such as an
+HTTP client. Moving the upstream out of process changes assembly and adds that adapter. Nothing in
+the downstream's services or domain changes.
 
-**SYS-5.** How a downstream relates to an upstream is chosen per relationship. Conformist is the
-default where the upstream offers an open host service. An anti-corruption layer is for an
-upstream whose model is foreign, unstable or not yours, as a third-party API's usually is.
+**SYS-5.** How a downstream relates to an upstream is chosen per relationship, conformist or
+anti-corruption layer, and recorded in an ADR.
 *Why:* an open host service publishes its model on purpose; translating it changes nothing and
-costs a layer. A foreign model changes on terms this system does not control, and the adapters
-are where that change is absorbed. The other context-map patterns are about how teams cooperate;
-in code, each lands as one of these two, or as no integration at all.
+costs a layer, so conformist fits an upstream this codebase writes. A foreign model, a third-party
+API's or a product's, changes on terms this system does not control, and the adapters of an
+anti-corruption layer are where that change is absorbed. The other context-map patterns are about
+how teams cooperate; in code, each lands as one of these two, or as no integration at all.
 *Looks like:* a driven port whose types copy the upstream's field for field, with an adapter that
 maps each field to itself; a message schema copied field for field from the system that publishes
 it; behind an anti-corruption layer, one of the upstream's terms showing up in this domain or in a
 service.
 *Allowed:* under conformist, using the upstream's terms directly is the design working, not a
-leak. Under an anti-corruption layer, one module holding the translation for both adapters, and a
-command to the upstream being this system's private message, whose handler's service reaches the
-upstream through the driven adapter that translates (TX-3 step 1, MSG-7).
-*Provenance:* conformist as the default for an open host service is this document's choice. The
+leak. Under an anti-corruption layer, one module holding the translation for both adapters.
+*Provenance:* conformist for an upstream this codebase writes is this document's choice. The
 context-map patterns are DDD's.
 
-**SYS-7.** Where this system keeps a copy of another system's data, sends another system a
-command, or calls a third party, it has a reconciliation for it.
+**SYS-7.** Where this system keeps a copy of another system's data that the owner's messages
+update (TX-3 step 2), sends another system a command, or calls a third party, it has a
+reconciliation for it.
 *Why:* consistency between systems is eventual (TX-3, MSG-5): a change crosses by message, later. A
 moment's lag is the design working; a gap that stays is drift, and only a comparison after the
 fact finds it. A system that writes an event does not know who handles it (MSG-5), so it has
@@ -439,7 +453,8 @@ nothing to compare; a reader that keeps a copy does. The reconciliation is a use
 system, called like any use case: by a scheduled task, or by a use case that finds the drift.
 *Looks like:* a copy of another system's data (TX-3 step 2) with nothing that compares it to the
 source; a command sent, or a third party called, with nothing that checks it landed.
-*Allowed:* another system catching up a moment later.
+*Allowed:* another system catching up a moment later; a value copied into an aggregate as its own
+fact (DOM-4), which nothing updates and so nothing reconciles.
 
 **SYS-8.** A record that two systems write is two aggregates that share an id.
 *Why:* an aggregate belongs to the system whose use cases write it (glossary), so one record with
@@ -478,9 +493,8 @@ self-contained pieces — a query builder's output, a mapping function.
 implementation, and run it twice: once against the fake, once against the real adapter.
 *Why:* the second run is the integration test, and it is what stops a fake from drifting into a
 fiction that passes while production breaks.
-*Allowed:* several systems each faking the same port. By default, each system writes its own fake.
-One fake that the upstream exports fits only where its downstreams need the same things of it; a
-fake that needs configuration per downstream has outgrown that.
+*Allowed:* several systems each faking the same port; an upstream exporting one fake of its
+driving ports for its downstreams (SYS-1).
 
 **TST-7.** A good test survives a rewrite of the thing it tests. It names inputs and observable
 results.
