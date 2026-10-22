@@ -25,7 +25,7 @@ ctx.insert(invoices).values({ orderId, total })
 invoices.createForOrder(ctx, { orderId, total })
 ```
 
-## DOM-4 — one rule, decided once
+## DOM-3 — one rule, decided once
 
 ```
 // domain/invoice.ts — settling also clears dunning, decided once

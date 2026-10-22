@@ -19,7 +19,7 @@ Or a driving adapter's body that grew past "call one service"; preparing the cal
 caller, validating, translating, putting ambient values in, asking a specification — is not
 growth.
 
-### 3. Does this add a second constructor for the same row? — DOM-4
+### 3. Does this add a second constructor for the same row? — DOM-3
 
 **In a diff:** a row shape for one table built in two places — commonly once on the server and
 once in a client-side optimistic update, or in two services.

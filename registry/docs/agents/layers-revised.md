@@ -12,123 +12,157 @@ Companion documents: examples in `layers-revised-examples.md`; the review checkl
 ## Scope
 
 This document assumes a store that can be read and written. Where it says *transaction*, it
-assumes the store can apply several writes atomically; where one cannot, S-TX-2 applies. *Table*,
+assumes the store can apply several writes atomically; where one cannot, S-TX-2 applies. What
+counts as one store is each codebase's choice. *Table*,
 *row* and *aggregate* are used in the relational sense — substitute your store's equivalents.
 
 Not everything gets a layer. Code that asserts about the source tree rather than about the
 application sits outside these layers, and so do the roots that assemble them, a system's export
 paths and the common library.
 
-Not covered: where UI code goes (`components.md`); library, framework and file-naming conventions
+Not covered: where UI code goes (`components.md` — it applies *controller* to route files on the
+client; those carry no writes, a server controller passes a write through to one service); library, framework and file-naming conventions
 (the stack document); whether a module that straddles two layers should be split now.
 
 ## Terms
 
-Definitions only. What a term may do is in the rules.
+Definitions only. What a term may do is in the rules. Ordered from the domain outwards, then
+assembly, then what spans systems.
 
-**Store, transaction.** A *store* is what one transaction port makes atomic: several clients are
-one store where one port makes their writes atomic together, and two clients of one database are
-two stores until one port reaches both. Which it is, is each codebase's choice. A *transaction*
-is several writes the store applies atomically. The *transaction context* is what the transaction
-port hands back for the duration of one transaction.
+### System
 
-**System.** One bounded context: code with its own domain and its own glossary, laid out by this
-document. A code repository may hold several. Another bounded context is another system, even when
-it is imported in-process as a package; so is a product.
+A system is one bounded context. It is code with its own domain and its own glossary. This
+document lays one out. A code repository may hold several. Another bounded context is another
+system, even when it is imported in-process.
 
-**Aggregate.** A cluster of records written as one unit. An aggregate belongs to the system whose
-use cases write it, wherever it is stored; a record two systems write is two aggregates sharing an
-id.
+### The layers
 
-**The layers.**
+**Use case.** One goal a caller can reach through the system, and how the system responds.
 
-- *Domain*: the model — rules, schemas, specifications, and the driven ports the rules need.
-- *Service*: the application layer — use cases, and the driving ports beside them.
-- *Driven adapters*: implementations of this system's driven ports — a repository over one
-  aggregate, a mailer, a clock, blob storage, another system behind an anti-corruption layer.
-- *Driving adapters*: the ways in — controllers, hooks, scheduled tasks, handlers, their validators
-  and inbound translation.
+- **Domain.** The model: rules, schemas, specifications. It is pure and knows no runtime.
+- **Service.** The application layer. It carries out the system's use cases. It holds no rule of
+  its own; the rules are the domain's. Each use case either acts or answers.
+- **Driven adapters.** Implementations of driven ports.
+- **Driving adapters.** Callers adapted to driving ports.
 
-In the vocabulary of domain-driven design, *domain* is the model, *service* is the application
-layer, *driving adapters* are the interface layer and *driven adapters* the infrastructure layer.
+In DDD vocabulary, domain is the model, service is the application layer, driving adapters are the
+interface layer, driven adapters the infrastructure layer.
 
-**Port.** An interface, never the code behind it. A *driving port* is the interface to a use case
-— the way in, something a controller calls. A *driven port* is something the code needs from
-outside — the way out: store an aggregate, send a mail, put a file somewhere. Who starts the call
-decides which: the outside starts it, driving; this system starts it, driven. A clock is outside.
+**Port.** An interface, never the code behind it.
 
-**Adapter.** Sits on the far side of a port: a *driving adapter* calls a driving port, a *driven
-adapter* implements a driven port.
+- A *driven port* is a way out of the system. Send a mail, save to the database, read from disk.
+- A *driving port* is the way in. It names one use case the system offers and what a caller must
+  bring. It does not know how it is reached.
+- Who starts the call decides which. Seen from the caller, this system's driving port is the
+  caller's driven port.
 
-**Repository.** A driven port over one aggregate's storage; its adapter is a driven adapter like a
-mailer's.
+**Adapter.** Code on the far side of a port.
 
-**Controller.** A driving adapter that receives a request. `components.md` applies the same role
-to route files on the client; the difference is writes — a server controller passes a write
-through to one service, a route controller does not carry writes at all.
+- A *driven adapter* implements a driven port. A port may have several: a database today, another
+  store or a fake tomorrow. Swapping one changes nothing on the system's side of the port.
+- A *driving adapter* adapts one caller to a driving port. There are as many driving adapters as
+  there are ways into the process, like a server function, a CLI command, a product's hook.
 
-**Handler.** A driving adapter the relay calls with a message.
+### Between systems
 
-**Hook.** A driving adapter a product calls.
+**Message.** What one system tells another, or itself, so that it may act. An *event* says something
+happened; a *command* says do this. *Published*: meant for other systems. *Private*: meant only for
+the system that wrote it.
+
+**Outbox.** Where a system's outgoing messages wait until they are delivered. The *outbox port* is
+the driven port a service writes messages through. The *outbox reader* is what the relay reads the
+outbox through; the system provides it.
+
+**Handler.** A driving adapter that acts on messages delivered to its system.
+
+**Relay.** The mechanism that reads every system's outbox and delivers each message to the handlers
+of the systems it is meant for.
+
+**Open host service.** The driving ports a system offers to outside callers.
+
+**Published language.** What an outside system needs to talk to this one, or to translate from it:
+the schemas, types and errors its driving ports take, return and raise, and its published messages.
+
+**Reconciliation.** A use case that compares, after the fact, what this system recorded with what
+another system holds, and repairs this system's record, or starts the step that repairs the
+other's.
+
+**Saga.** A sequence of steps across systems where, when a later step fails, new steps undo the
+earlier ones.
+
+**Choreography.** Each system reacts to the others' events and decides for itself what to do next.
+No one holds the whole sequence.
+
+**Orchestration.** One system's *process manager* holds the sequence and sends commands to the
+others.
+
+### Other systems
+
+**Upstream system.** Of two systems that talk, the one the other depends on: it offers the open
+host service the other calls, the messages the other handles, and the published language both are
+written in. It changes on its own terms.
+
+**Downstream system.** The one that depends on the upstream: it calls the upstream's open host
+service, handles its messages, and adapts to its changes.
+
+**Conformist.** A downstream system that takes the upstream as it is: its ports become the
+downstream's driven ports and its published language is used untranslated, in any layer including
+the domain.
+
+**Anti-corruption layer.** A downstream system that translates the upstream's published language
+into its own in every adapter that touches the upstream: the driven adapters that call into it and
+the driving adapters it calls into. The upstream's terms stop at those adapters.
+
+**Product.** Another system whose code this codebase does not write, only configures. Like any
+system it has a model of its own; unlike a library, its code is out of reach. It is driven through
+its instance and driving through its hooks.
+
+**Hook.** A driving adapter an upstream system calls.
+
+### Domain
+
+**Aggregate.** A cluster of records changed as one unit and addressed by one id; a repository loads
+and saves it whole.
+
+**Specification.** A domain function that answers yes or no about one candidate: is it valid, may
+this happen, does it qualify.
+
+**Repository.** A specialized driven port over exactly one aggregate: loads it, saves it, finds it.
+
+### Driven adapters
+
+**Store.** What lies behind one or more driven ports whose writes can be committed in one
+transaction. Two clients are one store when their writes commit together, two stores until they
+do.
+
+### Driving adapters
 
 **Scheduled task.** A driving adapter the clock calls.
 
-**Specification.** A domain function that takes a candidate and returns whether it is acceptable.
+**Ambient value.** A value a function reads without receiving it as an argument. Two scopes: per
+process, what assembly produced; per request, what the current request carries, like a request id,
+a trace context or a locale.
 
-**Message.** An event or a command. A system's *published* messages are part of its published
-language; a message only this system handles is *private*.
+**Courier.** How a driving adapter reaches what assembly produced when assembly cannot hand it over
+as an argument. Example implementations are per-process ambient values or the stack's context
+objects.
 
-**Outbox.** Where a system's outgoing messages wait, written in the transaction that produced them.
-The *outbox port* is a driven port the system declares, like a repository; the *outbox reader* is
-what the relay reads it through.
+### Assembly
 
-**Relay.** Reads every system's outbox, through the reader that system exports, and delivers each
-message to the handlers until it is taken. Whether it routes by message type or hands every message
-to every handler, what it orders by, and what counts as taken, is each codebase's.
+**Factory.** A function that takes what an implementation needs and returns it. A service is a
+factory for a driving port; an adapter's constructor is a factory for a driven port.
 
-**Reconciliation.** A use case of the system that owns an aggregate: it compares what this system
-recorded with what another system holds, and repairs this system's record, or starts the step that
-repairs the other's. A scheduled task of this system, or any driving adapter that finds the two
-apart, calls it.
+**System builder.** Assembly for one system, or for one part of it: takes configuration, wires the
+services it needs to their adapters, and returns implementations of what that part offers — its
+open host service, its handlers, its outbox reader, or several of them. A system has as many
+builders as there are ways it is driven.
 
-**Saga.** A sequence of steps across systems where, when a later step fails, new steps undo the
-earlier ones. *Choreography*: each system reacts to the others' events. *Orchestration*: one
-system's *process manager*, an aggregate of that system, sends commands.
-
-**Entry, root, assembly.** An *entry* is where a deployable starts — a server, a job, a relay
-worker. It has one *root*, which builds what that entry runs. *Assembly* is the code that builds
-adapters, calls factories and build functions, and hands the results on; the root is assembly,
-and so is a build function.
-
-**Build function.** A function a system exports that takes configuration and builds its open host
-service, its handler, or its outbox reader. It is that system's assembly.
-
-**Factory.** A function that takes its dependencies as arguments and returns a port's
-implementation. A service is one.
-
-**Courier.** Carries what the root built to a driving adapter the root cannot construct because the
-framework collects it, such as a server function: the per-process registry, or the framework's
-request context, which middleware the root installs fills per request. Which, the stack document
-says.
-
-**Ambient value.** A value held outside arguments, in one of two scopes: *per process* (what the
-root built) or *per request* (a request id, a trace context, a locale, the user an audit column
-records).
+**Assembly.** The one place in a process where every port gets its implementation, and the only
+place where port and implementation meet. It calls the system builders and produces what the
+process's driving adapters call into.
 
 **Common library.** Plumbing every system may import: the transaction port, store clients, a
-logger, a tracer, the relay, the ambient registry. It holds no model.
-
-**Open host service, published language.** A system's *open host service* is its driving ports and
-its *published language*: the schemas, types and errors those ports take, return and raise, and the
-messages the system publishes, if any.
-
-**Context-map relationships.** *Conformist*: this system adopts the other's published language as
-it is. *Anti-corruption layer*: this system's domain declares a driven port in its own terms, and a
-driven adapter translates to and from the other system. *Shared kernel*: model two systems share,
-in a module both import and neither changes alone.
-
-**Product.** A system with a model of its own that this system embeds — a CMS, an auth library —
-even when its tables sit in this system's database.
+logger, a tracer, the relay, the ambient registry.
 
 ## General rules
 
@@ -144,48 +178,51 @@ the wrong layer; it belongs in a service.
 
 ### Domain
 
-**DOM-1.** The domain imports no layer of this system: only other domain modules, the common
-library's ports, a shared kernel, a conformed system's published language and pure libraries. It
-reaches nothing; it computes from its arguments. The test for a package is whether calling it can
-reach outside the process: a store client, an HTTP client, a mailer SDK, `node:fs` and a clock all
-can, so they stay behind ports. A validation library cannot — it computes from its arguments and
-returns — so it is allowed, and so is any other library of the same shape.
+**DOM-1.** The domain is pure and knows no runtime.
 
-**DOM-2.** The domain runs on any runtime. It uses what every runtime has: the language and pure
-libraries. `node:*` modules and a runtime's globals — `Buffer`, `process`, `window`, the DOM —
-belong to the layers that run on one runtime, even where they cannot reach out of the process:
-`node:path` is pure, and still breaks in a browser. This holds through imports: a common-library
-module that imports `node:async_hooks` brings the runtime with it. Running on any runtime is what
-lets a browser and another system import the domain, and importing it loads only the domain.
+- *Pure:* it reaches nothing and computes from its arguments. It imports no layer of this system:
+  only other domain modules, the common library's ports, a shared kernel, a conformed system's
+  published language and pure libraries. The test for a package is whether calling it can reach
+  outside the process: a store client, an HTTP client, a mailer SDK, `node:fs` and a clock all can,
+  so they stay behind ports. A validation library cannot — it computes from its arguments and
+  returns — so it is allowed, and so is any other library of the same shape.
+- *No runtime:* it uses what every runtime has, the language and pure libraries. `node:*` modules
+  and a runtime's globals — `Buffer`, `process`, `window`, the DOM — belong to the layers that run
+  on one runtime, even where they cannot reach out of the process: `node:path` is pure, and still
+  breaks in a browser. This holds through imports: a common-library module that imports
+  `node:async_hooks` brings the runtime with it.
 
-**DOM-3.** A schema is a rule, not a description of one. `Invoice` — which fields exist, that an
+Running on any runtime is what lets a browser and another system import the domain, and importing
+it loads only the domain.
+
+**DOM-2.** A schema is a rule, not a description of one. `Invoice` — which fields exist, that an
 amount is a positive integer, that a status is one of four — is the same statement as the functions
 beside it, written in a form that also holds at runtime. Types are inferred from it.
 
-**DOM-4.** A rule about a row is decided once, in the domain, and every place that builds that row
+**DOM-3.** A rule about a row is decided once, in the domain, and every place that builds that row
 spreads it: the controller validating input and the repository mapping a row parse against the same
 schema; a server write and a client-side optimistic update derive from the same domain function.
 Two constructors drift, and the drift stays invisible until two parts of the system disagree about
 a rule neither of them writes down.
 
-**DOM-5.** An aggregate refers to another aggregate, and to another system's data, by id. What it
+**DOM-4.** An aggregate refers to another aggregate, and to another system's data, by id. What it
 needs of the other at the time — a price, a title — it copies as its own value. A reference that
 loads the other's whole record, such as a populated relationship, carries the other's model into
 this aggregate.
 
-**DOM-6.** Driven ports this system declares live in its domain. The rules declare what they need —
+**DOM-5.** Driven ports this system declares live in its domain. The rules declare what they need —
 store this order, send this mail — and driven adapters implement it. The domain names ports only;
 assembly picks their implementations. The domain names no use case: a use case is not a domain
 concept, so the domain never learns the name of one.
 
-**DOM-7.** The transaction context is opaque in the domain, so nothing there names the store or its
+**DOM-6.** The transaction context is opaque in the domain, so nothing there names the store or its
 client.
 
 ### Service
 
 **SVC-1.** A service is a factory. It takes its dependencies as arguments and returns its driving
 port. Nothing inside it constructs anything. Its driving port lives beside it, not in the domain
-(DOM-6).
+(DOM-5).
 
 **SVC-2.** A driving port takes what its use case decides by, the caller included. A question that
 needs this system's state — may this caller do this — is the acting service's: it loads the data,
@@ -243,7 +280,7 @@ is an anti-corruption layer (SYS-5).
 
 ### Driven adapters
 
-**DVN-1.** A driven adapter implements a driven port the domain declared (DOM-6).
+**DVN-1.** A driven adapter implements a driven port the domain declared (DOM-5).
 
 **DVN-2.** An adapter imports what is static and receives what is built. The domain, a schema it
 validates with, port types: imported. A service — a driving adapter's own; for a driven adapter,
@@ -288,11 +325,16 @@ Which values a codebase holds ambient, it says in an ADR; what carries them is t
 document's.
 
 **ASM-4.** The courier is used only where the framework collects a driving adapter and the root
-cannot construct it. A courier inside a build function is that function's detail and gets no rule
-here.
+cannot construct it. Where it is the framework's request context, middleware the root installs
+fills it per request. Which courier a codebase uses, the stack document says. A courier inside a
+build function is that function's detail and gets no rule here.
 
 **ASM-5.** The relay is common library: it belongs to no system and imports none; the root of the
-process that runs it hands it the handlers and the readers.
+process that runs it hands it the handlers and the readers. Whether it routes by message type or
+hands every message to every handler, what it orders by, and what counts as taken, is each
+codebase's.
+
+**ASM-6.** The common library holds no model.
 
 ### Transactions
 
@@ -322,7 +364,8 @@ same store, is the design working. That is how several tables stay one transacti
    is also valid here → S-TX-3.
 4. *Otherwise* → one transaction.
 
-**TX-4.** The outbox is this system's. Where the messages live — a table of its own, a store
+**TX-4.** The outbox is this system's. Its port is a driven port the system declares, like a
+repository (DOM-5). Where the messages live — a table of its own, a store
 another transaction reaches, a field it owns on a product's record — is that system's, and so are
 the adapter that writes it and the reader of it. A system writing several stores has an outbox in
 each store whose transaction writes the message.
@@ -417,12 +460,17 @@ into the entry's root, which builds B once and hands it to A's build function, w
 Until one of these holds, building B inside the root is ceremony.
 
 **SYS-7.** Between systems, consistency is eventual. Another system catching up a moment later is
-the design working.
+the design working. Where this system's record and another's stay apart, reconciliation repairs
+it. Reconciliation is a use case of the system that owns the aggregate (SYS-8); a scheduled task of
+that system, or any driving adapter that finds the two apart, calls it.
+
+**SYS-8.** An aggregate belongs to the system whose use cases write it, wherever it is stored; a
+record two systems write is two aggregates sharing an id.
 
 ### Products
 
-**PRD-1.** A product with a model of its own is another system; the rules of Other systems apply
-to it.
+**PRD-1.** A product is another system, even when its tables sit in this system's database; the
+rules of Other systems apply to it.
 
 **PRD-2.** Where this system stores an aggregate in a product, the product's screens may read it; a
 field this system owns is read-only there. A change comes through an action there — a button, an
