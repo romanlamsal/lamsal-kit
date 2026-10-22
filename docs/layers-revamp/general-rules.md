@@ -49,28 +49,29 @@ the wrong layer; it belongs in a service.
 Running on any runtime is what lets a browser and another system import the domain, and importing
 it loads only the domain.
 
-**DOM-2.** A schema is a rule, not a description of one. `Invoice` — which fields exist, that an
-amount is a positive integer, that a status is one of four — is the same statement as the
-functions beside it, written in a form that also holds at runtime. Types are inferred from it.
-
-**DOM-3.** A rule about a row is decided once, in the domain, and every place that builds that row
-spreads it: the driving adapter validating input and the repository mapping a row parse against
-the same schema; a server write and a client-side optimistic update derive from the same domain
-function. Two constructors drift, and the drift stays invisible until two parts of the system
-disagree about a rule neither of them writes down.
+**DOM-3.** A rule about a row is decided once, in the domain, as a schema: `Invoice` — which
+fields exist, that an amount is a positive integer, that a status is one of four — is the same
+statement as the functions beside it, written in a form that also holds at runtime, and its type
+is inferred from it. Every place that builds that row spreads the one decision: the driving
+adapter validating input and the repository mapping a row parse against the same schema; a server
+write and a client-side optimistic update derive from the same domain function. Two constructors
+drift, and the drift stays invisible until two parts of the system disagree about a rule neither
+of them writes down.
 
 **DOM-4.** An aggregate refers to another aggregate, and to another system's data, by id. What it
-needs of the other at the time — a price, a title — it copies as its own value. A reference that
-loads the other's whole record, such as a populated relationship, carries the other's model into
-this aggregate.
+needs of the other at the time — a price, a title — it copies as its own value, because it is
+this aggregate's fact from then on. A reference that loads the other's whole record, such as a
+populated relationship, makes the two one aggregate, written by two sets of use cases (SYS-8),
+and carries the other's model into this one.
+*Provenance:* Vernon's aggregate rule: reference other aggregates by identity only.
 
 **DOM-5.** Driven ports this system declares live in its domain. The rules declare what they
 need — store this order, send this mail — and driven adapters implement it. The domain names ports
 only; assembly picks their implementations. The domain names no use case: a use case is not a
 domain concept, so the domain never learns the name of one.
 
-**DOM-6.** The transaction context is opaque in the domain, so nothing there names the store or
-its client.
+**DOM-6.** What the transaction port hands back is opaque in the domain, so nothing there names
+the store or its client.
 
 ## Service
 
@@ -84,13 +85,13 @@ button, is called instead of acting, never before it.
 
 **SVC-3.** A service does not call another service of its system: the call is a second
 transaction, and the outbox is the one that retries. Writes two use cases share go through the
-repositories, inside one `run`; deciding that they share goes in the domain.
+repositories, inside one transaction; deciding that they share goes in the domain.
 *Allowed:* a service calling an upstream's driving port is calling a port, not a use case nested
-in another — for a read. A write goes through TX-3, never inside `run`.
+in another — for a read. A write goes through TX-3, never inside the transaction.
 *Provenance:* Khononov's application service is the transaction.
 
 **SVC-4.** A service writes no table itself. The write belongs to the repository that owns the
-table; the service hands that repository its transaction context and keeps the deciding.
+table; the service hands that repository its transaction and keeps the deciding.
 *Allowed:* a service that only forwards to its repository is correct, not an unnecessary
 indirection: a driving adapter's only door is a service (ARR-2), even when the service exports the
 same name again, so that deleting a repository fails inside the service that names it rather than
@@ -113,10 +114,9 @@ state is the service's (SVC-2).
 follows from its only door being a service.
 
 **DRV-3.** A driving adapter receives its service from assembly: as an argument where assembly
-constructs the adapter — a route, a server's handler, the adapters a system builder takes; from a
-courier where the framework collects the adapter and assembly cannot construct it, such as a
-server function. It reads the courier when it runs, not when it loads. A driving adapter never
-imports assembly.
+constructs the adapter — a route, the adapters a system builder takes; from a courier where the
+framework, not assembly, finds and calls the adapter, such as a server function. It reads the
+courier when it runs, not when it loads. A driving adapter never imports assembly.
 *Provenance:* that a driving adapter never imports assembly, and the courier, are this document's
 choices. In Cockburn's example the driving adapter wires the application itself; Khononov resolves
 ports "in the infrastructure layer, either through dependency injection or by bootstrapping"
@@ -132,8 +132,8 @@ only an upstream's driving port — and an adapter that resolves or translates i
 *Provenance:* that adapters are received is Khononov's (p. 128) and Cockburn's; the split between
 imported and received is this document's.
 
-**DVN-3.** *Allowed:* a read across its system's aggregates in a driven adapter is a reporting
-read, not a use case, as long as it writes nothing.
+**DVN-3.** *Allowed:* a read across its system's aggregates in a driven adapter is not a use
+case, as long as it writes nothing.
 
 ## Assembly
 
@@ -159,13 +159,13 @@ instance: nobody substitutes it.
 rule decides by, the port takes.
 
 - *Per process:* what assembly produced, read through a courier by the driving adapters assembly
-  cannot construct. Assembly puts it in before any adapter runs; a driving adapter reads it when it
-  runs, not when it loads (DRV-3); a service reads nothing from it (SVC-5).
+  does not construct (DRV-3). Assembly puts it in before any adapter runs; a driving adapter reads
+  it when it runs, not when it loads; a service reads nothing from it (SVC-5).
 - *Per request:* a request id, a trace context, the locale a mail is rendered in, the user an audit
   column records. A driving adapter puts it in; services and adapters read it; the domain takes
   arguments. A value a handler needs goes in the message, since the handler runs in another
   request.
-- The transaction context is in neither scope: what a read returns depends on it.
+- A transaction is in neither scope: what a read returns depends on it.
 
 Which values a codebase holds ambient, it says in an ADR; what carries them is the stack
 document's.
@@ -173,30 +173,30 @@ document's.
 Fowler's terms, and a departure from the injection the sources prefer, confined to the courier
 case. Where the line between ambient and argument falls is this document's choice.
 
-**ASM-4.** The courier is used only where the framework collects a driving adapter and assembly
-cannot construct it. Where it is the framework's request context, middleware assembly installs
+**ASM-4.** The courier is used only where assembly does not construct the driving adapter
+(DRV-3). Where it is the framework's request context, middleware assembly installs
 fills it per request. Which courier a codebase uses, the stack document says. A courier inside a
 system builder is that builder's detail and gets no rule here.
 
 **ASM-5.** The relay is common library: it belongs to no system and imports none; the assembly of
 the process that runs it hands it the handlers and the outbox readers. Whether it routes by message
-type or hands every message to every handler, what it orders by, and what counts as taken, is each
-codebase's.
+type or hands every message to every handler, what it orders by, and what marks a message
+delivered, is each codebase's.
 
 **ASM-6.** The common library holds no model.
 
 ## Transactions
 
 **TX-1.** Atomicity crosses ports through a transaction port. The service asks to run something
-inside a transaction; repository methods take the context it hands back.
+inside a transaction; repository methods take what it hands back.
 
-**TX-2.** Writes that must land together share one transaction, inside one `run`, and the
-transaction stays inside its system. A function joins the transaction it was given and opens none
-of its own; a repository method joins the caller's. A loop that calls `run` per item is one
-transaction per item, and a failure halfway leaves the use case half-applied. Moving a write out
-of a function tends to give it its own transaction.
-*Allowed:* a service passing its transaction context into another repository of its system, in the
-same store, is the design working. That is how several tables stay one transaction.
+**TX-2.** Writes that must land together share one transaction, and the transaction stays inside
+its system. A function joins the transaction it was given and opens none of its own; a repository
+method joins the caller's. A loop that opens a transaction per item is one transaction per item,
+and a failure halfway leaves the use case half-applied. Moving a write out of a function tends to
+give it its own transaction.
+*Allowed:* a service passing its transaction into another repository of its system, in the same
+store, is the design working. That is how several tables stay one transaction.
 
 **TX-3.** For each piece of data a use case touches, answer in order:
 
@@ -279,7 +279,8 @@ upstream's authorization lives in its service or domain, as it does for every ca
 **SYS-5.** How a downstream relates to an upstream is chosen per relationship, and the boundary
 matches the relationship.
 
-- *Conformist* is the default for an open host, a system that publishes its model on purpose.
+- *Conformist* is the default for an upstream that offers an open host service: it publishes its
+  model on purpose.
   *Allowed:* using an upstream's terms directly is the design working, not a leak.
 - *Anti-corruption layer* is for a model that is foreign, unstable or not yours, as a third-party
   API's usually is. The downstream's domain declares a driven port in its own terms; a driven
@@ -289,7 +290,7 @@ matches the relationship.
 
 The other context-map patterns describe how teams cooperate; in code, each lands as one of these
 two, or as no integration at all.
-*Provenance:* conformist as the default for an open host is this document's choice. The
+*Provenance:* conformist as the default for an open host service is this document's choice. The
 context-map patterns are DDD's.
 
 **SYS-6.** The downstream's system builder builds the upstream, by default: it calls the
@@ -329,7 +330,8 @@ default, and the real one is what you reach for when a failure makes you doubt t
 fakes and no setup. Most of what is worth asserting lives here.
 
 **TST-4.** Test services and driving adapters against fakes. Each receives ports — a driving
-adapter the framework collects reads them from a courier, which the test fills with fakes — so a
+adapter assembly does not construct (DRV-3) reads them from a courier, which the test fills with
+fakes — so a
 test hands it fakes and asserts what it *did*: which port it called, with what, and what it
 returned. Assert observable behaviour, not the order of internal calls.
 
@@ -343,8 +345,8 @@ port rather than any implementation, and run it twice: against the fake, and aga
 adapter. The second run is the integration test, and it is what stops a fake from drifting into a
 fiction that passes while production breaks.
 *Allowed:* several systems each faking the same port. By default, each system writes its own fake.
-One fake that the providing system exports fits only where its consumers need the same things of
-it; a fake that needs configuration per consumer has outgrown that.
+One fake that the upstream exports fits only where its downstreams need the same things of it; a
+fake that needs configuration per downstream has outgrown that.
 
 **TST-7.** A good test survives a rewrite of the thing it tests. It names inputs and observable
 results.
@@ -352,4 +354,5 @@ results.
 ## Ids not in this file
 
 `DRV-2`, `DRV-4`, `PRD-1` to `PRD-5` were general ids in the pass-1 translation and are specialized
-rules now; they retire as general ids and are not reused.
+rules now; they retire as general ids and are not reused. `DOM-2` was folded into `DOM-3` and is
+retired.
