@@ -17,8 +17,8 @@ A rule is one entry with labeled parts, in this order. Only the statement is req
 
 This document assumes a store that can be read and written, and that the store can apply several
 writes atomically where it says *transaction*. What counts as one store is each codebase's choice.
-*Table*, *row* and *aggregate* are used in the relational sense; substitute your store's
-equivalents.
+*Record* and *aggregate* are used in the relational sense, a record being a row; substitute your
+store's equivalents.
 
 Not everything gets a layer. Code that asserts about the source tree rather than about the
 application sits outside these layers, and so do assembly, a system's export paths and the common
@@ -60,14 +60,14 @@ get nothing but the domain.
 `process`, `window` or the DOM there, directly or through a common-library module that imports
 `node:async_hooks`.
 
-**DOM-3.** A rule about a row is decided once, in the domain, as a schema. The `Invoice` schema —
+**DOM-3.** A rule about a record is decided once, in the domain, as a schema. The `Invoice` schema —
 which fields exist, that an amount is a positive integer, that a status is one of four — says the
 same thing as the functions beside it, in a form that also checks at runtime, and the type is
-inferred from it. Everything that builds an invoice row parses against that schema or derives from
+inferred from it. Everything that builds an invoice record parses against that schema or derives from
 the one domain function.
 *Why:* two constructors drift, and the drift stays invisible until two parts of the system
 disagree about a rule neither of them writes down.
-*Looks like:* a row shape for one table built in two places — once on the server and once in a
+*Looks like:* the shape of one record built in two places — once on the server and once in a
 client-side optimistic update, or in two services; a type declared beside a validator that
 restates it.
 
@@ -119,10 +119,9 @@ the outbox carries it, and the outbox is what retries.
 in another — for a read. A write goes through TX-3, never inside the transaction.
 *Provenance:* Khononov's application service is the transaction.
 
-**SVC-4.** A service writes no table itself. The write belongs to the repository that owns the
-table; the service hands that repository its transaction and keeps the deciding.
-*Looks like:* an insert, update or delete inside a service, or a service reaching for a store
-handle to query it, against any table.
+**SVC-4.** A service writes no record itself. The write belongs to the repository of the
+aggregate the record is part of; the service keeps the deciding.
+*Looks like:* an insert, update or delete inside a service; a service holding a store client.
 *Allowed:* a service that does nothing but call its repository is fine, even if it looks like an
 extra layer. A driving adapter may only call a service (ARR-2). If the repository is deleted
 later, the compile error lands in the service that named it, not in a driving adapter.
@@ -237,7 +236,7 @@ through leaves the use case half done.
 repository method that takes the transaction and then writes without it; a loop with one write per
 iteration; a write moved out of a function, which tends to give it a transaction of its own.
 *Allowed:* a service passing its transaction into another repository of its system, in the same
-store, is the design working. That is how several tables stay one transaction.
+store, is the design working. That is how several aggregates stay one transaction.
 
 **TX-3.** For each piece of data a use case touches, answer in order:
 
@@ -276,7 +275,7 @@ each, so the message is written by the same transaction as the change.
 
 *Why:* a message is handled by code older or newer than the code that wrote it. One written before
 a deploy is handled after it; a handler still on old code may read one written by new code. The
-type checker sees none of this, because the stored row is not in the program.
+type checker sees none of this, because the stored record is not in the program.
 *Looks like:* a field renamed, removed, made required or narrowed in the schema of a message.
 
 **TX-6.** A message is written to the outbox in the transaction that produced the change it tells
