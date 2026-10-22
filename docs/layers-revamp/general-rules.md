@@ -151,13 +151,15 @@ it is valid. None of this is deciding by the system's state.
 *Provenance:* the conversion is Cockburn's adapter; that the adapter reads no state of its own
 follows from its only door being a service.
 
-**DRV-3.** A driving adapter gets its service from assembly. Where assembly constructs the
-adapter — a route, the adapters a system builder takes — the service comes as an argument. Where
-the framework, not assembly, finds and calls the adapter — a server function, say — the adapter
-reads its service from a courier, and it reads it when it runs, not when its module loads. A
-driving adapter never imports assembly.
-*Looks like:* a driving adapter importing an instance from assembly, or reading a courier when its
+**DRV-3.** A driving adapter gets its service from assembly, never by importing it. Where
+assembly constructs the adapter — a route, the adapters a system builder takes — the service is an
+argument. Where the driving adapter is not part of assembly — the framework finds and calls it,
+as it does a server function — it reads its service from a courier, when it runs, not when its
 module loads.
+*Why:* an adapter assembly does not construct cannot be handed anything, and importing assembly
+instead would run assembly at module load and let the adapter pick its own instance. The courier
+keeps assembly the one place where a port meets its implementation.
+*Looks like:* a driving adapter importing assembly; a courier read when the module loads.
 *Provenance:* that a driving adapter never imports assembly, and the courier, are this document's
 choices. In Cockburn's example the driving adapter wires the application itself; Khononov resolves
 ports "in the infrastructure layer, either through dependency injection or by bootstrapping"
@@ -200,7 +202,7 @@ instance: nobody substitutes it.
 **ASM-3.** A value may be ambient when no use case and no domain function decides by it. What a
 rule decides by, the port takes as an argument.
 
-- *Per process:* what assembly produced. Only the driving adapters assembly does not construct
+- *Per process:* what assembly produced. Only the driving adapters that are not part of assembly
   read it, through a courier (DRV-3). Assembly puts it in before any adapter runs; an adapter reads
   it when it runs, not when its module loads; a service never reads it (SVC-5).
 - *Per request:* a request id, a trace context, the locale a mail is rendered in, the user an audit
@@ -216,7 +218,7 @@ document's.
 Fowler's terms, and a departure from the injection the sources prefer, confined to the courier
 case. Where the line between ambient and argument falls is this document's choice.
 
-**ASM-4.** The courier exists only for driving adapters assembly does not construct (DRV-3). Where
+**ASM-4.** The courier exists only for driving adapters that are not part of assembly (DRV-3). Where
 the courier is the framework's request context, middleware installed by assembly fills it per
 request. Which courier a codebase uses is in the stack document. A courier inside a system builder
 is that builder's own business and gets no rule here.
@@ -392,8 +394,9 @@ what is worth asserting lives here.
 
 **TST-4.** Test services and driving adapters against fakes. Assert what they did — which port was
 called, with what, and what came back — not the order of internal calls.
-*Why:* both receive their ports, so a test can hand them fakes. A driving adapter assembly does
-not construct (DRV-3) reads its ports from a courier, and the test fills the courier with fakes.
+*Why:* both receive their ports, so a test can hand them fakes. A driving adapter that is not
+part of assembly (DRV-3) reads its ports from a courier, and the test fills the courier with
+fakes.
 
 **TST-5.** Driven adapters are integration-tested.
 *Why:* a driven adapter's entire job is to talk to something external, so a unit test of one
