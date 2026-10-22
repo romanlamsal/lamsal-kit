@@ -318,26 +318,23 @@ names the systems that handle its message.
 
 ## Other systems
 
-**SYS-1.** A system offers an open host service. Its driven ports stay inside: they are what it
-needs, not what it offers. It exports:
+**SYS-1.** A system exports its offer and nothing of its needs: what downstream systems need to
+talk to it, and what assembly needs to build it. Other systems reach it only through these
+exports. Today the offer is:
 
-- its published language, for downstream systems;
-- its driving port types, for downstream systems;
-- a system builder for its open host service, for assembly or a downstream's system builder to
-  call;
-- if it handles messages, a system builder for its handler, for the assembly that hands it to the
-  relay;
-- if it publishes messages, a system builder for its outbox reader, for the same assembly;
-- optionally, a fake of its driving ports, for downstream tests, from an export path production
+- the published language and the driving port types, for downstream systems;
+- its system builders, for assembly or a downstream's system builder to call;
+- optionally, a fake of its driving ports for downstream tests, from an export path production
   never loads.
 
-Whether one builder builds both the open host service and the handler, and which process runs the
-relay, is each codebase's choice. The published language and the port types get an export path
-that loads only the domain: the port types are exported type-only, or that path would load the
-service that declares them. Other systems reach a system only through these exports.
-*Why:* a downstream can import the published language without loading any service, and a linter
-can hold the boundary from import paths alone.
-*Looks like:* an import from another system that is not one of its export paths.
+The published language and the port types get an export path that loads only the domain; the
+port types are exported type-only, or that path would load the service that declares them.
+*Why:* driven ports, services and adapters are what a system needs; a downstream importing one
+couples to the inside. An export path that loads only the domain lets a downstream import the
+published language without loading any service, and a linter can hold the boundary from import
+paths alone.
+*Looks like:* an import from another system that is not one of its export paths; a driven port or
+an adapter of one system imported by another.
 
 **SYS-2.** The published language is the domain's own schemas, messages included. A private
 message is not published.
