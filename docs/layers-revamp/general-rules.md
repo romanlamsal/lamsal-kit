@@ -86,7 +86,8 @@ do it; assembly picks which. A use case is not a domain concept, so the domain n
 name of one.
 *Looks like:* a driving port type in the domain; a domain module importing an adapter.
 
-**DOM-6.** What the transaction port hands back is opaque in the domain.
+**DOM-6.** What a service hands a repository method to join its transaction (TX-1) is opaque in
+the domain.
 *Why:* so nothing there names the store or its client.
 *Looks like:* a store client's type in a domain signature.
 
@@ -230,8 +231,12 @@ as delivered, is each codebase's choice.
 
 ## Transactions
 
-**TX-1.** Atomicity crosses ports through a transaction port. The service asks it to run something
-inside a transaction; repository methods take what it hands back.
+**TX-1.** Where one use case writes several aggregates, the service holds the transaction: it
+opens it, hands it to each repository method, and commits it. A repository called on its own is
+its own transaction.
+*Why:* a repository saves one aggregate whole and knows nothing of the others. Only the service
+sees the whole use case, so only it can say which writes must land together. It opens the
+transaction through a port of the common library, so it names no store itself.
 
 **TX-2.** Writes that must land together share one transaction, and that transaction stays inside
 its system. A function joins the transaction it is given and never opens its own; a repository
