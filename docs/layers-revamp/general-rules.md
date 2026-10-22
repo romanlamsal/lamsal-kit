@@ -177,14 +177,14 @@ imported and received is this document's.
 
 ## Assembly
 
-**ASM-1.** Assembly is not a layer. There is one per process. It builds the adapters, calls the
-factories, and calls each system's builder for the way this process drives that system: the open
-host service builder for a server, the handler and outbox reader builders for the process that
-runs the relay, both where one process does both. It hands what comes out to its driving
-adapters, or to the relay. Assembly is the only place that knows both a port and its
-implementation. A service module exports only its factory; the instances live in assembly.
-*Why:* with assembly apart from the factories, every dependency except fixed plumbing (ASM-2) is
-one a factory asked for.
+**ASM-1.** One assembly per process. It holds the instances; a service module exports its factory
+and nothing built.
+*Why:* two assemblies in one process would be two places where a port meets its implementation,
+and two instances of what must exist once. With assembly apart from the factories, every
+dependency except fixed plumbing (ASM-2) is one a factory asked for. Which system builders
+assembly calls follows from how the process is driven: a server's assembly calls the open host
+service builders, the relay's process calls the handler and outbox reader builders, a process
+doing both calls both.
 *Provenance:* one assembly per process, apart from the driving adapters, is this document's
 choice; see DRV-3.
 
@@ -198,18 +198,17 @@ other rules: the code sits in the right layer and calls in the right direction.
 *Allowed:* plumbing with one fixed configuration, such as a logger or a tracer, may be a ready-made
 instance: nobody substitutes it.
 
-**ASM-3.** A value may be ambient when no use case and no domain function decides by it. What a
-rule decides by, the port takes as an argument.
+**ASM-3.** A value may be ambient only when no use case and no domain function decides by it
+(SVC-2).
 
-- *Per process:* what assembly produced. Only the driving adapters that are not part of assembly
-  read it, through a courier (DRV-3). Assembly puts it in before any adapter runs; an adapter reads
-  it when it runs, not when its module loads; a service never reads it (SVC-5).
+- *Per process:* what assembly produced. Assembly fills it before any adapter runs. Only driving
+  adapters that are not part of assembly read it, through a courier (DRV-3); a service never does
+  (SVC-5).
 - *Per request:* a request id, a trace context, the locale a mail is rendered in, the user an audit
-  column records. The driving adapter puts it in. The common library's plumbing and driven
-  adapters read it, for what they record or forward without deciding by it. A service and the
-  domain never read it (SVC-5). A handler runs in another request, so what it needs goes into the
-  message.
-- A transaction is in neither scope, because what a read returns depends on it.
+  column records. The driving adapter puts it in. Plumbing and driven adapters read it, for what
+  they record or forward; a service and the domain never do (SVC-5). A handler runs in another
+  request, so what it needs goes into the message.
+- A transaction is in neither scope: what a read returns depends on it.
 
 Which values a codebase holds ambient, it says in an ADR; what carries them is the stack
 document's.
