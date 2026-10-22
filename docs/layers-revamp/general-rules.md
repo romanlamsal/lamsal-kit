@@ -269,13 +269,12 @@ repository (DOM-5). Where the messages live is the system's choice — a table o
 another transaction reaches, a field it owns on a record in another system's store — and so are
 the adapter that writes it and the reader that reads it. A system that writes to several stores
 has an outbox in each.
-*Why:* a message is a record this system's use case writes, so it is this system's (SYS-8), and
-the service writes it the way it writes any record: through a driven port, never itself (SVC-4).
-Where it lives is left open because TX-6 fixes only one thing about it: the message must be
-reachable from the transaction that produced the change. That transaction is wherever the change
-is, so a system writing several stores needs an outbox in each.
-*Looks like:* a service inserting into an outbox table itself; one outbox table written by several
-systems; an outbox in a store the system's transactions do not reach.
+*Why:* a message is a record this system's use case writes, so it is this system's (SYS-8). Where
+it lives is left open because TX-6 fixes only one thing: the message must be reachable from the
+transaction that produced the change. That transaction is wherever the change is, so a system
+writing several stores needs an outbox in each.
+*Looks like:* a reader that returns another system's messages; an outbox in a store the system's
+transactions do not reach.
 *Provenance:* Khononov (ch. 9) and Richardson put the outbox table in the publishing aggregate's
 own database; Vernon (ch. 8) has the model and the messages share one persistence instance. That
 the messages may live on a record, or in a store another system's transaction reaches, is this
