@@ -1,6 +1,7 @@
 # 04 — Reader round 1 over the ported general rules
 
-**Status:** open
+**Status:** open, parked behind the provenance pass (issue 05). That pass may change or drop
+rules these items touch; recheck each against the rules as they stand then.
 
 ## Context
 
@@ -136,6 +137,36 @@ getter dependency reading request context (`ASM-3`).
 - MAY rules have no breach of their own; `asm-7-breach-*`, `tx-13-breach-*`, `tx-15-breach-*`
   list the MAY under `breaches`. Decide the convention: a "breach" of a MAY is listed under the
   rule that governs once the MAY's Scope fails.
+
+## Proposal
+
+Not decided. What I would do, in this order.
+
+1. One commit: the nineteen accepted wordings, the four relabels, the `randomUUID` fix.
+2. client_secret: keep `TX-3` a MUST; the polling shape becomes its ok example. A MAY for "needs
+   the third party's answer in the same request" reopens the call-after-commit question.
+3. A products group file for the four Payload gaps and the `DOM-3` cannot-comply; `DOM-3` stays
+   general. Payload's config loads before assembly runs, so its hooks are driving adapters
+   assembly does not construct, whoever writes the closure: the two `ASM-4` ok examples are
+   decided there, `ASM-4` stays.
+4. `TX-17` and the saga gap to issue 01, decided together: a process manager's commands are the
+   Adversarial reader's trick. `TX-11`'s idempotency key ("keyed by the message id where the
+   third party takes a key") goes there as well, a rule of its own.
+5. Shared kernel: a glossary term and a slot in `DOM-1`'s list; `ASM-6`'s Why loses the sentence
+   that rules against it. Or decide there is none, and `asm-6-ok` changes.
+6. Code that is no system: the admin dashboard is a system of its own, reading through `TX-12`
+   or `TX-13`; `/health` and `/metrics` go into Assumptions as outside the layers, like assembly.
+7. Glossary issue: *Driving port* names a question in the published language (the `TX-12` SQL
+   port); *Published language* includes driving port types; two words for live copy and snapshot
+   (`SYS-7`, `DOM-4`); *Fake*.
+8. Wording: `TX-5`, `TX-11`, `TX-8` name the service, not the handler, as what deduplicates,
+   calls and holds the transaction; `TX-11`'s Why names `TX-3`; `SVC-4` Scope "writes an
+   aggregate's record", the outbox and handled-ids ports not repositories; `TST-9` Statement
+   carries the condition its Why gives; `TX-7`'s Why states the freeze of re-used domain schemas;
+   `SYS-11` Why gains the one-to-one sentence; `TST-4` Why says a test filling the courier is that
+   process's assembly.
+9. MAY "breaches" are listed under the rule that governs once the MAY's Scope fails.
+10. Fill the `*Examples:*` lines from the example files, then rerun the readers.
 
 ## Decision
 
