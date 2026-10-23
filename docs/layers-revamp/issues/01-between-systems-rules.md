@@ -38,6 +38,18 @@ general tier. Kept from it: the glossary's *Bus* beside *Relay*. The rest stays 
 messaging document of its own. Reopened; to be reworked after the general tier has rule strengths
 and examples.
 
+The port of `general-rules.md` to the new shape left these out of the general tier, for the
+messaging group to rule:
+
+- at-least-once delivery and redelivery until handled, formerly in `ASM-5`;
+- an early arrival, a message about something the receiver has not recorded yet, and how a
+  handler says "not yet", formerly in `TX-5`; `TX-5` now rules idempotency alone;
+- ordering, and routing by type versus every message to every handler;
+- what assembly hands the relay and what it hands the bus, now that they are two terms.
+
+`ASM-5` keeps one ruling: relay and bus import no system. `TX-17` rules that a publisher names no
+handler.
+
 ## Consequences
 
 —

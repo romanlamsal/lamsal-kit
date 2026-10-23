@@ -28,8 +28,8 @@ driven adapter, driven adapter to the outside, any layer to the domain.
 business knowing. A service that knows the route that calls it, or the store client that saves
 for it, changes whenever either changes, and a second way in, or a second store, means rewriting
 the use case. A driving adapter that skips the service and reaches a driven adapter or the store
-reads state and decides by it, or writes outside any use case and the transaction a service would
-hold, and the rules in the domain are bypassed for that one way in. A driven adapter that calls a
+reads state and decides by it, or writes outside any use case and outside the transaction a
+service holds, and the rules in the domain are bypassed for that one way in. A driven adapter that calls a
 service has a use case inside it, in the layer meant to do nothing but talk to the outside. A
 domain that depends on a layer drags that layer along wherever the domain is imported: a browser
 importing a schema loads the server's store client with it. With the arrow one way, the system is
@@ -110,8 +110,8 @@ narrow it to what its store needs on its own side.
 *Why:* A use case is not a domain concept: the rules say what an invoice is, not that there is a
 "create invoice" call. A driving port in the domain hands every importer of the domain, a
 browser, another system, the names of this system's use cases, and the domain then changes
-whenever a use case is added. Beside the service, the port is exported type-only on the export
-path (SYS-10), and the implementation sits where the declaration is.
+whenever a use case is added. Beside the service, the port is exported as a type, not a value, on
+the export path (SYS-10), and the implementation sits where the declaration is.
 *Examples:* —
 
 **SVC-2**
@@ -552,12 +552,12 @@ boundary from import paths alone, so the breach shows in the diff and costs noth
 **SYS-10**
 *Scope:* the export path of a system's published language and driving port types.
 *Statement:* Loading it MUST load the domain and nothing else of the system: the port types are
-exported type-only.
+exported as types, not values.
 *Why:* A downstream, or a browser, imports the published language for the schemas. A path that
 also loads a service, because the port types sit beside it (SVC-1) and were exported as values,
 pulls the service's dependencies along: a store client in a browser bundle, a second system's
-whole graph in a test that wanted one type. Type-only, the port types vanish at compile time and
-the path loads the domain (DOM-1).
+whole graph in a test that wanted one type. Exported as types, the port types vanish at compile
+time and the path loads the domain (DOM-1).
 *Examples:* —
 
 **SYS-2**

@@ -113,5 +113,4 @@ are referenced from both. The cost of a change rises with the tier.
 and `layers-revised-provenance.md` are the pass-1 translation of the old document: deduplicated,
 with ids, but still in the old vocabulary and with general and specialized rules in one file. They
 are the source the documents here are extracted from, and they go once extracted. Nothing here
-references them otherwise. `general-rules-old.md` is the previous draft of `general-rules.md`, in
-the old shape; rules are ported from it one at a time, and it goes once empty.
+references them otherwise.
