@@ -15,6 +15,8 @@ what it keeps, is decided when it is first generated.
 - `general-rules.md`: rules whose scope is any system. Glossary vocabulary.
 - `<group>.md`: rules whose scope is one kind of situation — a product, messaging between
   systems. Groups emerge while the rules are written; none is fixed in advance.
+- `domain.md`: the fixture. A made-up shop with the situations the rules are tested against.
+  Situations only, no rulings.
 - `examples/<id>.md`: one example per file, so a reader opens one and not all. Front matter
   names the rules it breaches and the rules it satisfies. A rule references an example by file
   and never restates it.
@@ -33,9 +35,9 @@ and by scripts; a Statement is never judged alone.
   another system owns". Where the Scope does not hold, the rule says nothing.
 - **Statement.** One ruling, with one modal verb, capitalized: MUST, MUST NOT, SHOULD, SHOULD NOT,
   MAY. No other modal, no "always", "never", "only", "by default". Two rulings are two rules.
-- **Why.** One sentence naming the harm the rule prevents. Contains no modal verb and no "only"
-  or "never": a Why that rules is a Statement in hiding. Required on SHOULD rules, optional
-  otherwise.
+- **Why.** The harm the rule prevents and how it comes about, as long as that takes. Contains no
+  ruling: no modal verb, no "only" or "never"; a Why that rules is a Statement in hiding. Breach
+  examples show the harm happening. Required.
 - **Provenance.** Sources outside this repo: what the rule follows, where it departs from them.
   Never this repo's own history; that lives in git and the issues.
 - **Examples.** At least one breach and one ok, as `breach examples/<id>.md · ok
@@ -56,15 +58,27 @@ The modal verb is the rule's strength.
 ### Exceptions
 
 A rule has no exceptions inline. Where a situation needs a different ruling, that is another rule
-with a narrower Scope, usually a MAY. The relationship is visible through the two Scopes; the id
-reference sits in the narrower rule's Why.
+with a narrower Scope, usually a MAY. Where the Scopes of two rules both hold, the narrower Scope
+governs: a MAY against a MUST is not a deviation, it is the more specific ruling. The MAY
+announces itself as an exception; the id reference sits in its Why.
 
-### Examples as the test
+### Testing
 
 Examples are how the rules are checked. A rule without a breach and an ok example is unfinished.
-A contradiction is one example that one rule's front matter calls a breach and another rule
-treats as ok, for the same situation; it is found by script, not by reading. A reviewer who finds
-a gap writes the example that falls through it, not prose.
+A reviewer who finds a problem writes the example that shows it, not prose.
+
+The fixture is `domain.md`: a made-up shop whose systems carry the situations the rules have to
+place. It holds situations, never rulings. Testing a draft is an agent running several readers
+over the fixture and the rules, each producing example files:
+
+- **Implementer.** Builds the fixture under the rules. Produces the ok examples, and a finding
+  wherever a rule cannot be followed. Runs first; the others need its examples.
+- **Gap.** Finds a situation in the fixture that no Scope holds for. Produces an example with
+  empty front matter.
+- **Contradiction.** Finds one situation two rules rule oppositely. Produces an example naming
+  both ids; a script flags any example one rule breaches and another satisfies.
+- **Adversarial.** Satisfies a Statement while causing the harm in its Why. Produces a breach
+  example the Statement alone would call ok. This is the reader that tests Why.
 
 ## Tiers
 
@@ -89,9 +103,9 @@ are referenced from both. The cost of a change rises with the tier.
    language or a source's well-known term. A rule that needs a new word adds it to the glossary,
    as a definition, first.
 3. One ruling per rule. Another document refers to a rule by id, never by restating it.
-4. Work in batches, not sentence by sentence: one session drafts a tier whole, one writes its
-   examples, one reviews by writing examples that break it. A draft is done when every rule has
-   its examples and the script finds no contradiction.
+4. Work in batches, not sentence by sentence: one session drafts a tier whole, one runs the
+   readers over it. A draft is done when every rule has its examples, the readers produce no
+   new example, and the script finds no contradiction.
 
 ## Source material
 
