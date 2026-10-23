@@ -155,7 +155,12 @@ Per rule, as the author decides; applied when the pass closes.
   framework offers a factory seam, assembly constructs.
 - `DRV-6`: kept, the timing apart from the channel.
 - `DVN-2`: retired. What a driven adapter imports is its layer's rule; what is built is received
-  is `ASM-2`'s. What is static is imported gets a rule of its own, for every factory.
+  is `ASM-2`'s. What is static is imported gets a rule of its own, for every factory: Scope a
+  factory needs something the same in every instance, process and test, a domain function, a
+  schema, a constant; Statement it SHOULD import it; Why a parameter nobody varies hides which
+  of the real dependencies a test has to supply. SHOULD: nothing breaks. `ASM-2`'s Scope narrows
+  to what is built, a client, an adapter, a service, a clock, so the two rules partition.
+  Provenance candidate, unverified: Seemann's stable against volatile dependencies, DIPPP ch. 1.
 - `SVC-5`: retired. Dependencies are `ASM-2`'s; what a use case decides by is `ASM-3`'s. Fowler's
   "slight edge" for a locator moves to `ASM-2`'s Against.
 
