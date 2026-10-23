@@ -32,7 +32,11 @@ Decided and applied while revising TX in the session that opened this issue:
 
 ## Decision
 
-—
+Closed once in `4db0dfb` (seven `MSG-*` rules, relay/bus split) and reverted in `3e4958c`: the
+result added delivery semantics to a layering document and its carve-outs contradicted the
+general tier. Kept from it: the glossary's *Bus* beside *Relay*. The rest stays in history for a
+messaging document of its own. Reopened; to be reworked after the general tier has rule strengths
+and examples.
 
 ## Consequences
 
