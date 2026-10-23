@@ -229,6 +229,107 @@ hides, among the real dependencies, which ones a test has to supply.
 imported and received is this document's.
 *Examples:* —
 
+## Assembly
+
+**ASM-1**
+*Scope:* a process.
+*Statement:* It MUST have one assembly.
+*Why:* Two assemblies in one process are two places where a port meets its implementation, and two
+instances of what exists once: two store clients, two relays. Which system builders the one
+assembly calls follows from how the process is driven: a server's assembly calls the open host
+service builders, a worker's the handler and outbox reader builders, a process doing both calls
+both.
+*Provenance:* Seemann's composition root, one per application; that it sits apart from the
+driving adapters is this document's choice (DRV-3).
+*Examples:* —
+
+**ASM-2**
+*Scope:* a service, an adapter, a system builder or any other factory needs a dependency.
+*Statement:* It MUST receive the dependency from its caller.
+*Why:* A dependency built in place breaks substitution: a service that builds its own adapter is
+stuck with it, so its tests need the real thing, and a second instance of what exists once
+appears. A system builder is a factory for its system, and its upstreams are dependencies like any
+other: assembly builds them and hands them in, so each exists once, the graph is visible in one
+place, and a test hands the builder a fake upstream. Built in place, this breach is invisible to
+the other rules: the code sits in the right layer and calls in the right direction. A module that
+exports a ready-made instance beside its factory is the breach one step removed: the importer
+receives nothing, it imports the built thing.
+*Provenance:* Seemann's composition root; Spring Modulith's one application context.
+*Examples:* —
+
+**ASM-7**
+*Scope:* plumbing of the common library with one configuration for the whole process: a logger, a
+tracer.
+*Statement:* It MAY be imported as a ready-made instance.
+*Why:* ASM-2 exists so a dependency is substituted and exists once; plumbing with one
+configuration is substituted by nobody and exists once by being a module. Handing it through
+every factory adds a parameter to every signature for nothing a test varies. The line is
+substitution: a logger a test silences, a tracer a test inspects, gets substituted, and then the
+harm in ASM-2 is back.
+*Examples:* —
+
+**ASM-3**
+*Scope:* a value is ambient, in either scope.
+*Statement:* A use case and a domain function MUST NOT decide by it.
+*Why:* An ambient value is in no signature. A use case that decides by one, the current user for a
+permission, the locale for a rule, depends on something no caller knows to supply: the second
+driving adapter forgets it, the test does not set it, the handler runs in another request where
+it is absent, and the decision changes without a trace. What a use case decides by arrives through
+its driving port (SVC-5); what is ambient is what gets recorded or forwarded, a request id, a
+trace context, the locale a mail is rendered in, the user an audit column records.
+*Provenance:* Fowler's registry, in two scopes. The per-process scope is a service locator in
+Fowler's terms, a departure from the injection the sources prefer, confined to the courier
+(ASM-4). Where the line between ambient and argument falls is this document's choice.
+*Examples:* —
+
+**ASM-4**
+*Scope:* code reads the courier that carries what assembly produced.
+*Statement:* It MUST be a driving adapter that assembly does not construct.
+*Why:* The courier is a service locator: whoever reads it gets a dependency without anyone handing
+it over, so the graph of who depends on what leaves the one place it is visible (ASM-1, ASM-2).
+The one code with no caller to hand it anything is a driving adapter the framework constructs
+(DRV-3); everything else has a factory. A service reading the courier is SVC-5's breach; a driven
+adapter reading it is ASM-2's.
+*Examples:* —
+
+**ASM-8**
+*Scope:* the courier that carries what assembly produced.
+*Statement:* Assembly MUST fill it before any driving adapter runs: directly, or through
+middleware it installs where the courier is the framework's request context.
+*Why:* A driving adapter reads the courier when it runs (DRV-6) and gets what is there. Filled
+late, the first requests find it empty; filled by anything but assembly, a second place produces
+instances. Which courier a codebase uses is the stack document's.
+*Examples:* —
+
+**ASM-9**
+*Scope:* a transaction.
+*Statement:* It MUST NOT be an ambient value.
+*Why:* What a read returns depends on the transaction it runs in: a repository reading an ambient
+transaction returns different data depending on what the caller happened to open, and a use case
+decides by that data, which is ASM-3's harm one step removed. Handed as an argument (TX-1), the
+transaction is visible in every signature it crosses, and a write that got none is a write that
+opened its own (TX-10), visible as well.
+*Examples:* —
+
+**ASM-5**
+*Scope:* the relay and the bus.
+*Statement:* They MUST import no system.
+*Why:* They are common library: one relay reads every system's outbox, one bus delivers to every
+system's handlers, and the assembly of the process that runs them hands them the outbox readers
+and the handlers (ASM-2). A relay that imports a system knows its readers, and a new system means
+a change to the relay; a relay that imports a system's schema puts a model in the common library
+(ASM-6).
+*Examples:* —
+
+**ASM-6**
+*Scope:* the common library.
+*Statement:* It MUST hold no model: no schema, no aggregate, no rule of any system.
+*Why:* The common library is plumbing every system imports. A model in it is one every system
+shares: a change made for one system's reason reaches all of them, and no system's rules decide
+it, because a system's rules are in its domain. The shape two systems both need has a home in each
+system's domain, or in the published language of the one that is upstream (SYS-2).
+*Examples:* —
+
 ## Retired ids
 
 Never reused: `ARR-2`, `ARR-3`, `DOM-2`, `DRV-2`, `DRV-4`, `DVN-1`, `DVN-3`, `PRD-1` to `PRD-5`,
