@@ -100,7 +100,41 @@ Audit lines go and issue 04 is rechecked against the rules as they stand.
 
 ## Decision
 
-—
+Per rule, as the author decides; applied when the pass closes.
+
+- `ARR-1`: retired. Split into one rule per layer naming what its code may import, receive or
+  call, in `DOM-1`'s form. Service: the domain, the ports in the service layer, the common
+  library, a conformed upstream's export path. Driving adapter: its system's driving port types,
+  the domain, the common library. Driven adapter: what it talks to outside, the port it
+  implements, the domain, the common library, an upstream's export path; `DVN-2` merges in.
+- One architecture for every system (Across rules, 1): kept, stated in Assumptions as this
+  document's choice. Every system gets domain, service, repository and adapters, a simple one
+  too: no per-system judgment of "simple enough", no rewrite when a system grows rules. The
+  Provenance of `SVC-4`, `DOM-1` and `TST-3` names the departure.
+- `DOM-3`: kept as it is. Whether the published language re-exports the domain's schemas is
+  `SYS-2`'s; the author leans to re-export, against duplicate schemas.
+- `DOM-1`: kept as an allowlist: an unlisted kind of import fails closed, as a question. The
+  slot "a port of the common library" goes with `DOM-5`. The runtime test applies the glossary's
+  "pure and knows no runtime".
+- `DOM-5`: retired into `SVC-1`: a port this system declares, driving or driven, is declared in
+  the service layer. Why: the domain is pure and calls no port; one home lets the allowlists be
+  checked by path; the services calling a port and the adapters implementing it are then its only
+  importers. Provenance: Martin (output port in the use-case circle), Garrido ("ports belong to
+  the application"), Freeman §2.1; departs from Khononov, MS and Evans for repositories. A
+  conformist declares no port for its upstream; it imports the upstream's.
+- `DOM-6`: retired. Its restatement, a repository joins the transaction it is handed, is `TX-2`;
+  a store client's type in a port's signature becomes an example of `DOM-1` and of the service
+  rule.
+- `SVC-2`: kept. "Make the decision" becomes "enforce it": the domain's specification decides.
+  Provenance adds CWE-367 (time-of-check, time-of-use) for the stale check. The gate-against-
+  argument paragraph leaves the Why; `DRV-1` keeps it.
+- `SVC-3`: deferred to `TX-1` and `TX-14`. An ambient transaction stays forbidden (`ASM-9`): one
+  system calling another's open host service in-process would carry its transaction into the
+  other's services, one transaction spanning two systems. That argument is this document's; no
+  source for it.
+- `SVC-4`: kept, by the one architecture above.
+- `SVC-5`: retired. Dependencies are `ASM-2`'s; what a use case decides by is `ASM-3`'s. Fowler's
+  "slight edge" for a locator moves to `ASM-2`'s Against.
 
 ## Consequences
 
