@@ -330,6 +330,202 @@ it, because a system's rules are in its domain. The shape two systems both need 
 system's domain, or in the published language of the one that is upstream (SYS-2).
 *Examples:* —
 
+## Transactions
+
+**TX-1**
+*Scope:* one use case writes several aggregates of this system in one transaction.
+*Statement:* The service MUST hold the transaction: open it, hand it to each repository method,
+commit it.
+*Why:* A repository saves one aggregate whole and knows nothing of the others. The service sees
+the whole use case, so it is the one that knows which writes land together; a repository that
+opened the transaction would be deciding that for writes it does not see. Opening the transaction
+through the common library's transaction port is what keeps the store's name out of the service
+(ARR-1) and the client's type out of the domain (DOM-6).
+*Examples:* —
+
+**TX-2**
+*Scope:* a repository method is handed a transaction.
+*Statement:* It MUST write inside it.
+*Why:* The transaction was handed over so that this write lands with the others (TX-1). A method
+that takes it and writes without it, or opens its own, commits on its own: a failure between the
+writes leaves the use case half done, and the transaction's rollback leaves this write in place.
+The breach hides in small edits: a loop with one write per iteration is one transaction per item;
+a write moved out of a function tends to get a transaction of its own.
+*Examples:* —
+
+**TX-10**
+*Scope:* a repository method is called without a transaction.
+*Statement:* It MUST commit its writes in a transaction of its own.
+*Why:* An aggregate is changed as one unit (glossary). A save that writes the aggregate's records
+one by one and fails midway leaves an aggregate the rules did not produce, and the repository is
+the one place that knows how many records the save takes.
+*Examples:* —
+
+**TX-3**
+*Scope:* a use case of this system changes data another system owns, a third party's included: a
+mail sent, a payment created.
+*Statement:* It MUST do so by writing a message to this system's outbox.
+*Why:* The owner's rules decide its data (glossary: Aggregate), so a change to it is the owner's
+use case, and this system at most asks for it. Changing it directly, writing the owner's record or
+calling the third party inside this transaction, puts a write this system's rules do not decide
+into this system's transaction: there is no rollback once the third party has acted, no retry once
+this transaction committed and the third party had failed, and the owner's model is now in this
+service. Written to the outbox in the same transaction (TX-6), the message is exactly as committed
+as the change it tells of, and whoever acts on it, the owner's handler or this system's (TX-11),
+retries it until it lands.
+*Provenance:* Khononov's outbox pattern (ch. 9); Vernon (ch. 8) on domain events crossing
+bounded contexts.
+*Examples:* —
+
+**TX-11**
+*Scope:* a use case of this system changes data a third party holds, through a message in its
+outbox.
+*Statement:* A handler of this system MUST handle the message and make the call to the third
+party.
+*Why:* A third party reads no bus; nobody acts on the message unless this system does. The
+handler runs in a transaction of its own (TX-8), apart from the use case that wrote the message,
+so a failed call is retried by redelivery and the use case's commit stands while the third party
+is down. The translation into the third party's terms is the driven adapter the handler calls
+(SYS-11).
+*Examples:* —
+
+**TX-12**
+*Scope:* a use case of this system reads data another system owns.
+*Statement:* It MUST read it through the owner's open host service.
+*Why:* The owner's open host service is the ports it offers on purpose, in its published language
+(SYS-1, SYS-2). Reading its store directly, a join across both systems' tables, a query against
+its records, binds this system to the owner's storage: the owner's schema change breaks this
+system's query with no compile error, and the owner's rules, which decide what a record means,
+are bypassed. In-process the open host service is a function call (SYS-3); going through it costs
+a port, not a network hop.
+*Examples:* —
+
+**TX-13**
+*Scope:* a use case of this system reads data another system owns and the owner's open host
+service offers no fitting read.
+*Statement:* It MAY read a copy kept in this system, updated by the owner's published messages.
+*Why:* TX-12 has the read go through the owner's ports; where none fits, a listing filtered by a
+term the owner does not know, the alternatives are a read of the owner's store or a copy. The copy
+is this system's aggregate (glossary): its rules decide what it holds, the owner's messages update
+it (TX-8), and the owner publishes them (SYS-2). The copy lags by a moment and drifts where a
+message is lost, so SYS-7 asks a reconciliation of it.
+*Examples:* —
+
+**TX-14**
+*Scope:* a use case of this system writes several aggregates of this system.
+*Statement:* It SHOULD write them in one transaction.
+*Why:* A failure between two writes that belong to one use case leaves it half done: the order
+placed and the cart not cleared. One transaction, held by the service (TX-1), makes the writes
+land or fail together. The alternative, one aggregate written and a message in the outbox for the
+rest (TX-15), is eventual, and eventual means a moment where the two disagree and a
+reconciliation where they keep disagreeing.
+*Provenance:* This document's choice. Vernon and Khononov keep one aggregate per transaction and
+have the rest follow by domain event.
+*Examples:* —
+
+**TX-15**
+*Scope:* a use case of this system writes several aggregates of this system, and a later write of
+them following the first by a moment does no harm.
+*Statement:* It MAY write the first in its transaction and put a message in the outbox for the
+rest.
+*Why:* TX-14 has the writes in one transaction because a use case half done is the harm; where the
+later write arriving a moment later is not half done, a reservation after an order, a statistic
+after a sale, the one transaction buys nothing and costs the lock on both aggregates and a use case
+with no retry in part (SVC-3). The message is written in the first write's transaction (TX-6) and
+handled in its own (TX-8).
+*Examples:* —
+
+**TX-4**
+*Scope:* a system's outbox.
+*Statement:* Its port MUST be a driven port the system declares, its adapter and its reader the
+system's own.
+*Why:* A message is a record this system's use case writes, decided by this system's rules, so it
+is this system's (glossary: Aggregate). A reader that returns another system's messages, or an
+outbox port in the common library, makes the messages nobody's: their schema is in no domain
+(ASM-6), and which system's transaction they are written in (TX-6) is undecided. Where the
+messages live is left to the system: a table of its own, a store another transaction reaches, a
+field it owns on a record in another system's store. TX-6 fixes one thing, that the message is
+reachable from the transaction that produced the change, and that transaction is wherever the
+change is.
+*Provenance:* Khononov (ch. 9) and Richardson put the outbox table in the publishing aggregate's
+own database; Vernon (ch. 8) has the model and the messages share one persistence instance. That
+the messages may live on a record, or in a store another system's transaction reaches, is this
+document's.
+*Examples:* —
+
+**TX-16**
+*Scope:* a system writes to several stores.
+*Statement:* It MUST have an outbox in each.
+*Why:* The message is written in the transaction that produced the change (TX-6), and a
+transaction is one store's (glossary: Store). A change in the second store with the one outbox in
+the first has its message in a transaction that is not the change's: the message survives the
+change's rollback, or the change commits and the message is never written.
+*Examples:* —
+
+**TX-5**
+*Scope:* a handler receives a message.
+*Statement:* It MUST handle each message id once.
+*Why:* Delivery repeats: a handler that failed after acting is delivered the message again, a bus
+restarted redelivers what it had in flight. A handler that acts on every delivery reserves the
+stock twice and sends the mail twice. The id is what lets the handler recognize the repeat, so a
+message schema without one leaves the handler no way to comply, and a handler that reads "not
+found" as "already handled" has mistaken an early arrival for a repeat.
+*Provenance:* At-least-once delivery with the consumer de-duplicating is Vernon's (ch. 8) and
+Khononov's (ch. 9).
+*Examples:* —
+
+**TX-6**
+*Scope:* a use case writes a message about a change it makes.
+*Statement:* It MUST write the message in the transaction that commits the change.
+*Why:* Written before the commit and outside the transaction, the message survives a rollback of
+the change and tells of something that did not happen. Written after the commit, the process dies
+between the two and the change commits with no message, so nothing downstream ever learns of it.
+In the same transaction, the two are as committed as each other.
+*Provenance:* Khononov's outbox pattern (ch. 9).
+*Examples:* —
+
+**TX-7**
+*Scope:* the schema of a message changes, a domain schema the message re-uses included.
+*Statement:* The change MUST keep old messages readable by new code and new messages readable by
+old code: no field renamed, removed, made required or narrowed.
+*Why:* A message is handled by code older or newer than the code that wrote it. One written before
+a deploy sits in the outbox and is handled after it; a handler still on old code, in a process not
+yet restarted, reads one written by new code. The type checker sees none of this: the stored
+message is not in the program, so a renamed field compiles and fails at runtime, on a message
+nobody re-sends.
+*Examples:* —
+
+**TX-8**
+*Scope:* a handler handles a message.
+*Statement:* It MUST handle it in a transaction of its own.
+*Why:* One transaction per message lets the bus retry a failed message alone, without undoing or
+repeating the others delivered with it, and keeps the handler's writes apart from the transaction
+that wrote the message, which committed in another process (TX-3). A handler that handles several
+messages in one transaction fails all of them when one fails, and redelivery then repeats the ones
+that had succeeded (TX-5).
+*Provenance:* Vernon (ch. 10): subscribers execute in a separate transaction.
+*Examples:* —
+
+**TX-17**
+*Scope:* a system publishes a message.
+*Statement:* Its code MUST NOT name a system that handles the message.
+*Why:* The writer does not know its readers: it publishes, and which systems handle the message is
+each receiver's decision, made by subscribing its handler (glossary: Bus). A publisher that names
+its handlers changes whenever a system starts or stops listening, and imports what it names
+(SYS-9), so the dependency runs from upstream to downstream, against the one the published
+language establishes.
+*Examples:* —
+
+**TX-18**
+*Scope:* a handler needs a value the request that wrote the message carried: the user who acted,
+the locale.
+*Statement:* The message MUST carry it.
+*Why:* The handler runs in another request, in another process, later: the request context that
+held the user is gone (ASM-3), and a handler reading an ambient value finds nothing, or the bus's
+own context. What the message carries was written in the transaction that knew it (TX-6) and
+arrives with it.
+*Examples:* —
+
 ## Retired ids
 
 Never reused: `ARR-2`, `ARR-3`, `DOM-2`, `DRV-2`, `DRV-4`, `DVN-1`, `DVN-3`, `PRD-1` to `PRD-5`,

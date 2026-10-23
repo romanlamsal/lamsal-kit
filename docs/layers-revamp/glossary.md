@@ -96,7 +96,8 @@ its instance and driving through its hooks.
 ## Domain
 
 **Aggregate.** A cluster of records changed as one unit and addressed by one id; a repository loads
-and saves it whole. It belongs to the system whose use cases write it, wherever it is stored.
+and saves it whole. It belongs to the system whose rules decide what it holds, wherever it is
+stored.
 
 **Specification.** A domain function that answers yes or no about one candidate: is it valid, may
 this happen, does it qualify.
