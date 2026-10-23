@@ -138,3 +138,8 @@ process's driving adapters call into.
 
 **Common library.** Plumbing every system may import: the transaction port, store clients, a
 logger, a tracer, the relay, the ambient registry.
+
+## Tests
+
+**Integration test.** A test that uses a real external dependency: a database, a broker, a third
+party's API. Every other test is not one, whatever it covers.

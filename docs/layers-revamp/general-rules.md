@@ -636,7 +636,82 @@ change. Two aggregates with one id each have a repository over their own fields,
 fields reach them as another system's data (DOM-4, TX-12).
 *Examples:* —
 
+## Tests
+
+**TST-2**
+*Scope:* a test in the default suite reaches a driven port whose real adapter talks to an external
+dependency.
+*Statement:* It MUST use a fake implementation of the port.
+*Why:* The default suite runs on every save and before every commit, and it is run that often
+because it is fast enough that nobody thinks about running it. One real database in it makes it
+slow and makes it need an environment; from then on it is run less, and failures are found later.
+A port with one implementation is not premature: the fake is the second.
+*Examples:* —
+
+**TST-8**
+*Scope:* a suite runs against the fake or against the real adapter.
+*Statement:* The choice MUST be a flag, not an edit.
+*Why:* The real run is what you reach for when a failure makes you doubt the fake (TST-6). If
+reaching for it means editing imports, it is not reached for, and the fake drifts unnoticed.
+*Examples:* —
+
+**TST-3**
+*Scope:* a domain rule is tested.
+*Statement:* The test SHOULD call the domain function directly.
+*Why:* The domain is pure (DOM-1): the test needs no fixture, no fake and no setup, and fails for
+one reason. Tested through a service, the same rule needs fakes for every port the service takes,
+and a failure is the service's, the fake's or the rule's. Most of what is worth asserting lives in
+the domain, so this is where most tests are.
+*Examples:* —
+
+**TST-4**
+*Scope:* a service or a driving adapter is tested.
+*Statement:* The test MUST hand it fakes for its ports.
+*Why:* Both receive their ports (SVC-5, DRV-3), so the test hands them fakes, and then it tests
+what the service decided and what the adapter translated, not whether the database works
+(TST-5). A driving adapter assembly does not construct reads its ports from a courier (DRV-3); the
+test fills the courier with fakes.
+*Examples:* —
+
+**TST-5**
+*Scope:* a driven adapter is tested.
+*Statement:* The test MUST be an integration test.
+*Why:* A driven adapter's whole job is to talk to something external. A unit test of one asserts
+against a mock of the thing it exists to reach, and passes when the mock agrees with the adapter's
+idea of the database, which is exactly what is in doubt. Self-contained pieces of an adapter, a
+query builder's output, a mapping function, are functions, and a direct test of them pays off the
+way a domain test does (TST-3).
+*Examples:* —
+
+**TST-6**
+*Scope:* a driven port has a fake and a real adapter.
+*Statement:* One contract suite MUST be written against the port and run against both.
+*Why:* The run against the real adapter is the integration test (TST-5); the run against the fake
+is what stops the fake from drifting into a fiction that passes while production breaks. Two
+suites, one per implementation, drift the same way the fake does.
+*Examples:* —
+
+**TST-9**
+*Scope:* several systems fake the same port: an upstream's driving port, called by several
+downstreams.
+*Statement:* Each downstream SHOULD write its own fake.
+*Why:* A fake the upstream exports (SYS-1) fits where its downstreams need the same things of it;
+one that needs configuration per downstream has outgrown being shared, and every downstream's
+test then depends on the upstream's test code. A downstream's own fake fakes what the downstream
+uses, and nothing else.
+*Examples:* —
+
+**TST-7**
+*Scope:* a test asserts.
+*Statement:* It SHOULD assert on inputs and observable results: which port was called with what,
+what came back, what was stored.
+*Why:* A test that survives a rewrite of the thing it tests is one that names what goes in and
+what comes out. One that asserts the order of internal calls, or that a private helper ran, breaks
+on every refactoring and passes on a behavior change that kept the call order, so it stops being
+run or stops being believed.
+*Examples:* —
+
 ## Retired ids
 
 Never reused: `ARR-2`, `ARR-3`, `DOM-2`, `DRV-2`, `DRV-4`, `DVN-1`, `DVN-3`, `PRD-1` to `PRD-5`,
-`SYS-4`, `SYS-6`.
+`SYS-4`, `SYS-6`, `TST-1`.
