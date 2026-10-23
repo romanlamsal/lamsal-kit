@@ -17,9 +17,11 @@ what it keeps, is decided when it is first generated.
   systems. Groups emerge while the rules are written; none is fixed in advance.
 - `domain.md`: the fixture. A made-up shop with the situations the rules are tested against.
   Situations only, no rulings.
-- `examples/<id>.md`: one example per file, so a reader opens one and not all. Front matter
-  names the rules it breaches and the rules it satisfies. A rule references an example by file
-  and never restates it.
+- `examples/<id>.md`: one example per file, so a reader opens one and not all. File name
+  `<rule>-<ok|breach>-<slug>.md`. Front matter: `breaches` and `satisfies`, the rule ids;
+  `situation`, the fixture situation in a few words; `finding`, present on a reader's finding
+  only: `cannot-comply`, `gap`, `contradiction`, `adversarial`. Then a title, a code snippet, and
+  what makes it a breach or ok. A rule references an example by file and never restates it.
 - `issues/NN-<slug>.md`: work items. `**Status:**` line; Context and Problem when opened,
   Decision and Consequences when closed, closed with the commit that landed it. The issue files
   are the only bookkeeping; there is no index.
@@ -75,8 +77,10 @@ over the fixture and the rules, each producing example files:
   wherever a rule cannot be followed. Runs first; the others need its examples.
 - **Gap.** Finds a situation in the fixture that no Scope holds for. Produces an example with
   empty front matter.
-- **Contradiction.** Finds one situation two rules rule oppositely. Produces an example naming
-  both ids; a script flags any example one rule breaches and another satisfies.
+- **Contradiction.** Finds one situation where complying with one rule is the breach of another,
+  and no code satisfies both. Produces the pair of examples that shows it, each satisfying one
+  rule and breaching the other. No script checks this; an example that happens to satisfy one
+  rule and breach another is a defect, not a contradiction.
 - **Adversarial.** Satisfies a Statement while causing the harm in its Why. Produces a breach
   example the Statement alone would call ok. This is the reader that tests Why.
 
@@ -104,8 +108,8 @@ are referenced from both. The cost of a change rises with the tier.
    as a definition, first.
 3. One ruling per rule. Another document refers to a rule by id, never by restating it.
 4. Work in batches, not sentence by sentence: one session drafts a tier whole, one runs the
-   readers over it. A draft is done when every rule has its examples, the readers produce no
-   new example, and the script finds no contradiction.
+   readers over it. A draft is done when every rule has its examples and the readers produce no
+   new example.
 
 ## Source material
 
