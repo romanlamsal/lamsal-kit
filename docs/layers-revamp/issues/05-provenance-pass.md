@@ -199,6 +199,28 @@ Per rule, as the author decides; applied when the pass closes.
   Seemann's Composition Root supports; Google SWE's "less important" in JavaScript departs.
   Against: Evans p. 108 and Reference p. 17 (global access), Fowler's "slight edge". The
   configuration value is this document's: no DDD or hexagonal source names it.
+- `ASM-8`: Scope the courier, the glossary's definition not restated; Statement assembly MUST
+  fill it before any driving adapter reads it. "Reads" covers a per-process courier filled at
+  startup and a per-request one filled by middleware; the middleware moves to the Why. A system
+  builder filling it, the Payload case, is assembly filling it. Provenance: Garrido §2.5, the
+  composition root builds the system, then runs the driver adapter; the mechanism stays this
+  document's.
+- `ASM-9`: kept. Not `ASM-3`'s duplicate: a transaction opened on purpose changes nothing of how
+  the use case acts, so `ASM-3` catches the accident only; `ASM-9` forbids the mechanism. The Why
+  adds the cross-system leak: Node's `AsyncLocalStorage` store "is accessible to any asynchronous
+  operations created within the callback", so shop's ambient transaction becomes billing's on an
+  in-process call to its open host service; Richardson (Database per Service, "A service's
+  transactions only involve its database") and Helland 2007 ("Atomic Transactions Cannot Span
+  Entities") give the harm. The combination is this document's. Spring Modulith leaves the
+  Provenance; MS stays as practice against. The fixture's ambient unit of work is a situation
+  `ASM-9` places as a breach; its fix is `TX-1`'s.
+- `ASM-5`: widened to the whole common library. Scope a common-library module imports a module;
+  Statement it MUST NOT be a system's module. A denylist: what the library may import is open,
+  what it must not is one thing. The relay and the bus are examples; their outbox readers and
+  handlers implement the library's ports and arrive by `ASM-2`. Provenance unsourced but for MS
+  ("final application blocks, like the Event Bus client API"); Khononov p. 150's relay departs.
+- `ASM-6`: kept. The Why loses its last sentence, the homes of a shared shape: those are
+  `SYS-2`'s and issue 04's shared kernel. The contested flag goes.
 
 ## Consequences
 
