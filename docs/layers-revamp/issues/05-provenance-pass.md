@@ -221,6 +221,36 @@ Per rule, as the author decides; applied when the pass closes.
   ("final application blocks, like the Event Bus client API"); Khononov p. 150's relay departs.
 - `ASM-6`: kept. The Why loses its last sentence, the homes of a shared shape: those are
   `SYS-2`'s and issue 04's shared kernel. The contested flag goes.
+- `TX-1`: Scope a use case writes; Statement its service MUST run it in one transaction: open it,
+  hand it to each repository and outbox call, commit it. One acting use case is one transaction;
+  an answering one holds none. The transaction is a required parameter: a forgotten one is a type
+  error, `ASM-9`'s visibility completed. Reads take it too, so a check and its write share it
+  (`SVC-2`). Provenance: Evans p. 111, Fowler (Service Layer), Vernon EAD I p. 3, MS (the command
+  handler commits); handing it to each call is this document's, by `ASM-9`. The Why's `ARR-1`
+  and `DOM-6` become the service rule and `DOM-1`; the fixture's ambient unit of work is its
+  breach example.
+- `TX-10`: retired. Evans p. 111 leaves the commit to the client; with `TX-1` no repository
+  method is called without a transaction. `ASM-9`'s "a write that got none is a write that opened
+  its own (TX-10)" becomes "a write that got none does not compile".
+- `TX-2`: Scope a repository method writes; Statement unchanged. The type checker cannot see a
+  method that takes the transaction and writes through the global client.
+- `SVC-3`: kept, MUST NOT. The service owns the use case's one transaction (`TX-1`) and a driving
+  port carries none, so a nested call runs in a second transaction with no rollback of its own; a
+  use case that follows another goes through the outbox (`TX-15`). Provenance unchanged: no
+  source rules on it; MS does it in one shared transaction.
+- `TX-14`: retired into `TX-1`: one acting use case runs in one transaction, which already puts
+  several aggregates in it. Its Provenance moves to `TX-1`: against, Vernon EAD I p. 4, Khononov
+  p. 87, Evans Reference p. 16, Fowler and Helland 2007 (one aggregate per transaction); for, MS
+  and Vernon's user-aggregate affinity (EAD II p. 10, "transactional collisions").
+- `TX-15`: Scope a use case writes more aggregates of this system than it relies on; Statement it
+  SHOULD leave each write it does not rely on to a handler, through a message in its outbox. The
+  use case relies on a write when its goal (glossary: Use case) is not reached without it:
+  checkout relies on the order and the emptied cart, not on a statistic. Why: a write it does not
+  rely on holds its lock until commit and its failure aborts the rest; moved to a handler, it is
+  retried alone. SHOULD: nothing ends up wrong. Provenance: Vernon EAD II p. 9 (Evans's whose-job
+  test, read as "relies on" by this document), MS ("less impact in database locks"); Vernon,
+  Khononov p. 147, Evans Reference p. 16 and Helland make it the default beyond one aggregate,
+  and the rule follows them but where the use case relies on more (`TX-1`). The weaker flag goes.
 
 ## Consequences
 
