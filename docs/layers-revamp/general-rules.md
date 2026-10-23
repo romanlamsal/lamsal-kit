@@ -124,8 +124,9 @@ service sees every call. A service that answers a question exists for screens, t
 for instance; it is not a gate in front of the acting service. If a driving adapter asked first and
 then called the acting service, the acting service checks again anyway, because things change
 between the two calls. So the acting service loads the data, asks the specification and refuses
-where the specification says no, and the answering service is called on its own, not as a step
-before the act.
+where the specification says no. An answering service asked first, to learn whether the act is
+allowed, is a gate on one way in, and its answer is stale by the time the act runs; an answering
+service asked for an argument the act takes, who this session belongs to, decides nothing.
 *Examples:* —
 
 **SVC-3**
@@ -169,15 +170,18 @@ is a different user in a handler, which runs in no request at all.
 
 **DRV-1**
 *Scope:* a driving adapter has adapted its caller's request.
-*Statement:* It MUST make one call, to one service.
-*Why:* A driving adapter that needs two service calls has a use case growing inside it: which
+*Statement:* It MUST make one call that acts, to one service.
+*Why:* A driving adapter that needs two acting calls has a use case growing inside it: which
 second call to make, and what to do when the first succeeded and the second fails, are a use
 case's decisions, and here they sit in one way in, without a transaction, repeated or missing in
 the next way in. A driving adapter that hands a repository a transaction and a callback has not
 delegated a use case; it has written one, inside itself. Preparing the call is the adapter's job:
-working out who the caller is (DRV-5), validating and translating the input, putting per-request
-ambient values in, asking a specification about the input it holds. None of that is deciding by
-what the system has stored (SVC-2).
+validating and translating the input, putting per-request ambient values in, asking a
+specification about the input it holds, working out who the caller is. Where that last one takes
+this system's stored state, a session, an API key checked against a record, it is a question to a
+service that answers (SVC-2), and the answer becomes an argument of the acting call. An answering
+call whose answer decides whether to act is the use case's decision sitting in the adapter. Either
+way the adapter calls services and nothing else of the system (ARR-1).
 *Provenance:* The conversion is Cockburn's adapter.
 *Examples:* —
 
@@ -194,16 +198,6 @@ no way to hand the adapter a fake. The courier keeps assembly the one place.
 choices. In Cockburn's example the driving adapter wires the application itself; Khononov resolves
 ports "in the infrastructure layer, either through dependency injection or by bootstrapping"
 (p. 128).
-*Examples:* —
-
-**DRV-5**
-*Scope:* a driving adapter works out who its caller is, from a session, a signature, an API key.
-*Statement:* It MAY call a driven port it receives for that.
-*Why:* ARR-1 has no leg from a driving adapter to a driven adapter, and the caller's identity is
-not something the adapter establishes alone: a session is in a store, a key is checked against a
-record. The identity is what the caller brings (SVC-5), and the adapter is the one part of the
-system that sees the session or the header. Whether the identified caller is allowed to do what
-it asks is decided by the service (SVC-2); the port here answers who, not whether.
 *Examples:* —
 
 **DRV-6**
@@ -714,4 +708,4 @@ run or stops being believed.
 ## Retired ids
 
 Never reused: `ARR-2`, `ARR-3`, `DOM-2`, `DRV-2`, `DRV-4`, `DVN-1`, `DVN-3`, `PRD-1` to `PRD-5`,
-`SYS-4`, `SYS-6`, `TST-1`.
+`SYS-4`, `SYS-6`, `TST-1`, `DRV-5`.

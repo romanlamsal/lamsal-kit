@@ -25,9 +25,10 @@ rest get new ids; where another rule or the glossary carries the ruling, the id 
   `TX-4` and `TX-16`; `TX-8` and `TX-17`; `ASM-3` into `ASM-3`, `ASM-8`, `ASM-9`, `TX-18`;
   `SYS-1` into `SYS-1`, `SYS-9`, `SYS-10`; `SYS-5` and `SYS-11`; `DRV-3` and `DRV-6`; `TST-2`
   and `TST-8`.
-- Carve-outs that became MAY rules: plumbing instance (`ASM-7`), caller identity through a driven
-  port (`DRV-5`), copy of another system's data (`TX-13`), outbox between own aggregates
-  (`TX-15`).
+- Carve-outs that became MAY rules: plumbing instance (`ASM-7`), copy of another system's data
+  (`TX-13`), outbox between own aggregates (`TX-15`). Caller identity through a driven port was
+  briefly `DRV-5` (MAY) and retired in the same session: an answering service does it with the
+  arrow intact, so `DRV-1` rules "one call that acts" instead of "one call".
 - Carve-outs that became SHOULD: own fake per downstream (`TST-9`); conformist (`SYS-5`) and
   anti-corruption layer (`SYS-11`) each got a Scope that excludes the other.
 - Moved: `SVC-1`'s "constructs nothing" to `ASM-2`; `DOM-5`'s "no driving port in the domain"
