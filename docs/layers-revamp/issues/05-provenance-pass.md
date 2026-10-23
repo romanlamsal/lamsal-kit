@@ -116,6 +116,11 @@ Per rule, as the author decides; applied when the pass closes.
 - `DOM-1`: kept as an allowlist: an unlisted kind of import fails closed, as a question. The
   slot "a port of the common library" goes with `DOM-5`. The runtime test applies the glossary's
   "pure and knows no runtime".
+- `DOM-4`: split along its "or". Kept for another aggregate of the same system; the Why names
+  the stale embedded record the repository writes back, not "makes the two one aggregate", and the
+  Provenance names the MUST this document's strengthening of Vernon's "prefer". The half for
+  another system's data is retired: what is stored of it is a copy, `TX-12` and `TX-13` place it,
+  and snapshot against kept copy is the glossary item of issue 04.
 - `DOM-5`: retired into `SVC-1`: a port this system declares, driving or driven, is declared in
   the service layer. Why: the domain is pure and calls no port; one home lets the allowlists be
   checked by path; the services calling a port and the adapters implementing it are then its only
@@ -132,7 +137,25 @@ Per rule, as the author decides; applied when the pass closes.
   system calling another's open host service in-process would carry its transaction into the
   other's services, one transaction spanning two systems. That argument is this document's; no
   source for it.
-- `SVC-4`: kept, by the one architecture above.
+- `SVC-1`, the glossary's one use case per driving port: kept. Grouping buys shorter wiring and
+  one fake per conversation; it costs the union of dependencies in every test, `SVC-3` breached
+  by a sibling method no linter sees, and acting mixed with answering. Cockburn finds "no
+  particular damage" in the number of ports; MS has one handler per command.
+- `SVC-4`: kept, by the one architecture above. A port with one adapter as ceremony is `TST-2`'s
+  question: the fake is the port's second implementation.
+- `DRV-1`: Scope a driving adapter handles one call from its caller, a request, a message, a
+  tick; Statement it MUST make at most one acting call. "At most" lets an adapter that only
+  answers comply. Answering calls need no Statement: the driving adapter's rule allows calling
+  services. The Why loses the answer that decides whether to act: a guard on one way in refuses
+  earlier and lets nothing through, the acting service enforces (`SVC-2`). A loop over acting
+  calls is an example of the breach.
+- `DRV-3`: the half for an adapter assembly constructs is `ASM-2`'s, not restated. Kept for a
+  driving adapter assembly cannot construct, the framework finds and calls it: it MUST read the
+  services it calls from a courier. "Cannot", the glossary's word for the courier: where the
+  framework offers a factory seam, assembly constructs.
+- `DRV-6`: kept, the timing apart from the channel.
+- `DVN-2`: retired. What a driven adapter imports is its layer's rule; what is built is received
+  is `ASM-2`'s. What is static is imported gets a rule of its own, for every factory.
 - `SVC-5`: retired. Dependencies are `ASM-2`'s; what a use case decides by is `ASM-3`'s. Fowler's
   "slight edge" for a locator moves to `ASM-2`'s Against.
 
