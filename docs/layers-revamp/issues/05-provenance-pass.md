@@ -154,15 +154,51 @@ Per rule, as the author decides; applied when the pass closes.
   services it calls from a courier. "Cannot", the glossary's word for the courier: where the
   framework offers a factory seam, assembly constructs.
 - `DRV-6`: kept, the timing apart from the channel.
-- `DVN-2`: retired. What a driven adapter imports is its layer's rule; what is built is received
+- `DVN-2`: retired. What a driven adapter imports is its layer's rule; what is received
   is `ASM-2`'s. What is static is imported gets a rule of its own, for every factory: Scope a
   factory needs something the same in every instance, process and test, a domain function, a
   schema, a constant; Statement it SHOULD import it; Why a parameter nobody varies hides which
-  of the real dependencies a test has to supply. SHOULD: nothing breaks. `ASM-2`'s Scope narrows
-  to what is built, a client, an adapter, a service, a clock, so the two rules partition.
-  Provenance candidate, unverified: Seemann's stable against volatile dependencies, DIPPP ch. 1.
+  of the real dependencies a test has to supply. SHOULD: nothing breaks. Nothing a test swaps
+  falls under it, so it leaves `ASM-2` alone. Provenance: Garrido §3 (only a dependency on an
+  interface is configurable), Google SWE ch. 13 (a real implementation where fast and
+  deterministic), Seemann's "Volatile Dependencies" (2006).
 - `SVC-5`: retired. Dependencies are `ASM-2`'s; what a use case decides by is `ASM-3`'s. Fowler's
   "slight edge" for a locator moves to `ASM-2`'s Against.
+- `ASM-1`: kept. A system builder takes its choices as configuration from assembly, so Seemann's
+  "the earlier you compose, the more you limit your options" costs no option; the Provenance says
+  so.
+- `ASM-7`: kept, MAY. Scope a criterion, not a list: plumbing of the common library whose output
+  changes nothing the system does or returns, a logger, a tracer; a meter falls in, a feature-flag
+  client does not. Why: the line is behavior, not substitution. OpenTelemetry's JS API reads a
+  global TracerProvider, and a test inspecting spans registers an in-memory exporter: substitution
+  without a parameter. Telemetry missing from the signature hides nothing a caller has to supply.
+  Provenance adds the OpenTelemetry JS API as supporting, its wording fetched first. Seemann's
+  remedies, decorators and interception, are OOP; the harm he names is what the Why answers.
+- `ASM-3`: Scope a service, or a driven adapter a service calls, reads an ambient value, in
+  either scope; Statement it MUST NOT change how the use case acts or what it answers. The value
+  is the subject, so a driven adapter's read is in plain sight: a repository filtering by an
+  ambient tenant breaches. Stricter than "decide by": the locale a mail is rendered in and the user
+  an audit column records arrive as arguments, since the outbox handler runs outside the request.
+  Only telemetry stays ambient, `ASM-7`'s line. "A domain function" goes: `DOM-1` rules out the
+  ambient registry. The line stays this document's.
+- `ASM-4`: kept, against its earlier retirement. `ASM-2` reaches factories only, and the service
+  layer's rule allows the common library, where the courier lives: without `ASM-4`, a service
+  function reading the courier passes every rule. The converse of `DRV-3`, not a restatement.
+  Scope code reads the courier, the glossary's definition not restated; Statement it MUST be a
+  driving adapter assembly cannot construct. Why: read anywhere else, the courier is a service
+  locator; Seemann's limited, well-known context then supports it, and the contested flag goes.
+  "`SVC-5`'s breach" becomes `ASM-2`'s. `DRV-3`'s "the services it calls" becomes "what it calls";
+  its example is a Payload hook in the static config forwarding to an adapter assembly built.
+- `ASM-2`: kept, MUST. Scope a factory needs one of four things: a port's implementation, a
+  store client, a third-party client, a configuration value; Statement it MUST receive it from
+  its caller. The hexagonal sources hand in a port's implementation and nothing else; the clients
+  and the configuration are what Garrido's composition root sets up. `ASM-7`'s telemetry is none
+  of the four, so no carve-out. Provenance leads with Garrido §3 (Configurable Dependency) and
+  §2.5 (the composition root), Cockburn (swappable secondary actor adapters), MS (inject
+  infrastructure objects) and Khononov p. 128 (injection or bootstrapping, a departure);
+  Seemann's Composition Root supports; Google SWE's "less important" in JavaScript departs.
+  Against: Evans p. 108 and Reference p. 17 (global access), Fowler's "slight edge". The
+  configuration value is this document's: no DDD or hexagonal source names it.
 
 ## Consequences
 
