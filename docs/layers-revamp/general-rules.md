@@ -526,6 +526,116 @@ own context. What the message carries was written in the transaction that knew i
 arrives with it.
 *Examples:* —
 
+## Other systems
+
+**SYS-1**
+*Scope:* a system exports a path for other code to import.
+*Statement:* What the path exports MUST be the system's offer: its published language, its
+driving port types, its system builders, or a fake of its driving ports for downstream tests.
+*Why:* Driven ports, services and adapters are what a system needs, not what it offers; a
+downstream that imports one couples to the inside, and the system changes its adapters by changing
+its downstreams. The offer is what downstream systems need to talk to it, the published language
+and the port types, and what assembly needs to build it, the builders. A fake of the driving ports
+is part of the offer for tests and lives on a path production does not load.
+*Provenance:* Khononov's open host service and published language; the export paths are this
+document's.
+*Examples:* —
+
+**SYS-9**
+*Scope:* code of one system imports from another system.
+*Statement:* It MUST import from one of that system's export paths.
+*Why:* An export path is a promise (SYS-1); a deep import past it reaches a service, a driven port
+or an adapter, the inside, and holds whatever file layout it found there. A linter holds this
+boundary from import paths alone, so the breach shows in the diff and costs nothing to find.
+*Examples:* —
+
+**SYS-10**
+*Scope:* the export path of a system's published language and driving port types.
+*Statement:* Loading it MUST load the domain and nothing else of the system: the port types are
+exported type-only.
+*Why:* A downstream, or a browser, imports the published language for the schemas. A path that
+also loads a service, because the port types sit beside it (SVC-1) and were exported as values,
+pulls the service's dependencies along: a store client in a browser bundle, a second system's
+whole graph in a test that wanted one type. Type-only, the port types vanish at compile time and
+the path loads the domain (DOM-1).
+*Examples:* —
+
+**SYS-2**
+*Scope:* a system declares its published language.
+*Statement:* It MUST be the domain's own schemas, re-exported: the published messages included,
+the private ones excluded.
+*Why:* A published language kept apart from the domain is a second statement of the same shapes
+(DOM-3): the two drift, and a translation layer between them appears in every system to keep them
+aligned. Re-exported, the schema a downstream parses with is the one the upstream validated with.
+A private message is meant for the system that wrote it (glossary); exported, it becomes a
+contract (TX-7) the system did not mean to give.
+*Provenance:* Khononov keeps the published language and the domain apart from the start;
+re-exporting the domain, messages included, is this document's choice.
+*Examples:* —
+
+**SYS-3**
+*Scope:* a downstream system calls an upstream's driving port.
+*Statement:* The downstream MUST call it through a driven port of its own, implemented by what
+assembly picks.
+*Why:* In-process, assembly hands the downstream the upstream's service itself; out of process, a
+driven adapter of the downstream, an HTTP client. Moving the upstream out of process then changes
+assembly and adds that adapter, and nothing in the downstream's services or domain. A downstream
+that imports the upstream's service and calls it has decided in-process for good, and tests with
+the upstream running.
+*Examples:* —
+
+**SYS-5**
+*Scope:* a downstream integrates an upstream of this codebase that offers an open host service.
+*Statement:* It SHOULD be a conformist.
+*Why:* An open host service publishes its model on purpose, in a published language this codebase
+writes (SYS-2); translating it changes nothing and costs a layer, a driven port whose types copy
+the upstream's field for field and an adapter that maps each field to itself, or a message schema
+copied field for field from the system that publishes it. Under conformist, the upstream's terms
+in the downstream's domain are the design working, not a leak. The upstream's change still reaches
+the downstream, but as a change this codebase makes, with the compiler showing every place it
+lands.
+*Provenance:* Conformist as the default for an open host service is this document's choice. The
+context-map patterns are Evans's; Vernon (ch. 3) on choosing between them.
+*Examples:* —
+
+**SYS-11**
+*Scope:* a downstream integrates an upstream whose code this codebase does not write: a third
+party's API, a product.
+*Statement:* It SHOULD put an anti-corruption layer between them.
+*Why:* A foreign model changes on terms this codebase does not control, and its terms are not this
+domain's: a PaymentIntent is not a Payment. Untranslated, the foreign terms spread into the domain
+and the services, and the upstream's change is absorbed everywhere at once instead of in the
+adapters that touch it. One module holding the translation for both the driven adapters that call
+into the upstream and the hooks it calls into keeps it in one place.
+*Provenance:* Evans's anti-corruption layer; that a product counts as a foreign model is this
+document's.
+*Examples:* —
+
+**SYS-7**
+*Scope:* a system keeps a copy of data another system owns, or changes data another system owns
+through messages.
+*Statement:* It MUST have a reconciliation for it.
+*Why:* Consistency between systems is eventual (TX-3, TX-13): a change crosses by message, later.
+A moment's lag is the design working; a gap that stays is drift, from a message lost, a handler
+that failed for good, a copy updated out of order, and a comparison after the fact is what finds
+it. The reconciliation is a use case of the system whose aggregate it repairs: for the copy, this
+system's own; for the owner's data, the step that asks the owner to repair. It is called like any
+use case, by a scheduled task, or by whichever driving adapter notices the drift.
+*Examples:* —
+
+**SYS-8**
+*Scope:* one record carries fields whose rules two systems decide: a product document with
+editorial copy and a price.
+*Statement:* Each system MUST model its fields as an aggregate of its own, sharing the record's
+id.
+*Why:* An aggregate belongs to the system whose rules decide what it holds (glossary), so one
+record with two deciders is two aggregates. Modeled as one, one system's use case writes a field
+the other's rules decide, with no message (TX-3) and no rule of its own behind the write, and a
+repository loads and saves fields its system does not own, so a save undoes the other system's
+change. Two aggregates with one id each have a repository over their own fields, and the other's
+fields reach them as another system's data (DOM-4, TX-12).
+*Examples:* —
+
 ## Retired ids
 
 Never reused: `ARR-2`, `ARR-3`, `DOM-2`, `DRV-2`, `DRV-4`, `DVN-1`, `DVN-3`, `PRD-1` to `PRD-5`,
