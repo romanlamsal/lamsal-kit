@@ -42,15 +42,15 @@ interface layer, driven adapters the infrastructure layer.
 happened; a *command* says do this. *Published*: meant for other systems. *Private*: meant only for
 the system that wrote it.
 
-**Outbox.** Where a system's outgoing messages wait until the relay has taken them. The *outbox
-port* is the driven port a service writes messages through. The *outbox reader* is what the relay
-reads the outbox through, and marks it by; the system provides it.
+**Outbox.** Where a system's outgoing messages wait until they are delivered. The *outbox port* is
+the driven port a service writes messages through. The *outbox reader* is what the relay reads the
+outbox through, and marks it by; the system provides it.
 
 **Handler.** A driving adapter that acts on messages delivered to its system.
 
 **Bus.** What delivers a message to the handlers subscribed to it.
 
-**Relay.** The mechanism that reads outboxes and hands each message to the bus.
+**Relay.** The mechanism that reads outboxes and publishes each message to the bus.
 
 **Open host service.** The driving ports a system offers to outside callers.
 
@@ -72,12 +72,13 @@ others.
 
 ## Other systems
 
-**Upstream system.** Of two systems that talk, the one whose published language they talk in: it
-offers the open host service the other calls and the events the other handles, and the commands
-it handles are written in its language. It changes on its own terms.
+**Upstream system.** Of two systems that talk, the one the other depends on: it offers the open
+host service the other calls, the events the other handles, and the published language both are
+written in. It changes on its own terms. A command runs the other way: its type is in the
+published language of the system that handles it, so the sender is that system's downstream.
 
-**Downstream system.** The one that talks in the upstream's language: it calls the upstream's
-open host service, handles its events, sends it commands, and adapts to its changes.
+**Downstream system.** The one that depends on the upstream: it calls the upstream's open host
+service, handles its events, sends it commands, and adapts to its changes.
 
 **Conformist.** A downstream system that takes the upstream as it is: its ports become the
 downstream's driven ports and its published language is used untranslated, in any layer including
@@ -91,7 +92,7 @@ the driving adapters it calls into. The upstream's terms stop at those adapters.
 system it has a model of its own; unlike a library, its code is out of reach. It is driven through
 its instance and driving through its hooks.
 
-**Hook.** A driving adapter an upstream system calls, in the upstream's language.
+**Hook.** A driving adapter an upstream system calls.
 
 ## Domain
 
@@ -133,7 +134,7 @@ builders as there are ways it is driven.
 
 **Assembly.** The one place in a process where every port gets its implementation, and the only
 place where port and implementation meet. It calls the system builders and produces what the
-process's driving adapters, and its relay, call into.
+process's driving adapters call into.
 
 **Common library.** Plumbing every system may import: the transaction port, store clients, a
 logger, a tracer, the relay, the ambient registry.

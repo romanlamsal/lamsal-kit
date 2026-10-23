@@ -24,12 +24,9 @@ decided when it is first generated.
   are the only bookkeeping; there is no index.
 
 A rule, general or specialized, is one entry with labeled parts: its id and statement, then
-*Why*, *Looks like* (the breach as seen in a diff), *Allowed* (what the statement never forbade,
-where a reader may think it did; it carves nothing out), *Provenance* (what source it follows or
-departs from) and *Examples* (ids). A specialized rule adds *Narrows* right after the statement,
-naming the general ids. Only the statement is required. Everything the rule requires is in the
-statement; the other parts explain, show or clarify it. Another rule narrows or references the
-statement, never the other parts.
+*Why*, *Looks like* (the breach as seen in a diff), *Allowed*, *Provenance* (what source it
+follows or departs from) and *Examples* (ids). Only the statement is required. Another rule
+narrows or references the statement, never the other parts.
 
 ## Tiers
 
