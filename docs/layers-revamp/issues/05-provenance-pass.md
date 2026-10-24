@@ -273,6 +273,16 @@ Per rule, as the author decides; applied when the pass closes.
   operation, payment storing nothing until the webhook; the two `tx-3-breach-*-client-secret`
   examples become `TX-3` ok examples. The customer paying after the deadline cancelled the order
   goes to issue 01's saga gap.
+- `TX-12`: Scope unchanged; Statement it MUST read it from the owner's open host service or from its
+  published messages. One fault, a read of the owner's store: a copy is this system's aggregate
+  (issue 02), so reading it is outside the Scope, and filling it reads the owner's messages. The Why
+  gains `TX-13`'s (the copy lags, `SYS-7` reconciles it) and Khononov p. 246 ("If the components
+  can settle for eventually consistent data, use the event-carried state transfer message") as a
+  rule of thumb, no SHOULD: Fowler finds it "usually easier just to call the sender". Provenances
+  merge; departures: Richardson (Shared database), Evans p. 263, Khononov p. 209's strangler
+  exception. The `findInvoices(where: SQL)` hole stays the glossary issue's (driving port).
+- `TX-13`: retired into `TX-12`; its examples relabel to `TX-12`, and `DOM-4`'s "`TX-12` and
+  `TX-13` place it" becomes `TX-12`.
 
 ## Consequences
 
