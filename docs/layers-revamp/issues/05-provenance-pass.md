@@ -290,6 +290,26 @@ Per rule, as the author decides; applied when the pass closes.
   p. 149 (the handler executes the command) moves to its Provenance. The NServiceBus repeat and
   the idempotency key go to issue 01. `tx-11-ok-*` goes as a duplicate of `tx-3-ok`; the lambda
   breach relabels to `DRV-1`.
+- `TX-6`: kept as it is. `TX-1` hands the transaction to calls into the store; a use case that
+  publishes to the bus directly takes none and compiles, and only `TX-6` forbids it. Provenance:
+  Spring Modulith goes; EIP (Event Message) departs, guaranteed delivery "usually not very helpful
+  with events".
+- `TX-1`: "each repository and outbox call" becomes "each call into its store": the record of a
+  handled message and a read take it too, by construction, a store being what one transaction
+  commits. The Why gains the consequence: a use case that writes writes one store, and a write to
+  a second store goes to a handler through the outbox.
+- `TX-2`: Scope a driven adapter writes to a store; Statement it MUST write inside the transaction
+  it is handed. Outbox and handled-ids adapters, not only repositories.
+- `TX-16`: retired. `TX-6` puts the message in the change's transaction, and a transaction is one
+  store's (glossary: Store), so an outbox sits in each store whose use cases send messages. The
+  Drizzle plus Payload pair stays the products group file's.
+- `TX-4`: retired. Its sourced part, the outbox in the publisher's own database (Richardson,
+  Khononov p. 145, MS), follows from `TX-6` and `TX-1`. Its unsourced part, port, adapter and
+  reader the system's own, is what NServiceBus's framework outbox contradicts; the reader is the
+  system's by the glossary (Outbox), its port the library's by `ASM-5`. The Why's "a message is
+  this system's aggregate" leaned on issue 04's open question whether the outbox port is a
+  repository; a schema in no domain is `ASM-6`'s. The storage sentence moves to `TX-6`'s Why,
+  Richardson's outbox as a record's property and Khononov p. 146 to its Provenance.
 
 ## Consequences
 
