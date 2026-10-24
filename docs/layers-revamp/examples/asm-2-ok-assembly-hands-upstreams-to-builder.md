@@ -20,7 +20,7 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return
   const pool = new Pool({ connectionString: process.env.DATABASE_URL })
   const tx = createTransactionPort(pool)
-  const payload = await getPayload({ config })                  // the product's instance, built once
+  const payload = await getPayload({ config })                  // the external system's instance, built once
   const billing = buildBilling({ tx })
   const payment = buildPayment({ tx, stripe: { secretKey: process.env.STRIPE_SECRET_KEY } })
   const shop = buildShop({

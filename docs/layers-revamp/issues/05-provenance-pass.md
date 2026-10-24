@@ -600,6 +600,14 @@ entry overrides an earlier one (`SYS-10` revised in round 3g, the id `TST-12` re
   Service, Helland 2007, Confluent schema evolution, coupling.dev.
 - Glossary: issue 06 lands before this Apply, the adds Tentative operation and Idempotent
   included; the messaging terms wait for issue 01 (`specs/01-work-order.md`).
+- Read with issue 06's terms, wherever the entries above say otherwise. "Third party" reads
+  "external system", in Provenance too but in quotes; `ASM-2`'s "a third-party client" becomes
+  "any other client of something outside the process", the mail provider's included. `TX-3`'s "a
+  third party is no system" goes: an external system is a bounded context, so a system, and the
+  split by "of this codebase" between `TX-3` and `TX-22` stands. `DOM-1`'s list gains "a shared
+  kernel"; `asm-6-ok` places `Money` and `Sku` there. `DOM-4`'s "a value copied when it needed
+  it" becomes "a snapshot"; the copy `TX-12` places, "a replica". Assumptions' "Not everything
+  gets a layer" is issue 06's; this Apply's Assumptions entry adds to it.
 - Forwarded: issues 01 and 07 carry what goes to them.
 - Book and web text (`sources/`) and the reader files (`audit/`) are in `docs/layers-sources/`,
   gitignored: local only, never committed.

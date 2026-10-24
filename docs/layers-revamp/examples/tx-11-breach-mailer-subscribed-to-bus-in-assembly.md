@@ -24,7 +24,7 @@ bus.subscribe("OrderPaid", billing.handlers.OrderPaid)
 ```
 
 The message is shop's, the mail is shop's change to the provider's data, and no handler of shop handles
-it: the call to the third party is made by a lambda in the worker's assembly, outside every system. There
+it: the call to the mail provider is made by a lambda in the worker's assembly, outside every system. There
 is no transaction of its own and no claim on the message id, so the bus's redelivery after a timeout
 sends the mail twice; there is nothing a test of shop can hand a fake to; and the next system that
 needs a mail copies the lambda. Shop's system builder returns handlers for `PaymentSucceeded` and

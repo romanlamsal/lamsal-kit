@@ -28,7 +28,7 @@ export const payloadCatalog: CatalogPort = {
 export async function register() {
   const payload = await getPayload({ config })
   const shop = buildShop({ tx, catalog: payloadCatalog, billing: buildBilling({ tx }).invoicing })
-  courier.fill({ shop, payload })                       // the courier now carries a product instance too
+  courier.fill({ shop, payload })                       // the courier now carries an external system's instance too
 }
 ```
 

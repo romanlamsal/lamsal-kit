@@ -1,6 +1,6 @@
 # 06 — Glossary pass
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -55,8 +55,49 @@ Left to issue 01, which changes them under the glossary's tier rules (README, Ti
 
 ## Decision
 
-—
+Settled entries applied as drafted, but for the External system follow-ons: Tentative operation
+reads "a request to another system", an external system being one; End-to-end test reads "a real
+external dependency running elsewhere: an external system's own service, such as Stripe in test
+mode, or a mail provider's sandbox", mirroring Integration test, so a mail sandbox test stays out
+of the default suite. Fake: "A working implementation of a port that reaches nothing outside the
+process: a repository over an in-memory map."
+
+Open items:
+
+- External system: issue 05's draft, plus "though it may configure it". A bounded context is the
+  test, so a mail provider stays behind a driven port, no external system. Product goes; Hook
+  moves above it. Port's "a product's hook" becomes "a webhook". Tested against issue 07: catalog
+  is an external system, so catalog data written through Payload falls under `TX-22`'s Scope; the
+  rest of its list reads unchanged.
+- Published language and open host service: no change beyond the settled wording. The driving
+  port types are the open host service (Port: an interface); the published language is what they
+  take, return and raise. Issue 05 puts ports in the service layer, so no domain imports one.
+- Driving port, the `findInvoices(where: SQL)` hole: it names the use case and what a caller
+  brings "in the system's terms, not its store's".
+- Driving port grouping: one use case per port, as issue 05 decided (`SVC-1`).
+- Code that is no system: Tooling, a term under System: "Code that runs in no process of the
+  deployed application: a developer CLI, a seed script, a test that asserts about the source
+  tree." Assumptions: tooling sits outside the layers and the rules; `/health` and `/metrics`
+  outside the layers, beside assembly. The admin dashboard is a system of its own, reading under
+  `TX-12` (issue 04's proposal); no text.
+- System builder: no change. It is a factory by Factory's definition, so `ASM-2` reaches it;
+  Seemann's late composing is `ASM-1`'s Provenance.
+- Service: "What it holds is the sequence: what to load, which rule to ask, what to save." Where
+  Martin's use cases and Fowler's Service Layer hold rules, here the sequence is the service's and
+  the rules are the domain's.
+- Snapshot and Replica, under Domain: `DOM-4`'s value copied against `TX-12`'s copy fed by
+  messages.
+- Shared kernel, under Other systems: "A model several systems of this codebase share as code,
+  each importing it into its domain". `DOM-1`'s list gains it, applied with issue 05 (Evans
+  p. 251, Khononov p. 51).
+- Ambient value, per process: "set once for the process's life, like what assembly produced, a
+  ready-made logger or an environment variable".
 
 ## Consequences
 
-—
+- `glossary.md` carries every entry above; `general-rules.md`'s Assumptions the Tooling and
+  `/health` sentences.
+- Swept: the README's group example, `domain.md`'s catalog kind and third parties, examples whose
+  prose used "product" or "third party" as a term. Rules issue 05 rewrites or retires are left to
+  its Apply, which gains a bullet mapping them to these terms.
+- Issue 07's catalog item restated under `TX-22`.

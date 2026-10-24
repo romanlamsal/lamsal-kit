@@ -18,7 +18,7 @@ export const createCreatePayment =
     const existing = await payments.byOrderId(orderId)
     if (existing) return { paymentId: existing.id, clientSecret: existing.clientSecret }
     const payment = newPayment(orderId, amount)
-    // the third party acts here, before anything of ours is committed
+    // the external system acts here, before anything of ours is committed
     const intent = await gateway.createIntent({ amount, idempotencyKey: payment.id })
     const open = withIntent(payment, intent)      // { intentId, clientSecret }
     await transaction.run((tx) => payments.save(open, tx))

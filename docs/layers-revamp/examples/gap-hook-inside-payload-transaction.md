@@ -40,7 +40,7 @@ export const createSyncPrice =
 ```
 
 TX-1 comes closest: its Scope holds, one use case writing two of shop's aggregates in one
-transaction, but its Statement has the service open the transaction, and here a product opened
+transaction, but its Statement has the service open the transaction, and here an external system opened
 it before the hook ran. TX-6's Scope does not hold: the change the editor's save makes is
 Payload's, not this use case's, so nothing rules that `PriceChanged` must commit with it, and
 without the join a rollback of the editor's save leaves a committed message telling of a price

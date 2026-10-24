@@ -24,8 +24,9 @@ merges Product and third party, so Stripe's items sit here too and the group's n
   before-change hook returning shop's price for Payload to write; editors editing shop's price in
   Payload's admin (issue 04).
 - Drizzle plus Payload as two clients on one database (issue 05).
-- Catalog data written through Payload in a transaction that commits with ours, under neither
-  `TX-3` nor `TX-22` (issue 05).
+- Catalog data written through Payload in a transaction that commits with ours. Catalog is an
+  external system (issue 06), so `TX-22`'s Scope holds and the shared transaction breaches it
+  (issue 05).
 - Hooks shop's builder constructs that read the courier, the ok examples
   `sys-1-ok-shop-hooks-via-builder.md` and `sys-11-ok-payload-terms-stop-in-shop-payload-module.md`
   (`ASM-4`, `DRV-3`). Issue 04 proposed: Payload's config loads before assembly runs, so its hooks

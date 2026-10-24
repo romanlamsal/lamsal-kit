@@ -8,7 +8,7 @@ rule places one is in the rules and the examples, not here.
 
 | system | kind | owns | stored in |
 | --- | --- | --- | --- |
-| **catalog** | product: Payload CMS | editorial content of a product page: copy, images, slug | shared Postgres, Payload's tables |
+| **catalog** | external system: Payload CMS | editorial content of a product page: copy, images, slug | shared Postgres, Payload's tables |
 | **shop** | system | Cart, Order, the commercial fields of a product: price, sku | shared Postgres via Drizzle; price and sku also on Payload's `products` document |
 | **payment** | system | Payment, Refund | shared Postgres |
 | **billing** | system | Invoice, dunning stage, gapless invoice numbers | shared Postgres |
@@ -16,8 +16,8 @@ rule places one is in the rules and the examples, not here.
 | **common library** | plumbing | pino logger, OpenTelemetry tracer exporting to Jaeger, outbox relay, transaction port with an ambient unit of work in `AsyncLocalStorage` | – |
 | **shared kernel** | model | `Money`, `Sku` | – |
 
-Third parties: Stripe (payment), a 3PL warehouse API (fulfillment), a mail provider (shop,
-billing).
+External systems: Stripe (payment), a 3PL warehouse API (fulfillment). Also used: a mail provider
+(shop, billing).
 
 ## Edge cases per system
 

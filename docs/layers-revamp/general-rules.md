@@ -16,9 +16,13 @@ This document assumes a store that can be read and written, and that can apply s
 atomically where it says *transaction*. *Record* is used in the relational sense, a row;
 substitute your store's equivalent.
 
-Not everything gets a layer. Code that asserts about the source tree rather than about the
-application sits outside the layers, and so do assembly, a system's export paths and the common
-library.
+Not everything gets a layer. Assembly, a system's export paths and the common library sit outside
+the layers. So does code of a process that reports on the process rather than on a system, like
+`/health` and `/metrics`.
+
+Tooling sits outside the layers and the rules. It builds systems through their builders or
+replaces their internals: an in-memory outbox, a CLI as relay and bus. What it reaches past an
+export path is no offer (SYS-1), and a system changes it without notice.
 
 Not covered: where UI code goes, which is `components.md`; library, framework and file-naming
 conventions, which are the stack document's; whether a module that straddles two layers should be

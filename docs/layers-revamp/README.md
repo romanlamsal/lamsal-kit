@@ -13,7 +13,7 @@ what it keeps, is decided when it is first generated.
 - `glossary.md`: definitions only. What a term may do is in the rules. Each term uses only terms
   defined above it.
 - `general-rules.md`: rules whose scope is any system. Glossary vocabulary.
-- `<group>.md`: rules whose scope is one kind of situation — a product, messaging between
+- `<group>.md`: rules whose scope is one kind of situation — an external system, messaging between
   systems. Groups emerge while the rules are written; none is fixed in advance.
 - `domain.md`: the fixture. A made-up shop with the situations the rules are tested against.
   Situations only, no rulings.
