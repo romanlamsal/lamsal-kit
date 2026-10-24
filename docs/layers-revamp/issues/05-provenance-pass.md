@@ -310,12 +310,33 @@ Per rule, as the author decides; applied when the pass closes.
   this system's aggregate" leaned on issue 04's open question whether the outbox port is a
   repository; a schema in no domain is `ASM-6`'s. The storage sentence moves to `TX-6`'s Why,
   Richardson's outbox as a record's property and Khononov p. 146 to its Provenance.
-- Delivery, to issue 01's area between systems, where relays and how handlers reach the bus
-  belong; agreed as rules. The relay MUST hand each message it reads from an outbox to the bus at
-  least once: Khononov p. 145 (marks "upon successful publishing") and p. 147 ("guarantees
-  delivery of the messages at least once"), Richardson (Transactional outbox), NServiceBus. The bus
-  MUST deliver a message to a handler again until the handler acknowledges it: EIP (Guaranteed
-  Delivery, Transactional Client), Vernon EAD II p. 9 ("The message will be redelivered").
+- Idempotent, a glossary add (Between systems): "An operation is idempotent when repeating it
+  leads to the same result as performing it once." Khononov p. 68; Richardson, EIP and MS agree.
+- `TX-5`: Scope a use case is called for a delivered message; Statement it MUST be idempotent. The
+  subject is the use case, not the handler (issue 04). Both means follow: by id (Richardson,
+  NServiceBus, Helland p. 140, Khononov p. 245) and by what the message says (EIP, Helland p. 139,
+  MS's preference); NServiceBus's retention window departs. The stronger flag goes. The early
+  arrival moves to `TX-19`.
+- `TX-19`, new: Scope `TX-5`'s; Statement it MUST reach the same result whatever order messages
+  arrive in. Fixture: fulfillment's `OrderCancelled` before `OrderPlaced` leaves no reservation.
+  Why: "not found" is not "already handled"; messages that override each other, two price updates,
+  need something to order by from the publisher, Khononov's advice, kept in the Why; between two
+  publishers the domain decides, and refunding a late payment is issue 01's saga gap. Provenance:
+  Khononov p. 245 ("Events will arrive out of order"), Helland p. 138, MS (an older price event
+  overwriting a newer one).
+- Delivery: here, not parked in issue 01, which may revise them. `TX-20`: Scope the relay reads a
+  message from an outbox; Statement it MUST hand it to the bus at least once. Khononov p. 145
+  (marks "upon successful publishing") and p. 147 ("guarantees delivery of the messages at least
+  once"), Richardson (Transactional outbox), NServiceBus. `TX-21`: Scope the bus delivers a message
+  to a handler; Statement it MUST deliver it again until the handler acknowledges it. EIP
+  (Guaranteed Delivery, Transactional Client), Vernon EAD II p. 9. `DRV-7`: Scope a handler is
+  delivered a message; Statement it MUST NOT acknowledge it unless the use case it calls has
+  succeeded. "Succeeded": a use case that writes nothing commits nothing; for one that writes,
+  success includes the commit (`TX-1`). Why: the queue client acknowledging on receipt, a handler
+  catching the use case's error and returning. Provenance: Vernon EAD II p. 9 ("The modification
+  can be retried if the subscriber does not acknowledge success"), Helland p. 134, EIP
+  (Transactional Client), MS (RabbitMQ requeues the unacknowledged); Khononov, Evans and Cockburn
+  are silent.
 
 ## Consequences
 
