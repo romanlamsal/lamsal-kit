@@ -1,14 +1,14 @@
 ---
 breaches: []
-satisfies: [TX-12, SYS-3]
+satisfies: [TX-12, ASM-2]
 situation: shop's order detail page shows the invoice number billing issued
 ---
 
 # Shop reads the invoice through a driven port that assembly binds to billing's open host service
 
 ```ts
-// shop/domain/ports/invoice-lookup.ts
-import type { InvoiceSummary } from "@teeladen/billing/published"   // conformist (SYS-5): billing's type as is
+// shop/service/ports/invoice-lookup.ts
+import type { InvoiceSummary } from "@teeladen/billing/published"   // conformist: billing's type as is
 export interface InvoiceLookup { byOrderId(orderId: OrderId): Promise<InvoiceSummary | null> }
 
 // shop/service/get-order-detail.ts

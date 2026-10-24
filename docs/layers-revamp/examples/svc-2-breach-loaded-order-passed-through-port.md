@@ -1,6 +1,6 @@
 ---
 breaches: [SVC-2]
-satisfies: [DRV-1, SVC-5]
+satisfies: [DRV-1]
 situation: shop cancels an order from a server action
 finding: adversarial
 ---

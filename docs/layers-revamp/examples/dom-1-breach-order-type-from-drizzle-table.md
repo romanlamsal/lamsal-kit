@@ -1,5 +1,5 @@
 ---
-breaches: [DOM-1, ARR-1]
+breaches: [DOM-1]
 satisfies: []
 situation: shop's Order type is inferred from its Drizzle table
 ---

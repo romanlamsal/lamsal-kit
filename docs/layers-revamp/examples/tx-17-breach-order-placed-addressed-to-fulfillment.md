@@ -7,7 +7,7 @@ situation: shop publishes OrderPlaced; fulfillment reserves stock on it
 # Shop addresses OrderPlaced to the systems it knows will handle it
 
 ```ts
-// shop/domain/ports/outbox.ts
+// shop/service/ports/outbox.ts
 export interface ShopOutbox {
   write(message: ShopMessage, recipients: readonly SystemName[], tx: Transaction): Promise<void>
 }

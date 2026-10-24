@@ -11,9 +11,9 @@ situation: shop's export paths carry published language, driving port types, sys
 export {
   orderSchema, cartSchema, productCommercialSchema,
   orderPlacedSchema, orderPaidSchema, orderCancelledSchema,
-} from "./domain/schemas"
-export type { Order, Cart, ProductCommercial, OrderPlaced, OrderPaid, OrderCancelled } from "./domain/schemas"
-export { OrderNotOpen, ProductNotFound } from "./domain/errors"
+} from "./published"
+export type { Order, Cart, ProductCommercial, OrderPlaced, OrderPaid, OrderCancelled } from "./published"
+export { OrderNotOpen, ProductNotFound } from "./published/errors"
 export type { PlaceOrder } from "./service/place-order"
 export type { Checkout } from "./service/checkout"
 export type { OrderDetails } from "./service/order-details"
@@ -28,4 +28,4 @@ export { buildShopHooks } from "./builders/hooks"
 export { fakeShop } from "./testing/fake-shop"
 ```
 
-Three paths, each one kind of offer. Billing and fulfillment import schemas and errors from `index.ts`, the server's and the worker's assembly import builders from `build.ts`, a downstream's test imports `fakeShop` from `testing.ts`. No driven port, service or driven adapter leaves the package, so shop can replace its Drizzle repository without touching a downstream. The driving port types are exported as types, so loading `index.ts` loads the domain only (SYS-10), and the published language is the domain's own schemas re-exported with the published messages included (SYS-2).
+Three paths, each one kind of offer. Billing and fulfillment import schemas and errors from `index.ts`, the server's and the worker's assembly import builders from `build.ts`, a downstream's test imports `fakeShop` from `testing.ts`. No driven port, service or driven adapter leaves the package, so shop can replace its Drizzle repository without touching a downstream. The driving port types are exported as types, so loading `index.ts` loads the published language only (SYS-10), and the published language is declared apart from the domain, which shop's services translate to and from (SYS-2).

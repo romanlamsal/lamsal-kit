@@ -1,5 +1,5 @@
 ---
-breaches: [SVC-3, TX-14]
+breaches: [SVC-3, TX-1]
 satisfies: []
 situation: shop's placeOrder reuses the clearCart service
 ---
@@ -31,4 +31,4 @@ export const createPlaceOrder =
     }
 ```
 
-`clearCart` exists and does exactly what is needed, so the developer injects it rather than repeat two lines. The inner service opens its own transaction: the cart is cleared and committed while the outer transaction is still open, and when the order insert fails on a constraint and the outer transaction rolls back, the customer has no order and an empty cart. The inner call also retries on nothing of its own, and the use case's writes, one of which TX-14 wants together, now land in two transactions.
+`clearCart` exists and does exactly what is needed, so the developer injects it rather than repeat two lines. The inner service opens its own transaction: the cart is cleared and committed while the outer transaction is still open, and when the order insert fails on a constraint and the outer transaction rolls back, the customer has no order and an empty cart. The inner call also retries on nothing of its own, and the use case's writes, which TX-1 wants in one transaction, now land in two transactions.

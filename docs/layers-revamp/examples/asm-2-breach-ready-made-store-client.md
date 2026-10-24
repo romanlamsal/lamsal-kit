@@ -1,5 +1,5 @@
 ---
-breaches: [ASM-2, DVN-2]
+breaches: [ASM-2]
 satisfies: []
 situation: shared Postgres via Drizzle, the store client exported as a ready-made instance beside its factory
 ---
@@ -17,7 +17,7 @@ export const db = createDb(new Pool({ connectionString: process.env.DATABASE_URL
 // shop/src/adapters/drizzle-order-repository.ts
 import { db } from "@teeladen/common/db"
 import { orders, orderLines } from "./schema"
-import type { OrderRepository } from "../domain/ports"
+import type { OrderRepository } from "../service/ports"
 
 export const createOrderRepository = (): OrderRepository => ({
   async save(order, t) {

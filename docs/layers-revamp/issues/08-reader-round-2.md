@@ -16,6 +16,20 @@ produce no new example. Order: `specs/01-work-order.md`, step 6.
   `domain.md`, as in round 1: Implementer agents by section, then Gap, Contradiction and
   Adversarial.
 - Round 1's example files stay in `examples/`; round 2 adds to them.
+- Left by issue 05's Apply, to recheck before the readers run:
+  - The `gap-*` files argue against Scopes since retired or rewritten (`ARR-1`, `DOM-6`, `SYS-3`,
+    `SYS-5`, `SYS-7`, `SYS-8`, `TX-8`, `TX-13`); issues 05 and 06 placed most of their
+    situations.
+  - `asm-7-breach-logger-substituted-by-module-mock.md`: `ASM-7`'s line is behavior now, not
+    substitution, so its verdict may flip.
+  - `drv-8-breach-server-action-raw-sql-through-common-pool.md` (adversarial): `DRV-8`'s list
+    allows the common library, store clients included.
+  - Examples that still import a published language re-exporting the domain, or declare driven
+    ports outside `service/ports`, predate `SYS-2`'s flip and `SVC-1`'s move; the export-path and
+    port examples were moved, the rest were not.
+  - `OrderQueries` in the `TST-11` examples groups two use cases in one driving port.
+  - A message with no schema at all, `payload: unknown` in a common-library outbox, lost its rule
+    with `TX-4`; a lead for the Gap reader.
 - From issue 04's proposal: MAY "breaches" are listed under the rule that governs once the MAY's
   Scope fails. The README's examples entry gains it.
 

@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [ASM-7, DVN-2]
+satisfies: [ASM-7, DVN-4]
 situation: fulfillment's 3PL client imports the pino logger and the OpenTelemetry tracer; auto-instrumentation preloaded
 ---
 
@@ -13,7 +13,7 @@ export const tracer = trace.getTracer("teeladen")
 
 // fulfillment/src/adapters/warehouse-client.ts — driven adapter to the 3PL
 import { logger, tracer } from "@teeladen/common"
-import type { Warehouse } from "../domain/ports"
+import type { Warehouse } from "../service/ports"
 import { toWarehouseOrder, fromWarehouseShipment } from "./warehouse-translation"
 
 export const createWarehouseClient = (cfg: { baseUrl: string; apiKey: string }, fetchImpl: typeof fetch = fetch): Warehouse => ({

@@ -1,5 +1,5 @@
 ---
-breaches: [SVC-4, ARR-1]
+breaches: [SVC-4, SVC-6]
 satisfies: []
 situation: shop marks the order paid on PaymentSucceeded
 ---

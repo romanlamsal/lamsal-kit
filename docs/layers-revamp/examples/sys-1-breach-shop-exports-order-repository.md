@@ -11,12 +11,12 @@ situation: shop exports its order repository so billing's dunning can load the o
 export * from "./domain/schemas"
 export type { PlaceOrder } from "./service/place-order"
 // dunning needs the order's customer and total; expose the repository
-export type { OrderRepository } from "./domain/ports/order-repository"
+export type { OrderRepository } from "./service/ports/order-repository"
 export { drizzleOrderRepository } from "./adapters/drizzle/order-repository"
 
 // packages/billing/service/run-dunning.ts
 import type { OrderRepository } from "@teeladen/shop"
-import type { InvoiceRepository } from "../domain/ports/invoice-repository"
+import type { InvoiceRepository } from "../service/ports/invoice-repository"
 
 export const createRunDunning =
   (invoices: InvoiceRepository, orders: OrderRepository): RunDunning =>

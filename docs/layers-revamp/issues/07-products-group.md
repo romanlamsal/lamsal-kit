@@ -39,6 +39,14 @@ merges Product and third party, so Stripe's items sit here too and the group's n
 - An external system's hook that never arrives, a Stripe webhook after Stripe stops retrying
   (issue 05, `SYS-7` retired).
 
+Example material, left under retired ids by issue 05's Apply:
+`sys-8-ok-product-two-aggregates-one-document.md` (the shared record),
+`tx-16-breach-payload-write-message-in-drizzle-outbox.md` and
+`tx-16-ok-outbox-in-drizzle-store-and-in-payload-store.md` (Drizzle plus Payload),
+`sys-11-ok-payment-stripe-anti-corruption-layer.md` (Stripe's webhook in payment's terms), and
+`sys-7-*` (a dropped `OrderCancelled`, for recovery). The `sys-8-breach-*` pair became
+`tx-22-breach-*`: catalog's fields written back through Payload.
+
 Shared with issue 01, decided here once:
 
 - Recovery of a message that fails for good, beside `TX-21`, whose "until the handler

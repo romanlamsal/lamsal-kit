@@ -1,6 +1,6 @@
 ---
 breaches: [SVC-3]
-satisfies: [DOM-5, SVC-5, ASM-2]
+satisfies: [ASM-2]
 situation: shop places the order and clears the cart
 finding: adversarial
 ---
@@ -8,7 +8,7 @@ finding: adversarial
 # `placeOrder` calls `clearCart` through a driven port assembly implements with the service
 
 ```ts
-// shop/domain/ports/cart-clearing.ts  (a driven port, declared in the domain)
+// shop/service/ports/cart-clearing.ts  (a driven port, declared in the domain)
 export interface CartClearing {
     clear(input: { cartId: string }): Promise<void>
 }
@@ -32,4 +32,4 @@ const clearCart = createClearCart({ carts, transactions })
 const placeOrder = createPlaceOrder({ orders, outbox, transactions, cartClearing: { clear: clearCart } })
 ```
 
-`placeOrder` calls no service: it calls `cartClearing`, a driven port declared in the domain and received through the factory, and only assembly knows that the implementation is `clearCart`. The Why's harm is exactly what happens: `clearCart` opens a transaction of its own, so the order commits and the cart survives when the second transaction fails, and the use case has no retry for that half; moved inside the `run`, it would nest. The Statement forbids the call by what the callee is, which the caller cannot see; "MUST NOT depend on it, directly or behind a port of this system" names the dependency rather than the call, and the builder line is where it shows.
+`placeOrder` calls no service: it calls `cartClearing`, a driven port declared in shop's service layer and received through the factory, and only assembly knows that the implementation is `clearCart`. The Why's harm is exactly what happens: `clearCart` opens a transaction of its own, so the order commits and the cart survives when the second transaction fails, and the use case has no retry for that half; moved inside the `run`, it would nest. The Statement forbids the call by what the callee is, which the caller cannot see; "MUST NOT depend on it, directly or behind a port of this system" names the dependency rather than the call, and the builder line is where it shows.

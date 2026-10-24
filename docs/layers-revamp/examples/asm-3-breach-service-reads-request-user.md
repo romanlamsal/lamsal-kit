@@ -1,5 +1,5 @@
 ---
-breaches: [ASM-3, SVC-5]
+breaches: [ASM-3]
 satisfies: []
 situation: shop's cancelOrder decides permission by the user in the request context; the PaymentFailed handler calls the same service
 ---

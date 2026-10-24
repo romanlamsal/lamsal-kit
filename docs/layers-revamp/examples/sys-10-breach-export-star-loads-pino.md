@@ -9,8 +9,8 @@ situation: the browser imports shop's cart schema to render the cart form
 ```ts
 // packages/shop/service/checkout.ts
 import { logger } from "@teeladen/common/logger"      // pino, ready-made: ASM-7 allows this
-import type { OrderRepository } from "../domain/ports/order-repository"
-import type { PaymentIntents } from "../domain/ports/payment-intents"
+import type { OrderRepository } from "../service/ports/order-repository"
+import type { PaymentIntents } from "../service/ports/payment-intents"
 
 export type Checkout = (input: { cartId: string; customerId: string }) => Promise<{ orderId: string; clientSecret: string }>
 

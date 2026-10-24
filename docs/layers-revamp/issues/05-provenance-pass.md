@@ -1,6 +1,6 @@
 # 05 — Provenance pass over the general rules
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -614,4 +614,32 @@ entry overrides an earlier one (`SYS-10` revised in round 3g, the id `TST-12` re
 
 ## Consequences
 
-—
+- `general-rules.md` rewritten by the Decision: 51 rules. Retired: `ARR-1`, `DOM-5`, `DOM-6`,
+  `SVC-5`, `DVN-2`, `TX-4`, `TX-8`, `TX-10`, `TX-11`, `TX-13`, `TX-14`, `TX-16`, `TX-18`,
+  `SYS-3`, `SYS-5`, `SYS-7`, `SYS-8`, `SYS-11`, `TST-2`. New: `SVC-6`, `DRV-8`, `DVN-4` (the
+  per-layer lists of `ARR-1`'s split), `ASM-10` (the static-import SHOULD), `DRV-7`, `TX-19` to
+  `TX-22`, `TST-10`, `TST-11`, `TST-12`. Audit lines and flag definitions gone; Spring Modulith out
+  of every Provenance and of Sources; Sources gain CWE-367, Node.js, the OpenTelemetry JS API,
+  Seemann's "Volatile Dependencies".
+- Applied beyond the entries' wording: the shared kernel joins the service's, driving adapter's
+  and driven adapter's lists, as it joined `DOM-1`'s. `ASM-7`'s Why names `ASM-2` as the rule it
+  excepts: a tracer's exporter is a client of something outside the process, which the README's
+  MAY needs and the `ASM-2` entry's "none of the four" denies. `DRV-1`'s Why keeps no sentence on
+  a callback handed to a repository: that adapter reaches a repository, `DRV-8`'s breach.
+- Assumptions: one architecture, this document's choice; Not covered gains the conformist or
+  anti-corruption layer choice, how a driving adapter is tested, and when the integration suite
+  runs (the `TST-12` round's "No rule").
+- Examples relabeled as the entries say, plus what the entries imply: `ARR-1`'s to `DRV-8` and
+  `SVC-6`; `DOM-5`'s and `DOM-6`'s to `SVC-1` and `SVC-6`, ports moved to `service/ports`; `SVC-5`'s
+  and `TX-18`'s to `ASM-3`; `DVN-2`'s and `DRV-3`'s assembly-constructed handler to `ASM-2`;
+  `TX-10`'s, `TX-14`'s and `TX-8`'s to `TX-1` and `DRV-1`; `TX-5`'s early arrival to `TX-19`; the
+  3PL claim, the mail and Stripe to `TX-22`; `TST-2`'s to `TST-4`; `TST-9`'s to `TST-11`, both
+  breaches now; `SYS-2`'s inverted by its flip, the private message to `SYS-1`; the shop export
+  path examples moved to a `published` module. New: `sys-2-ok-shop-messages-union`. The
+  `client_secret` pair rewritten as a Checkout Session, `tx-3-ok-checkout-requests-checkout-session`
+  and `tx-22-ok-payment-requests-checkout-session`.
+- Deleted, no successor rule: `sys-5-*`, `sys-11-breach-*`, `tx-4-*`, `tx-10-ok-*`, `tx-11-ok-*`
+  (a duplicate of the mail example), `tst-4-*` (driving adapter tests, now the repository's).
+- Left under their old names, as material: `sys-7-*`, `sys-8-ok-*`, `sys-11-ok-*`, `tx-16-*` for
+  issue 07; `tx-17-breach-published-command-named-for-receiver` for issue 01. Rechecks for issue
+  08.

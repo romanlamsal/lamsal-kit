@@ -8,9 +8,9 @@ situation: the browser imports shop's cart schema to render the cart form
 
 ```ts
 // packages/shop/service/checkout.ts — driving port beside its service
-import type { Cart, Order } from "../domain/schemas"
-import type { OrderRepository } from "../domain/ports/order-repository"
-import type { PaymentIntents } from "../domain/ports/payment-intents"
+import type { Cart, Order } from "../published"   // published language: no domain import (SYS-2)
+import type { OrderRepository } from "../service/ports/order-repository"
+import type { PaymentIntents } from "../service/ports/payment-intents"
 import type { Transactions } from "@teeladen/common/transactions"
 import { logger } from "@teeladen/common/logger"
 
@@ -21,11 +21,11 @@ export const createCheckout =
   async (input) => { /* ... */ }
 
 // packages/shop/index.ts
-export * from "./domain/schemas"
+export * from "./published"
 export type { Checkout } from "./service/checkout"
 
 // apps/web/components/cart-form.tsx — runs in the browser
 import { cartSchema } from "@teeladen/shop"
 ```
 
-`export type` is erased when the package compiles, so `@teeladen/shop` resolves to `domain/schemas` and nothing else: the browser bundle gets zod and the schemas, and the pino logger `checkout.ts` imports stays on the server. The driving port sits beside the service that implements it, outside the domain (SVC-1), and still travels to the downstream as a type. A test in billing that wants `Checkout` for a fake loads no store client.
+`export type` is erased when the package compiles, so `@teeladen/shop` resolves to `published` and nothing else: the browser bundle gets zod and the schemas, and the pino logger `checkout.ts` imports stays on the server. The driving port sits beside the service that implements it, outside the domain (SVC-1), and still travels to the downstream as a type. A test in billing that wants `Checkout` for a fake loads no store client.

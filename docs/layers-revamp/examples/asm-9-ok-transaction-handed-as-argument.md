@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [ASM-9, TX-1, TX-6, DOM-6]
+satisfies: [ASM-9, TX-1, TX-6, SVC-6]
 situation: shop's checkout writes Order and Cart in one transaction, then calls payment's open host service in-process
 ---
 

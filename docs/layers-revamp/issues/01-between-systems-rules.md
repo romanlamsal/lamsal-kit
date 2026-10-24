@@ -60,7 +60,8 @@ may revise them. Left for it:
   NServiceBus "logical owner"). Open: the command's published language (issue 06), routing to one
   receiver while the bus delivers to subscribers and the relay imports no system (`ASM-5`), the
   sender importing the receiver's command (`SYS-9`), the refusal coming back. Fowler's
-  passive-aggressive command, issue 04's `ReserveStock`;
+  passive-aggressive command, issue 04's `ReserveStock`, whose example stays under its old label:
+  `tx-17-breach-published-command-named-for-receiver.md`;
 - the fixture's request id and trace context crossing the bus, beside the relay and bus rules.
 
 Moved to issue 07, decided there with the external system items they pair with: recovery of a

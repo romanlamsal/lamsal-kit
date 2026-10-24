@@ -9,7 +9,7 @@ situation: fulfillment saves a Reservation with several lines
 ```ts
 // fulfillment/driven/drizzle/reservation-repository.ts
 import { asDrizzle } from "@teeladen/common/drizzle"
-import type { ReservationRepository } from "../../domain/ports"
+import type { ReservationRepository } from "../../service/ports"
 
 export const createDrizzleReservationRepository = (db: Db): ReservationRepository => ({
   save: async (reservation, tx) => {

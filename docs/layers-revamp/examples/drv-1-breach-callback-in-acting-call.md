@@ -1,6 +1,6 @@
 ---
 breaches: [DRV-1]
-satisfies: [ARR-1]
+satisfies: [DRV-8]
 situation: shop's checkout server action places the order and needs the Stripe client_secret in the same request
 finding: adversarial
 ---
@@ -37,4 +37,4 @@ export async function checkoutAction(form: FormData) {
 }
 ```
 
-The adapter makes one call that acts, to one service, and calls nothing else of the system: the Statement and ARR-1 are satisfied as written. The Why's harm is intact: which second call to make and what to do when it fails is decided in this one way in, inside a callback the next way in, Payload's hook placing a phone order, does not pass, so payment is requested from the browser checkout and from nowhere else, and the request runs inside shop's transaction, which is TX-3's harm as well. "One call that acts, to one service, with values as its arguments" is the clause that keeps the adapter from handing behavior in with the data.
+The adapter makes one call that acts, to one service, and calls nothing else of the system: the Statement and DRV-8 are satisfied as written. The Why's harm is intact: which second call to make and what to do when it fails is decided in this one way in, inside a callback the next way in, Payload's hook placing a phone order, does not pass, so payment is requested from the browser checkout and from nowhere else, and the request runs inside shop's transaction, which is TX-3's harm as well. "One call that acts, to one service, with values as its arguments" is the clause that keeps the adapter from handing behavior in with the data.

@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [TX-1, TX-14, TX-6]
+satisfies: [TX-1, TX-6]
 situation: shop places the order, clears the cart and publishes OrderPlaced
 ---
 
@@ -10,7 +10,7 @@ situation: shop places the order, clears the cart and publishes OrderPlaced
 // shop/service/place-order.ts
 import type { Transaction, TransactionPort } from "@teeladen/common/transaction"
 import { placeOrder, orderPlaced, sendOrderConfirmation } from "../domain"
-import type { CartRepository, OrderRepository, ShopOutbox } from "../domain/ports"
+import type { CartRepository, OrderRepository, ShopOutbox } from "../service/ports"
 
 type Deps = { transaction: TransactionPort; carts: CartRepository; orders: OrderRepository; outbox: ShopOutbox }
 

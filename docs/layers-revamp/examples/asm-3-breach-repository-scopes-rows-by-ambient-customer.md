@@ -1,8 +1,7 @@
 ---
 breaches: [ASM-3]
-satisfies: [SVC-5]
+satisfies: []
 situation: shop cancels an order from a server action, a PaymentFailed handler and the deadline scheduled task
-finding: adversarial
 ---
 
 # The order repository filters rows by the ambient customer; the use case decides by what it loaded
@@ -32,4 +31,9 @@ export const createCancelOrder =
     }
 ```
 
-Neither the use case nor a domain function reads the ambient value: `cancelOrder` decides by the Order it loaded and by `now`, both arguments, so the Statement is satisfied and SVC-5 too. The decision is made by the ambient customer all the same, one step removed, as the Why describes: another customer's order is "not found", and the deadline scheduled task, running in no request, loads and cancels every customer's order, with no caller knowing why the two ways in behave differently. "A use case and a domain function MUST NOT decide by it, nor by what a driven adapter read by it" closes the step; ASM-9's Why names this very mechanism for the transaction and the rule for ambient values in general leaves it open.
+The use case decides by the Order it loaded and by `now`, both arguments; the ambient read sits in
+the driven adapter the service calls, which ASM-3's Scope names. It changes what the use case
+acts on: another customer's order is "not found", and the deadline scheduled task, running in no
+request, loads and cancels every customer's order, with no caller knowing why the two ways in
+behave differently. Which customer is asking belongs in `CancelOrder`'s input, and the service
+asks the domain whether that customer may cancel.

@@ -1,10 +1,10 @@
 ---
-breaches: [SYS-2, DOM-3]
+breaches: [SYS-2]
 satisfies: []
 situation: shop publishes OrderPaid; billing issues the invoice from it
 ---
 
-# A hand-written public schema beside the domain's OrderPaid
+# The public OrderPaid stands apart, and its module imports the domain to translate
 
 ```ts
 // packages/shop/domain/messages.ts
@@ -31,4 +31,11 @@ export const toPublic = (e: OrderPaid): OrderPaidPublic => ({
 export { orderPaidPublicSchema, type OrderPaidPublic } from "./published/order-paid"
 ```
 
-OrderPaid is now stated twice (DOM-3), and `toPublic` is the translation layer that keeps the two aligned. Shop adds `discount` to `orderLineSchema` and writes it into the message; `toPublic` maps fields by name, so the compiler is silent and the public schema never carries it. Billing's invoice totals stop matching the orders, and the drift is found when a customer complains, not when the field was added. Every downstream that wants the discount then waits for shop to extend the public schema and its mapping, which is the drift SYS-2's Why describes.
+The public schema is hand-written apart from the domain's, as SYS-2's Why asks, and `toPublic` is
+the translation. But it sits in the published-language module and takes the domain's `OrderPaid`,
+so the module that declares the contract imports the domain, and every downstream that loads the
+contract's path depends on shop's model again. Shop renames `unitPrice` in `orderLineSchema` for a
+pricing rule: the published-language module fails to compile and has to change in the same commit
+as a refactoring that changed nothing shop publishes. Built in shop's service from the `Order`,
+the translation would fail there instead, in the code that decides what shop publishes, and the
+published language would stay a module of zod and the shared kernel.

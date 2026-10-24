@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [DRV-1, SYS-11]
+satisfies: [DRV-1]
 situation: Stripe's webhook reaches payment, at least once, out of order, in Stripe's terms
 ---
 

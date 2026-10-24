@@ -12,7 +12,7 @@ It checks the step in the commit that lands it.
   messaging terms (whose published language holds a command; Message, Saga, Handler, Bus;
   Reconciliation) are step 5's, which changes them under the glossary's tier rules (README,
   Tiers).
-- [ ] 3. **Apply issue 05.** Its Apply section, in order, on the glossary as step 2 left it.
+- [x] 3. **Apply issue 05.** Its Apply section, in order, on the glossary as step 2 left it.
 - [ ] 4. **Products and external systems, issue 07.** A grill. It decides once the items it shares
   with issue 01: a hook that never arrives with recovery of a message that fails for good; an
   external system that answers only synchronously with a tentative operation left open; the

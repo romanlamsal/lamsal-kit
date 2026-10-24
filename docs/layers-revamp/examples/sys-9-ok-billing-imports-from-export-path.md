@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [SYS-9, SYS-5]
+satisfies: [SYS-9]
 situation: billing's handler parses shop's OrderPaid message
 ---
 
@@ -26,4 +26,4 @@ export const handleOrderPaid =
   }
 ```
 
-`@teeladen/shop` is shop's export path for its published language; the handler gets the schema shop's own service built the message with, and nothing of shop's inside. Shop is free to move `orderPaidSchema` between files, rename its domain folders or split its package: the path is the promise, and billing's import does not change. The schema is used untranslated, which is SYS-5's conformist.
+`@teeladen/shop` is shop's export path for its published language; the handler gets the schema shop's own service built the message with, and nothing of shop's inside. Shop is free to move `orderPaidSchema` between files, rename its domain folders or split its package: the path is the promise, and billing's import does not change. The schema is used untranslated: billing conforms.

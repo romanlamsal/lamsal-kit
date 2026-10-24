@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [ASM-3, SVC-5, ASM-4, DRV-6]
+satisfies: [ASM-3, ASM-4, DRV-6]
 situation: Payload's own auth supplies req.user; the afterChange hook calls shop's syncPrice
 ---
 

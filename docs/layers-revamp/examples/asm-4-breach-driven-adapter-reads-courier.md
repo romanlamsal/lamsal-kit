@@ -1,5 +1,5 @@
 ---
-breaches: [ASM-4, ASM-2, DVN-2]
+breaches: [ASM-4, ASM-2]
 satisfies: []
 situation: shop's driven adapter over Payload's Local API fetches the Payload instance from the courier
 ---
@@ -9,7 +9,7 @@ situation: shop's driven adapter over Payload's Local API fetches the Payload in
 ```ts
 // shop/src/adapters/payload-catalog.ts
 import { courier } from "@teeladen/common"
-import type { CatalogPort } from "../domain/ports"
+import type { CatalogPort } from "../service/ports"
 
 // the Payload instance exists only after getPayload(), and shop is built before that is
 // convenient, so the adapter looks it up when first used

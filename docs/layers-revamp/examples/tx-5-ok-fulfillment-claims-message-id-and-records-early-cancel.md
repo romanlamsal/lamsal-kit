@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [TX-5, TX-8]
+satisfies: [TX-5, TX-19, TX-1]
 situation: fulfillment handles OrderPlaced and OrderCancelled, which arrive repeated and out of order
 ---
 

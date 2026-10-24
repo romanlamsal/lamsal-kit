@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [SVC-2, SVC-5]
+satisfies: [SVC-2, ASM-3]
 situation: shop cancels an order from a server action, a PaymentFailed handler and the deadline scheduled task
 ---
 

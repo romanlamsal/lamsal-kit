@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [DRV-1, SVC-5, ARR-1]
+satisfies: [DRV-1, ASM-3, DRV-8]
 situation: shop's server action works out which customer is cancelling, from the session cookie
 ---
 

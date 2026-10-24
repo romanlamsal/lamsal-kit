@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [SVC-3, TX-1, TX-14, TX-6]
+satisfies: [SVC-3, TX-1, TX-6]
 situation: shop places an order, clears the cart and sends the confirmation mail once the order commits
 ---
 

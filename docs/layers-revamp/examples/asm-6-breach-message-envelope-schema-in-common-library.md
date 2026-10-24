@@ -1,6 +1,6 @@
 ---
 breaches: [ASM-6]
-satisfies: [TX-4]
+satisfies: []
 situation: every system's outbox messages share an envelope; fulfillment's deadline release has no acting user
 finding: adversarial
 ---
@@ -21,7 +21,7 @@ export const messageEnvelopeSchema = z.object({
 })
 export type MessageEnvelope = z.infer<typeof messageEnvelopeSchema>
 
-// fulfillment/domain/messages.ts  (fulfillment's outbox port is its own, TX-4)
+// fulfillment/domain/messages.ts
 export const reservationReleasedSchema = messageEnvelopeSchema.extend({
     type: z.literal("ReservationReleased"),
     payload: z.object({ orderId: z.string(), sku: skuSchema, quantity: z.number().int() }),
@@ -31,4 +31,4 @@ export const reservationReleasedSchema = messageEnvelopeSchema.extend({
 await outbox.write({ ...released, actorId: "system" }, tx)     // the envelope demands one
 ```
 
-The envelope is "no schema, no aggregate, no rule of any system": it is the relay's and the bus's, written for no system, so the Statement is satisfied and TX-4 is, since each system declares its own outbox port over it. The Why's harm is the one that lands: a change made for billing's reason, `actorId` required for its audit trail, reaches fulfillment, whose scheduled release has no actor and invents `"system"`, and TX-7 is breached for every system's stored messages at once by a required field no system's domain decided. "It MUST hold no schema that a system's records or messages parse against, whoever declared it" is the wording; "of any system" lets a schema of no system through.
+The envelope is "no schema, no aggregate, no rule of any system": it is the relay's and the bus's, written for no system, so the Statement is satisfied, and each system declares its own outbox port over it. The Why's harm is the one that lands: a change made for billing's reason, `actorId` required for its audit trail, reaches fulfillment, whose scheduled release has no actor and invents `"system"`, and TX-7 is breached for every system's stored messages at once by a required field no system's domain decided. "It MUST hold no schema that a system's records or messages parse against, whoever declared it" is the wording; "of any system" lets a schema of no system through.

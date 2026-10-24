@@ -1,6 +1,6 @@
 ---
 breaches: [SVC-4]
-satisfies: [ARR-1, TX-2]
+satisfies: [SVC-6, TX-2]
 situation: shop marks the order paid on PaymentSucceeded
 finding: adversarial
 ---
@@ -8,7 +8,7 @@ finding: adversarial
 # A second repository over the Order writes the status column
 
 ```ts
-// shop/domain/ports/order-status-repository.ts  (a repository of the Order aggregate)
+// shop/service/ports/order-status-repository.ts  (a repository of the Order aggregate)
 export interface OrderStatusRepository {
     markPaid(orderId: string, paymentId: string, paidAt: Date, tx: Transaction): Promise<void>
 }
@@ -30,4 +30,4 @@ export const createDrizzleOrderStatusRepository = (): OrderStatusRepository => (
 })
 ```
 
-The write goes through a repository of the aggregate the record belongs to, inside the handed transaction, with no store name in the service: Statement, ARR-1 and TX-2 are all met. The Why's harm is untouched, because the repository never loads the aggregate and the domain's `markPaid` is never asked: a cancelled order whose webhook arrives late becomes paid, the exact case `svc-4-breach-mark-paid-updates-column.md` shows, now one file to the right. The glossary allows this by saying a repository is "over exactly one aggregate" without saying one aggregate has one repository that "loads it and saves it whole"; the Statement would catch it as "the write MUST be the aggregate's repository saving the aggregate the domain returned".
+The write goes through a repository of the aggregate the record belongs to, inside the handed transaction, with no store name in the service: Statement, SVC-6 and TX-2 are all met. The Why's harm is untouched, because the repository never loads the aggregate and the domain's `markPaid` is never asked: a cancelled order whose webhook arrives late becomes paid, the exact case `svc-4-breach-mark-paid-updates-column.md` shows, now one file to the right. The glossary allows this by saying a repository is "over exactly one aggregate" without saying one aggregate has one repository that "loads it and saves it whole"; the Statement would catch it as "the write MUST be the aggregate's repository saving the aggregate the domain returned".
