@@ -68,7 +68,7 @@ Moved to issue 07, decided there with the external system items they pair with: 
 message that fails for good, beside `TX-21`; NServiceBus's repeat and the idempotency key; a
 tentative operation left open. From issue 06, changed here under the glossary's tier rules:
 whose published language holds a command, with Upstream and downstream; Message, Saga, Handler,
-Bus; Reconciliation. Order: `specs/01-work-order.md`, step 5.
+Bus; Reconciliation. Order: `specs/01-work-order.md`, step 6.
 
 ## Consequences
 

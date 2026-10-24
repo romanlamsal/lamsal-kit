@@ -7,7 +7,7 @@
 Issue 04 recorded reader round 1 over the general rules as first ported. Issues 05, 06, 07 and 01
 retire, rewrite and add rules and terms after it, so its findings go stale. The README's loop runs
 the readers again instead: a draft is done when every rule has its examples and the readers
-produce no new example. Order: `specs/01-work-order.md`, step 6.
+produce no new example. Order: `specs/01-work-order.md`, step 7.
 
 ## Problem
 
