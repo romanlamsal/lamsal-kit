@@ -7,8 +7,8 @@
 Issue 05's provenance pass and issue 04's reader round left changes to glossary terms. Changing a
 term is an issue a fresh session works (README, Tiers): it sweeps every lower tier for the term
 and re-decides what the change touched. Adds settled in other issues come here too, so every
-glossary edit lands in one pass. First in the chain: issue 05's Apply follows, then issues 01
-and 04.
+glossary edit lands in one pass. First in the chain: issue 05's Apply follows, then issues 01,
+04 and 07.
 
 ## Problem
 

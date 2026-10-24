@@ -590,7 +590,7 @@ entry overrides an earlier one (`SYS-10` revised in round 3g, the id `TST-12` re
 - Examples: `tx-3-breach-*-client-secret` become `TX-3` ok; `tx-8-*` to `TX-1` and `DRV-1`;
   `tx-11-*`, `tx-13-*` as their entries say; `tx-18-*` to `ASM-3`; `sys-3-*` to `ASM-2`; `sys-8-*`
   to `TX-3`; `sys-9-breach-wildcard-export-path` to `SYS-1`; the `SYS-5` labels go;
-  `sys-11-ok-*` to issue 04's products group file. New: `sys-2-ok-shop-messages-union`.
+  `sys-11-ok-*` to the products group (issue 07). New: `sys-2-ok-shop-messages-union`.
 - Assumptions: one architecture for every system, this document's choice. Not covered gains
   whether a downstream conforms or builds an anti-corruption layer (a repository's ADRs), and how
   a driving adapter is tested.
@@ -600,7 +600,7 @@ entry overrides an earlier one (`SYS-10` revised in round 3g, the id `TST-12` re
   Service, Helland 2007, Confluent schema evolution, coupling.dev.
 - Glossary: issue 06 carries every entry, the adds Tentative operation and Idempotent included,
   and lands before this Apply.
-- Forwarded: issue 01 and issue 04 carry what goes to them.
+- Forwarded: issues 01, 04 and 07 carry what goes to them.
 - Book and web text (`sources/`) and the reader files (`audit/`) are in `docs/layers-sources/`,
   gitignored: local only, never committed.
 

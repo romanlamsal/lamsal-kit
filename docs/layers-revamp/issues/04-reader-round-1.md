@@ -17,8 +17,7 @@ What the readers found, grouped by the change it implies. Nothing below is appli
 
 - `DOM-3` on catalog: Payload stores no field its collection config does not declare, so price
   and sku are stated in shop's domain schema and again in Payload's config. Deriving the config
-  from the schema covers neither `Money` nor admin-UI concerns. →  products group rule, or
-  `DOM-3` Scope narrowed to records whose storage this codebase declares.
+  from the schema covers neither `Money` nor admin-UI concerns. → issue 07.
 - `TX-3` twice, the client_secret round trip: shop's checkout returns Stripe's `client_secret` in
   the same request, which means a Payment created by payment and a PaymentIntent created at
   Stripe, both inside one request. The all-rules shape exists (PaymentRequested message, payment's
@@ -30,7 +29,7 @@ What the readers found, grouped by the change it implies. Nothing below is appli
 
 - Four are Payload's: a hook called inside Payload's transaction; shop's own Local API write
   re-firing shop's own hook; a before-change hook returning shop's price for Payload to write;
-  editors editing shop's price in Payload's admin. → a products group file.
+  editors editing shop's price in Payload's admin. → issue 07.
 - The saga as a sequence: glossary defines saga, choreography, orchestration, process manager; no
   Scope uses them. → messaging group (issue 01).
 - Code that is no system: the admin dashboard joining three systems' tables, `/health` and
@@ -111,7 +110,7 @@ getter dependency reading request context (`ASM-3`).
   `sys-11-ok-payload-terms-stop-in-shop-payload-module.md`) have closures that shop's builder
   constructed read the courier. Either the examples are wrong, the shape being hooks as
   module-level functions Payload finds, or "a driving adapter that assembly does not construct"
-  is the wrong cut.
+  is the wrong cut. → issue 07.
 - `ASM-6` Why: "the shape two systems both need has a home in each system's domain, or in the
   published language of the upstream" is a ruling against a shared kernel. Shared kernel has no
   glossary term and no slot in `DOM-1`'s list; `asm-6-ok` places `Money` and `Sku` in a
@@ -145,10 +144,7 @@ Not decided. What I would do, in this order.
 1. One commit: the nineteen accepted wordings, the four relabels, the `randomUUID` fix.
 2. client_secret: keep `TX-3` a MUST; the polling shape becomes its ok example. A MAY for "needs
    the third party's answer in the same request" reopens the call-after-commit question.
-3. A products group file for the four Payload gaps and the `DOM-3` cannot-comply; `DOM-3` stays
-   general. Payload's config loads before assembly runs, so its hooks are driving adapters
-   assembly does not construct, whoever writes the closure: the two `ASM-4` ok examples are
-   decided there, `ASM-4` stays.
+3. Products: issue 07.
 4. `TX-17` and the saga gap to issue 01, decided together: a process manager's commands are the
    Adversarial reader's trick. `TX-11`'s idempotency key ("keyed by the message id where the
    third party takes a key") goes there as well, a rule of its own.
@@ -171,17 +167,7 @@ Not decided. What I would do, in this order.
 ## Forwarded from issue 05
 
 Recheck this issue against issue 05's Decision before resuming: it retired or rewrote rules named
-here. For the products group file:
-
-- a Payload hook inside Payload's transaction: no after-commit, its service cannot open its own;
-- Drizzle plus Payload as two clients on one database;
-- catalog data written through Payload in a transaction that commits with ours, under neither
-  `TX-3` nor `TX-22`;
-- an external system that answers only synchronously; the tentative operation is the way around;
-- the shared `products` record, editorial copy and price (`SYS-8` retired);
-- an external system's hook that never arrives, a Stripe webhook after Stripe stops retrying
-  (`SYS-7` retired);
-- `sys-11-ok-payload-terms-stop-in-shop-payload-module`, material (`SYS-11` retired).
+here. Its items for the products group are issue 07's.
 
 ## Decision
 
