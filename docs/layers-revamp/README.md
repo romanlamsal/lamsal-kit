@@ -30,8 +30,8 @@ what it keeps, is decided when it is first generated.
 
 ## Rule shape
 
-One rule is one entry with labeled parts. Scope and Statement are read as one unit, by people
-and by scripts; a Statement is never judged alone.
+One rule is one entry with labeled parts. Scope and Statement are the rule, read as one unit, by
+people and by scripts; a Statement is never judged alone. The other parts serve them.
 
 - **Id.** Stable for life: never renumbered, never reused; a removed rule retires its id.
   Numbers are labels, not positions.
@@ -39,9 +39,18 @@ and by scripts; a Statement is never judged alone.
   another system owns". Where the Scope does not hold, the rule says nothing.
 - **Statement.** One ruling, with one modal verb, capitalized: MUST, MUST NOT, SHOULD, SHOULD NOT,
   MAY. No other modal, no "always", "never", "only", "by default". Two rulings are two rules.
-- **Why.** The harm the rule prevents and how it comes about, as long as that takes. Contains no
-  ruling: no modal verb, no "only" or "never"; a Why that rules is a Statement in hiding. Breach
-  examples show the harm happening. Required.
+- **Relies on.** What the rule takes as given from other rules: one line per rule, its id and
+  what that rule's Scope and Statement guarantee, in its terms, never what its Why argues:
+  `- TX-5: a repeated delivery changes nothing.` Direct only, not what the named rule relies on
+  in turn; no glossary terms, whose changes sweep every tier anyway. `—` where the rule relies on
+  none. A rule that needs what only another rule's Why says has found a gap in that rule's
+  Statement, and an issue records it. A line is no second statement of the named rule: it states
+  what this rule assumes, and where the two disagree, the named rule stands and the line is the
+  finding.
+- **Why.** The harm the rule prevents and how it comes about, as long as that takes. It takes the
+  Relies-on lines as given and argues this rule alone. Contains no ruling: no modal verb, no
+  "only" or "never"; a Why that rules is a Statement in hiding. Breach examples show the harm
+  happening. Required.
 - **Provenance.** Sources outside this repo: what the rule follows, where it departs from them.
   Never this repo's own history; that lives in git and the issues.
 - **Examples.** At least one breach and one ok, as `breach examples/<id>.md · ok
@@ -56,8 +65,8 @@ The modal verb is the rule's strength.
 - **SHOULD**, **SHOULD NOT**: the default. A codebase deviates through an ADR that names the rule
   id, the situation, and what protects against the harm in the rule's Why. A deviation that
   recurs reopens the rule.
-- **MAY**: a permission. It exists where another rule would otherwise forbid; its Why names that
-  rule's id.
+- **MAY**: a permission. It exists where another rule would otherwise forbid; its Relies on names
+  that rule.
 
 ### Exceptions
 
@@ -94,8 +103,9 @@ are referenced from both. The cost of a change rises with the tier.
 - **Glossary.** Adding a term is cheap: it slots into the dependency order. Changing one —
   rewording, narrowing, dropping — is an issue, and a fresh session works it: it sweeps every
   lower tier for the term and re-decides whatever the change touched, inside that issue.
-- **General rules.** Changing a rule's Scope or Statement is an issue that also visits the group
-  rules whose Why names it. Changing Why, Provenance or Examples is not.
+- **General rules.** Changing a rule's Scope or Statement is an issue that also visits every
+  rule, general or group, whose Relies on names it. Changing Relies on, Why, Provenance or
+  Examples is not.
 - **Group rules.** Changeable without touching the tiers above. Where a situation cannot be ruled
   without changing a general rule or a term, the same issue makes that change, upward, under the
   rules of the tier it touches.
@@ -108,8 +118,13 @@ are referenced from both. The cost of a change rises with the tier.
    same thing. A word with meaning the glossary does not give it appears only if it is common
    language or a source's well-known term. A rule that needs a new word adds it to the glossary,
    as a definition, first.
-3. One ruling per rule. Another document refers to a rule by id, never by restating it.
-4. Work in batches, not sentence by sentence: one session drafts a tier whole, one runs the
+3. One ruling per rule. Another document refers to a rule by id, never by restating it; a
+   Relies-on line is no restatement (Rule shape).
+4. Changing a rule's Scope or Statement, find every Relies-on line that names it and ask of each
+   whether the changed rule still guarantees it; each no is part of the same issue. Writing or
+   changing a rule, check that its own Relies-on lines still hold, and add one for each rule its
+   new text leans on.
+5. Work in batches, not sentence by sentence: one session drafts a tier whole, one runs the
    readers over it. A draft is done when every rule has its examples and the readers produce no
    new example.
 
