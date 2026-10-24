@@ -283,6 +283,13 @@ Per rule, as the author decides; applied when the pass closes.
   exception. The `findInvoices(where: SQL)` hole stays the glossary issue's (driving port).
 - `TX-13`: retired into `TX-12`; its examples relabel to `TX-12`, and `DOM-4`'s "`TX-12` and
   `TX-13` place it" becomes `TX-12`.
+- `TX-11`: retired. What it adds over `TX-3` is that this system's handler acts. A lambda on the
+  bus is a handler (glossary: Bus) and breaches `DRV-1`, `TX-5`, `TX-8`; a relay that calls the
+  third party itself is no relay (glossary: Relay), and no rule restates a definition. `TX-3`'s
+  Why: "(`TX-11`)" becomes "the owner's handler, or for a third party this system's"; Khononov
+  p. 149 (the handler executes the command) moves to its Provenance. The NServiceBus repeat and
+  the idempotency key go to issue 01. `tx-11-ok-*` goes as a duplicate of `tx-3-ok`; the lambda
+  breach relabels to `DRV-1`.
 
 ## Consequences
 
