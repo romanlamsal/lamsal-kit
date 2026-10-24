@@ -1,0 +1,23 @@
+# Spec 01 — Work order after the provenance pass
+
+A session told "the next in the spec" works the first unchecked step, as a fresh session: the
+README, `glossary.md` and `general-rules.md` first (README, Working here), then the step's issue.
+It checks the step in the commit that lands it.
+
+## Steps
+
+- [ ] 1. **Bookkeeping.** Close issue 04 as superseded; open issue 08 for reader round 2.
+- [ ] 2. **Glossary, issue 06.** External system first, tested against issue 07's Problem list:
+  two settled entries lean on it, and step 4 builds on the term instead of reopening it. The
+  messaging terms (whose published language holds a command; Message, Saga, Handler, Bus;
+  Reconciliation) are step 5's, which changes them under the glossary's tier rules (README,
+  Tiers).
+- [ ] 3. **Apply issue 05.** Its Apply section, in order, on the glossary as step 2 left it.
+- [ ] 4. **Products and external systems, issue 07.** A grill. It decides once the items it shares
+  with issue 01: a hook that never arrives with recovery of a message that fails for good; an
+  external system that answers only synchronously with a tentative operation left open; the
+  idempotency key with NServiceBus's repeat. It may revise general rules between systems.
+- [ ] 5. **What is left of issue 01.** Commands, routing to one receiver, the refusal coming back,
+  trace context across the bus, the saga gap's remainder; the messaging terms from step 2.
+- [ ] 6. **Readers, issue 08.** Last: steps 4 and 5 revise general rules, and readers run before
+  them would read text about to change.

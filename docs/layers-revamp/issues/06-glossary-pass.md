@@ -6,9 +6,8 @@
 
 Issue 05's provenance pass and issue 04's reader round left changes to glossary terms. Changing a
 term is an issue a fresh session works (README, Tiers): it sweeps every lower tier for the term
-and re-decides what the change touched. Adds settled in other issues come here too, so every
-glossary edit lands in one pass. First in the chain: issue 05's Apply follows, then issues 01,
-04 and 07.
+and re-decides what the change touched. Adds settled in other issues come here too. Order and
+scope: `specs/01-work-order.md`, step 2.
 
 ## Problem
 
@@ -34,21 +33,24 @@ Open, with where their detail is:
 
 - External system: Product and third party merge; draft in issue 05 (`TX-3`, `TX-22` entries).
   "Third party", undefined, appears across the general rules. First: two settled entries lean on
-  it.
+  it. Tested against issue 07's Problem list, which builds on it.
 - Published language and open host service: driving port types themselves (issue 04).
 - A driving port that names a question in the published language, `TX-12`'s
   `findInvoices(where: SQL)` hole (issue 04).
 - Driving port grouping (issue 05, `SVC-1`).
-- Whose published language holds a command, the sender's or the receiver's (issue 05, `TX-17`);
-  Upstream and downstream split alike.
 - System: code that is no system, the admin dashboard, `/health`, `/metrics` (issue 04).
-- Message, Saga, Handler; Bus delivering to subscribers while a command goes to one receiver
-  (issue 01).
 - System builder.
 - Service "holds no rule of its own".
 - Snapshot against kept copy, `DOM-4`'s value copied against a copy fed by messages (issue 04).
 - Shared kernel, `Money` and `Sku` (issue 04).
 - Ambient value's per-process scope.
+
+Left to issue 01, which changes them under the glossary's tier rules (README, Tiers):
+
+- Whose published language holds a command, the sender's or the receiver's (issue 05, `TX-17`);
+  Upstream and downstream split alike.
+- Message, Saga, Handler; Bus delivering to subscribers while a command goes to one receiver
+  (issue 01).
 - Reconciliation: used by no rule once `SYS-7` retires; drop it, or keep it for issue 01.
 
 ## Decision

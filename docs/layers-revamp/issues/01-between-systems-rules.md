@@ -54,18 +54,20 @@ Forwarded from issue 05, detail in its Decision. The general tier now rules deli
 `TX-21`, `DRV-7`), the early arrival and ordering (`TX-19`) and idempotency (`TX-5`); this group
 may revise them. Left for it:
 
-- recovery of a message that fails for good, beside `TX-21`, whose "until the handler
-  acknowledges it" a retry limit and an error queue revise: NServiceBus, Vernon EAD II p. 9, MS
-  (`SYS-7` retired);
-- NServiceBus's repeat and the idempotency key;
 - the saga gap: who acts on a refusal or a failure, the payment arriving after the deadline
-  cancelled the order, a tentative operation left open;
+  cancelled the order;
 - commands, `TX-17` ruling events only: every source names the receiver (Khononov p. 235, p. 149;
   NServiceBus "logical owner"). Open: the command's published language (issue 06), routing to one
   receiver while the bus delivers to subscribers and the relay imports no system (`ASM-5`), the
   sender importing the receiver's command (`SYS-9`), the refusal coming back. Fowler's
   passive-aggressive command, issue 04's `ReserveStock`;
 - the fixture's request id and trace context crossing the bus, beside the relay and bus rules.
+
+Moved to issue 07, decided there with the external system items they pair with: recovery of a
+message that fails for good, beside `TX-21`; NServiceBus's repeat and the idempotency key; a
+tentative operation left open. From issue 06, changed here under the glossary's tier rules:
+whose published language holds a command, with Upstream and downstream; Message, Saga, Handler,
+Bus; Reconciliation. Order: `specs/01-work-order.md`, step 5.
 
 ## Consequences
 

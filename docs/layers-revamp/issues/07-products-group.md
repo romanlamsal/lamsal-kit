@@ -38,6 +38,16 @@ merges Product and third party, so Stripe's items sit here too and the group's n
 - An external system's hook that never arrives, a Stripe webhook after Stripe stops retrying
   (issue 05, `SYS-7` retired).
 
+Shared with issue 01, decided here once:
+
+- Recovery of a message that fails for good, beside `TX-21`, whose "until the handler
+  acknowledges it" a retry limit and an error queue revise: NServiceBus, Vernon EAD II p. 9, MS.
+  With the hook that never arrives above.
+- NServiceBus's repeat and the idempotency key; issue 04's key for a call to a third party,
+  "keyed by the message id where the third party takes a key" (`TX-11` retired).
+- A tentative operation left open, from the saga gap: with the external system that answers
+  only synchronously above.
+
 ## Decision
 
 —

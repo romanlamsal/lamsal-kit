@@ -598,9 +598,9 @@ entry overrides an earlier one (`SYS-10` revised in round 3g, the id `TST-12` re
   flag definitions go. Sources gain, where missing: CWE-367, the OpenTelemetry JS API (fetch its
   wording), Seemann 2006 "Volatile Dependencies", Node.js `async_context`, Richardson Database per
   Service, Helland 2007, Confluent schema evolution, coupling.dev.
-- Glossary: issue 06 carries every entry, the adds Tentative operation and Idempotent included,
-  and lands before this Apply.
-- Forwarded: issues 01, 04 and 07 carry what goes to them.
+- Glossary: issue 06 lands before this Apply, the adds Tentative operation and Idempotent
+  included; the messaging terms wait for issue 01 (`specs/01-work-order.md`).
+- Forwarded: issues 01 and 07 carry what goes to them.
 - Book and web text (`sources/`) and the reader files (`audit/`) are in `docs/layers-sources/`,
   gitignored: local only, never committed.
 

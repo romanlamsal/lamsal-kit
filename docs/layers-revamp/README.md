@@ -24,7 +24,9 @@ what it keeps, is decided when it is first generated.
   what makes it a breach or ok. A rule references an example by file and never restates it.
 - `issues/NN-<slug>.md`: work items. `**Status:**` line; Context and Problem when opened,
   Decision and Consequences when closed, closed with the commit that landed it. The issue files
-  are the only bookkeeping; there is no index.
+  are the only record of decisions; there is no index.
+- `specs/NN-<slug>.md`: an order to work issues in, as numbered steps. A session told "the next
+  in the spec" works the first unchecked step and checks it in the commit that lands it.
 
 ## Rule shape
 
