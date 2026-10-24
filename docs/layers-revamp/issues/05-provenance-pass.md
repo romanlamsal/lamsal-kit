@@ -556,6 +556,26 @@ Per rule, as the author decides; applied when the pass closes.
 - `TST-7`: kept; Spring Modulith leaves the Provenance. `TST-8`: unchanged; the mechanism of
   `TST-12`'s "configured with fakes".
 
+- Glossary issue: Integration test changes to "A test that uses a real external dependency
+  running where the test runs: a database or a broker in a container." Adds: End-to-end test, "A
+  test that talks to an external system's own service, such as Stripe in test mode."; Default
+  suite, "The tests run by default: every test that is neither an integration test nor an
+  end-to-end test." Which suite CI runs is the repository's. The name fits Fowler's "end-to-end
+  system test with all real services", not Vocke's deployed app driven through its UI.
+- `TST-5`: Scope unchanged; Statement The test MUST NOT replace what it talks to with a double.
+  Integration or end-to-end follows from the glossary. The Why's carve-out (a query builder's
+  output, a mapping function) goes. Departures stay: Fowler, Vocke (a fake server), Google ch. 14.
+  The contested flag goes.
+- `TST-12` withdrawn: how a driving adapter is tested is the repository's, by its assembly's
+  surroundings; Assumptions' Not covered gains it. `TST-4`'s courier sentence still goes; `TST-8`
+  stays as it was. The id goes to the end-to-end rule.
+- `TST-12`: Scope an end-to-end test; Statement It SHOULD NOT run automatically. Google SWE ch. 14
+  ("it is not recommended to have automated tests use a real third-party API"). Departs: Fowler
+  (ContractTest: "Often running just once a day is plenty", outside the regular pipeline, not
+  breaking the build).
+- No rule: when the integration suite runs, the repository's; a test that fills a courier, none
+  being asked for.
+
 ## Consequences
 
 —
