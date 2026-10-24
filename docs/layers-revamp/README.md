@@ -73,7 +73,7 @@ The modal verb is the rule's strength.
 A rule has no exceptions inline. Where a situation needs a different ruling, that is another rule
 with a narrower Scope, usually a MAY. Where the Scopes of two rules both hold, the narrower Scope
 governs: a MAY against a MUST is not a deviation, it is the more specific ruling. The MAY
-announces itself as an exception; the id reference sits in its Why.
+announces itself as an exception.
 
 ### Testing
 
@@ -94,6 +94,9 @@ over the fixture and the rules, each producing example files:
   rule and breach another is a defect, not a contradiction.
 - **Adversarial.** Satisfies a Statement while causing the harm in its Why. Produces a breach
   example the Statement alone would call ok. This is the reader that tests Why.
+
+Every reader also checks each Relies-on line of the rules it reads against the Scope and
+Statement the line names. A line they do not guarantee is a finding: an issue records it.
 
 ## Tiers
 

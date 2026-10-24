@@ -64,11 +64,23 @@ may revise them. Left for it:
   `tx-17-breach-published-command-named-for-receiver.md`;
 - the fixture's request id and trace context crossing the bus, beside the relay and bus rules.
 
+Forwarded from issue 09, detail in its Consequences:
+
+- a message's id kept across repeats, which `TX-5` by ids and `TX-22`'s idempotency key need; a
+  change to the glossary's Message;
+- the order `TX-19`'s Why has the publisher put on messages that override each other, which no
+  rule obliges;
+- what the modules of a published language and of a shared kernel import: `DOM-1` admits both,
+  `SYS-2` rules out the domain only, nothing bounds the shared kernel. Lead: import lists, like
+  `DOM-1`'s;
+- the open host service's schemas and errors kept compatible: `SYS-2` relies on `TX-7`, which
+  covers messages.
+
 Moved to issue 07, decided there with the external system items they pair with: recovery of a
 message that fails for good, beside `TX-21`; NServiceBus's repeat and the idempotency key; a
 tentative operation left open. From issue 06, changed here under the glossary's tier rules:
 whose published language holds a command, with Upstream and downstream; Message, Saga, Handler,
-Bus; Reconciliation. Order: `specs/01-work-order.md`, step 6.
+Bus; Reconciliation. Order: `specs/01-work-order.md`, step 7.
 
 ## Consequences
 

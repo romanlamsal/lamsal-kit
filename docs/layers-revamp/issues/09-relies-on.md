@@ -1,6 +1,6 @@
 # 09 — Relies on
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -49,8 +49,38 @@ Settled when it was opened:
 
 ## Decision
 
-—
+- Every general rule carries `*Relies on:*` after Statement, `—` for 14. Whys trimmed of what
+  the lines carry; cites left in a Why are lines. Reverse cites dropped (TX-5 no longer cites
+  TX-20, TX-21; TX-1 no longer SVC-2, ASM-9).
+- Cycles allowed: TX-1 relies on TX-2 (writes land together only if adapters write inside the
+  handed transaction), TX-2 on TX-1 (there is one to write inside).
+- Delivery chain spelled out where a Why argues it itself: TX-3, TX-15, TX-22 name TX-6, TX-20,
+  TX-21, DRV-7, TX-5 directly.
+- TX-5's line everywhere: "a repeated delivery changes nothing".
+- README: Exceptions said the MAY's id sits in its Why, against Strength; the clause is gone,
+  Strength states it. Testing gains the issue 08 check: every reader checks each Relies-on line
+  against the Scope and Statement it names; a line they do not guarantee is a finding.
+- No other README lead proved wrong.
+- Review fixes: SVC-4's Why keeps the repository saving its aggregate whole (glossary); SVC-1's
+  Why loses the driving port's importers loading none of its service, which SYS-10 holds for
+  export paths only; TX-1's Why loses a check and its write seeing the same state (issue 10).
 
 ## Consequences
 
-—
+Gaps found, a line needing what only a Why says, or no rule saying it. Lines written against the
+Statements as they stand.
+
+- To issue 10: reads in the transaction, `TX-2`'s Scope being writes; isolation, `SVC-2` needing
+  check and act to see the same state where `TX-1` guarantees one transaction; an answering port
+  handed a downstream's transaction.
+- To issue 01: a message's id kept across repeats; the order `TX-19`'s Why has the publisher put
+  on messages; what a published language's and a shared kernel's modules import; the open host
+  service's schemas and errors kept compatible.
+- Closed here. `TST-9` retired: a MAY excepting nothing, `TST-11`'s Scope needing two downstreams;
+  Vocke moved to `TST-11`'s Provenance. `DOM-3`'s Why called `SYS-2`'s Scope narrower; the
+  published language shapes no record, so it falls outside `DOM-3`'s Scope. `SYS-2`'s Why had the
+  service translate, which only `SVC-6`'s Why says; the translation fails to compile wherever it
+  sits.
+- Not gaps. A writing use case's driving port takes no transaction: `TX-1`'s "open it" rules it.
+  The glossary's Factory names an adapter's constructor a factory "for a driven port"; its first
+  sentence covers driving adapters.

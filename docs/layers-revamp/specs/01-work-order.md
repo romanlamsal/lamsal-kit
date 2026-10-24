@@ -8,18 +8,21 @@ It checks the step in the commit that lands it.
 
 - [x] 1. **Bookkeeping.** Close issue 04 as superseded; open issue 08 for reader round 2.
 - [x] 2. **Glossary, issue 06.** External system first, tested against issue 07's Problem list:
-  two settled entries lean on it, and step 5 builds on the term instead of reopening it. The
+  two settled entries lean on it, and step 6 builds on the term instead of reopening it. The
   messaging terms (whose published language holds a command; Message, Saga, Handler, Bus;
-  Reconciliation) are step 6's, which changes them under the glossary's tier rules (README,
+  Reconciliation) are step 7's, which changes them under the glossary's tier rules (README,
   Tiers).
 - [x] 3. **Apply issue 05.** Its Apply section, in order, on the glossary as step 2 left it.
-- [ ] 4. **Relies on, issue 09.** First of the open steps: steps 5 and 6 write and revise rules,
-  so they write the field and self-review with it, and step 7's readers check it.
-- [ ] 5. **Products and external systems, issue 07.** A grill. It decides once the items it shares
+- [x] 4. **Relies on, issue 09.** First of the open steps: steps 5 to 7 write and revise rules,
+  so they write the field and self-review with it, and step 8's readers check it.
+- [ ] 5. **Transaction reads and concurrency, issue 10.** Before products: steps 6 and 7 build on
+  `TX-1` and `SVC-2`, whose guarantees it changes.
+- [ ] 6. **Products and external systems, issue 07.** A grill. It decides once the items it shares
   with issue 01: a hook that never arrives with recovery of a message that fails for good; an
   external system that answers only synchronously with a tentative operation left open; the
   idempotency key with NServiceBus's repeat. It may revise general rules between systems.
-- [ ] 6. **What is left of issue 01.** Commands, routing to one receiver, the refusal coming back,
-  trace context across the bus, the saga gap's remainder; the messaging terms from step 2.
-- [ ] 7. **Readers, issue 08.** Last: steps 5 and 6 revise general rules, and readers run before
+- [ ] 7. **What is left of issue 01.** Commands, routing to one receiver, the refusal coming back,
+  trace context across the bus, the saga gap's remainder; the messaging terms from step 2; the gaps
+  issue 09 forwarded.
+- [ ] 8. **Readers, issue 08.** Last: steps 5 to 7 revise general rules, and readers run before
   them would read text about to change.
