@@ -444,6 +444,43 @@ Per rule, as the author decides; applied when the pass closes.
   applications across the enterprise or net"); Modulith goes. `SVC-3`'s Why cites the glossary
   (Port), `TX-12`'s `ASM-2`. `sys-3-*` relabel to `ASM-2`.
 
+- `SYS-2`: flips. Scope unchanged; Statement The modules that declare it MUST NOT import the
+  domain. Re-export, `.pick()`, `.extend()` and a re-used domain enum all need that import, so a
+  linter holds it. Why: the domain refactors without touching the contract; where a domain change
+  meets the contract, the translation fails to compile; the contract changes on its own terms,
+  and only then does `TX-7` ask for versions; shapes may match at first (Evans p. 278, "Keeping
+  them close together will reduce translation overhead"). Provenance Evans, Khononov and MS alone:
+  Evans p. 278 ("Therefore, do not equate the interchange language and the model of the host"),
+  p. 264 ("it essentially becomes frozen and cannot respond to new development needs") and
+  Reference p. 36; Khononov p. 55, p. 140 ("a common mistake to design and expose a published
+  language for the model's objects"), p. 229 ("it can expose less data and in a more convenient
+  model for consumers") and p. 244; MS ("their implementation must be different"). Departs:
+  Khononov p. 207, conditional when retrofitting ("If changes in the implementation details of one
+  component often ripple … consider making it an open-host service"). NServiceBus, protobuf,
+  Helland and Spring Modulith go; the contested flag goes. The private-message clause goes: it
+  restates the glossary (Message, Published language). For a monorepo of internal systems, where
+  a change's cost is foreseeable, the author expects a repository ADR to set it aside
+  (`docs/extending-layers.md`). The zod discriminated union over a system's published messages is
+  an example, `sys-2-ok-shop-messages-union`, not a rule.
+- Follows from `SYS-2`. `DOM-3` unchanged: `SYS-2`'s narrower Scope governs the published
+  language's schemas, and `DOM-3`'s Why says so; MS's two-step validation, against `DOM-3`, now
+  fits in part, a driving adapter parsing with the published language and the domain checking its
+  own rule; a second statement inside the system stays `DOM-3`'s breach. `TX-7`'s Scope loses "a
+  domain schema the message re-uses included", its Why the freeze sentence. `SYS-10`'s Statement,
+  revising round 3f: Loading it MUST load no module of the system outside its published language.
+  The service's and the driving adapter's lists (`ARR-1`'s split) gain its system's published
+  language; the service translates both ways (MS, integration events "defined at the application
+  level"; Khononov p. 55, "the supplier implements the translation of its internal model").
+  `SYS-5`'s Why leans on `SYS-2`; there the author holds that conforming by default lets an
+  upstream's change leak into the downstream.
+- Open host service only. `SYS-1`'s slot becomes its open host service's driving port types, and
+  `SYS-10`'s Scope with it: a driving port only this system's own driving adapters reach is no
+  offer, and a downstream faking it fakes a shape nobody offers. In-process, a downstream's driven
+  adapter, or a conformist's driven port, is typed by the upstream's driving port type, so the
+  slot serves production as well as tests. The fake slot, if `TST-9` keeps it, fakes the open host
+  service alone. Glossary issue: Published language's "its driving ports" becomes "its open host
+  service's driving ports"; joins the Open host service / published language item.
+
 ## Consequences
 
 —
