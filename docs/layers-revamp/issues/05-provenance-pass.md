@@ -369,6 +369,51 @@ Per rule, as the author decides; applied when the pass closes.
   behind a driven port (Evans p. 55). "Third party", undefined and used 14 times in the general
   rules, and the `TX-3` entry's "a third party is no system" are revisited there.
 
+- `TX-7`: the list goes, the principle stays. Statement: The change MUST keep messages old code
+  writes readable by new code, and messages new code writes readable by old code, each field
+  keeping its meaning. Scope widens: the schema of a message changes or a new message takes over
+  from another, a domain schema the message re-uses included; distillation keeps the versions
+  path, new code writing both while old readers run and reading the old until none waits. Why
+  gains Confluent's list: an optional field added or removed keeps both directions; a field
+  renamed, a required one added or removed, a type changed, an enum value added or removed, a
+  meaning changed (issue 04's `amount`, cents to euros) breaks one. One deployment does not clear
+  the outbox: old messages wait through it. The freeze of a re-used domain schema is stated,
+  `SYS-2`'s to decide. Provenance adds Khononov p. 55 ("only possible if the modified
+  implementation model can be translated into the published language the consumers are already
+  using"; "simultaneously expose multiple versions") and p. 243 ("if an event's schema changes,
+  the subscribers' projection logic will fail"); Confluent's new topic follows; Helland 2005 §3.4
+  departs, stronger, every change a new version; Confluent's default and Evans p. 264 stay
+  departures. The contested flag goes. For `SYS-2`: a zod discriminated union over a system's
+  messages, the published language a standalone thing apart from the domain.
+- `TX-8`: retired. One transaction per message follows from `DRV-1` (a message is one call) and
+  `TX-1`; "a transaction of its own" read as the handler opening it (issue 04); apart from the
+  writer's transaction cannot fail. `DRV-1`'s Why gains: a bus that delivers several messages at
+  once makes one call per message. A use case over a batch, Dahan's (Vernon EAD II p. 10),
+  complies: one acting call, one transaction, as `TX-1` allows several aggregates. Provenance
+  moves to `TX-1`: Vernon EAD II p. 9 ("Each of the subscribers executes in a separate
+  transaction"), NServiceBus and Richardson (one transaction per incoming message), Dahan as
+  complying. `tx-8-*` relabel to `TX-1` and `DRV-1`.
+- `TX-17`: Scope a system publishes an event; Statement its code MUST NOT name a system that
+  handles it. Khononov p. 233 joins the Provenance, Spring Modulith goes. Commands to issue 01
+  with the saga gap: every source names the receiver (Khononov p. 235 "the command's target", p.
+  149, NServiceBus "logical owner", glossary: Orchestration), and the Why's dependency argument
+  does not carry, a command living in its receiver's published language. Fowler's
+  passive-aggressive command and issue 04's `ReserveStock` go along. The command rule is one
+  line; open around it: the glossary item below; routing to one named receiver while the bus
+  delivers to subscribers (glossary: Bus) and the relay imports no system (`ASM-5`); the sender
+  importing the receiver's command (`SYS-9`); the receiver's refusal coming back (Khononov p.
+  235), the saga gap.
+- `TX-18`: retired. Unnarrowed it bars Khononov p. 236's notification; narrowed to a value no
+  store holds it is forced: such a value reaches the handler in the message or not at all, and
+  reading it ambiently is `ASM-3`'s breach. Pointer or payload is the publisher's choice, message
+  by message. `tx-18-*` relabel to `ASM-3`. The fixture's request id and trace context crossing
+  the bus go to issue 01, beside the relay and bus rules.
+- Glossary issue: whose published language holds a command. Message's "Published: meant for
+  other systems" with Published language's "its published messages" puts shop's command for
+  billing in shop's; Khononov p. 235 and NServiceBus put it in the receiver's. Upstream splits
+  alike: "the messages the other handles" makes the sender upstream, "the open host service the
+  other calls" the receiver. Joins Upstream/downstream and Published language.
+
 ## Consequences
 
 —
