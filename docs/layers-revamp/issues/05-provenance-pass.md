@@ -251,6 +251,28 @@ Per rule, as the author decides; applied when the pass closes.
   test, read as "relies on" by this document), MS ("less impact in database locks"); Vernon,
   Khononov p. 147, Evans Reference p. 16 and Helland make it the default beyond one aggregate,
   and the rule follows them but where the use case relies on more (`TX-1`). The weaker flag goes.
+- `TX-3`: Scope a use case of this system changes data another system or a third party holds: a
+  mail sent, a shipment booked; Statement unchanged. "Holds" for both: a third party is no system
+  (glossary: System). "A payment created" goes: it was the open `client_secret` case. `TX-1` makes
+  the call after commit visible, not safe: a crash or a failed call there loses the change and
+  nobody retries; the Why names it. Provenance adds Khononov p. 144–145 ("Can we trust this code?
+  No.") and Richardson (Transactional outbox: "no guarantee that it won't crash before sending the
+  message"); Evans Reference p. 16 says it of aggregate boundaries, a fortiori of systems; the MUST
+  for a third party is this document's, on Khononov p. 293's ground; Spring Modulith goes. A hook
+  inside Payload's transaction has no after-commit and its service cannot open its own: to the
+  products group file (issue 04). Rejected: "changes an aggregate outside the system": a mail is
+  no aggregate, and "outside" reads as storage.
+- Tentative operation, a glossary add (Between systems): "A request to another system or a third
+  party for a commitment that leaves open the possibility of cancellation. It changes nothing it
+  asks for: its confirmation does." From Helland 2007, without his "Every tentative operation
+  eventually confirms or cancels"; one left open is reconciliation's (`SYS-7`). A request is no
+  change, so neither `TX-1` nor `TX-3` binds it; a confirmation reaching this system is a driving
+  call whose write `TX-1` covers, one this system sends a change under `TX-3`. No rule of its own,
+  no exclusion in `TX-3`'s Scope.
+- Issue 04's `client_secret` case closes: a Stripe Checkout Session requested as a tentative
+  operation, payment storing nothing until the webhook; the two `tx-3-breach-*-client-secret`
+  examples become `TX-3` ok examples. The customer paying after the deadline cancelled the order
+  goes to issue 01's saga gap.
 
 ## Consequences
 
