@@ -414,6 +414,36 @@ Per rule, as the author decides; applied when the pass closes.
   alike: "the messages the other handles" makes the sender upstream, "the open host service the
   other calls" the receiver. Joins Upstream/downstream and Published language.
 
+- `SYS-1`: Statement in `DOM-1`'s form: Everything it exports MUST be one of: its published
+  language, its driving port types, a system builder, a fake of its driving ports. Provenance
+  keeps Evans p. 263 and Khononov p. 55 and adds Garrido §2.3 ("Ports are interfaces that the
+  application offers to the outside world") and Cockburn ("deployed in headless mode, so only the
+  API is available, and other programs can make use of its functionality"); Spring Modulith goes,
+  its SPI departure with it; MS's shared library of integration events stays a departure. The
+  list is this document's, the flag says so. The fake slot is decided with `TST-9` (issue 04):
+  Google SWE has the owner write the fake.
+- `SYS-9`: Scope widens: code outside a system imports from it. Assembly falls under it and
+  reaches a system through its builders, not its adapters. Provenance is Khononov's alone: p. 41
+  ("Each bounded context should be implemented as an individual service/project, meaning it is
+  implemented, evolved, and versioned independently"), a deep import tying one system's change to
+  another's file layout, and intrusive coupling (coupling.dev). Spring Modulith and MS go; the
+  linter sentence stays, unsourced. Flag: sourced.
+- `SYS-10`: Scope a path exports a system's published language or its driving port types;
+  Statement Loading it MUST load no module of the system outside its domain and its published
+  language. It holds whichever way `SYS-2` decides. The port types exported as types move to the
+  Why as the mechanism; builders and fakes end up on other paths. Provenance Garrido §6.2.1 ("If
+  the programming language doesn't allow the hexagon to expose just the ports … split the hexagon
+  into ports and implementation … ports would depend on nothing"), TypeScript's type-only exports
+  the mechanism. The unsourced flag goes.
+- `SYS-3`: retired. "Through a driven port" is the glossary's (Port: "Seen from the caller, this
+  system's driving port is the caller's driven port"); "implemented by what assembly picks" is
+  `ASM-2`'s, whose Why names upstreams; importing the upstream's service breaches `SYS-1` and
+  `SYS-9`; its breach example already breaches `ASM-2`. Provenance moves to `ASM-2`: Evans p. 249
+  and Khononov p. 148 as examples, Cockburn ("without actually knowing the nature of the things on
+  the other side of the adapters"; adapters include "any code needed for communication between
+  applications across the enterprise or net"); Modulith goes. `SVC-3`'s Why cites the glossary
+  (Port), `TX-12`'s `ASM-2`. `sys-3-*` relabel to `ASM-2`.
+
 ## Consequences
 
 —
