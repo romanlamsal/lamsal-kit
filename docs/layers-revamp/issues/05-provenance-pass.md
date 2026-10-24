@@ -481,6 +481,35 @@ Per rule, as the author decides; applied when the pass closes.
   service alone. Glossary issue: Published language's "its driving ports" becomes "its open host
   service's driving ports"; joins the Open host service / published language item.
 
+- `SYS-5`, `SYS-11`: retired. Whether a downstream conforms or builds an anti-corruption layer is
+  the repository's to decide; Evans Reference p. 35 ("some of them will be conformist and some
+  will build anticorruption layers"). Assumptions' Not covered gains: whether a downstream
+  conforms to an upstream or builds an anti-corruption layer, which a repository's ADRs decide.
+  It gives Conformist and Anti-corruption layer their use. `DOM-1`'s slot (the published language
+  of an upstream this system conforms to) and the service list's (a conformed upstream's export
+  path) stay: a repository that conforms needs them. The `SYS-5` labels on `sys-3-ok` and
+  `sys-9-ok` go; `sys-11-ok-payload-terms-stop-in-shop-payload-module` becomes material for the
+  products group file; issue 04's one-to-one sentence for `SYS-11` is moot.
+- `SYS-7`: retired. No source asks for a standing reconciliation; Evans p. 97 and MS offer one
+  ("could"). After `TX-20`, `TX-21`, `DRV-7`, `TX-5` and `TX-19`, a copy drifts only where a
+  message fails for good, and its remedy is recovery: NServiceBus ("the failed message should be
+  retried"), Vernon EAD II p. 9 ("report the failure for pending intervention"), MS ("you must
+  design a separate reporting and recovery system for failures"). Recovery to issue 01, beside
+  `TX-21`, whose "until the handler acknowledges it" a retry limit and an error queue revise. An
+  external system's hook that never arrives, a Stripe webhook after Stripe stops retrying, to the
+  products group file. `TX-12`'s Why: the copy lags by a moment. The Tentative operation entry's
+  "one left open is reconciliation's" points to issue 01's saga gap. Glossary issue:
+  Reconciliation is used by no rule; drop it, or keep it for issue 01.
+- `SYS-8`: retired. The split restates the glossary (Aggregate: "belongs to the system whose rules
+  decide what it holds, wherever it is stored"; "a repository loads and saves it whole"); a whole
+  document saved is `TX-3`'s breach, or `TX-22`'s where an external system holds the other
+  fields (issue 04's relabel); the other's fields read from the shared row are `TX-12`'s. The
+  shared record, which Richardson (private tables per service) and Khononov p. 209 (a shared
+  database "when implementing the strangler pattern" only) avoid, arises in the fixture only
+  through Payload: to the products group file, beside catalog data written through Payload and
+  Drizzle plus Payload as two clients. No rule for a record two systems of this codebase share:
+  `TX-3` and `TX-12` keep each to its own fields. `DOM-4`'s Why cites the glossary (Aggregate).
+
 ## Consequences
 
 —
