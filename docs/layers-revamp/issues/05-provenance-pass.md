@@ -510,6 +510,52 @@ Per rule, as the author decides; applied when the pass closes.
   Drizzle plus Payload as two clients. No rule for a record two systems of this codebase share:
   `TX-3` and `TX-12` keep each to its own fields. `DOM-4`'s Why cites the glossary (Aggregate).
 
+- Tests, the author's frame: unit tests are the default and the main test driver. The domain is
+  tested directly; services get fakes; driven adapters are tested against the real thing;
+  driving adapters assembly builds are tested through it with fakes, others may leave a gap.
+- `TST-3`: kept; the fold-in changes nothing.
+- `TST-10`, new: Scope a test of a domain function reaches another domain module; Statement It
+  SHOULD NOT replace it with a double. Why: the domain is pure, so the real module is fast and
+  deterministic, Google's own test for the real implementation; a mock of a pure function restates
+  what it returns, and the two drift. Provenance Google SWE ch. 13 ("our first choice for tests is
+  to use the real implementations"), Khononov p. 165 ("Aggregates and value objects make perfect
+  units for effectively testing the business logic"), Fowler (Mocks Aren't Stubs, the classical
+  style).
+- `TST-4`: Scope a service is tested; Statement The test SHOULD hand it fakes for its driven
+  ports. SHOULD: a test proving `TX-1` or `TX-6` needs the real store; Evans p. 111 ("can"),
+  Cockburn (the application "can be configured to run decoupled … using an in-memory oracle, or
+  mock, database replacement; or it can run against the test- or run-time database"). `TST-2`
+  retires into it: domain tests reach no port, services and driving adapters get fakes, driven
+  adapters are tested against the real thing. `TST-2`'s Why, the fast suite run on every save, and
+  its Provenance (Cockburn, Garrido §2.4, MS) move here, with Cockburn ("The functional
+  specification … is made against the inner hexagon's interface"). The flags go.
+- `TST-12`, new, from `TST-4`'s other half: Scope a driving adapter the process's assembly
+  constructs is tested; Statement The test SHOULD get it from that assembly, configured with fakes
+  (`TST-8`). A `node:http` server built in assembly. Why: real services over faked driven ports,
+  as Google, Fowler and Vocke prefer. A driving adapter assembly does not construct, a server
+  function reading its courier (`DRV-3`), may leave a gap: a test filling the courier is
+  cumbersome, leans on assembly's wiring of the value and tests the framework that needs the
+  courier; `TST-4`'s courier sentence goes. The gap stays small while `DRV-1` keeps the adapter to
+  one call. SHOULD: an adapter with parsing of its own, a webhook signature check, may justify a
+  fake service.
+- `TST-6`: kept, MUST: the main test driver stands on fakes. Google SWE ch. 13 ("A fake must have
+  its own tests") backs it; the one suite for both stays a departure ("one approach"). The run
+  against the fake is in the default suite, the run against the real adapter outside it. A
+  downstream's own fake passes the suite against the upstream's real service, a cost that leans
+  toward `TST-11`.
+- `TST-9`: Scope a downstream fakes a driving port of an upstream's open host service; Statement
+  It MAY write its own fake. `TST-11`, new: Scope two downstreams fake the same driving port of an
+  upstream's open host service; Statement They SHOULD use one fake of it, exported by the
+  upstream. The narrower `TST-11` governs. The port is the grain of "the same parts" of the open
+  host service: a fake is a working implementation (Fowler: "Fake objects actually have working
+  implementations"), so one port has one fake, its scenarios data. `SYS-1`'s fake slot stays: a
+  fake of its open host service's driving ports. Provenance Google SWE ch. 13 ("the team that owns
+  the real implementation should write and maintain a fake"), departing on timing, from the start;
+  Vocke's consumer-driven contracts for the MAY. Spring Modulith and the contested flag go.
+  Glossary issue: Fowler's definition joins the Fake item.
+- `TST-7`: kept; Spring Modulith leaves the Provenance. `TST-8`: unchanged; the mechanism of
+  `TST-12`'s "configured with fakes".
+
 ## Consequences
 
 —
