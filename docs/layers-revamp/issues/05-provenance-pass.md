@@ -337,6 +337,37 @@ Per rule, as the author decides; applied when the pass closes.
   can be retried if the subscriber does not acknowledge success"), Helland p. 134, EIP
   (Transactional Client), MS (RabbitMQ requeues the unacknowledged); Khononov, Evans and Cockburn
   are silent.
+- `TX-3`, split in two by who acts on the message. Scope a use case of this system changes data
+  another system of this codebase holds; Statement unchanged. The owner's handler acts, so `TX-5`
+  binds the owner's use case; Khononov p. 148's direct call stays a departure. The Scope's
+  examples move to `TX-22`, and the Why's "or for a third party this system's" goes.
+- `TX-22`, new. Scope a use case of this system changes something outside its store that no
+  system of this codebase holds; Statement: The change MUST go through this system's outbox, on
+  behalf of its holder. The use case that decides it writes a message instead of making it. This
+  system's handler handles that message on the holder's behalf: the use case it calls makes the
+  change and writes to no store of this system. "On behalf" sits in the Statement so distillation
+  keeps it: the holder reads no bus. Why: the decision commits with the message (`TX-6`) and the
+  call is apart from it, so a retry repeats the call and decides nothing again; a use case that
+  marks the reservation and books the 3PL in one attempt redecides on redelivery, the order
+  cancelled meanwhile, while the booking stands. Idempotent (`TX-5`) through the holder's
+  idempotency key, the message id; a handled-ids record cannot help outside any transaction. The
+  holder's answer comes back as its own message or webhook. A call designed as a tentative
+  operation changes nothing (glossary) and falls outside the Scope: the way around a holder that
+  answers only synchronously. An event from another system that leads to a mail takes two hops.
+  Provenance: Khononov p. 148, p. 149–150 ("the command execution logic should be moved out of the
+  saga itself") and p. 293 ("it can be used for sending email messages"); departs p. 150, where
+  the relay executes the commands (glossary: Relay); against EIP (Command Message) and Richardson
+  (Messaging), the synchronous call; Evans p. 55 and Cockburn do not rule on the timing. Where
+  cases land: mail, Stripe, the 3PL under `TX-22`; billing's data under `TX-3`; this system's own
+  data in its store under `TX-1`; catalog's data written through Payload in a transaction that
+  commits with ours under neither, the products group file's.
+- Glossary issue: Product and third party merge into External system, the term Evans (p. 114,
+  p. 129, Reference p. 34) and Khononov (p. 69, p. 193) share; Khononov p. 10 bins bought and
+  adopted alike. Draft: "A bounded context whose code this codebase does not write: bought or
+  adopted, run by its vendor or by us. It is driven through its API and driving through its
+  hooks." A bounded context is the test (Evans p. 244), so a mail provider stays infrastructure
+  behind a driven port (Evans p. 55). "Third party", undefined and used 14 times in the general
+  rules, and the `TX-3` entry's "a third party is no system" are revisited there.
 
 ## Consequences
 
