@@ -602,7 +602,8 @@ entry overrides an earlier one (`SYS-10` revised in round 3g, the id `TST-12` re
   marked "Glossary issue" is issue 06's; End-to-end test and Default suite wait for it, leaning on
   Integration test's change.
 - Forwarded: issue 01 and issue 04 carry what goes to them.
-- Book quotes and the reader files live outside the repo, in the author's local copy.
+- Book and web text (`sources/`) and the reader files (`audit/`) are in `docs/layers-sources/`,
+  gitignored: local only, never committed.
 
 ## Consequences
 
