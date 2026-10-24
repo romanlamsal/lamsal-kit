@@ -310,6 +310,12 @@ Per rule, as the author decides; applied when the pass closes.
   this system's aggregate" leaned on issue 04's open question whether the outbox port is a
   repository; a schema in no domain is `ASM-6`'s. The storage sentence moves to `TX-6`'s Why,
   Richardson's outbox as a record's property and Khononov p. 146 to its Provenance.
+- Delivery, to issue 01's area between systems, where relays and how handlers reach the bus
+  belong; agreed as rules. The relay MUST hand each message it reads from an outbox to the bus at
+  least once: Khononov p. 145 (marks "upon successful publishing") and p. 147 ("guarantees
+  delivery of the messages at least once"), Richardson (Transactional outbox), NServiceBus. The bus
+  MUST deliver a message to a handler again until the handler acknowledges it: EIP (Guaranteed
+  Delivery, Transactional Client), Vernon EAD II p. 9 ("The message will be redelivered").
 
 ## Consequences
 
