@@ -30,6 +30,14 @@ produce no new example. Order: `specs/01-work-order.md`, step 6.
   - `OrderQueries` in the `TST-11` examples groups two use cases in one driving port.
   - A message with no schema at all, `payload: unknown` in a common-library outbox, lost its rule
     with `TX-4`; a lead for the Gap reader.
+- Left by the import-only lists (`SVC-6`, `DRV-8`, `DVN-4`; issue 05's Consequences):
+  - `drv-8-breach-mailer-subscribed-to-bus-in-assembly`: a handler written inside assembly
+    imports nothing, so it loses `DRV-8`; a lead for the Gap reader.
+  - `drv-8-breach-adapter-reads-repository-to-check-owner` reads the repository from the courier
+    and keeps only `SVC-2`.
+  - `svc-6-breach-drizzle-transaction-in-port`: whether a store client library's type counts as
+    a library that computes from its arguments.
+  - The raw-SQL example above is issue 07's now (store clients).
 - From issue 04's proposal: MAY "breaches" are listed under the rule that governs once the MAY's
   Scope fails. The README's examples entry gains it.
 

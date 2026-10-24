@@ -640,6 +640,12 @@ entry overrides an earlier one (`SYS-10` revised in round 3g, the id `TST-12` re
   and `tx-22-ok-payment-requests-checkout-session`.
 - Deleted, no successor rule: `sys-5-*`, `sys-11-breach-*`, `tx-4-*`, `tx-10-ok-*`, `tx-11-ok-*`
   (a duplicate of the mail example), `tst-4-*` (driving adapter tests, now the repository's).
+- Review after the Apply: `SVC-6`, `DRV-8` and `DVN-4` rule imports only, in `DOM-1`'s form,
+  departing from the `ARR-1` entry's "import, receive or call". Read literally, the lists forbade
+  receiving the service a driving adapter calls, and calling any library; what a factory receives
+  stays `ASM-2`'s. Each list gains `DOM-1`'s library slot, `DRV-8` the framework that calls it;
+  `DRV-8`'s "of its system" goes. Lost: a handler written inside assembly, an adapter reading a
+  repository from the courier (issue 08). Store clients in the common library to issue 07.
 - Left under their old names, as material: `sys-7-*`, `sys-8-ok-*`, `sys-11-ok-*`, `tx-16-*` for
   issue 07; `tx-17-breach-published-command-named-for-receiver` for issue 01. Rechecks for issue
   08.

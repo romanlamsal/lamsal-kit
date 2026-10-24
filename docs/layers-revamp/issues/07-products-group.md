@@ -57,6 +57,20 @@ Shared with issue 01, decided here once:
 - A tentative operation left open, from the saga gap: with the external system that answers
   only synchronously above.
 
+Store clients, from the review of issue 05's Apply:
+
+- Store clients sit in the common library (glossary: Common library), so a service and a
+  driving adapter may import one through `SVC-6`'s and `DRV-8`'s "the common library". Dropping
+  them is a glossary change; its sweep: the Common library entry, `ASM-1`'s "two store clients",
+  `TX-1`'s Why, `drv-8-breach-server-action-raw-sql-through-common-pool`.
+- Transaction port: named in the Common library entry and `TX-1`'s Why, defined nowhere. A term,
+  and whether `TX-1`'s service opens its transaction through it; without it, a service needs the
+  store client to open one.
+- A plain read through a store client, by a service or a driving adapter: only `SVC-6`'s and
+  `DRV-8`'s Whys speak to it; CQRS query paths (MS, Vernon) skip the domain.
+
+Decided with the hook inside Payload's transaction and the two clients on one database.
+
 ## Decision
 
 —

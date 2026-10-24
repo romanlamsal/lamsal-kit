@@ -121,10 +121,10 @@ choosing the 'wrong' number of ports", and MS has one handler per command.
 *Examples:* —
 
 **SVC-6**
-*Scope:* a service imports, receives or calls code.
-*Statement:* The code MUST be one of: its system's domain, a shared kernel, a port declared in its
-service layer, its system's published language, the common library, the export path of an
-upstream its system conforms to.
+*Scope:* a module of the service layer imports a module.
+*Statement:* The import MUST be one of: its system's domain, a shared kernel, a port declared in
+its service layer, its system's published language, the common library, the export path of an
+upstream its system conforms to, a library that computes from its arguments.
 *Why:* A service that knows the route that calls it, or the store client that saves for it,
 changes whenever either changes, and a second way in, or a second store, means rewriting the use
 case. It reaches driven adapters through the ports they implement, handed in by assembly
@@ -202,9 +202,10 @@ architecture for every system (Assumptions).
 ## Driving adapters
 
 **DRV-8**
-*Scope:* a driving adapter imports, receives or calls code of its system.
-*Statement:* The code MUST be one of: its system's driving port types, its system's domain, a
-shared kernel, its system's published language, the common library.
+*Scope:* a driving adapter imports a module.
+*Statement:* The import MUST be one of: the framework that calls it, a driving port of its
+system, its system's domain, a shared kernel, its system's published language, the common
+library, a library that computes from its arguments.
 *Why:* A driving adapter that skips the service and reaches a driven adapter, a repository or the
 store reads state and decides by it, or writes outside any use case and outside the transaction a
 service holds, and the rules in the domain are bypassed for that one way in. Typed by the driving
@@ -282,10 +283,10 @@ requeues the unacknowledged). Khononov, Evans and Cockburn do not rule on it.
 ## Driven adapters
 
 **DVN-4**
-*Scope:* a driven adapter imports, receives or calls code.
-*Statement:* The code MUST be one of: what it talks to outside the process, the port it
+*Scope:* a driven adapter imports a module.
+*Statement:* The import MUST be one of: a client of something outside the process, the port it
 implements, its system's domain, a shared kernel, the common library, the export path of an
-upstream.
+upstream, a library that computes from its arguments.
 *Why:* A driven adapter exists to talk to the outside on the system's behalf. One that calls a
 service has a use case inside it, in the layer meant to do nothing but talk to the outside; one
 that imports another adapter or a service of its system is tied to how that one is built.
