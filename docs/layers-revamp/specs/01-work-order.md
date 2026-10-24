@@ -6,7 +6,7 @@ It checks the step in the commit that lands it.
 
 ## Steps
 
-- [ ] 1. **Bookkeeping.** Close issue 04 as superseded; open issue 08 for reader round 2.
+- [x] 1. **Bookkeeping.** Close issue 04 as superseded; open issue 08 for reader round 2.
 - [ ] 2. **Glossary, issue 06.** External system first, tested against issue 07's Problem list:
   two settled entries lean on it, and step 4 builds on the term instead of reopening it. The
   messaging terms (whose published language holds a command; Message, Saga, Handler, Bus;

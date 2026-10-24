@@ -1,7 +1,6 @@
 # 04 — Reader round 1 over the ported general rules
 
-**Status:** open, parked behind the provenance pass (issue 05). That pass may change or drop
-rules these items touch; recheck each against the rules as they stand then.
+**Status:** closed, superseded by issue 08
 
 ## Context
 
@@ -171,8 +170,13 @@ here. Its items for the products group are issue 07's.
 
 ## Decision
 
-—
+Superseded. Issue 05 retires or rewrites most rules these findings name; the README's loop
+reruns the readers instead (issue 08). Taken out before closing: the glossary items, the shared
+kernel and code that is no system to issue 06; products to issue 07; `TX-17` and the saga gap to
+issue 01; the idempotency key to issue 07; client_secret decided in issue 05 (`TX-3`); proposals
+9 and 10 to issue 08. The rest is not applied.
 
 ## Consequences
 
-—
+- Round 1's example files stay in `examples/`; issue 05's Apply relabels them.
+- A finding still true after issue 05 comes back in round 2.
