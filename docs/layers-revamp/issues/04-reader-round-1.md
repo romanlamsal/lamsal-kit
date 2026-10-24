@@ -168,6 +168,21 @@ Not decided. What I would do, in this order.
 9. MAY "breaches" are listed under the rule that governs once the MAY's Scope fails.
 10. Fill the `*Examples:*` lines from the example files, then rerun the readers.
 
+## Forwarded from issue 05
+
+Recheck this issue against issue 05's Decision before resuming: it retired or rewrote rules named
+here. For the products group file:
+
+- a Payload hook inside Payload's transaction: no after-commit, its service cannot open its own;
+- Drizzle plus Payload as two clients on one database;
+- catalog data written through Payload in a transaction that commits with ours, under neither
+  `TX-3` nor `TX-22`;
+- an external system that answers only synchronously; the tentative operation is the way around;
+- the shared `products` record, editorial copy and price (`SYS-8` retired);
+- an external system's hook that never arrives, a Stripe webhook after Stripe stops retrying
+  (`SYS-7` retired);
+- `sys-11-ok-payload-terms-stop-in-shop-payload-module`, material (`SYS-11` retired).
+
 ## Decision
 
 —

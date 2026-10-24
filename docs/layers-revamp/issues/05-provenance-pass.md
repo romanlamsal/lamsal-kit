@@ -576,6 +576,34 @@ Per rule, as the author decides; applied when the pass closes.
 - No rule: when the integration suite runs, the repository's; a test that fills a courier, none
   being asked for.
 
+## Apply
+
+Every rule is walked. When the pass closes, one session applies the Decision in order; a later
+entry overrides an earlier one (`SYS-10` revised in round 3g, the id `TST-12` reassigned).
+
+- `general-rules.md`: each entry's Scope, Statement, Why and Provenance. New rules: the per-layer
+  "MUST be one of" rules (`ARR-1`'s split) and the static-import SHOULD (`DVN-2`'s entry), ids to
+  give; `TX-19`, `TX-20`, `TX-21`, `TX-22`, `DRV-7`, `TST-10`, `TST-11`, `TST-12`. Retired ids gain
+  `ARR-1`, `DOM-5`, `DOM-6`, `SVC-5`, `DVN-2`, `TX-4`, `TX-8`, `TX-10`, `TX-11`, `TX-13`, `TX-14`,
+  `TX-16`, `TX-18`, `SYS-3`, `SYS-5`, `SYS-7`, `SYS-8`, `SYS-11`, `TST-2`; grep each for references
+  in Whys, Provenance, examples and issue 01.
+- Examples: `tx-3-breach-*-client-secret` become `TX-3` ok; `tx-8-*` to `TX-1` and `DRV-1`;
+  `tx-11-*`, `tx-13-*` as their entries say; `tx-18-*` to `ASM-3`; `sys-3-*` to `ASM-2`; `sys-8-*`
+  to `TX-3`; `sys-9-breach-wildcard-export-path` to `SYS-1`; the `SYS-5` labels go;
+  `sys-11-ok-*` to issue 04's products group file. New: `sys-2-ok-shop-messages-union`.
+- Assumptions: one architecture for every system, this document's choice. Not covered gains
+  whether a downstream conforms or builds an anti-corruption layer (a repository's ADRs), and how
+  a driving adapter is tested.
+- Provenance: Spring Modulith leaves every rule and Sources. The Audit lines and the preamble's
+  flag definitions go. Sources gain, where missing: CWE-367, the OpenTelemetry JS API (fetch its
+  wording), Seemann 2006 "Volatile Dependencies", Node.js `async_context`, Richardson Database per
+  Service, Helland 2007, Confluent schema evolution, coupling.dev.
+- Glossary, the adding tier: Tentative operation and Idempotent (Between systems). Every entry
+  marked "Glossary issue" is issue 06's; End-to-end test and Default suite wait for it, leaning on
+  Integration test's change.
+- Forwarded: issue 01 and issue 04 carry what goes to them.
+- Book quotes and the reader files live outside the repo, in the author's local copy.
+
 ## Consequences
 
 —
