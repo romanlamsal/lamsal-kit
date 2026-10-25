@@ -9,8 +9,7 @@ at the end.
 This document assumes a store that can be read and written, that can apply several writes
 atomically where it says *transaction*, and that can make a write fail where the record has
 changed since it was read. It assumes no isolation between transactions beyond reading committed
-writes: a transaction may read what another commits while it runs. *Record* is used in the
-relational sense, a row; substitute your store's equivalent.
+writes: a transaction may read what another commits while it runs.
 
 Every system gets the same architecture: domain, service, repositories and adapters, a simple one
 too. That is this document's choice. The sources pick the architecture per subdomain and let
@@ -868,8 +867,8 @@ its published language. Reading its store directly, a join across both systems' 
 against its records, binds this system to the owner's storage: the owner's schema change breaks this
 system's query with no compile error, and the owner's rules, which decide what a record means, are
 bypassed. In-process the open host service is a function call behind a driven port; going through it
-costs a port, not a network hop. A replica is this system's aggregate, so reading it is no read of
-another system's data; filling it reads the owner's messages. The replica lags by a moment. Where
+costs a port, not a network hop. A replica is filled from the owner's published messages, so
+reading it reads them. The replica lags by a moment. Where
 the components can settle for that, the published messages are the rule of thumb: the read then
 needs the owner neither running nor fast.
 *Provenance:* Follows Richardson (Database per service: data "accessible only via its API"; API

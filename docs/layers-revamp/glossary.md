@@ -1,24 +1,35 @@
 # Glossary
 
-Definitions only. What a term may do is in the rules. Each term uses only terms defined above it.
+Definitions only, read as a whole. What a term may do is in the rules.
+
+## Business domain
+
+**Business domain.** A company's main area of activity: selling tea online. The domain models it.
+
+**Business rule.** What the business domain allows, requires or forbids: an order ships only once
+paid.
 
 ## System
 
-A system is one bounded context. It is code with its own domain and its own glossary. This
-document lays one out. A code repository may hold several. Another bounded context is another
-system, even when it is imported in-process.
+A system is one bounded context. It is code with its own domain and its own glossary. A code
+repository may hold several. Another bounded context is another system, even when it is
+imported in-process.
 
 **Tooling.** Code that runs in no process of the deployed application: a developer CLI, a seed
 script, a test that asserts about the source tree.
+
+**Probe.** Code a process runs to report on itself rather than on a system: whether it is alive or
+ready, its metrics. `/health`, `/metrics`.
 
 ## The layers
 
 **Use case.** One goal a caller can reach through the system, and how the system responds.
 
-- **Domain.** The model: rules, schemas, specifications. It is pure and knows no runtime.
-- **Service.** The application layer. It carries out the system's use cases. It holds no rule of
-  its own; the rules are the domain's. What it holds is the sequence: what to load, which rule to
-  ask, what to save. Each use case either acts or answers.
+- **Domain.** The model: business rules, schemas, specifications. It is pure and knows no runtime.
+- **Service.** The application layer. It carries out the system's use cases. It holds no business
+  rule of its own; the business rules are the domain's. What it holds is the sequence within one
+  use case: what to load, which business rule to ask, what to save. Each use case either acts or
+  answers.
 - **Driven adapters.** Implementations of driven ports.
 - **Driving adapters.** Callers adapted to driving ports.
 
@@ -30,8 +41,8 @@ interface layer, driven adapters the infrastructure layer.
 - A *driven port* is a way out of the system. Send a mail, save to the database, read from disk.
 - A *driving port* is the way in. It names one use case the system offers and what a caller must
   bring, in the system's terms, not its store's. It does not know how it is reached.
-- Who starts the call decides which. Seen from the caller, this system's driving port is the
-  caller's driven port.
+- Who starts the call decides which. Seen from the caller, this system's driving port lies
+  behind one of the caller's driven ports.
 
 **Adapter.** Code on the far side of a port.
 
@@ -62,9 +73,9 @@ it once.
 **Tentative operation.** A request to another system for a commitment that leaves open the
 possibility of cancellation. It changes nothing it asks for: its confirmation does.
 
-**Open host service.** The driving ports a system offers to outside callers.
+**Open host service.** The driving ports a system offers to other systems.
 
-**Published language.** What an outside system needs to talk to this one, or to translate from it:
+**Published language.** What another system needs to talk to this one, or to translate from it:
 the schemas, types and errors its open host service's driving ports take, return and raise, and
 its published messages.
 
@@ -78,8 +89,9 @@ earlier ones.
 **Choreography.** Each system reacts to the others' events and decides for itself what to do next.
 No one holds the whole sequence.
 
-**Orchestration.** One system's *process manager* holds the sequence and sends commands to the
-others.
+**Orchestration.** One system's *process manager* holds the sequence across systems: an aggregate
+whose state is where the sequence stands. Each step is a use case of that system that sends
+commands to the others.
 
 ## Other systems
 
@@ -110,21 +122,24 @@ driving through its hooks.
 ## Domain
 
 **Aggregate.** A cluster of records changed as one unit and addressed by one id; a repository loads
-and saves it whole. It belongs to the system whose rules decide what it holds, wherever it is
-stored.
+and saves it whole. It belongs to the system whose business rules decide what it holds,
+wherever it is stored.
 
 **Specification.** A domain function that answers yes or no about one candidate: is it valid, may
 this happen, does it qualify.
 
 **Repository.** A specialized driven port over exactly one aggregate: loads it, saves it, finds it.
 
-**Snapshot.** A value an aggregate copies from another when a use case needs it, and keeps as its
-own fact from then on: the price the order was placed at.
+**Snapshot.** A value an aggregate copies from another aggregate or from a message when a use
+case needs it, and keeps as its own fact from then on: the price the order was placed at.
 
-**Replica.** Another system's data kept in this system, updated by the owner's published messages.
-It is this system's aggregate and lags the owner.
+**Replica.** Another system's data kept in this system from what the owner publishes or offers:
+its messages, or reads of its open host service. It lags the owner.
 
 ## Driven adapters
+
+**Record.** What a store holds and a write changes: a row in a relational store, its equivalent in
+another.
 
 **Store.** What lies behind one or more driven ports whose writes can be committed in one
 transaction. Two clients are one store when their writes commit together, two stores until they
@@ -148,10 +163,10 @@ objects.
 **Factory.** A function that takes what an implementation needs and returns it. A service is a
 factory for a driving port; an adapter's constructor is a factory for a driven port.
 
-**System builder.** Assembly for one system, or for one part of it: takes configuration, wires the
-services it needs to their adapters, and returns implementations of what that part offers — its
-open host service, its handlers, its outbox readers, or several of them. A system has as many
-builders as there are ways it is driven.
+**System builder.** The part of assembly for one system, or for what one process runs of it:
+takes configuration, wires the services it needs to their adapters, and returns implementations
+of what that part offers — its open host service, its handlers, its outbox readers, or several of
+them.
 
 **Assembly.** The one place in a process where every port gets its implementation, and the only
 place where port and implementation meet. It calls the system builders and produces what the

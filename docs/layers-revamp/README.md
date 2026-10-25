@@ -10,8 +10,7 @@ what it keeps, is decided when it is first generated.
 
 ## Documents
 
-- `glossary.md`: definitions only. What a term may do is in the rules. Each term uses only terms
-  defined above it.
+- `glossary.md`: definitions only, read as a whole. What a term may do is in the rules.
 - `general-rules.md`: rules whose scope is any system. Glossary vocabulary.
 - `<group>.md`: rules whose scope is one kind of situation — an external system, messaging between
   systems. Groups emerge while the rules are written; none is fixed in advance.
@@ -103,7 +102,7 @@ Statement the line names. A line they do not guarantee is a finding: an issue re
 The documents depend downward: general rules use the glossary; group rules use both; examples
 are referenced from both. The cost of a change rises with the tier.
 
-- **Glossary.** Adding a term is cheap: it slots into the dependency order. Changing one —
+- **Glossary.** Adding a term is cheap. Changing one —
   rewording, narrowing, dropping — is an issue, and a fresh session works it: it sweeps every
   lower tier for the term and re-decides whatever the change touched, inside that issue.
 - **General rules.** Changing a rule's Scope or Statement is an issue that also visits every
@@ -112,6 +111,26 @@ are referenced from both. The cost of a change rises with the tier.
 - **Group rules.** Changeable without touching the tiers above. Where a situation cannot be ruled
   without changing a general rule or a term, the same issue makes that change, upward, under the
   rules of the tier it touches.
+
+## Peer review
+
+Only when one is requested. Each type has one goal; a request names the goal, and only that type
+runs. A reviewer is a subagent given only the files its type lists, never the conversation, the
+issues or the other documents; it writes what it finds to a temporary file for the requester to
+read. A finding the requester accepts goes into an issue.
+
+- **Fresh repo, twice.** Goal: tell where `the-world.md` leaves a choice open on purpose from
+  where a reader can take it two ways. Two subagents each get `glossary.md`, `the-world.md`, that
+  both draw on Evans, Cockburn and Khononov, and the same product brief: the fixture's
+  capabilities and technologies, never its systems or edge cases. Each drafts an architecture:
+  systems and what each owns, ports and adapters, calls and messages, processes, a directory
+  tree, how each property holds, and every decision the two documents left to it. Where the
+  drafts differ, either the world leaves the choice open, fine, or one of its sentences reads two
+  ways, a finding.
+- **Red team.** Goal: find what `the-world.md` should rule out and does not. One subagent gets
+  `glossary.md` and `the-world.md` and designs architectures that hold every property and are
+  plainly bad: a distributed monolith, every system reading one shared schema, one system owning
+  everything. Each design that holds is a finding: a force or a property missing.
 
 ## Working here
 
