@@ -23,6 +23,9 @@ merges Product and third party, so Stripe's items sit here too and the group's n
 - The shared `products` record, editorial copy and price (issue 05, `SYS-8` retired): a
   before-change hook returning shop's price for Payload to write; editors editing shop's price in
   Payload's admin (issue 04).
+- Shop's fields on the shared `products` record under `TX-23`: whether Payload's Local API can make
+  a write conditional, and whether an editor's copy edit counts as a change to shop's aggregate
+  (issue 10).
 - Drizzle plus Payload as two clients on one database (issue 05).
 - Catalog data written through Payload in a transaction that commits with ours. Catalog is an
   external system (issue 06), so `TX-22`'s Scope holds and the shared transaction breaches it

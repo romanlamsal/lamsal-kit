@@ -38,6 +38,8 @@ produce no new example. Order: `specs/01-work-order.md`, step 8.
   - `svc-6-breach-drizzle-transaction-in-port`: whether a store client library's type counts as
     a library that computes from its arguments.
   - The raw-SQL example above is issue 07's now (store clients).
+- Left by issue 10: `TX-23`, `TX-24`, `TX-25` are new, with no example files; the `tx-2-*` files
+  show writes only, where `TX-2`'s Scope now covers reads.
 - From issue 04's proposal: MAY "breaches" are listed under the rule that governs once the MAY's
   Scope fails. The README's examples entry gains it.
 

@@ -15,7 +15,7 @@ It checks the step in the commit that lands it.
 - [x] 3. **Apply issue 05.** Its Apply section, in order, on the glossary as step 2 left it.
 - [x] 4. **Relies on, issue 09.** First of the open steps: steps 5 to 7 write and revise rules,
   so they write the field and self-review with it, and step 8's readers check it.
-- [ ] 5. **Transaction reads and concurrency, issue 10.** Before products: steps 6 and 7 build on
+- [x] 5. **Transaction reads and concurrency, issue 10.** Before products: steps 6 and 7 build on
   `TX-1` and `SVC-2`, whose guarantees it changes.
 - [ ] 6. **Products and external systems, issue 07.** A grill. It decides once the items it shares
   with issue 01: a hook that never arrives with recovery of a message that fails for good; an

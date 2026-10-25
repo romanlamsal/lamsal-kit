@@ -1,6 +1,6 @@
 # 10 — Transaction reads and concurrency
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -36,8 +36,30 @@ Settled when it was opened:
 
 ## Decision
 
-—
+- **Reads.** `TX-2`'s Scope becomes a driven adapter handed a transaction; each call into its
+  store, reads included, runs inside it. The visit: `TX-1`, `TX-5`, `TX-6`, `SVC-4` rely on writes
+  inside the handed transaction, which the wider Statement still guarantees; their lines stand.
+- **Concurrency.** Two new rules; `SVC-2`'s Scope and Statement stand:
+  - `TX-23`: a repository's save fails where the aggregate changed since it was loaded. A version
+    compared on save and a lock held from load to commit both comply. Khononov p. 86–87, Vernon
+    EAD I p. 2, Evans p. 94.
+  - `TX-24`, SHOULD: the data a decision has to hold by at commit belongs to aggregates the use
+    case saves. A decision across aggregates holds after a delay; a deviation's ADR names a lock
+    or an isolation level. Evans p. 91 and p. 97, Vernon EAD I p. 3.
+  - `SVC-2` relies on `TX-2`, `TX-23`, `TX-24`; its Why's "loads the data in the transaction that
+    writes" gains the failing save.
+- **Isolation.** The Assumptions gain a write that fails where the record changed since it was
+  read, and assume no isolation. `TX-23` holds at READ COMMITTED: Postgres re-checks an
+  `UPDATE`'s condition against the row version it waited for.
+- **Answering ports.** `TX-25`: a driving port takes no transaction. `ASM-9`'s Why, the
+  transaction stopping where a call into another system takes none, now relies on it.
+- Review fixes: `TX-5`'s Why has a second record of the same id fail, for a redelivery running
+  beside the first attempt; `TX-23` relies on `SVC-4`, a version seeing only writes through the
+  repository; the Assumptions' no isolation reads committed writes.
 
 ## Consequences
 
-—
+- To issue 07: shop's fields on Payload's `products` document fall under `TX-23`; whether the
+  Local API can make a write conditional, and whether an editor's copy edit is a change to shop's
+  aggregate.
+- To issue 08: `TX-23`, `TX-24`, `TX-25` have no examples; the `tx-2-*` files show writes only.

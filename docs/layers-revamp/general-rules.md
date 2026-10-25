@@ -6,9 +6,11 @@ at the end.
 
 ## Assumptions
 
-This document assumes a store that can be read and written, and that can apply several writes
-atomically where it says *transaction*. *Record* is used in the relational sense, a row;
-substitute your store's equivalent.
+This document assumes a store that can be read and written, that can apply several writes
+atomically where it says *transaction*, and that can make a write fail where the record has
+changed since it was read. It assumes no isolation between transactions beyond reading committed
+writes: a transaction may read what another commits while it runs. *Record* is used in the
+relational sense, a row; substitute your store's equivalent.
 
 Every system gets the same architecture: domain, service, repositories and adapters, a simple one
 too. That is this document's choice. The sources pick the architecture per subdomain and let
@@ -162,6 +164,12 @@ whether the stock suffices, whether the order is still open.
 *Relies on:*
 - TX-1: a use case that writes runs in one transaction its service opens, hands to each call into
   its store, reads included, and commits.
+- TX-2: a driven adapter handed a transaction makes each call into its store inside it, reads
+  included.
+- TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
+  changed in the store since the load.
+- TX-24: by default, the data a decision has to hold by when the use case commits belongs to
+  aggregates the use case saves.
 - DRV-8: a driving adapter reaches its system through driving ports, importing no driven port,
   driven adapter or service of it.
 - SYS-1: a system exports no service, driven port or adapter to other code.
@@ -170,7 +178,7 @@ protects one way in; another adapter, or a downstream calling the port directly,
 service sees every call. A check made before the acting call, by another call, is stale by the
 time the act runs: what it read changes between the two. So the acting service loads the data in
 the transaction that writes, asks the domain's specification, which decides, and refuses where it
-says no.
+says no; where what it loaded changes before the commit, its save fails and the act with it.
 *Provenance:* Follows Khononov p. 85 (the aggregate's public interface validates the input and
 enforces all business rules, "in one place") and Cockburn (Motivation: business logic infiltrating
 the user interface). The stale check is CWE-367's (Time-of-check Time-of-use: "the resource's
@@ -487,7 +495,8 @@ builds the system, then runs the driver adapter). The courier and its filling ar
 **ASM-9**
 *Scope:* a transaction.
 *Statement:* It MUST NOT be an ambient value.
-*Relies on:* —
+*Relies on:*
+- TX-25: a driving port takes no transaction.
 *Why:* What a read returns depends on the transaction it runs in: a repository reading an ambient
 transaction returns different data depending on what the caller happened to open. A transaction
 opened on purpose changes nothing of how the use case acts, and still travels where nobody passed
@@ -569,18 +578,91 @@ aggregates see no "transactional collisions".
 *Examples:* —
 
 **TX-2**
-*Scope:* a driven adapter writes to a store.
-*Statement:* It MUST write inside the transaction it is handed.
+*Scope:* a driven adapter is handed a transaction.
+*Statement:* Each call it makes into its store MUST run inside that transaction.
 *Relies on:*
 - TX-1: a use case that writes runs in one transaction, which its service hands to each call into
   its store and commits.
-*Why:* An adapter that takes the transaction and writes without it, or opens its own, commits on its
-own: a failure between the writes leaves the use case half done, and the transaction's rollback
-leaves this write in place. The type checker cannot see this: a method that takes the transaction
-and writes through the global client compiles. The breach hides in small edits: a loop with one
-write per iteration on the client, not the transaction; a write moved out of a function that gets a
-transaction of its own. Repositories, the outbox and the record of handled messages alike.
-*Provenance:* Follows Evans p. 111 (the repository "will ordinarily not commit anything").
+*Why:* A write outside it, through the global client or a transaction the adapter opens itself,
+commits on its own: a failure between the writes leaves the use case half done, and the
+transaction's rollback leaves this write in place. A read outside it sees none of the use case's
+writes so far, so the service decides by a state its own transaction has already changed, and it
+reads past whatever the transaction holds against others: a row lock the transaction took, an
+isolation level stricter than the default. The type checker cannot see this: a method that takes
+the transaction and calls through the global client compiles. The breach hides in small edits: a
+loop with one write per iteration on the client, not the transaction; a lookup moved into a helper
+that reaches for the client. Repositories, the outbox and the record of handled messages alike.
+*Provenance:* Follows Evans p. 111 (the repository "will ordinarily not commit anything"). Reads
+inside the transaction are this document's.
+*Examples:* —
+
+**TX-23**
+*Scope:* a repository saves an aggregate that was loaded through it.
+*Statement:* The save MUST fail where the aggregate has changed in the store since it was loaded.
+*Relies on:*
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
+  its store and commits.
+- TX-2: a driven adapter handed a transaction makes each call into its store inside it.
+- SVC-4: a use case's write of a record goes through the repository of the aggregate it belongs to.
+*Why:* One transaction does not stop another from changing what it read before it commits. At
+Postgres's default isolation, READ COMMITTED, shop's payment and its deadline arrive together:
+marking the order paid loads it open, cancelling it loads it open, each saves, and both commit.
+The order ends in whichever state saved last, `OrderPaid` and `OrderCancelled` are both out, and
+fulfillment ships an order it released. The later save wrote over the earlier one by a decision
+whose state no longer held. A save that fails tells the second use case so, and its transaction
+rolls back with nothing of it committed. A version the aggregate carries, compared on save, is
+one way; a lock taken at the load and held to the commit, under which the aggregate cannot
+change, is another.
+*Provenance:* Follows Khononov p. 86–87 (the concurrency check: the later transaction must not be
+"blindly overwriting the changes committed by the first one"; a version compared on save; "it's
+crucial to ensure that the database used for storing an aggregate's data supports concurrency
+management") and Vernon EAD I p. 2 (a version number "checked before they are saved to the
+database"; the stale copy's updates "are rejected"). Evans p. 94 locks the whole purchase order
+instead, which the Statement admits too.
+*Examples:* —
+
+**TX-24**
+*Scope:* a use case decides by what this system has stored, and the decision has to hold when the
+use case commits: the stock suffices, the order is still open.
+*Statement:* The data it decides by SHOULD belong to aggregates the use case saves.
+*Relies on:*
+- TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
+  changed in the store since the load.
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
+  its store and commits.
+*Why:* The aggregates a use case saves fail on a change. Data in one it reads and does not save
+changes before the commit and nothing fails: two reservations both read a stock of 1 from
+`Stock`, each saves a `Reservation` of its own, and both commit. Held in the aggregate the use
+case saves, the stock with its reservations in `Stock`, the second save fails. Where the decision
+cannot sit in the aggregates one use case saves, it is a rule across aggregates, which holds
+after a delay: a later use case, a reconciliation, a compensating step repairs it. A deviation's
+ADR names what holds the data still instead: a lock on what the decision read, an isolation level
+under which the second commit fails.
+*Provenance:* Follows Evans p. 91 (invariants within an aggregate "enforced with the completion of
+each transaction"; "Any rule that spans AGGREGATES will not be expected to be always up to date")
+and p. 97 (the line item holds its own price, the purchase order's invariant kept inside it),
+Evans Reference p. 16 ("Within an aggregate boundary, apply consistency rules synchronously"),
+Vernon EAD I p. 3 ("Model True Invariants In Consistency Boundaries": an invariant "is a business
+rule that must always be consistent", transactionally) and Khononov p. 87 (the aggregate as the
+transactional boundary). Departs: Vernon EAD I p. 4 has one aggregate per transaction; under
+TX-1's several, the data may span the aggregates one use case saves. Evans p. 94–95 locks the
+purchase order and the parts it prices before modeling the lock away (p. 96–97).
+*Examples:* —
+
+**TX-25**
+*Scope:* a system declares a driving port.
+*Statement:* It MUST NOT take a transaction.
+*Relies on:*
+- TX-1: a use case that writes runs in one transaction its own service opens and commits.
+*Why:* A writing use case opens its own transaction, so one handed in is a second, or takes the
+place of the one its service opens. An answering use case writes nothing and needs none; a port
+that takes one "to read consistently" is where the caller's slips in. The caller of an open host
+service's port is another system: its transaction handed in runs the upstream's reads in the
+downstream's, one transaction across two systems' data, the upstream's store bound to whatever
+the downstream opened, and a port that stops working once the upstream runs in its own process.
+*Provenance:* Follows Richardson (Database per service: "A service's transactions only involve
+its database") and Helland 2007 ("Atomic Transactions Cannot Span Entities"). The rule on the
+port is this document's.
 *Examples:* —
 
 **TX-15**
@@ -716,10 +798,11 @@ modification can be retried if the subscriber does not acknowledge success").
   its store and commits.
 - TX-2: a driven adapter writes to its store inside the transaction it is handed.
 *Why:* Delivery repeats: a handler that failed after acting is delivered the message again, a relay
-that crashed after handing a message over hands it over again. A use case that acts on every
-delivery reserves the stock twice and sends the mail twice. Two means reach idempotence: recording
-the ids of handled messages in the transaction that acts on them, or a change whose repeat is no
-change, a status set rather than toggled.
+that crashed after handing a message over hands it over again, and a redelivery can run while the
+first attempt still does. A use case that acts on every delivery reserves the stock twice and
+sends the mail twice. Two means reach idempotence: recording the ids of handled messages in the
+transaction that acts on them, where a second record of the same id fails, or a change whose
+repeat is no change, a status set rather than toggled.
 *Provenance:* By id, follows Richardson (Idempotent consumer: "a consumer must be idempotent", by
 recording the ids of processed messages), NServiceBus (Outbox: deduplication by MessageId), Helland
 2007 p. 140 and Khononov p. 245. By what the message says, follows EIP (Idempotent Receiver),
