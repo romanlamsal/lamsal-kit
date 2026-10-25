@@ -24,7 +24,8 @@ Settled when it was opened:
 Glossary changes made while `the-world.md` was written. Each is a changed term, so lower tiers are
 swept (README, Tiers):
 
-- New: *Business domain*, *Business rule*, *Record*, *Probe*.
+- New: *Business domain*, *Business rule*, *Record*, *Probe*; *Outside* from the red team round
+  below.
 - Domain, Service, Aggregate: "rules" became "business rules". Plain "rules" means the documents'
   rules.
 - Service: holds the sequence "within one use case". Orchestration: the process manager holds the
@@ -48,6 +49,20 @@ Applied already, outside the glossary and `the-world.md`:
   system's data" became "A replica is filled from the owner's published messages, so reading it
   reads them."
 - README: the ordering claim dropped from Documents and Tiers; Peer review added.
+
+A red team round on `the-world.md` (README, Peer review) changed it after it was opened. The sweep
+reads the rules against these too:
+
+- Properties renumbered. New: P3, business rules that change together sit together; P14, a record
+  or a message means the same to all code that reads it.
+- P2 places business rules in the domain. P4: a use case responds the same. P5: ports both ways,
+  each in the system's terms. P8: an uncommitted write is not yet a fact. P10: a use case commits
+  only on reads that still hold; use cases fail each other only where a business rule ties them.
+  P15: down or slow. P17: work spanning systems ends.
+- "The model" became "a business rule" in P9, P10, P17.
+- F2: the cut between systems moves. F4: a deploy replaces processes one at a time; records and
+  messages outlive the code that wrote them. Scope: what a store commits survives any stop.
+- "A system's records" are the records it keeps, not those its business rules decide (issue 07).
 
 ## Problem
 
@@ -77,6 +92,9 @@ Applied already, outside the glossary and `the-world.md`:
   - Working here 1 reads it with the glossary; spec 01's opening likewise.
   - Exceptions states the overrule condition: a repo may overrule a general rule where the
     properties of `the-world.md` still hold.
+  - Exceptions also meets an overrule of `the-world.md` itself: a CLI driving the repo on
+    in-memory outboxes, relay and bus, only aggregates reaching production, breaks the Scope's
+    surviving commits and P8. Accepted as an overrule one tier higher; how it is stated is open.
 
 ### Open questions
 
@@ -92,7 +110,7 @@ an architecture for the fixture's shop and listed where the two left it guessing
    adapters.
 3. **Call or message.** No rule says when a step is a call to another system and when a message.
    Lead from the draft: a step before the commit is a call whose effect stays tentative; a
-   consequence of the commit is a message (`the-world.md` P7).
+   consequence of the commit is a message (`the-world.md` P8).
 4. **A failed save.** `TX-23` fails a save on a changed aggregate; no rule says who reruns it,
    the transaction adapter or the caller. A rerun needs a body that can run twice.
 5. **The fake of an in-process conformist's open host service.** Who owns it (`TST-11`).
@@ -105,6 +123,11 @@ an architecture for the fixture's shop and listed where the two left it guessing
 10. **Authorization.** Where the check sits. Lead: the driving adapter prepares the call for its
     driving port, the check included. Against: whether a caller may act on a given record, only
     the order's customer cancels it, is a business rule (`the-world.md` P2).
+    *Answered in the red team round:* the per-record check is a business rule, so in the domain
+    (P2); the driving adapter establishes who calls and passes it. Tell, don't ask: a downstream
+    system never asks an upstream whether a user may act; it sends the command to the upstream's
+    acting use case, which checks. No source names the per-record check; closest, Evans pdf 295:
+    who has authority to approve, answered by the domain model.
 11. **`TX-12` and `TX-7`.** Whether `TX-12` relies on `TX-7`.
 12. **Earlier review items awaiting a ruling.**
     - `TX-3`'s "holds" back to "owns".
@@ -112,7 +135,7 @@ an architecture for the fixture's shop and listed where the two left it guessing
     - `asm-7-breach-logger-substituted-by-module-mock` flipped to ok, its
       transaction-per-invoice loop fixed.
     - The shared kernel kept in the `SVC-6`, `DRV-8`, `DVN-4` lists.
-    - To issue 07: `TX-22`'s "holds" (storage or rules) with the shared-Postgres store question;
+    - To issue 07: `TX-22`'s "holds" (storage, issue 07) with the shared-Postgres store question;
       `sys-8` under `TX-22`; mail handlers relying on the provider's idempotency key.
 13. **The fixture.** `domain.md` leaves open what the bank API is for (a paid order gets an
     invoice, yet unpaid invoices are dunned), who owns a product's tax class, and the SKU's

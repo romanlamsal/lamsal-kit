@@ -30,6 +30,12 @@ merges Product and third party, so Stripe's items sit here too and the group's n
 - Catalog data written through Payload in a transaction that commits with ours. Catalog is an
   external system (issue 06), so `TX-22`'s Scope holds and the shared transaction breaches it
   (issue 05).
+- `TX-22`'s "holds" and the shared-Postgres store: the red team round on `the-world.md` read "a
+  system's records" as the records it keeps, not those its business rules decide; one store may
+  keep two systems' records. Sources: ownership is stated by storage, for the owner's business
+  rules (Evans pdf 114: other processes "could violate the invariants enforced by the objects");
+  a replica is the receiver's own copy; outbox, processed ids and saga state sit in the same
+  store, named apart from domain state (Richardson, Khononov, MS, Helland, NServiceBus).
 - Hooks shop's builder constructs that read the courier, the ok examples
   `sys-1-ok-shop-hooks-via-builder.md` and `sys-11-ok-payload-terms-stop-in-shop-payload-module.md`
   (`ASM-4`, `DRV-3`). Issue 04 proposed: Payload's config loads before assembly runs, so its hooks

@@ -15,6 +15,9 @@ A system is one bounded context. It is code with its own domain and its own glos
 repository may hold several. Another bounded context is another system, even when it is
 imported in-process.
 
+**Outside.** Other systems and third parties, the operating system among them, whether they
+drive the system or it drives them: a store, a mail provider, the clock, the file system.
+
 **Tooling.** Code that runs in no process of the deployed application: a developer CLI, a seed
 script, a test that asserts about the source tree.
 
