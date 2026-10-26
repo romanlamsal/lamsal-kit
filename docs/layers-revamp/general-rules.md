@@ -923,7 +923,7 @@ owner.
 rest on a fact the owner has already changed. Whether that is acceptable depends on the use case, so
 the answer is a business rule, in the domain, where a reader finds it. Shop offers pay-by-invoice by
 its copy of billing's dunning stage; a business rule accepts a customer who entered dunning a moment
-ago. Where none accepts the lag, the decision is the owner's: a tentative operation, a message.
+ago.
 *Provenance:* Follows Vernon EAD II p. 9 (domain experts "are often willing to allow for reasonable
 delays"), MS (Domain events: "it is in any case the responsibility of the domain experts to say
 whether particular operations need atomic transactions or not"), Helland 2005 §2.5 (the application
