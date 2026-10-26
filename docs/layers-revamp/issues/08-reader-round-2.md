@@ -56,11 +56,12 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
   `sys-1-ok-shop-export-paths`, `svc-6-ok-opaque-transaction`.
 - Left by issue 01: `TX-32` to `TX-35`, `SYS-13`, `SYS-14` are new; `TX-7`'s Scope widened to an
   open host service called from another process, with no example of that; `TX-12` reads published
-  events. The glossary's Message, Published language, Upstream and Downstream changed: a command is
-  its receiver's. Examples still sending commands named for their sender's model, or a private
-  `SendOrderConfirmation` called a command, are leads. `tx-1-ok-refund-and-payment-in-one-transaction`
-  throws on a refused refund; called for shop's `RefundPayment`, that is `TX-34`'s breach. The fixture
-  gained refunds, credit notes, the dunning stage and saga step 7.
+  events; `TX-26` writes a replica from events and returns, not replies. The glossary's Message,
+  Published language, Upstream and Downstream changed: a command is its receiver's. Examples still
+  sending commands named for their sender's model are leads.
+  `tx-1-ok-refund-and-payment-in-one-transaction` throws on a refused refund; called for shop's
+  `RefundPayment`, that is `TX-34`'s breach. The fixture gained refunds, credit notes, the dunning
+  stage and saga step 7.
 - From issue 04's proposal: MAY "breaches" are listed under the rule that governs once the MAY's
   Scope fails. The README's examples entry gains it.
 

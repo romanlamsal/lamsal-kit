@@ -921,7 +921,9 @@ holding the state the event meets; the step it undoes stays its owner's.
 changes made by the completed steps are undone by compensating transactions"; the order service's
 handler "either approves or rejects the Order"), Khononov p. 235 ("The only thing that can be done
 to overturn an event is to issue a compensating action—a command, as it's carried out in the saga
-pattern").
+pattern") and p. 151 (the process manager "determines the next processing steps"), and Vernon EAD II
+p. 8–9 ("it may be necessary to compensate, or at a minimum to report the failure for pending
+intervention").
 *Examples:* breach examples/tx-35-breach-late-payment-dropped.md · ok
 examples/tx-35-ok-late-payment-refunded.md
 
@@ -1072,14 +1074,12 @@ upgrade order; Helland 2005 §3.4 goes further, every change a new version.
 each receiver's decision, made by subscribing its handler (glossary: Bus). A publisher that names
 its handlers changes whenever a system starts or stops listening, and imports what it names, so the
 dependency runs from upstream to downstream, against the one the published language establishes.
-A command is outside the Scope: it is its receiver's, declared in the receiver's published language
-(glossary: Published language), and the sender imports it as a downstream does.
 *Provenance:* Follows EIP (Publish-Subscribe Channel), Richardson (Messaging), NServiceBus (Events),
 MS (the publisher does not need "to know the subscribers") and Khononov p. 233.
 *Examples:* —
 
 **TX-33**
-*Scope:* a handler is subscribed to a command.
+*Scope:* a handler is subscribed to a published command.
 *Statement:* It MUST be a handler of the system whose published language declares the command.
 *Relies on:* —
 *Why:* A command asks, and its receiver may refuse (glossary: Message). Another system's handler
@@ -1087,16 +1087,18 @@ that acts on it acts on a request as if it were done: billing, subscribed to pay
 `RefundPayment`, issues a credit note for a refund payment refused on a disputed charge. Two systems
 acting on one command each do what the sender asked of one. And the command is the receiver's offer,
 shaped for the receiver's use case and changed on its terms; a second system's handler breaks where
-the receiver changes it. What did happen the receiver tells as an event, which any system may handle.
-*Provenance:* Follows NServiceBus (Messages, events, and commands: "a command should only be
-consumed by a single consumer"; a command "Cannot be subscribed to or unsubscribed from") and
-Khononov p. 235 ("the command's target can refuse to execute the command").
+the receiver changes it. What did happen the receiver tells as an event, which any system may
+handle.
+*Provenance:* Follows NServiceBus (Messages, events, and commands: a command "Should be sent to the
+logical owner"; "Typically, a command should only be consumed by a single consumer"), MS (a command
+"should be processed just once by a single receiver") and Khononov p. 235 ("the command's target can
+refuse to execute the command").
 *Examples:* breach examples/tx-33-breach-billing-handles-refund-payment.md · ok
 examples/tx-33-ok-billing-handles-payment-refunded.md
 
 **TX-34**
-*Scope:* a use case called for a command another system sent refuses it: a business rule of its
-system says no.
+*Scope:* a use case called for a command another system of this codebase sent refuses it: a business
+rule of its system says no.
 *Statement:* It MUST publish an event that tells of the refusal.
 *Relies on:*
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
@@ -1112,10 +1114,10 @@ event is the receiver's, in its published language, naming no sender; the sender
 downstream handles any event of its upstream. A failure that a retry may cure, a store down, a save
 that lost to a concurrent one (TX-23), is no refusal: the use case fails and the bus delivers again.
 *Provenance:* Follows Khononov p. 235 (a command "can be rejected", "if the command is invalid or if
-it contradicts the system's business rules") and Richardson (Saga: the participant "emits an event
-indicating the outcome"). Departs: Richardson's orchestrated participant "sends back a reply
-message", and NServiceBus replies to the sender; here the receiver publishes, and the sender
-subscribes.
+it contradicts the system's business rules") and p. 148 (the saga's command answered by
+"PublishingConfirmed and PublishingRejected events from the AdPublishing bounded context"). Departs:
+Richardson's orchestrated participant "sends back a reply message" (Saga), and NServiceBus replies
+to the sender; here the receiver publishes, and the sender subscribes.
 *Examples:* breach examples/tx-34-breach-refund-refusal-thrown.md · ok
 examples/tx-34-ok-refund-refusal-published.md
 
@@ -1124,8 +1126,8 @@ examples/tx-34-ok-refund-refusal-published.md
 *Statement:* It MUST read it from the owner's open host service or from its published events.
 *Relies on:*
 - SYS-2: the modules that declare a published language import nothing of the domain.
-- TX-7: a changed message schema keeps messages old code writes readable by new code and the
-  reverse, each field keeping its meaning.
+- TX-7: a changed schema of a message, or of an open host service called from another process,
+  keeps what old code writes readable by new code and the reverse, each field keeping its meaning.
 *Why:* The owner's open host service and its published events are what it offers on purpose, in
 its published language. Reading its store directly, a join across both systems' tables, a query
 against its records, binds this system to the owner's storage: the owner's schema change breaks this
@@ -1150,8 +1152,8 @@ autonomy.
 
 **TX-26**
 *Scope:* a replica is written.
-*Statement:* It MUST be written from the owner's events, or from what the owner returns or replies
-to the keeping system's own calls and commands.
+*Statement:* It MUST be written from the owner's events, or from what the owner returns to the
+keeping system's own calls.
 *Relies on:*
 - TX-3: a use case changes data another system of this codebase owns by writing a message to its
   own outbox.
@@ -1161,7 +1163,7 @@ port the keeping system opens for it or by a command, changes whenever a system 
 keeping one, and decides what another system keeps, in which shape, and how a late or repeated
 message lands there. The keeping system decides that against its own needs: its handler of the
 owner's events, its scheduled task reading the open host service, its process manager keeping what
-the owner replies to its commands. The owner shapes its published language for the systems
+the owner's events tell of its commands. The owner shapes its published language for the systems
 downstream; it does not start the exchange.
 *Provenance:* Follows Fowler (What do you mean by "Event-Driven"?, Event-Carried State Transfer: the
 recipient keeps its own copy), Khononov p. 238, Richardson (CQRS: the view is kept by subscribing to
@@ -1287,7 +1289,7 @@ anti-corruption layer hands its own terms to a driven port, whose adapter writes
 command to the outbox in the transaction it is handed.
 *Provenance:* Follows NServiceBus (Messages, events, and commands: a command "Has one logical
 owner" and "Should be sent to the logical owner") and Khononov p. 235 (the command's target) and
-p. 149–150 (the saga's commands executed on their targets). Fowler (What do you mean by
+p. 148–150 (the saga's commands executed on their targets). Fowler (What do you mean by
 "Event-Driven"?) warns of the reverse disguise, an event used as a "passive-aggressive command".
 *Examples:* breach examples/sys-13-breach-shop-declares-reserve-stock.md · ok
 examples/sys-13-ok-checkout-process-sends-receivers-commands.md
@@ -1304,10 +1306,13 @@ where it conforms (DOM-1), into a browser parsing a form. What they import, ever
 that imports `Money` and into the browser bundle, past DOM-1, whose list names the shared kernel and
 not what it imports. SYS-2 keeps the domain out of a published language and SYS-10 the rest of its
 system; neither bounds what else it imports. The list is DOM-1's, narrowed to what both are for: a
-model of values, computed from arguments. It is closed, like DOM-1's.
-*Provenance:* Follows Evans p. 251 (the shared kernel: "some subset of the domain model that the two
-teams agree to share") and
-Garrido §6.2.1 (ports that "would depend on nothing"). The list is this document's.
+model of values, computed from arguments. DOM-1's published language of an upstream stays off the
+list: a published language or a shared kernel that imports one passes the upstream's changes on to
+every system that imports it, on the upstream's schedule. It is closed, like DOM-1's.
+*Provenance:* Follows Khononov p. 51 ("Ideally, the shared kernel will consist only of integration
+contracts and data structures") and Garrido §3 (the hexagon "depends on nothing, maybe just on
+utilities"). The list is this document's. Departs: Evans p. 251 shares "the subset of code or of the
+database design" with the model.
 *Examples:* breach examples/sys-14-breach-money-imports-common-logger.md · ok
 examples/sys-14-ok-money-returns-remainder.md
 

@@ -14,7 +14,7 @@ export const reserveStockSchema = z.object({
 })
 
 // shop/service/checkout-process.ts — a process manager: its state is where the checkout stands
-import { reserveStock, releaseStock } from "@teeladen/fulfillment/published"
+import { reserveStock } from "@teeladen/fulfillment/published"
 import { createPayment } from "@teeladen/payment/published"
 
 export const createCheckoutProcess =
@@ -42,8 +42,7 @@ export const createCheckoutProcess =
 
 Shop imports each command from its receiver's export path, as a downstream imports a driving port
 type: fulfillment declares `ReserveStock` and changes it on its own terms. Shop conforms to both
-here, so its service imports them (SVC-6). Each step writes the
-command in the transaction that records where the process stands. A refused reservation is an event
-fulfillment publishes, and shop's domain decides what follows. Whether the saga is orchestrated like
-this or choreographed, as the fixture's five steps read, the rules do not say; it is a repository's
-choice (Assumptions).
+here, so its service imports them (SVC-6). Each step writes the command in the transaction that
+records where the process stands. A refused reservation is an event fulfillment publishes, and
+shop's domain decides what follows. Whether the saga is orchestrated like this or choreographed, as
+the fixture's five steps read, the rules do not say; it is a repository's choice (Assumptions).

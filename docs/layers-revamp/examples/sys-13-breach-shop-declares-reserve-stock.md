@@ -1,6 +1,6 @@
 ---
-breaches: [SYS-13]
-satisfies: [SYS-2, TX-17]
+breaches: [SYS-13, TX-33]
+satisfies: [SYS-2]
 situation: shop places the order; fulfillment reserves the stock on it
 ---
 
@@ -26,10 +26,11 @@ export const buildFulfillmentHandlers = ({ reserveStock }: FulfillmentServices) 
 })
 ```
 
-No line of shop names fulfillment, so TX-17 holds, and the schema imports no domain. Yet the command
+The schema imports no domain, so SYS-2 holds, and no line of shop names fulfillment. Yet the command
 is fulfillment's use case, declared in shop's terms. When fulfillment's reservation rule changes,
 `reserveUntil` changes in shop's published language, and commands in the old shape still wait in
 shop's outbox. Fulfillment imports shop's published language to handle orders it is told to carry
-out, so shop is upstream of the system it gives orders to, and fulfillment adapts to it. Declared in
+out, so shop is upstream of the system it gives orders to, and fulfillment adapts to it; its handler
+is subscribed to a command another system's published language declares (TX-33). Declared in
 fulfillment's published language, `ReserveStock` would be fulfillment's to change, and shop would
 import it as the downstream.

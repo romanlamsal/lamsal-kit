@@ -1,5 +1,5 @@
 ---
-breaches: [TX-32]
+breaches: [TX-32, TX-19]
 satisfies: [TX-5, TX-6]
 situation: billing's dunning stage rises with each reminder and clears once the customer pays; shop keeps a replica for pay-by-invoice
 ---
@@ -24,9 +24,10 @@ export const createRecordDunningStage = ({ transaction, handled, dunning }: Deps
     })
 ```
 
-The scheduled dunning run raises a customer to `reminder`; a minute later the bank transfer matches and
-billing clears the stage to `none`. The relay hands both over; the bus delivers `none` first, then
-`reminder`. Shop's replica holds `reminder` for a customer who owes nothing, and checkout refuses them
-pay-by-invoice until the next change, which may never come. Shop could compare `changedAt`, but the
-dunning run and the bank match run in different processes whose clocks disagree by more than the
-minute between them. Nothing on the message says which change came after the other.
+The scheduled dunning run raises a customer to `reminder`; a minute later the bank transfer matches
+and billing clears the stage to `none`. The relay hands both over; the bus delivers `none` first,
+then `reminder`. Shop's replica holds `reminder` for a customer who owes nothing, and checkout
+refuses them pay-by-invoice until the next change, which may never come. Shop could compare
+`changedAt`, but the dunning run and the bank match run in different processes whose clocks disagree
+by more than the minute between them. Nothing on the message says which change came after the other,
+so shop's result follows the order they arrive in (TX-19).

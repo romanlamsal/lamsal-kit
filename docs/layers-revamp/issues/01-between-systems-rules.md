@@ -95,14 +95,14 @@ Other systems; ids are labels.
 - **Glossary.** *Message*: an id, the same on every delivery; no receiver can refuse an event; a
   command goes to the one system that offers it, which may refuse. *Published language*: the events
   it publishes and the commands it takes from other systems: a command is the receiver's (Khononov
-  p. 235, NServiceBus "logical owner"). *Upstream* and *Downstream* follow: the sender of a command is
-  downstream. Saga, Handler, Bus unchanged; Reconciliation kept, `TX-24` and `TX-30` use it.
+  p. 235, NServiceBus "logical owner"). *Upstream* and *Downstream* follow: the sender of a command
+  is downstream. Saga, Handler, Bus unchanged; Reconciliation kept, `TX-24` and `TX-30` use it.
 - **Commands.** `SYS-13`: a command to another system of this codebase is one the receiver's
-  published language declares. `TX-33`: only the declaring system's handler subscribes to it. Routing
-  to one receiver follows: the receiver's assembly subscribes, the relay and bus import nothing
-  (`ASM-5`); how the bus finds handlers is the stack document's (Assumptions). The sender imports the
-  command through the receiver's export path (`SYS-9`); a conformist's service writes it, an
-  anti-corruption layer's driven adapter does.
+  published language declares. `TX-33`: only the declaring system's handler subscribes to it.
+  Routing to one receiver follows: the receiver's assembly subscribes, the relay and bus import
+  nothing (`ASM-5`); how the bus finds handlers is the stack document's (Assumptions). The sender
+  imports the command through the receiver's export path (`SYS-9`); a conformist's service writes
+  it, an anti-corruption layer's driven adapter does.
 - **The refusal coming back.** `TX-34`: a use case refusing another system's command publishes an
   event telling of it, and succeeds. Throwing loops through redelivery into the dead-letter queue.
   Refusals only: a command's success may come late, through an external system.
@@ -113,10 +113,10 @@ Other systems; ids are labels.
 - **Trace context across the bus.** No rule: telemetry, so `ASM-3` and `ASM-7` let the outbox
   adapter read it and the envelope carry it.
 - **Issue 09's gaps.** The id kept across repeats: the glossary's Message. The order on overriding
-  messages: `TX-32`, a version, rising with each change; `TX-19` relies on it. Imports of a published
-  language and a shared kernel: `SYS-14`, a closed list; `DOM-1` relies on it. The open host service
-  kept compatible: `TX-7`'s Scope widens to a port called from another process; `SYS-2`'s line
-  follows.
+  messages: `TX-32`, a version, rising with each change; `TX-19` relies on it. Imports of a
+  published language and a shared kernel: `SYS-14`, a closed list; `DOM-1` relies on it. The open
+  host service kept compatible: `TX-7`'s Scope widens to a port called from another process;
+  `SYS-2`'s line follows.
 - **Issue 11's item**, a downstream acting on an acting use case's result: no rule. `TX-3` leaves no
   acting call into another system of this codebase; an external system's answer recorded under
   `TX-22` and told again by its hook is `TX-5`'s repeat.
@@ -136,3 +136,32 @@ Other systems; ids are labels.
   `sys-13-ok-checkout-process-sends-receivers-commands`. New:
   `asm-3-ok-trace-context-crosses-bus-in-envelope`.
 - To issue 08: see its Problem.
+
+## Review
+
+A review after closing changed, with no new issue:
+
+- `TX-33`'s Scope is a published command. A system may tell itself "do this" (glossary: Message), a
+  private command, which no published language declares, so no handler could comply. Khononov p. 149
+  issues commands to the saga's own aggregate through the outbox. Issue 08's lead on a private
+  command goes.
+- `TX-34`'s Scope is a command from another system of this codebase. A hook call is a delivered
+  message (`TX-5`'s Why), and an external system asking by hook, Stripe Issuing's authorization
+  request, takes the refusal in the hook's answer (`TX-28`).
+- `TX-26` writes a replica from the owner's events and what it returns, not its replies: a command's
+  outcome comes back as the receiver's event (`TX-34`), and the glossary's Message knows no reply.
+- `TX-17`'s Why loses its sentence on commands: its Scope says event, and the rest restated the
+  glossary and `SYS-13`. `SYS-14`'s Why says why `DOM-1`'s published language of an upstream stays
+  off its list. `TX-12`'s line on `TX-7` names the open host service, as `SYS-2`'s does.
+- Examples: `sys-13-breach-shop-declares-reserve-stock` breaches `TX-33` too and no longer claims
+  `TX-17`, whose Scope is events; `tx-32-breach-dunning-stage-changed-without-version` breaches
+  `TX-19` too; `asm-3-ok-trace-context-crosses-bus-in-envelope` reads the trace context through the
+  common library's tracer, `@opentelemetry/api` being on no line of `DVN-4`;
+  `sys-13-ok-checkout-process-sends-receivers-commands` loses an unused import.
+- Sources checked: NServiceBus throws on subscribing to a command, so `TX-33` cites "Should be sent
+  to the logical owner" and MS's single receiver. Richardson's outcome event answers an event, not a
+  command; `TX-34` cites Khononov p. 148, where `PublishingConfirmed` and `PublishingRejected`
+  answer the saga's command. Richardson names compensation only; `TX-35` adds Khononov p. 151 and
+  Vernon EAD II p. 8–9. `SYS-13`'s saga commands are p. 148–150. No source lists what a shared
+  kernel imports: `SYS-14` follows Khononov p. 51 and Garrido §3, and departs from Evans p. 251,
+  whose kernel shares code and database design.

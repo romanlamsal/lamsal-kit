@@ -57,9 +57,9 @@ interface layer, driven adapters the infrastructure layer.
 ## Between systems
 
 **Message.** What one system tells another, or itself, so that it may act. It has an id, the same on
-every delivery of it. An *event* says something happened; no receiver can refuse it. A *command* says
-do this, to the one system that offers it, which may refuse. *Published*: meant for other systems.
-*Private*: meant only for the system that wrote it.
+every delivery of it. An *event* says something happened; no receiver can refuse it. A *command*
+says do this, to the one system that offers it, which may refuse. *Published*: meant for other
+systems. *Private*: meant only for the system that wrote it.
 
 **Outbox.** Where a system's outgoing messages wait until they are delivered. The *outbox port* is
 the driven port a service writes messages through. The *outbox reader* is what the relay reads the
