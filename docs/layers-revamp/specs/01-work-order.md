@@ -1,8 +1,8 @@
 # Spec 01 — Work order after the provenance pass
 
 A session told "the next in the spec" works the first unchecked step, as a fresh session: the
-README, `glossary.md` and `general-rules.md` first (README, Working here), then the step's issue.
-It checks the step in the commit that lands it.
+README, `glossary.md`, `the-world.md` and `general-rules.md` first (README, Working here), then
+the step's issue. It checks the step in the commit that lands it.
 
 ## Steps
 
@@ -17,7 +17,7 @@ It checks the step in the commit that lands it.
   so they write the field and self-review with it, and step 9's readers check it.
 - [x] 5. **Transaction reads and concurrency, issue 10.** Before products: steps 7 and 8 build on
   `TX-1` and `SVC-2`, whose guarantees it changes.
-- [ ] 6. **The world, issue 11.** Before products: it sweeps `general-rules.md` and the README
+- [x] 6. **The world, issue 11.** Before products: it sweeps `general-rules.md` and the README
   for the glossary changes and `the-world.md`, so steps 7 to 9 work against both.
 - [ ] 7. **Products and external systems, issue 07.** A grill. It decides once the items it shares
   with issue 01: a hook that never arrives with recovery of a message that fails for good; an

@@ -29,6 +29,10 @@ Decided and applied while revising TX in the session that opened this issue:
 - The relay knows the systems in its process (`ASM-5`), handlers decide what they handle (`TX-8`),
   the writer does not know its readers (`TX-8` Why). Who routes, and on what, has no rule beyond
   "the codebase's".
+- From issue 11: a downstream system acts on what an upstream's acting use case returns, where the
+  upstream also published a message for that consequence; the consequence happens twice, once
+  past relay and bus. Inside a system, `DRV-1` and `DRV-8` leave a driving adapter nothing to do
+  with the result but hand it to its caller.
 
 ## Decision
 

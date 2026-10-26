@@ -11,6 +11,9 @@ what it keeps, is decided when it is first generated.
 ## Documents
 
 - `glossary.md`: definitions only, read as a whole. What a term may do is in the rules.
+- `the-world.md`: forces, what the world does to a system, and properties, what holds anyway. It
+  names no mechanism and no rule; the general rules are one set that delivers the properties.
+  Glossary vocabulary.
 - `general-rules.md`: rules whose scope is any system. Glossary vocabulary.
 - `<group>.md`: rules whose scope is one kind of situation — an external system, messaging between
   systems. Groups emerge while the rules are written; none is fixed in advance.
@@ -99,12 +102,15 @@ Statement the line names. A line they do not guarantee is a finding: an issue re
 
 ## Tiers
 
-The documents depend downward: general rules use the glossary; group rules use both; examples
-are referenced from both. The cost of a change rises with the tier.
+The documents depend downward: the glossary and `the-world.md` on top; general rules use both;
+group rules use the general rules too; examples are referenced from the rules. The cost of a
+change rises with the tier.
 
 - **Glossary.** Adding a term is cheap. Changing one —
   rewording, narrowing, dropping — is an issue, and a fresh session works it: it sweeps every
   lower tier for the term and re-decides whatever the change touched, inside that issue.
+- **The world.** Changing a force or a property is an issue. No rule names the property it serves,
+  so the issue reads every rule, general or group, against the change.
 - **General rules.** Changing a rule's Scope or Statement is an issue that also visits every
   rule, general or group, whose Relies on names it. Changing Relies on, Why, Provenance or
   Examples is not.
@@ -134,8 +140,8 @@ read. A finding the requester accepts goes into an issue.
 
 ## Working here
 
-1. Read `glossary.md` and `general-rules.md` whole before anything else; group files for the
-   situation at hand. Never the issue files, unless working one.
+1. Read `glossary.md`, `the-world.md` and `general-rules.md` whole before anything else; group
+   files for the situation at hand. Never the issue files, unless working one.
 2. Terms are used exactly as the glossary spells them. No synonyms, no second word for the
    same thing. A word with meaning the glossary does not give it appears only if it is common
    language or a source's well-known term. A rule that needs a new word adds it to the glossary,

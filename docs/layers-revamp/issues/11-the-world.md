@@ -1,6 +1,6 @@
 # 11 — The world
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -63,6 +63,8 @@ reads the rules against these too:
 - F2: the cut between systems moves. F4: a deploy replaces processes one at a time; records and
   messages outlive the code that wrote them. Scope: what a store commits survives any stop.
 - "A system's records" are the records it keeps, not those its business rules decide (issue 07).
+  Revised by answer 12: the records it owns (glossary: Owner); a store keeps records of several
+  owners.
 
 ## Problem
 
@@ -104,22 +106,45 @@ an architecture for the fixture's shop and listed where the two left it guessing
 1. **Unique keys.** `TX-5`'s Why relies on a second record of the same id failing. The Assumptions
    give no store that fails a write where a record with the same key exists. Lead: the
    Assumptions gain it.
+   *Answer:* yes. A store that cannot fail a duplicate key satisfies the Assumptions and breaks
+   `TX-5`'s means by id under concurrent redelivery.
 2. **An acting use case's result.** It may return something meaningful; what it returns depends
    on the use case. The harm: the code invoking it acts on the result where the use case also
    wrote a message for that consequence, skipping relay and bus. Lead: a rule on driving
    adapters.
+   *Answer:* no rule. `DRV-1` allows one acting call, `DRV-8` no client to act with; the adapter
+   hands the result to its caller. A downstream system acting on it goes to issue 01.
 3. **Call or message.** No rule says when a step is a call to another system and when a message.
    Lead from the draft: a step before the commit is a call whose effect stays tentative; a
    consequence of the commit is a message (`the-world.md` P8).
+   *Answer:* `TX-3`, `TX-22` and `TX-12` rule it. Asking for a tentative operation, of this
+   system, another system of the codebase or an external system, falls outside `TX-3`'s Scope:
+   it changes nothing until confirmed or declined. Its Why says so; the Scope stands.
 4. **A failed save.** `TX-23` fails a save on a changed aggregate; no rule says who reruns it,
    the transaction adapter or the caller. A rerun needs a body that can run twice.
+   *Answer:* a request whose save fails fails to its caller; the rules rerun nothing. A handler's
+   use case runs again on redelivery. A repo may do better; a driving adapter's answering call
+   before the acting one stays rare. `TX-23`'s Why says so. No transaction port is ruled on; it
+   is named, not defined (issue 07).
 5. **The fake of an in-process conformist's open host service.** Who owns it (`TST-11`).
    `SVC-6` and `DVN-4` admit any export path of an upstream, its builder and fake paths included.
+   *Answer:* no change. Nobody imports a marked fake into production, or builds a real system in
+   a suite meant for fakes; narrowing the lists rules out nothing that happens. `TST-11` stands.
 6. **The relay.** One for all outboxes or one per system, and in which process.
+   *Answer:* the repo's; no rule, no line in Not covered. An outbox no relay reads is a wiring
+   fault, easy to find. `TX-20` stands.
 7. **Probes.** What a probe may touch: a readiness check reaches store clients past the ports.
+   *Answer:* no rule. A probe sits outside the layers; code that reports on a system is no probe.
+   The Assumptions use the term.
 8. **Driving adapters outside the system's directory.** A framework's file router (TanStack
     Start's server functions and routes) places them in the app.
+    *Answer:* no rule. A system is a bounded context, not a directory: a driving adapter is code
+    of the system whose driving port it calls, wherever its file sits. Placement is the stack
+    document's.
 9. **Ids crossing systems.** In the shared kernel, or in each published language.
+   *Answer:* in the published language of the system that issues it. A shared kernel is a model
+   no one system owns (Evans: shared by agreement; Khononov: changed jointly); `OrderId` is
+   shop's. The glossary's Shared kernel says so.
 10. **Authorization.** Where the check sits. Lead: the driving adapter prepares the call for its
     driving port, the check included. Against: whether a caller may act on a given record, only
     the order's customer cancels it, is a business rule (`the-world.md` P2).
@@ -129,6 +154,8 @@ an architecture for the fixture's shop and listed where the two left it guessing
     acting use case, which checks. No source names the per-record check; closest, Evans pdf 295:
     who has authority to approve, answered by the domain model.
 11. **`TX-12` and `TX-7`.** Whether `TX-12` relies on `TX-7`.
+    *Answer:* yes, weakly: it matters to a system reading the owner's tables, which `TX-12`
+    forbids anyway.
 12. **Earlier review items awaiting a ruling.**
     - `TX-3`'s "holds" back to "owns".
     - `SYS-10`'s "(SVC-1)" reworded; partly superseded, `SYS-10` relies on `SVC-1`.
@@ -137,6 +164,63 @@ an architecture for the fixture's shop and listed where the two left it guessing
     - The shared kernel kept in the `SVC-6`, `DRV-8`, `DVN-4` lists.
     - To issue 07: `TX-22`'s "holds" (storage, issue 07) with the shared-Postgres store question;
       `sys-8` under `TX-22`; mail handlers relying on the provider's idempotency key.
+    *Answers:*
+    - Owner by business rules, not storage: under "keeps", catalog may change shop's price on
+      Payload's document, and moving a table moves ownership. Glossary gains *Owner*; `TX-3`,
+      `TX-22` say "owns", `TX-12` did; `the-world.md` P11 reads "the records a system owns".
+      Under "owns", a replica's records are the owner's, so writing one falls under `TX-3`;
+      `TX-3`'s Why places a replica written from what the owner publishes or offers outside its
+      Scope, and `TX-26` has the keeping system write it, so the owner never learns who keeps a
+      copy. `SVC-4`'s Scope narrows to records of an aggregate: replica, outbox and handled-id
+      records belong to none; it relies on `TX-3` for the aggregate being its own system's.
+    - `SYS-10`: done by issue 09; closed.
+    - `asm-7-breach-…`: deleted, wrong twice.
+    - Shared kernel kept in the lists.
+    - `TX-22`'s "holds" settled above. Mail key: `TX-22`'s Why gains the holder that takes no
+      key, a repeat the domain accepts. `sys-8` stays in issue 07.
 13. **The fixture.** `domain.md` leaves open what the bank API is for (a paid order gets an
     invoice, yet unpaid invoices are dunned), who owns a product's tax class, and the SKU's
     second home in the 3PL's article master.
+    *Answer:* pay-by-invoice, for its reconciliation: billing invoices those orders on
+    `OrderPlaced`, dunning chases them, a bank API reports transfers billing matches. Shop owns
+    the tax class beside price; billing needs it per invoice line. Fulfillment registers each new
+    SKU in the 3PL's article master.
+
+Not asked, from the red team round: the CLI overrule. Dropped: it outlined what would happen, and
+the README does not reach a codebase, which gets one `layers.md` distilled from the glossary,
+`the-world.md` and the rules. The overrule condition is `the-world.md`'s opening; the README does
+not state it again. A reader that changes a property on purpose was weighed and left out.
+
+## Decision
+
+- **Glossary.** New *Owner*: the system whose business rules decide a record, wherever it is
+  kept. *Aggregate* has one owner. *Shared kernel*: none owns it alone. *System builder*: what a
+  system provides so a process's assembly builds what it needs without knowing its internals or
+  their defaults; a system has several, each returns one thing or many.
+- **`the-world.md`.** P11: the records a system owns.
+- **General rules.**
+  - Assumptions: a write fails where a record with the same key exists; probes sit outside the
+    layers.
+  - "Rule" became "business rule" where it meant one: Assumptions, `DOM-3` Scope and Why,
+    `SVC-1`, `DRV-8`, `ASM-6` Statement and Why, `TX-24`, `TX-3`, `TX-12`, `TST-3` Scope and
+    Why. Wording only; no Relies-on line names `DOM-3`, `ASM-6` or `TST-3`.
+  - `TX-3`, `TX-22`: "owns". No Relies-on line named either before; `SVC-4` now relies on `TX-3`.
+  - `TX-3`'s Why: a tentative operation and a replica written from what the owner offers fall
+    outside its Scope.
+  - `TX-26`, new: a replica is written by a use case of the system that keeps it.
+  - `SVC-4`: records of an aggregate, through its repository. `TX-23`'s line on it follows; it
+    still holds.
+  - `TX-12`: relies on `TX-7`; its Why follows the wider Replica.
+  - `TX-22`'s Why: a holder that takes no key. `TX-23`'s Why: who reruns.
+  - `ASM-1`: builders follow what a process runs; a builder is part of assembly.
+  - Port, open host service, process manager: re-read, nothing leaned on the old entries.
+- **README.** Documents lists `the-world.md`; Tiers puts it on top and has a changed force or
+  property read every rule; Working here 1 and spec 01's opening read it.
+- **Fixture.** Pay-by-invoice and the bank API, the tax class, the 3PL's article master.
+
+## Consequences
+
+- To issue 01: a downstream system acting on an acting use case's result.
+- To issue 07: ownership settled; the shared document under `TX-1` and `TX-23`, and `sys-8`, stay.
+- To issue 08: `TX-26` has no examples; `ASM-7` has no breach example; the fixture's bank API and
+  pay-by-invoice are new situations for the readers.

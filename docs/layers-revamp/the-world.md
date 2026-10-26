@@ -143,11 +143,11 @@ one of their requests on an ongoing basis is completely unacceptable. […] Noth
 a new backlog item should logically interfere with scheduling a new release! […] the large
 cluster aggregate was designed with false invariants in mind, not real business rules."
 
-### P11. No other system changes a system's records
+### P11. No other system changes the records a system owns
 
 *Against:* F8.
-*Why:* Where another system writes this one's records, this one's business rules stop holding
-for them, and neither system can change its model without the other.
+*Why:* Where another system writes the records this one owns, this one's business rules stop
+holding for them, and neither system can change its model without the other.
 *Provenance:* Evans, Bounded Context (pdf 239): "Explicitly define the context within which a
 model applies. […] Keep the model strictly consistent within these bounds".
 

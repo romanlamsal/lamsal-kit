@@ -9,15 +9,15 @@ rule places one is in the rules and the examples, not here.
 | system | kind | owns | stored in |
 | --- | --- | --- | --- |
 | **catalog** | external system: Payload CMS | editorial content of a product page: copy, images, slug | shared Postgres, Payload's tables |
-| **shop** | system | Cart, Order, the commercial fields of a product: price, sku | shared Postgres via Drizzle; price and sku also on Payload's `products` document |
+| **shop** | system | Cart, Order, the commercial fields of a product: price, sku, tax class | shared Postgres via Drizzle; price, sku and tax class also on Payload's `products` document |
 | **payment** | system | Payment, Refund | shared Postgres |
 | **billing** | system | Invoice, dunning stage, gapless invoice numbers | shared Postgres |
 | **fulfillment** | system | Stock, Reservation, Shipment | shared Postgres; runs in its own worker process |
 | **common library** | plumbing | pino logger, OpenTelemetry tracer exporting to Jaeger, outbox relay, transaction port with an ambient unit of work in `AsyncLocalStorage` | – |
 | **shared kernel** | model | `Money`, `Sku` | – |
 
-External systems: Stripe (payment), a 3PL warehouse API (fulfillment). Also used: a mail provider
-(shop, billing).
+External systems: Stripe (payment), a 3PL warehouse API (fulfillment), a bank API (billing). Also
+used: a mail provider (shop, billing).
 
 ## Edge cases per system
 
@@ -36,6 +36,8 @@ External systems: Stripe (payment), a 3PL warehouse API (fulfillment). Also used
     document it is about to save.
 - **shop**
   - Checkout must return a Stripe `client_secret` in the same request; payment creates it.
+  - Checkout also offers pay-by-invoice: no Stripe payment, the customer pays by bank transfer
+    after the order ships.
   - One use case writes Drizzle tables and Payload documents: two store clients, one database.
   - Sends an order-confirmation mail once the order commits.
   - Calls billing's open host service in-process while holding its own ambient transaction.
@@ -45,13 +47,20 @@ External systems: Stripe (payment), a 3PL warehouse API (fulfillment). Also used
     in the same call.
   - Stripe webhooks arrive at least once, out of order, in Stripe's terms.
 - **billing**
-  - Creates an invoice on shop's `OrderPaid` message.
-  - Scheduled dunning runs.
+  - Creates an invoice on shop's `OrderPaid` message, or on `OrderPlaced` for an order paid by
+    invoice.
+  - Each invoice line needs its VAT rate, which follows from the product's tax class: 7% for tea,
+    19% for accessories.
+  - The bank API reports incoming transfers in the bank's terms; billing matches them to open
+    invoices. Some match none: a wrong reference, an amount short.
+  - Scheduled dunning runs over unpaid invoices.
 - **fulfillment**
   - Reserves stock on `OrderPlaced`; releases it on `OrderCancelled`.
   - `OrderPaid` or `OrderCancelled` can arrive before `OrderPlaced`; a dropped cancel leaves
     stock reserved for a dead order.
   - 3PL webhooks report shipments in the 3PL's terms.
+  - The 3PL's article master needs each SKU before it ships one; fulfillment registers each new
+    SKU there.
   - Its worker process has its own entry point and its own assembly.
 - **common library**
   - OpenTelemetry keeps its own ambient context and returns a no-op span when it is empty.

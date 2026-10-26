@@ -20,8 +20,8 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
   - The `gap-*` files argue against Scopes since retired or rewritten (`ARR-1`, `DOM-6`, `SYS-3`,
     `SYS-5`, `SYS-7`, `SYS-8`, `TX-8`, `TX-13`); issues 05 and 06 placed most of their
     situations.
-  - `asm-7-breach-logger-substituted-by-module-mock.md`: `ASM-7`'s line is behavior now, not
-    substitution, so its verdict may flip.
+  - `asm-7-breach-logger-substituted-by-module-mock.md`: deleted by issue 11; `ASM-7`'s line is
+    behavior now, not substitution, and its loop breached `TX-1`. `ASM-7` has no breach example.
   - `drv-8-breach-server-action-raw-sql-through-common-pool.md` (adversarial): `DRV-8`'s list
     allows the common library, store clients included.
   - Examples that still import a published language re-exporting the domain, or declare driven
@@ -40,6 +40,9 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
   - The raw-SQL example above is issue 07's now (store clients).
 - Left by issue 10: `TX-23`, `TX-24`, `TX-25` are new, with no example files; the `tx-2-*` files
   show writes only, where `TX-2`'s Scope now covers reads.
+- Left by issue 11: `TX-26` is new, with no example files; `SVC-4`'s Scope narrowed to records of
+  an aggregate. The fixture gained pay-by-invoice with a bank API, the tax class, and the 3PL's
+  article master.
 - From issue 04's proposal: MAY "breaches" are listed under the rule that governs once the MAY's
   Scope fails. The README's examples entry gains it.
 

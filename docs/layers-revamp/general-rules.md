@@ -6,19 +6,18 @@ at the end.
 
 ## Assumptions
 
-This document assumes a store that can be read and written, that can apply several writes
-atomically where it says *transaction*, and that can make a write fail where the record has
-changed since it was read. It assumes no isolation between transactions beyond reading committed
-writes: a transaction may read what another commits while it runs.
+This document assumes a store that can be read and written, that can apply several writes atomically
+where it says *transaction*, and that can make a write fail where the record has changed since it
+was read, or where a record with the same key exists. It assumes no isolation between transactions
+beyond reading committed writes: a transaction may read what another commits while it runs.
 
 Every system gets the same architecture: domain, service, repositories and adapters, a simple one
 too. That is this document's choice. The sources pick the architecture per subdomain and let
 simple logic read and write the store directly; here no system is judged simple enough, and none
-is rewritten when it grows rules.
+is rewritten when it grows business rules.
 
 Not everything gets a layer. Assembly, a system's export paths and the common library sit outside
-the layers. So does code of a process that reports on the process rather than on a system, like
-`/health` and `/metrics`.
+the layers. So do probes.
 
 Tooling sits outside the layers and the rules. It builds systems through their builders or
 replaces their internals: an in-memory outbox, a CLI as relay and bus. What it reaches past an
@@ -61,25 +60,25 @@ subdomains; this document picks one architecture for every system (Assumptions).
 *Examples:* —
 
 **DOM-3**
-*Scope:* a rule about the shape of a record: which fields it has, what each holds, which values a
-status takes.
+*Scope:* a business rule about the shape of a record: which fields it has, what each holds, which
+values a status takes.
 *Statement:* It MUST be stated once, as a schema in the domain.
 *Relies on:* —
 *Why:* A schema says what the functions beside it say, in a form that also checks at runtime, and
 the type is inferred from it. Stated a second time, as a type declared beside the schema, a
 validator in a driving adapter, a second constructor in a client-side optimistic update, the two
-drift, and the drift stays invisible until two parts of the system disagree about a rule neither
-writes down. Everything that builds the record parses against the one schema or derives from the
-one domain function, and a changed field lands as a compile error in every builder at once. The
-published language's schemas shape what crosses to other systems, not records, so they fall
-outside the Scope: a driving adapter parsing with the published language and the domain checking
-its own rule are two statements by design, a second statement inside the domain is not.
-*Provenance:* Stating a rule once follows Evans p. 160 (without a specification "the same rule may
-show up in different guises"), Khononov p. 80 (validation resides in the value objects) and MS
-(Two-step validation: "you do not duplicate the validation definition"). That the statement is a
+drift, and the drift stays invisible until two parts of the system disagree about a business rule
+neither writes down. Everything that builds the record parses against the one schema or derives from
+the one domain function, and a changed field lands as a compile error in every builder at once. The
+published language's schemas shape what crosses to other systems, not records, so they fall outside
+the Scope: a driving adapter parsing with the published language and the domain checking its own
+business rule are two statements by design, a second statement inside the domain is not.
+*Provenance:* Stating a business rule once follows Evans p. 160 (without a specification "the same
+rule may show up in different guises"), Khononov p. 80 (validation resides in the value objects) and
+MS (Two-step validation: "you do not duplicate the validation definition"). That the statement is a
 schema is this document's. Departs: MS recommends field-level validation on command DTOs and in
-ViewModels beside the domain's own (Two-step validation; validators in the MediatR pipeline); at
-the published language's edge this document does the same (SYS-2).
+ViewModels beside the domain's own (Two-step validation; validators in the MediatR pipeline); at the
+published language's edge this document does the same (SYS-2).
 *Examples:* —
 
 **DOM-4**
@@ -109,13 +108,13 @@ rule of thumb (EAD III p. 15) and breaks it for query performance (EAD II p. 11,
 *Relies on:*
 - SYS-10: loading a path that exports a system's open host service's driving port types loads no
   module of the system outside its published language.
-*Why:* A use case is not a domain concept: the rules say what an invoice is, not that there is a
-"create invoice" call. A driving port in the domain hands every importer of the domain, a browser,
-another system, the names of this system's use cases, and the domain then changes whenever a use
-case is added. A driven port is called by services; the domain is pure and calls none. One home
-for both lets the import lists of each layer be checked by path, and makes the services that call
-a port and the adapters that implement it its importers, and nothing else. A conformist declares
-no port for its upstream: it uses the upstream's driving port types (glossary: Conformist).
+*Why:* A use case is not a domain concept: the business rules say what an invoice is, not that there
+is a "create invoice" call. A driving port in the domain hands every importer of the domain, a
+browser, another system, the names of this system's use cases, and the domain then changes whenever
+a use case is added. A driven port is called by services; the domain is pure and calls none. One
+home for both lets the import lists of each layer be checked by path, and makes the services that
+call a port and the adapters that implement it its importers, and nothing else. A conformist
+declares no port for its upstream: it uses the upstream's driving port types (glossary: Conformist).
 *Provenance:* Use cases outside the domain follow Fowler (Service Layer: it "defines an
 application's boundary and its set of available operations"), Khononov p. 122, Evans p. 53 (the
 application layer "defines the jobs the software is supposed to do") and MS (commands in the
@@ -206,9 +205,11 @@ IdentifiedCommand handler re-dispatches the command it wraps.
 *Examples:* —
 
 **SVC-4**
-*Scope:* a use case writes a record.
-*Statement:* The write MUST go through the repository of the aggregate the record belongs to.
+*Scope:* a use case writes a record of an aggregate.
+*Statement:* The write MUST go through the aggregate's repository.
 *Relies on:*
+- TX-3: a use case changes data another system of this codebase owns by writing a message to its
+  own outbox.
 - TX-2: a driven adapter that writes to a store writes inside the transaction it is handed.
 - DRV-8: a driving adapter imports a driving port of its system, and no repository.
 - TST-4: by default, a service's test hands it fakes for its driven ports.
@@ -240,9 +241,9 @@ library, a library that computes from its arguments.
 - DRV-3: a driving adapter assembly cannot construct reads what it calls from a courier.
 *Why:* A driving adapter that skips the service and reaches a driven adapter, a repository or the
 store reads state and decides by it, or writes outside any use case and outside the transaction a
-service holds, and the rules in the domain are bypassed for that one way in. Typed by the driving
-port, the adapter calls whichever service assembly handed it, a fake in a test. The published
-language is what it parses its caller's input with where the caller is another system.
+service holds, and the business rules in the domain are bypassed for that one way in. Typed by the
+driving port, the adapter calls whichever service assembly handed it, a fake in a test. The
+published language is what it parses its caller's input with where the caller is another system.
 *Provenance:* The conversion at the edge is Cockburn's adapter (Intent) and Garrido's (§2.4,
 "the driver adapter has a configurable dependency on the driver port", §3). The list is this
 document's.
@@ -348,16 +349,16 @@ domain, knowing nothing of it: the 2003 layering hexagonal replaces. The list is
 *Relies on:* —
 *Why:* Two assemblies in one process are two places where a port meets its implementation, and two
 instances of what exists once: two store clients, two relays. Which system builders the one
-assembly calls follows from how the process is driven: a server's assembly calls the open host
-service builders, a worker's the handler and outbox reader builders, a process doing both calls
-both.
+assembly calls follows from what the process runs of each system: a server's assembly calls the
+builders that return what its driving adapters call, a worker's those that return its handlers and
+outbox readers, a process doing both calls both.
 *Provenance:* Follows Seemann ("Composition Root": "a (preferably) unique location"; in a comment of
 2011-08-02, "Each application/process requires only a single Composition Root"), Seemann's
 interview, Garrido §6.2.1 (one module for starting up) and MS (Program.cs). Departs: for objects a
 framework creates, Seemann accepts "a set of distributed Composition Roots" (comment of
 2010-02-06), and warns that "the earlier you compose, the more you limit your options" (comment
-of 2011-08-02). A system builder takes its choices as configuration from assembly, so composing a
-system before assembly sees it costs no option.
+of 2011-08-02). A system builder is part of assembly and takes its choices as configuration, so
+composing a system in it costs no option.
 *Examples:* —
 
 **ASM-2**
@@ -528,11 +529,11 @@ targets, so his relay knows the systems it calls.
 
 **ASM-6**
 *Scope:* the common library.
-*Statement:* It MUST hold no model: no schema, no aggregate, no rule of any system.
+*Statement:* It MUST hold no model: no schema, no aggregate, no business rule of any system.
 *Relies on:* —
 *Why:* The common library is plumbing every system imports. A model in it is one every system
-shares: a change made for one system's reason reaches all of them, and no system's rules decide
-it, because a system's rules are in its domain.
+shares: a change made for one system's reason reaches all of them, and no system's business rules
+decide it, because a system's business rules are in its domain.
 *Provenance:* Follows MS (Integration events: share only "final application blocks, like the Event
 Bus client API", and no common domain model) and Evans p. 244 ("Code reuse between BOUNDED CONTEXTS
 is a hazard to be avoided"). A model systems agree to share is a shared kernel (Evans p. 251,
@@ -602,14 +603,15 @@ inside the transaction are this document's.
 - TX-1: a use case that writes runs in one transaction, which its service hands to each call into
   its store and commits.
 - TX-2: a driven adapter handed a transaction makes each call into its store inside it.
-- SVC-4: a use case's write of a record goes through the repository of the aggregate it belongs to.
+- SVC-4: a use case's write of a record of an aggregate goes through the aggregate's repository.
 *Why:* One transaction does not stop another from changing what it read before it commits. At
 Postgres's default isolation, READ COMMITTED, shop's payment and its deadline arrive together:
 marking the order paid loads it open, cancelling it loads it open, each saves, and both commit.
 The order ends in whichever state saved last, `OrderPaid` and `OrderCancelled` are both out, and
 fulfillment ships an order it released. The later save wrote over the earlier one by a decision
 whose state no longer held. A save that fails tells the second use case so, and its transaction
-rolls back with nothing of it committed. A version the aggregate carries, compared on save, is
+rolls back with nothing of it committed. A handler's use case runs again on redelivery; a
+request's fails to its caller. A version the aggregate carries, compared on save, is
 one way; a lock taken at the load and held to the commit, under which the aggregate cannot
 change, is another.
 *Provenance:* Follows Khononov p. 86–87 (the concurrency check: the later transaction must not be
@@ -630,13 +632,13 @@ use case commits: the stock suffices, the order is still open.
 - TX-1: a use case that writes runs in one transaction, which its service hands to each call into
   its store and commits.
 *Why:* The aggregates a use case saves fail on a change. Data in one it reads and does not save
-changes before the commit and nothing fails: two reservations both read a stock of 1 from
-`Stock`, each saves a `Reservation` of its own, and both commit. Held in the aggregate the use
-case saves, the stock with its reservations in `Stock`, the second save fails. Where the decision
-cannot sit in the aggregates one use case saves, it is a rule across aggregates, which holds
-after a delay: a later use case, a reconciliation, a compensating step repairs it. A deviation's
-ADR names what holds the data still instead: a lock on what the decision read, an isolation level
-under which the second commit fails.
+changes before the commit and nothing fails: two reservations both read a stock of 1 from `Stock`,
+each saves a `Reservation` of its own, and both commit. Held in the aggregate the use case saves,
+the stock with its reservations in `Stock`, the second save fails. Where the decision cannot sit in
+the aggregates one use case saves, it is a business rule across aggregates, which holds after a
+delay: a later use case, a reconciliation, a compensating step repairs it. A deviation's ADR names
+what holds the data still instead: a lock on what the decision read, an isolation level under which
+the second commit fails.
 *Provenance:* Follows Evans p. 91 (invariants within an aggregate "enforced with the completion of
 each transaction"; "Any rule that spans AGGREGATES will not be expected to be always up to date")
 and p. 97 (the line item holds its own price, the purchase order's invariant kept inside it),
@@ -689,7 +691,7 @@ use case relies on more (TX-1).
 *Examples:* —
 
 **TX-3**
-*Scope:* a use case of this system changes data another system of this codebase holds.
+*Scope:* a use case of this system changes data another system of this codebase owns.
 *Statement:* It MUST do so by writing a message to this system's outbox.
 *Relies on:*
 - TX-6: a message about a change commits in the transaction that commits the change.
@@ -697,13 +699,16 @@ use case relies on more (TX-1).
 - TX-21: the bus delivers a message to a handler again until the handler acknowledges it.
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
 - TX-5: a repeated delivery changes nothing.
-*Why:* The owner's rules decide its data (glossary: Aggregate), so a change to it is the owner's use
-case, and this system at most asks for it. Changing it directly, writing the owner's record or
-calling the owner inside this transaction, puts a write this system's rules do not decide into this
-system's transaction, and the owner's model into this service. Calling the owner after the commit
-does not help: a crash between the commit and the call, or a failed call, loses the change, and
-nobody retries. Written to the outbox in the same transaction, the message is exactly as committed
-as the change it tells of; the owner's handler acts on it, and redelivery retries it until it lands.
+*Why:* The owner's business rules decide its data (glossary: Owner), so a change to it is the
+owner's use case, and this system at most asks for it. Changing it directly, writing the owner's
+record or calling the owner inside this transaction, puts a write this system's business rules do
+not decide into this system's transaction, and the owner's model into this service. Calling the
+owner after the commit does not help: a crash between the commit and the call, or a failed call,
+loses the change, and nobody retries. Written to the outbox in the same transaction, the message is
+exactly as committed as the change it tells of; the owner's handler acts on it, and redelivery
+retries it until it lands. A tentative operation changes nothing (glossary), so asking for one
+falls outside the Scope, from any system; confirming it does not. A replica written from what the
+owner publishes or offers copies a change the owner made, and falls outside the Scope too (TX-26).
 *Provenance:* Asynchrony across systems follows Evans Reference p. 16 ("Across boundaries, handle
 updates asynchronously", said of aggregates, so of systems a fortiori), MS (integration events
 "must be based on asynchronous communication"), Richardson (Database per service: transactions
@@ -717,7 +722,7 @@ alternative. Departs: Khononov's simple saga calls the other context directly (p
 
 **TX-22**
 *Scope:* a use case of this system changes something outside its store that no system of this
-codebase holds: a mail sent, a shipment booked with an external system.
+codebase owns: a mail sent, a shipment booked with an external system.
 *Statement:* The change MUST go through this system's outbox, on behalf of its holder.
 *Relies on:*
 - TX-6: a message about a change commits in the transaction that commits the change.
@@ -732,9 +737,10 @@ decision commits with the message and the call is apart from it, so a retry repe
 decides nothing again. A use case that marks the reservation and books the 3PL in one attempt
 decides again on redelivery, the order cancelled meanwhile, while the booking stands. The call's use
 case reaches idempotence through the holder's idempotency key, the message id; a record of handled
-ids cannot help, being outside any transaction the call is in. The holder's answer comes back as its
-own message or its hook. A request designed as a tentative operation changes nothing (glossary) and
-falls outside the Scope: the way around a holder that has no asynchronous answer. An event from
+ids cannot help, being outside any transaction the call is in. Where the holder takes no key, a
+repeat stays possible, and the domain accepts it: a second mail. The holder's answer comes back as
+its own message or its hook. A request designed as a tentative operation changes nothing (glossary)
+and falls outside the Scope: the way around a holder that has no asynchronous answer. An event from
 another system that leads to a mail takes two hops: this system's use case decides, and its message
 drives the mail.
 *Provenance:* Follows Khononov p. 148, p. 149–150 (the handler executes the command; "the command
@@ -862,13 +868,15 @@ MS (the publisher does not need "to know the subscribers") and Khononov p. 233.
 *Statement:* It MUST read it from the owner's open host service or from its published messages.
 *Relies on:*
 - SYS-2: the modules that declare a published language import nothing of the domain.
+- TX-7: a changed message schema keeps messages old code writes readable by new code and the
+  reverse, each field keeping its meaning.
 *Why:* The owner's open host service and its published messages are what it offers on purpose, in
 its published language. Reading its store directly, a join across both systems' tables, a query
 against its records, binds this system to the owner's storage: the owner's schema change breaks this
-system's query with no compile error, and the owner's rules, which decide what a record means, are
-bypassed. In-process the open host service is a function call behind a driven port; going through it
-costs a port, not a network hop. A replica is filled from the owner's published messages, so
-reading it reads them. The replica lags by a moment. Where
+system's query with no compile error, and the owner's business rules, which decide what a record
+means, are bypassed. In-process the open host service is a function call behind a driven port; going
+through it costs a port, not a network hop. A replica is filled from the owner's published messages
+or reads of its open host service, so reading it reads those. The replica lags by a moment. Where
 the components can settle for that, the published messages are the rule of thumb: the read then
 needs the owner neither running nor fast.
 *Provenance:* Follows Richardson (Database per service: data "accessible only via its API"; API
@@ -882,6 +890,22 @@ Departs: Richardson weighs a shared database as a pattern with drawbacks (Shared
 Khononov p. 209 allows one during a strangler migration; Evans p. 263 has an open host service pay
 off only with many integrations; MS counts a synchronous call to another service against its
 autonomy.
+*Examples:* —
+
+**TX-26**
+*Scope:* a replica is written.
+*Statement:* It MUST be written by a use case of the system that keeps it.
+*Relies on:*
+- TX-17: a system that publishes an event names no system that handles it.
+*Why:* The owner publishes and offers without knowing who keeps a copy. An owner that writes the
+copy itself, into the keeping system's store or through a port the keeping system opens for it,
+knows its readers: it changes whenever a system starts or stops keeping one, and decides what
+another system keeps, in which shape, and how a late or repeated message lands there. The keeping
+system's handler, or its scheduled task reading the open host service, decides that against its
+own needs, and the owner stays unaware of it.
+*Provenance:* Follows Fowler (What do you mean by "Event-Driven"?, Event-Carried State Transfer:
+the recipient keeps its own copy), Khononov p. 238 and Richardson (CQRS: the view is kept by
+subscribing to the events the owner publishes).
 *Examples:* —
 
 ## Other systems
@@ -970,15 +994,15 @@ making it an open-host service").
 ## Tests
 
 **TST-3**
-*Scope:* a domain rule is tested.
+*Scope:* a business rule is tested.
 *Statement:* The test SHOULD call the domain function directly.
 *Relies on:*
 - DOM-1: a domain module imports nothing but other domain modules, a shared kernel, the published
   language of an upstream its system conforms to and libraries that compute from their arguments.
 *Why:* The domain is pure: the test needs no fixture, no fake and no setup, and fails for one
-reason. Tested through a service, the same rule needs fakes for every port the service takes, and a
-failure is the service's, the fake's or the rule's. Most of what is worth asserting lives in the
-domain, so this is where most tests are.
+reason. Tested through a service, the same business rule needs fakes for every port the service
+takes, and a failure is the service's, the fake's or the business rule's. Most of what is worth
+asserting lives in the domain, so this is where most tests are.
 *Provenance:* Follows Freeman §4.5, Fowler (Mocks Aren't Stubs), Vocke ("Push your tests as far down
 the test pyramid as you can"), Google SWE ch. 12, Khononov p. 165 (for domain models), Evans p. 44
 and p. 175, and MS. Departs: Google SWE ch. 12 tests a helper of one or two classes through them;

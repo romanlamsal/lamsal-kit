@@ -113,8 +113,8 @@ the domain.
 into its own in every adapter that touches the upstream: the driven adapters that call into it and
 the driving adapters it calls into. The upstream's terms stop at those adapters.
 
-**Shared kernel.** A model several systems of this codebase share as code, each importing it into
-its domain: `Money`, `Sku`. A change to it is a change to each.
+**Shared kernel.** A model several systems of this codebase share as code and none owns alone, each
+importing it into its domain: `Money`, `Sku`. A change to it is a change to each.
 
 **Hook.** A driving adapter an upstream system calls.
 
@@ -125,8 +125,10 @@ driving through its hooks.
 ## Domain
 
 **Aggregate.** A cluster of records changed as one unit and addressed by one id; a repository loads
-and saves it whole. It belongs to the system whose business rules decide what it holds,
-wherever it is stored.
+and saves it whole. It has one owner.
+
+**Owner.** The system whose business rules decide what a record holds, wherever it is kept. A store
+may keep records of several owners, and a system may keep records another system owns: a replica.
 
 **Specification.** A domain function that answers yes or no about one candidate: is it valid, may
 this happen, does it qualify.
@@ -166,10 +168,10 @@ objects.
 **Factory.** A function that takes what an implementation needs and returns it. A service is a
 factory for a driving port; an adapter's constructor is a factory for a driven port.
 
-**System builder.** The part of assembly for one system, or for what one process runs of it:
-takes configuration, wires the services it needs to their adapters, and returns implementations
-of what that part offers — its open host service, its handlers, its outbox readers, or several of
-them.
+**System builder.** The part of assembly a system provides, so that a process's assembly builds
+what it needs of the system without knowing its internals or their defaults: it takes
+configuration and returns implementations. A system may have several, and one may return one
+thing or many.
 
 **Assembly.** The one place in a process where every port gets its implementation, and the only
 place where port and implementation meet. It calls the system builders and produces what the
