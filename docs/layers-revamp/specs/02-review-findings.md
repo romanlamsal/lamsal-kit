@@ -14,7 +14,7 @@ did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
 
 - [x] 1. **Bookkeeping.** Issue 08 closed, superseded: its readers ran as this review, and its
   example items are issue 19's. Spec 01 step 9 checked. `distill.mjs` committed.
-- [ ] 2. **A rule placing business rules.** In the session that wrote this spec, no issue: no
+- [x] 2. **A rule placing business rules.** In the session that wrote this spec, no issue: no
   Scope holds for where a business rule sits; four readers of both sets found it, and P2 to P4
   hang on it.
 - [ ] 3. **The world and the glossary, issue 12.** First: the top tier, whose change sweeps every

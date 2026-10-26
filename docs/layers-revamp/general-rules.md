@@ -110,6 +110,28 @@ references to other aggregates' roots, as does Fowler (DDD_Aggregate). Vernon ca
 rule of thumb (EAD III p. 15) and breaks it for query performance (EAD II p. 11, EAD III p. 15).
 *Examples:* —
 
+**DOM-7**
+*Scope:* a business rule of this system.
+*Statement:* It MUST be stated once, in the domain.
+*Relies on:* —
+*Why:* The domain holds the business rules and the service the sequence of a use case (glossary:
+The layers), so whoever looks for a business rule opens the domain. A rate computed in a service,
+a condition in a server action, a check in a hook is a statement of the rule where nobody looks
+for one: the next change edits the domain and leaves it standing, and the system decides one way
+here and another there. A second statement in the domain drifts the same way. Stated once, a
+change is one edit. An external system's configuration is that system's own, even where this
+codebase writes it (Assumptions): a business rule written there is the external system's, about
+the records it keeps, and none of this system's. A business rule of this system that an external
+system asks before it writes, catalog's veto of a sku change, stays here; the external system
+reaches it through its hook, a way out of that system into this one's driving adapter.
+*Provenance:* Follows Evans p. 53 (the domain layer is "responsible for representing concepts of
+the business, information about the business situation, and business rules"; the application
+layer "does not contain business rules or knowledge, but only coordinates tasks") and MS ("all
+the domain logic should be contained in the domain classes […] but not within the command
+handler, which is a class from the application layer"). The once follows Evans p. 52, P2's
+Provenance: business rules diffused through other code are changed by tracing all of it.
+*Examples:* —
+
 ## Service
 
 **SVC-1**

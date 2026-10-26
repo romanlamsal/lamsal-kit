@@ -93,8 +93,9 @@ Settled when it was opened:
 
 ### Missing
 
-- 55 rules with `*Examples:* —`. Eleven have no file on disk: DRV-7, ASM-10, TX-20, TX-21, TX-23,
-  TX-24, TX-25, TX-26, TX-27, TST-10, TST-12. The other 44 have files the line does not name.
+- 56 rules with `*Examples:* —`. Twelve have no file on disk: DOM-7, DRV-7, ASM-10, TX-20,
+  TX-21, TX-23, TX-24, TX-25, TX-26, TX-27, TST-10, TST-12. The other 44 have files the line does
+  not name.
 - ASM-7 has no breach example; its old one, deleted by issue 11, breached TX-1 in its loop.
 - TX-7 has no example of an open host service called from another process, its Scope since issue
   01.

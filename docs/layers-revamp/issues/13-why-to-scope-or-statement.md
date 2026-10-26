@@ -71,6 +71,13 @@ Statement refuse it; if not, the ruling moves.
 - TST-5: `pushSchema` from the adapter's tables.
 - TST-6: the contract suite omits the stale save.
 
+### Scopes that illustrate after a colon
+
+DOM-3, SVC-2, SVC-7, DRV-1, ASM-10, ASM-7, TX-24, TX-22 and TX-32 end their Scope with a list of
+instances. The README has the Scope state the situation in prose and the Examples field carry the
+examples. Added at spec 02 step 2, where the requester refused such a list for DOM-7; whether
+these go is decided here, and a Scope unclear without its list is reworded.
+
 ### Elsewhere
 
 P5's and P1's Whys: issue 12. The import lists: issue 14.

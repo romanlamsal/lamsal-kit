@@ -86,7 +86,8 @@ agreed.
 6. "A repeated delivery changes nothing in this system": records only, or outside effects too
    (3 of 4, all records).
 7. An external system's "configuration may hold business rules" against P2 (3 of 4, all "but
-   should not").
+   should not"). Answered by spec 02 step 2: it may; a business rule written there is the external
+   system's, about the records it keeps (Assumptions; DOM-7's Why).
 8. Outbox reader, "marks it by": where the marks live for an external system's outbox (3 of 4).
 9. Tentative operation, "changes nothing it asks for": is a hold or a reservation one (3 of 4,
    all yes).
@@ -119,6 +120,12 @@ caller and port, or per way in.
 - Whether a request id on an outbox row is "what it answers" (TX-34); whether ASM-3 reaches a
   domain function the service calls. Rule words: where the glossary does not settle them, issue
   15.
+
+### A glossary sentence that rules
+
+Service: "It holds no business rule of its own; the business rules are the domain's" is a ruling,
+DOM-7's since spec 02 step 2, and the README keeps what a term may do out of the glossary. Decide
+whether the entry keeps it as part of the layer's definition or loses it.
 
 ### Housekeeping
 
