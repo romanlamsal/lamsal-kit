@@ -828,20 +828,20 @@ system's key is this document's.
 examples/tx-31-ok-3pl-booking-keyed-by-shipment-id.md
 
 **TX-28**
-*Scope:* a hook is called before the change it tells of commits in the external system.
+*Scope:* an external system calls a hook before its change commits.
 *Statement:* The use case it calls MUST NOT change this system beyond recording a tentative
 operation.
 *Relies on:*
 - TX-25: a driving port takes no transaction.
 - TX-1: a use case that writes runs in one transaction its own service opens and commits.
 - TX-30: a business rule of this system decides what happens when a confirmation does not come.
-*Why:* The external system has not committed when it calls: its change can still roll back after
-the hook returns, by a later hook, a failed validation, a crash. The use case runs in a transaction
-of its own, which commits whatever the external system does next. A change there that takes the
+*Why:* The external system has not committed when it calls: its change can still roll back after the
+hook returns, by a later hook, a failed validation, a crash. The use case runs in a transaction of
+its own, which commits whatever the external system does next. A change there that takes the
 external change as done, a record updated, a page revalidated, a published event, stands for a
-change a rollback undoes. Two answers stay safe. Answering changes nothing, and can refuse the
-change by this system's business rules: a veto. Recording a tentative operation, a pending record or
-a private message for a handler that checks the external system's committed state, leaves the change
+change a rollback undoes. Two answers stay safe. Answering changes nothing, and the external system
+can refuse its change by the answer: a veto. Recording a tentative operation, a pending record or a
+private message for a handler that checks the external system's committed state, leaves the change
 to a confirmation that comes after the commit: a message the external system publishes, a later
 hook, a read that finds the change committed. A read can come before the commit and find nothing
 yet, so what happens when no confirmation comes is a business rule's (TX-30). TX-6 binds a message
@@ -854,12 +854,13 @@ examples/tx-28-ok-before-change-hook-vetoes-sku-change.md · ok
 examples/tx-28-ok-after-change-hook-records-revalidation-request.md
 
 **TX-29**
-*Scope:* an external system this codebase configures calls a hook that tells of its change before
-the change commits, and its transaction can write a message to an outbox.
-*Statement:* It SHOULD be configured to tell of the change by that message, not by the hook.
+*Scope:* an external system this codebase configures tells this system of its change, and its
+transaction can write a message to an outbox.
+*Statement:* It SHOULD be configured to tell of the change by that message, not by a hook called
+before the change commits.
 *Relies on:*
-- TX-28: the use case a hook calls before the change it tells of commits changes this system no
-  further than recording a tentative operation.
+- TX-28: the use case a hook calls before the external system's change commits changes this system
+  no further than recording a tentative operation.
 - TX-20: the relay hands each message it reads from an outbox to the bus at least once.
 - TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
 *Why:* Through the hook, this system holds a tentative operation that waits on a confirmation: a

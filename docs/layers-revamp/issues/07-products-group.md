@@ -189,6 +189,15 @@ A review after closing changed, with no new issue:
 - The Assumptions drop "its configuration included": `TX-29` and `SYS-12` rule on the configuration,
   so the parts that touch a system of this codebase are inside the rules; Payload's own business
   rules, layers and transactions stay outside.
+- `TX-28`'s Scope is any hook called before the external system's change commits, so the veto is
+  inside it; `TX-29`'s Scope is an external system telling of its change, so the configured outbox
+  is inside it too. `TX-29`'s Statement and its line on `TX-28` follow.
+- The sku veto is catalog's rule, in its config: shop's hook answers how many open orders carry the
+  sku, and catalog refuses. Shop's rule deciding the sku made two systems decide one record
+  (glossary: Owner). An external system that cannot hold such a rule, Stripe Issuing asking whether
+  to approve an authorization, leaves the hook as the hatch: the rule is this system's, and no rule
+  of the external system decides the same. `TX-28`'s Why says the external system refuses by the
+  answer, whoever's rule it is.
 - Sources checked: Payload runs `beforeChange` and `afterChange` before its commit, and a write
   passing `req` joins the transaction; Stripe keeps a key 24 hours and resends a webhook for three
   days.

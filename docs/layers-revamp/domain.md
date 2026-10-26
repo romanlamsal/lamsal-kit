@@ -25,8 +25,8 @@ used: a mail provider (shop, billing).
   - Editors set copy, price, sku and tax class in Payload's admin UI; the business rules for them
     sit in Payload's collection config: a price above zero, a sku unique. Payload's own auth
     supplies `req.user`.
-  - Driving side: `afterChange` hooks call shop's services; a `beforeChange` hook asks shop
-    whether a sku on an open order may change.
+  - Driving side: `afterChange` hooks call shop's services; catalog's `beforeChange` asks shop how
+    many open orders carry a sku, and refuses to change a sku one does.
   - Driven side: shop reads the product, price and tax class included, through Payload's Local
     API.
   - Payload has its own transactions (`req.transactionID`); a hook may run inside one. Payload's
