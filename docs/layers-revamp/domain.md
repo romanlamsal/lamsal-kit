@@ -8,12 +8,12 @@ rule places one is in the rules and the examples, not here.
 
 | system | kind | owns | stored in |
 | --- | --- | --- | --- |
-| **catalog** | external system: Payload CMS | editorial content of a product page: copy, images, slug | shared Postgres, Payload's tables |
-| **shop** | system | Cart, Order, the commercial fields of a product: price, sku, tax class | shared Postgres via Drizzle; price, sku and tax class also on Payload's `products` document |
+| **catalog** | external system: Payload CMS | the product: copy, images, slug, price, sku, tax class | shared Postgres, Payload's tables |
+| **shop** | system | Cart, Order | shared Postgres via Drizzle |
 | **payment** | system | Payment, Refund | shared Postgres |
 | **billing** | system | Invoice, dunning stage, gapless invoice numbers | shared Postgres |
 | **fulfillment** | system | Stock, Reservation, Shipment | shared Postgres; runs in its own worker process |
-| **common library** | plumbing | pino logger, OpenTelemetry tracer exporting to Jaeger, outbox relay, transaction port with an ambient unit of work in `AsyncLocalStorage` | – |
+| **common library** | plumbing | pino logger, OpenTelemetry tracer exporting to Jaeger, outbox relay and bus, a Drizzle client factory, a unit of work kept ambient in `AsyncLocalStorage` | – |
 | **shared kernel** | model | `Money`, `Sku` | – |
 
 External systems: Stripe (payment), a 3PL warehouse API (fulfillment), a bank API (billing). Also
@@ -22,14 +22,16 @@ used: a mail provider (shop, billing).
 ## Edge cases per system
 
 - **catalog (Payload)**
-  - Driving side: `beforeChange` and `afterChange` hooks call shop services; editors act in
-    Payload's admin UI; Payload's own auth supplies `req.user`.
-  - Driven side: shop reads content and writes price and sku through Payload's Local API.
-  - One `products` document carries fields two systems write: editors write copy, shop writes
-    price.
-  - Payload has its own transactions (`req.transactionID`); a hook may run inside one.
-  - Shop's own write through the Local API fires shop's own `afterChange` hook again.
-  - Payload's collection config re-declares fields the shop domain's schema already declares.
+  - Editors set copy, price, sku and tax class in Payload's admin UI; the business rules for them
+    sit in Payload's collection config: a price above zero, a sku unique. Payload's own auth
+    supplies `req.user`.
+  - Driving side: `afterChange` hooks call shop's services; a `beforeChange` hook asks shop
+    whether a sku on an open order may change.
+  - Driven side: shop reads the product, price and tax class included, through Payload's Local
+    API.
+  - Payload has its own transactions (`req.transactionID`); a hook may run inside one. Payload's
+    transaction can also write a document to a collection of its own, which the relay can read.
+  - Editors see each product's stock in Payload's admin, read-only; fulfillment owns it.
   - Payload's config needs the hooks, the hooks need services, the services need the Payload
     instance: a cycle.
   - Payload's before-write hook may change the record it saves, so a hook can embed data in the
@@ -38,19 +40,20 @@ used: a mail provider (shop, billing).
   - Checkout must return a Stripe `client_secret` in the same request; payment creates it.
   - Checkout also offers pay-by-invoice: no Stripe payment, the customer pays by bank transfer
     after the order ships.
-  - One use case writes Drizzle tables and Payload documents: two store clients, one database.
+  - Checkout copies each line's price, sku and tax class from catalog's product.
   - Sends an order-confirmation mail once the order commits.
   - Calls billing's open host service in-process while holding its own ambient transaction.
 - **payment**
   - Stripe is behind an anti-corruption layer on the way out.
   - Creates a Stripe PaymentIntent when shop's checkout calls it, and returns its `client_secret`
     in the same call.
-  - Stripe webhooks arrive at least once, out of order, in Stripe's terms.
+  - Stripe webhooks arrive at least once, out of order, in Stripe's terms. Stripe stops resending
+    a webhook after three days.
 - **billing**
   - Creates an invoice on shop's `OrderPaid` message, or on `OrderPlaced` for an order paid by
     invoice.
-  - Each invoice line needs its VAT rate, which follows from the product's tax class: 7% for tea,
-    19% for accessories.
+  - Each invoice line needs its VAT rate, which follows from the tax class on the order's line: 7%
+    for tea, 19% for accessories.
   - The bank API reports incoming transfers in the bank's terms; billing matches them to open
     invoices. Some match none: a wrong reference, an amount short.
   - Scheduled dunning runs over unpaid invoices.

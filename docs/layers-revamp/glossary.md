@@ -62,13 +62,15 @@ the system that wrote it.
 
 **Outbox.** Where a system's outgoing messages wait until they are delivered. The *outbox port* is
 the driven port a service writes messages through. The *outbox reader* is what the relay reads the
-outbox through, and marks it by; the system provides it.
+outbox through, and marks it by; the system provides it, and for an external system's outbox,
+assembly does.
 
 **Handler.** A driving adapter that acts on messages delivered to its system.
 
-**Bus.** What delivers a message to the handlers subscribed to it.
+**Bus.** What delivers a message to the handlers subscribed to it. Assembly hands it the handlers.
 
-**Relay.** The mechanism that reads outboxes and hands each message to the bus.
+**Relay.** The mechanism that reads outboxes and hands each message to the bus. Assembly hands it
+the outbox readers.
 
 **Idempotent.** An operation is idempotent when repeating it leads to the same result as performing
 it once.
@@ -119,8 +121,9 @@ each importing it into its domain: `Money`, `Sku`. A change to it is a change to
 **Hook.** A driving adapter an upstream system calls.
 
 **External system.** A bounded context whose code this codebase does not write, though it may
-configure it: bought or adopted, run by its vendor or by us. It is driven through its API and
-driving through its hooks.
+configure it: bought or adopted, run by its vendor or by us, in its own process or in ours. Its
+configuration may hold business rules this codebase writes, in the external system's terms; its
+architecture stays its own. It is driven through its API and driving through its hooks.
 
 ## Domain
 
@@ -179,8 +182,8 @@ thing or many.
 place where port and implementation meet. It calls the system builders and produces what the
 process's driving adapters call into.
 
-**Common library.** Plumbing every system may import: the transaction port, store clients, a
-logger, a tracer, the relay, the ambient registry.
+**Common library.** Plumbing every system may import: store clients, a logger, a tracer, the relay,
+the bus, the courier.
 
 ## Tests
 

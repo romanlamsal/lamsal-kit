@@ -23,6 +23,10 @@ Tooling sits outside the layers and the rules. It builds systems through their b
 replaces their internals: an in-memory outbox, a CLI as relay and bus. What it reaches past an
 export path is no offer (SYS-1), and a system changes it without notice.
 
+An external system, its configuration included, sits outside the rules: its exports, its layers
+and its transactions are its own, even where this codebase writes its configuration. What a system
+of this codebase does with it, the adapters that call it and the hooks it calls, is inside them.
+
 Not covered: where UI code goes, which is `components.md`; library, framework and file-naming
 conventions, which are the stack document's; whether a module that straddles two layers should be
 split now; whether a downstream conforms to an upstream or builds an anti-corruption layer, which
@@ -46,7 +50,7 @@ like it. `node:path` reaches nowhere outside the process and still breaks in a b
 `process`, `window` and the DOM are one runtime's. A domain that imports any of these loads on
 one runtime, and whoever imports it elsewhere, a browser rendering a form from the schema, another
 system's domain, gets a load error or the server's store client along with the model. The common
-library is not on the list: its ambient registry would hand the domain a value no caller passed.
+library is not on the list: its courier would hand the domain a value no caller passed.
 The list is closed: an import of a kind it does not name is a question for this rule, not a
 permission.
 *Provenance:* The direction follows Khononov p. 77 (the model "devoid of any infrastructural or
@@ -131,7 +135,8 @@ choosing the 'wrong' number of ports", and MS has one handler per command.
 *Scope:* a module of the service layer imports a module.
 *Statement:* The import MUST be one of: its system's domain, a shared kernel, a port declared in
 its service layer, its system's published language, the common library, the export path of an
-upstream its system conforms to, a library that computes from its arguments.
+upstream its system conforms to, the package of an external system it conforms to, a library that
+computes from its arguments.
 *Relies on:*
 - ASM-2: a factory receives port implementations, store clients and other clients of something
   outside the process from its caller.
@@ -141,8 +146,10 @@ upstream its system conforms to, a library that computes from its arguments.
 changes whenever either changes, and a second way in, or a second store, means rewriting the use
 case. It reaches driven adapters through the ports they implement, handed in, so a swapped adapter
 leaves it untouched. The published language is on the list because the service translates both
-ways between it and the domain. A store client's type in a port's signature is the store's name in
-the service, one step removed. With the list, the system is replaced from the outside in, a new
+ways between it and the domain. An external system has no export path (Assumptions); for a service
+that conforms to it, its package takes that place. A store client's type in a port's signature is
+the store's name in the service, one step removed. With the list, the system is replaced from the
+outside in, a new
 driving adapter, a swapped driven adapter, with service and domain untouched.
 *Provenance:* The direction follows Cockburn (Intent: the application is "blissfully ignorant" of
 the adapters on every side), Martin (The Dependency Rule: source code dependencies point inward;
@@ -229,6 +236,29 @@ not, as you see fit"; the DbContext injected directly "for simpler implementatio
 architecture for every system (Assumptions).
 *Examples:* —
 
+**SVC-7**
+*Scope:* a service or a driving adapter reaches the outside: a store, a mail provider, the clock,
+another system.
+*Statement:* It MUST do so through a port of its system.
+*Relies on:* —
+*Why:* What a module imports, or receives from its caller, says what it holds, not what it calls:
+the common library holds store clients, and a factory receives one where it needs one. A service
+handed the store client and querying with it reads the store's records in the store's terms, past
+the repository and the aggregate it loads whole; the store's name is in the service, and its test
+needs the store. A server action doing the same skips the service, and the business rules with it. A
+service reaches the outside through a driven port, in its own terms, and its test hands it a fake; a
+driving adapter reaches it through a driving port, and the service behind it does the rest. A read
+that skips the aggregates, a list joined for one screen, is a driven port that returns it, and the
+driven adapter behind it holds the query.
+*Provenance:* Follows Cockburn (Intent: the application is "blissfully ignorant" of what lies on
+the other side of its ports; "A port identifies a purposeful conversation") and Garrido §2.3
+("Ports are interfaces that the application offers to the outside world"). The read behind a
+driven port follows Richardson (CQRS: a view database "designed specifically to support that
+query"). Against: MS performs the
+queries "by simple SQL statements using Dapper", "out of the domain model", from the application
+layer, with no port.
+*Examples:* —
+
 ## Driving adapters
 
 **DRV-8**
@@ -238,7 +268,8 @@ system, its system's domain, a shared kernel, its system's published language, t
 library, a library that computes from its arguments.
 *Relies on:*
 - ASM-2: a factory receives a port's implementation from its caller.
-- DRV-3: a driving adapter assembly cannot construct reads what it calls from a courier.
+- DRV-3: a driving adapter assembly cannot construct, or cannot hand what it calls when it
+  constructs it, reads what it calls from a courier.
 *Why:* A driving adapter that skips the service and reaches a driven adapter, a repository or the
 store reads state and decides by it, or writes outside any use case and outside the transaction a
 service holds, and the business rules in the domain are bypassed for that one way in. Typed by the
@@ -276,7 +307,9 @@ this document's. A batch in one transaction is Dahan's, in Vernon EAD II p. 10.
 *Examples:* —
 
 **DRV-3**
-*Scope:* a driving adapter assembly cannot construct: the framework finds and calls it.
+*Scope:* a driving adapter assembly cannot construct, or cannot hand what it calls when it
+constructs it: the framework finds and calls it, or what it calls is built from what it is built
+into.
 *Statement:* It MUST read what it calls from a courier.
 *Relies on:*
 - ASM-8: assembly fills the courier before any driving adapter reads it.
@@ -286,7 +319,11 @@ assembly runs assembly at module load and lets the adapter pick its own instance
 second place exists where port and implementation meet, and the test has no way to hand the
 adapter a fake. The courier keeps assembly the one place. Where the framework offers a factory
 seam, assembly constructs the adapter and hands it what it calls. A hook in a framework's static
-config that forwards to an adapter assembly built reads that adapter from the courier.
+config that forwards to an adapter assembly built reads that adapter from the courier. Where
+assembly builds the framework itself and the framework takes the adapter as it is built, the
+adapter exists before what it calls: Payload's config takes shop's hooks, and shop's services take
+the Payload instance. Assembly constructs the hooks with the courier and fills it once the services
+exist.
 *Provenance:* Follows Seemann ("Service Locator is an Anti-Pattern", comment of 2010-02-04): each
 framework-created object pulls from the container the framework's application object holds,
 having "no recourse" otherwise; his first choice is the framework's factory seam ("Composition
@@ -315,7 +352,9 @@ per object, not once at load.
 *Why:* An acknowledged message is gone. A queue client that acknowledges on receipt, or a handler
 that catches the use case's error and returns, loses the message the moment the use case fails,
 and the change it tells of does not reach this system. A use case that writes nothing succeeds
-when it returns; one that writes succeeds when it has committed.
+when it returns; one that writes succeeds when it has committed. A hook acknowledges by its
+answer: one that answers an external system's delivery at once and calls the use case afterwards
+loses the message the same way.
 *Provenance:* Follows Vernon EAD II p. 9 ("The modification can be retried if the subscriber does
 not acknowledge success"), Helland 2007 p. 134, EIP (Transactional Client) and MS (RabbitMQ
 requeues the unacknowledged). Khononov, Evans and Cockburn do not rule on it.
@@ -325,9 +364,9 @@ requeues the unacknowledged). Khononov, Evans and Cockburn do not rule on it.
 
 **DVN-4**
 *Scope:* a driven adapter imports a module.
-*Statement:* The import MUST be one of: a client of something outside the process, the port it
-implements, its system's domain, a shared kernel, the common library, the export path of an
-upstream, a library that computes from its arguments.
+*Statement:* The import MUST be one of: a client of something outside the process, an external
+system's package, the port it implements, its system's domain, a shared kernel, the common library,
+the export path of an upstream, a library that computes from its arguments.
 *Relies on:*
 - SYS-1: everything a system exports is its published language, its open host service's driving
   port types, a system builder or a fake of its open host service's driving ports.
@@ -335,7 +374,9 @@ upstream, a library that computes from its arguments.
 service has a use case inside it, in the layer meant to do nothing but talk to the outside; one
 that imports another adapter or a service of its system is tied to how that one is built.
 In-process, the adapter for an upstream calls the upstream's open host service and is typed by
-its export path.
+its export path. An external system has none (Assumptions); its package is what the adapter
+imports, a client of something outside the process where the external system runs elsewhere, the
+external system itself where it runs in this process: Payload's Local API.
 *Provenance:* That an adapter depends on the inside follows Garrido §6.2.1 ("adapters depend on
 hexagon") and Martin (The Dependency Rule). Evans p. 55 has the infrastructure layer below the
 domain, knowing nothing of it: the 2003 layering hexagonal replaces. The list is this document's.
@@ -417,9 +458,11 @@ a logger, a tracer.
 *Statement:* It MAY be imported as a ready-made instance.
 *Relies on:*
 - ASM-2: a factory receives each client of something outside the process from its caller.
+- SVC-7: a service or a driving adapter reaches the outside through a port of its system.
 *Why:* Telemetry reaches outside the process, a logger to its transport, a tracer to its
-exporter. The line is behavior, not substitution: a meter falls under this rule, a feature-flag
-client, whose answer changes what the system does, does not. Telemetry is substituted without a
+exporter, and a service calls it where it imports it, through no port. The line is behavior, not
+substitution: a meter falls under this rule, a feature-flag client, whose answer changes what the
+system does, does not. Telemetry is substituted without a
 parameter: OpenTelemetry's JS API reads a global tracer provider, and a test inspecting spans
 registers an in-memory exporter there. Missing from the signature, telemetry hides nothing a
 caller has to supply; handed through every factory, it adds a parameter to every signature for
@@ -459,15 +502,17 @@ The line between telemetry and everything else is this document's.
 
 **ASM-4**
 *Scope:* code reads the courier.
-*Statement:* It MUST be a driving adapter assembly cannot construct.
+*Statement:* It MUST be a driving adapter that assembly cannot construct, or cannot hand what it
+calls when it constructs it.
 *Relies on:*
 - ASM-1: a process has one assembly.
 *Why:* Read anywhere else, the courier is a service locator: whoever reads it gets a dependency
 without anyone handing it over, so the graph of who depends on what leaves assembly, the one
 place it is visible. A factory that reads it has a dependency it did not receive; code that is no
 factory, a service function, passes every other rule, since the courier lives in the common
-library its layer may import. The one code with no caller to hand it anything is a driving
-adapter the framework constructs.
+library its layer may import. Two kinds of code have no caller to hand them what they call: a
+driving adapter the framework constructs, and one assembly constructs before what it calls exists,
+because what it calls is built from what the adapter is built into (DRV-3).
 *Provenance:* Follows Seemann ("Service Locator is an Anti-Pattern", comments of 2010-02-04): the
 framework-created object reaches the container, and "from there on down, there will be no Service
 Locator available"; everything else gets an injected abstract factory. Seemann holds that a
@@ -481,7 +526,8 @@ depend on the locator; Evans Reference p. 17 gives every repository client globa
 *Statement:* Assembly MUST fill it before any driving adapter reads it.
 *Relies on:*
 - DRV-6: a driving adapter reads the courier when it runs, not when its module loads.
-- ASM-4: what reads the courier is a driving adapter assembly cannot construct.
+- ASM-4: what reads the courier is a driving adapter assembly cannot construct, or cannot hand what
+  it calls when it constructs it.
 - ASM-1: a process has one assembly.
 *Why:* A reader gets what is there when it runs. Filled late, the first requests find it empty;
 filled by anything but assembly, a second place produces instances. A per-process courier is
@@ -558,10 +604,10 @@ together. An answering use case holds none. Every call into the store takes the 
 reads too, and the record of a handled
 message commits with the writes it guards. A store is what one transaction commits, so a use case
 that writes writes one store; a write to a second store goes to a handler through the outbox. The
-transaction is a required parameter: a forgotten one is a type error. Opening it through the common
-library's transaction port keeps the store's name out of the service and the client's type out of
-the domain. A handler calls one use case per message, so each message gets a transaction of its own,
-apart from the one that wrote it.
+transaction is a required parameter: a forgotten one is a type error. Opening it through a driven
+port keeps the store's name out of the service and the client's type out of the domain. A handler
+calls one use case per message, so each message gets a transaction of its own, apart from the one
+that wrote it.
 *Provenance:* The service holding the transaction follows Fowler (Service Layer: "controlling
 transactions"), Evans p. 111 ("Leave transaction control to the client"), Khononov p. 86 n. 7 and
 p. 123, Vernon EAD I p. 3 (the transactional application service) and MS (the command handler
@@ -730,24 +776,109 @@ codebase owns: a mail sent, a shipment booked with an external system.
 - TX-21: the bus delivers a message to a handler again until the handler acknowledges it.
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
 - TX-5: a repeated delivery changes nothing.
+- TX-31: a use case called for a message passes the external system a key the message carries, where
+  the external system takes one.
 *Why:* The owner reads no bus, so this system acts for it. The use case that decides the change
 writes a message instead of making it; this system's handler handles that message on the owner's
-behalf, and the use case it calls makes the change and writes to no store of this system. The
-decision commits with the message and the call is apart from it, so a retry repeats the call and
-decides nothing again. A use case that marks the reservation and books the 3PL in one attempt
-decides again on redelivery, the order cancelled meanwhile, while the booking stands. The call's use
-case reaches idempotence through the owner's idempotency key, the message id; a record of handled
-ids cannot help, being outside any transaction the call is in. Where the owner takes no key, a
-repeat stays possible, which a business rule has to allow: a second mail. The owner's answer comes
-back as its own message or its hook. A request designed as a tentative operation changes nothing
-(glossary) and falls outside the Scope: the way around an owner that has no asynchronous answer. An
-event from another system that leads to a mail takes two hops: this system's use case decides, and
-its message drives the mail.
+behalf, and the use case it calls makes the change and decides nothing: it records the owner's
+answer where there is one, a booking's id, and a repeat records it again. The decision commits with
+the message and the call is apart from it, so a retry repeats the call and decides nothing again. A
+use case that marks the reservation and books the 3PL in one attempt decides again on redelivery,
+the order cancelled meanwhile, while the booking stands. The call's use case reaches idempotence
+through the owner's idempotency key, one the message carries (TX-31). Where the owner takes no key,
+a repeat stays possible, which a business rule has to allow: a second mail. The owner's answer comes
+back in the response, as its own message or by its hook. A request designed as a tentative operation
+changes nothing (glossary) and falls outside the Scope: the way around an owner that has no
+asynchronous answer. An event from another system that leads to a mail takes two hops: this system's
+use case decides, and its message drives the mail.
 *Provenance:* Follows Khononov p. 148, p. 149–150 (the handler executes the command; "the command
 execution logic should be moved out of the saga itself") and p. 293 (the outbox: "it can be used
 for sending email messages"). Departs: Khononov p. 150 has the relay execute the commands, which
 the glossary's relay does not (glossary: Relay). Against: EIP (Command Message) and Richardson
 (Messaging), the synchronous call. Evans p. 55 and Cockburn do not rule on the timing.
+*Examples:* —
+
+**TX-31**
+*Scope:* a use case called for a message changes something in an external system that takes an
+idempotency key.
+*Statement:* It SHOULD pass a key the message carries.
+*Relies on:*
+- TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
+- DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
+*Why:* Redelivery repeats the call: the external system acted, and the handler failed or its process
+died before it acknowledged. A record of handled ids cannot make the call idempotent, being outside
+any transaction the call is in. The external system's key can: it answers a repeated call with the
+first call's result instead of acting again. The key is the same on every delivery where it comes
+from the message, its id or the id of what it is about, the shipment, the refund; a key made at the
+call, a fresh UUID, differs on every attempt and deduplicates nothing. The external system keeps a
+key for a time, a day at Stripe, so a message parked longer in a dead-letter queue acts again when
+it is retried.
+*Provenance:* Follows Richardson (Idempotent consumer) and NServiceBus (Outbox: deduplication "is
+done using MessageId", and a repeat sent otherwise "cannot be deduplicated unless" it carries "the
+same MessageId"), carried here from the receiver to the external system's key. The external
+system's key is this document's.
+*Examples:* —
+
+**TX-28**
+*Scope:* a hook is called before the change it tells of commits in the external system.
+*Statement:* The use case it calls MUST NOT change this system beyond recording a tentative
+operation.
+*Relies on:*
+- TX-25: a driving port takes no transaction.
+- TX-1: a use case that writes runs in one transaction its own service opens and commits.
+- TX-30: a business rule of this system decides what happens when a confirmation does not come.
+*Why:* The external system has not committed when it calls: its change can still roll back after
+the hook returns, by a later hook, a failed validation, a crash. The use case runs in a transaction
+of its own, which commits whatever the external system does next. A change there that takes the
+external change as done, a record updated, a page revalidated, a published event, stands for a
+change a rollback undoes. Two answers stay safe. Answering changes nothing, and can refuse the
+change by this system's business rules: a veto. Recording a tentative operation, a pending record or
+a private message for a handler that checks the external system's committed state, leaves the change
+to a confirmation that comes after the commit: a message the external system publishes, a later
+hook, a read that finds the change committed. A read can come before the commit and find nothing
+yet, so what happens when no confirmation comes is a business rule's (TX-30). TX-6 binds a message
+to a change the use case makes; here the change is the external system's.
+*Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
+cancels"; "When an entity agrees to perform a tentative operation, it agrees to let another entity
+decide the outcome"). The hook before the commit is this document's.
+*Examples:* —
+
+**TX-29**
+*Scope:* an external system this codebase configures calls a hook that tells of its change before
+the change commits, and its transaction can write a message to an outbox.
+*Statement:* It SHOULD be configured to tell of the change by that message, not by the hook.
+*Relies on:*
+- TX-28: the use case a hook calls before the change it tells of commits changes this system no
+  further than recording a tentative operation.
+- TX-20: the relay hands each message it reads from an outbox to the bus at least once.
+- TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
+*Why:* Through the hook, this system holds a tentative operation that waits on a confirmation: a
+read of the external system's state can run before the commit and find nothing yet, and a
+confirmation the external system sends afterwards is its to send or lose. A message written in the
+external system's transaction commits with the change or not at all, and the relay hands it to this
+system's handler after the commit: nothing waits, nothing is confirmed. The outbox is the external
+system's, in its store, and assembly hands the relay its reader (glossary: Outbox). A hook that asks
+rather than tells, a veto, falls outside the Scope. A deviation's ADR names what confirms the
+tentative operation instead.
+*Provenance:* The outbox follows Richardson (Transactional outbox) and Khononov p. 144–145. Writing
+it in an external system's transaction is this document's.
+*Examples:* —
+
+**TX-30**
+*Scope:* this system holds a tentative operation, or waits on another system's answer.
+*Statement:* A business rule of this system MUST decide what happens when the confirmation or answer
+does not come.
+*Relies on:* —
+*Why:* Another system can fail after it said yes, stop resending a hook, or not answer at all, and a
+message can wait in a dead-letter queue. Waiting decides nothing, and what it leaves is a state a
+customer finds: payment still pending for a webhook Stripe stopped sending, while the card was
+charged; stock reserved for a checkout nobody completes. A business rule
+decides instead: a deadline that cancels, as shop's payment deadline cancels the order; a
+reconciliation that asks the other system; or accepting the state as it stands, a PaymentIntent
+nobody confirmed and that changes nothing. Each ends the waiting.
+*Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
+cancels") and NServiceBus (Saga timeouts: how long a saga waits for a message that comes late or not
+at all is the business's to say).
 *Examples:* —
 
 **TX-6**
@@ -785,14 +916,20 @@ outbox) and NServiceBus (Outbox).
 
 **TX-21**
 *Scope:* the bus delivers a message to a handler.
-*Statement:* It MUST deliver it again until the handler acknowledges it.
+*Statement:* It MUST keep the message, and deliver it again, until the handler acknowledges it.
 *Relies on:*
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
 - TX-5: a repeated delivery changes nothing.
 *Why:* A handler fails, a process dies mid-message, a store is briefly down. Delivered once, the
-message is lost with the attempt; delivered again, the attempt that fails is retried.
+message is lost with the attempt; delivered again, the attempt that fails is retried. Again need not
+be at once: a bus that backs off between attempts, and after several parks the message in a
+dead-letter queue, keeps it there until it is retried, once whatever failed it is fixed. Dropped
+from there, it is lost as surely as one acknowledged on receipt.
 *Provenance:* Follows EIP (Guaranteed Delivery; Transactional Client) and Vernon EAD II p. 9 ("The
-modification can be retried if the subscriber does not acknowledge success").
+modification can be retried if the subscriber does not acknowledge success"). Parking follows
+NServiceBus (Outbox: a message that "fails to process through all the retry attempts" is "moved to
+the error queue"; "Once the error is resolved, the failed message should be retried") and EIP (Dead
+Letter Channel). Khononov p. 147's at-least-once is the relay's (TX-20).
 *Examples:* —
 
 **TX-5**
@@ -807,7 +944,10 @@ that crashed after handing a message over hands it over again, and a redelivery 
 first attempt still does. A use case that acts on every delivery reserves the stock twice and
 sends the mail twice. Two means reach idempotence: recording the ids of handled messages in the
 transaction that acts on them, where a second record of the same id fails, or a change whose
-repeat is no change, a status set rather than toggled.
+repeat is no change, a status set rather than toggled. A hook that tells of something is delivered a
+message too, on the external system's terms rather than TX-20's and TX-21's: Stripe sends an event
+again, for days, in any order and at times twice at once. Where the call carries no id, the second
+means is left.
 *Provenance:* By id, follows Richardson (Idempotent consumer: "a consumer must be idempotent", by
 recording the ids of processed messages), NServiceBus (Outbox: deduplication by MessageId), Helland
 2007 p. 140 and Khononov p. 245. By what the message says, follows EIP (Idempotent Receiver),
@@ -1014,6 +1154,22 @@ retrofitting ("If changes in the implementation details of one component often r
 making it an open-host service").
 *Examples:* —
 
+**SYS-12**
+*Scope:* a record this system owns is kept by an external system.
+*Statement:* The external system's own ways in MUST NOT change it.
+*Relies on:* —
+*Why:* The owner's business rules decide what the record holds (glossary: Owner). An external
+system's own ways in, its admin, its API, its hooks other than this system's, write by the external
+system's rules: no use case of this system runs, its business rules are bypassed, no message tells
+of the change, and this system's next save writes over it or is written over. The external system
+lets this system configure them: a field an editor cannot change, an API key that cannot write it.
+A record whose changes have to come through the external system's ways in is the external
+system's to own, and this system keeps a snapshot of it or a replica.
+*Provenance:* Follows Evans p. 114 ("Processes outside the object system should not access such an
+object store. They could violate the invariants enforced by the objects") and Helland 2005 §1.3 (no
+access to the data "unless it is mediated by the application logic of the service").
+*Examples:* —
+
 ## Tests
 
 **TST-3**
@@ -1192,7 +1348,8 @@ Books by printed page; web pages and papers by section heading.
   learn.microsoft.com, the DDD and CQRS and the event-based communication chapters.
 - **Node.js**: Node.js documentation, "Asynchronous context tracking" (`node:async_hooks`,
   `AsyncLocalStorage`).
-- **NServiceBus**: Particular Software documentation, "Outbox"; "Messages, events, and commands".
+- **NServiceBus**: Particular Software documentation, "Outbox"; "Messages, events, and commands";
+  "Saga timeouts".
 - **OpenTelemetry JS API**: the `@opentelemetry/api` package README, github.com/open-telemetry.
 - **protobuf**: protobuf.dev, "Proto Best Practices".
 - **Richardson**: Chris Richardson, microservices.io pattern pages, among them Database per
