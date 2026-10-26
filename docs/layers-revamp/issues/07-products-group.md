@@ -1,6 +1,6 @@
-# 07 — Products group
+# 07 — External systems
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -83,8 +83,85 @@ Decided with the hook inside Payload's transaction and the two clients on one da
 
 ## Decision
 
-—
+Retitled from "Products group". A product is no term of its own: a bounded context whose code this
+codebase does not write is an external system, wherever it runs, and Payload's documentation puts
+business rules in its configuration (Hooks: "perform business logic"; Access Control: "what a user
+can and cannot do"; the ecommerce plugin keeps products, prices, carts and orders). No group file:
+every ruling holds for any system.
+
+- **Glossary.** *External system*: in its own process or in ours; its configuration may hold
+  business rules this codebase writes, in its terms; its architecture stays its own. *Common
+  library*: store clients, a logger, a tracer, the relay, the bus, the courier; the transaction
+  port goes, with no term in its place, and the ambient registry is the courier. *Outbox*, *Relay*,
+  *Bus*: assembly hands the relay its outbox readers, an external system's included, and the bus
+  its handlers.
+- **Assumptions.** An external system, configuration included, sits outside the rules; what a
+  system of this codebase does with it does not. `SYS-1`, `SYS-2`, `TX-17` no longer bind Payload's
+  exports.
+- **Hook before the external system commits.** `TX-28`: the use case changes this system no
+  further than recording a tentative operation: answering, a veto, a pending record, a private
+  message whose handler checks the committed state. A published event is the breach. `TX-29`,
+  SHOULD: an external system this codebase configures, whose transaction can write a message,
+  tells of its change by that message instead. A MAY was weighed and has nothing to override:
+  catalog writing its own outbox is outside the rules, shop writing in Payload's transaction spans
+  two systems.
+- **Waiting.** `TX-30`: a business rule decides what happens when a confirmation or an answer does
+  not come: a deadline that cancels, a reconciliation, or accepting the state. A deadline was
+  weighed; accepting the open state is an ending too. Covers a Stripe webhook after Stripe stops
+  resending and a tentative operation left open.
+- **A message that fails for good.** `TX-21`: the bus keeps the message and delivers it again
+  until acknowledged; backing off and parking in a dead-letter queue keep it. Khononov p. 147's
+  at-least-once is the relay's; NServiceBus moves a message to the error queue after its retries
+  and retries it once the error is resolved.
+- **Idempotency key.** `TX-31`, SHOULD: a key the message carries, not one made at the call.
+  `TX-22`'s Why: the call's use case records the owner's answer and decides nothing.
+- **A hook call is a delivered message.** `TX-5` and `TX-19` apply; `TX-6`, `TX-20` and `TX-21` are
+  the external system's to give or not, covered by `TX-28` and `TX-30`. `TX-5`'s Why says so.
+- **Our record kept by an external system.** `SYS-12`: the external system's own ways in do not
+  change it.
+- **The cycle.** `ASM-4`'s Statement and `DRV-3`'s Scope add the driving adapter assembly cannot
+  hand what it calls when it constructs it: what it calls is built from what it is built into.
+- **In the process, outside the system.** `DVN-4` admits an external system's package, `SVC-6` the
+  package of an external system it conforms to.
+- **Store clients.** They stay in the common library. `SVC-7`: a service or a driving adapter
+  reaches the outside through a port; import lists say what a module holds, not what it calls. A
+  read that skips the aggregates is a driven port returning it. `ASM-7`'s MAY relies on it.
+- **Fixture.** Catalog owns price, sku and tax class, their rules in Payload's config; shop copies
+  them at checkout. Shop owning a price editors set in Payload is P3's boundary drawn wrong
+  (Khononov pdf 186), kept as the variant in the `SYS-12` examples.
 
 ## Consequences
 
-—
+The Problem items, as placed:
+
+- `DOM-3` on catalog, the shared `products` record, `TX-23` on shop's fields, the before-change
+  hook embedding shop's price, editors editing shop's price: gone with the fixture; catalog owns
+  the product. The variant is `SYS-12`'s.
+- Hook inside Payload's transaction: `TX-28`, `TX-29`. Shop's own write firing its hook: gone with
+  the fixture; a repeat would be `TX-5`'s.
+- Drizzle plus Payload, two clients: two stores by the glossary; shop writes Payload no more.
+- Catalog written in a transaction shared with ours: `TX-22`, unchanged.
+- Hooks shop's builder constructs reading the courier: `ASM-4`, `DRV-3`.
+- The external system that answers only synchronously: the tentative operation (`TX-3`, `TX-22`),
+  the recorded answer (`TX-22`'s Why), what happens without one (`TX-30`).
+- Shared with issue 01: recovery (`TX-21`, `TX-30`), the key (`TX-31`), the tentative operation
+  left open (`TX-30`).
+- Store clients, transaction port, plain reads: `SVC-7`, the glossary.
+
+Examples:
+
+- Retired with their situations: `sys-8-ok-product-two-aggregates-one-document`, both `tx-16-*`,
+  `tx-22-breach-repository-writes-whole-document`, `tx-22-breach-shop-product-aggregate-is-whole-document`,
+  the three `sys-7-*` (a dropped message no longer drops: `TX-21`), `gap-own-write-refires-own-hook`,
+  `gap-before-change-hook-embeds-data`, `dom-3-breach-payload-collection-redeclares-price`.
+- Relabeled: `gap-hook-inside-payload-transaction` to `tx-28-breach-after-change-hook-revalidates-page`;
+  `sys-11-ok-payment-stripe-anti-corruption-layer` to
+  `svc-7-ok-payment-reaches-stripe-through-gateway-port`; `sys-11-ok-payload-terms-stop-in-shop-payload-module`
+  to `dvn-4-ok-payload-adapter-imports-external-package`;
+  `drv-8-breach-server-action-raw-sql-through-common-pool` to `svc-7-breach-*`.
+- New for `SVC-7`, `TX-28` to `TX-31`, `SYS-12`. `svc-6-breach-drizzle-transaction-in-port` also
+  breaches `SVC-7`; `sys-1-ok-shop-hooks-via-builder` satisfies `ASM-4`, `DRV-3`; `dom-1-ok` no
+  longer imports the common library into the domain.
+- `TransactionPort` stays a code name in the examples: a driven port, no glossary term.
+- To issue 01: the items above it shared; a hook call is a delivered message.
+- To issue 08: see its Problem.

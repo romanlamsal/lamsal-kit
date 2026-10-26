@@ -7,7 +7,7 @@ situation: Next.js finds and calls shop's server action; assembly never construc
 # Server action reads its service from the courier
 
 ```ts
-// common/courier.ts  (common library, per-process ambient registry)
+// common/courier.ts  (common library, per-process courier)
 const registry = new Map<string, unknown>()
 export const provide = <T>(key: CourierKey<T>, value: T): void => { registry.set(key.name, value) }
 export const resolve = <T>(key: CourierKey<T>): T => {

@@ -1,13 +1,13 @@
 ---
 breaches: [ASM-9]
 satisfies: []
-situation: common library transaction port with ambient unit of work in AsyncLocalStorage; shop calls billing's open host service in-process while holding it
+situation: common library unit of work kept ambient in AsyncLocalStorage; shop calls billing's open host service in-process while holding it
 ---
 
 # Repositories read the transaction from `AsyncLocalStorage`; billing's reads join shop's transaction unasked
 
 ```ts
-// common/src/transaction.ts — the fixture's transaction port, ambient unit of work
+// common/src/transaction.ts — the fixture's ambient unit of work
 const uow = new AsyncLocalStorage<PoolClient>()
 export const createTransactionPort = (pool: Pool) => ({
   run: <T>(fn: () => Promise<T>): Promise<T> =>

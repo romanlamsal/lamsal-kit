@@ -4,7 +4,7 @@ satisfies: [TST-4, TST-7]
 situation: default-suite test of shop's checkout, whose real adapters reach Postgres and payment's Stripe-backed service
 ---
 
-# Checkout tested against fake repositories, a fake transaction port and a fake PaymentIntents
+# Checkout tested against fake repositories, a fake `TransactionPort` and a fake PaymentIntents
 
 ```ts
 // shop/test/service/checkout.test.ts
@@ -32,6 +32,6 @@ it("should place the order and write OrderPlaced in the same transaction", async
 Every port whose real adapter talks to something external, the three Drizzle adapters over
 Postgres and payment's service in front of Stripe, is a fake here, so the test runs in
 milliseconds with no database and no network, and it can run on every save. The fakes share a fake
-transaction port that exposes what was committed, so the assertion is on stored state and on the
+`TransactionPort` that exposes what was committed, so the assertion is on stored state and on the
 return value. The real adapters are tested where they belong, in the contract suite's integration
 run.

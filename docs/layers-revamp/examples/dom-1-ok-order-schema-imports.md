@@ -9,7 +9,6 @@ situation: shop's Order schema is imported by the browser's checkout form and by
 ```ts
 // shop/domain/order.ts
 import { z } from "zod"
-import type { Transaction } from "@teeladen/common/transaction"
 import { moneySchema } from "./money"
 import { skuSchema } from "./sku"
 
@@ -27,11 +26,6 @@ export const orderSchema = z.object({
     paymentDeadline: z.string().datetime(),
 })
 export type Order = z.infer<typeof orderSchema>
-
-export interface OrderRepository {
-    findById(id: string): Promise<Order | null>
-    save(order: Order, tx: Transaction): Promise<void>
-}
 ```
 
-Every import passes DOM-1's two questions: zod computes from its arguments, `./money` and `./sku` are domain modules of the same system, and the common library's transaction port is a type that names no store. The browser renders the checkout form from `orderSchema` and loads nothing of Node or Postgres with it; billing, reading shop's published language, gets the same module.
+Every import passes DOM-1's two questions: zod computes from its arguments, and `./money` and `./sku` are domain modules of the same system. The repository that saves an `Order` is a port in the service layer, so the transaction it takes never reaches the domain. The browser renders the checkout form from `orderSchema` and loads nothing of Node or Postgres with it; billing, reading shop's published language, gets the same module.

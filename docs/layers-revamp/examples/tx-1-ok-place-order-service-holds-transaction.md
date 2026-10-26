@@ -30,7 +30,7 @@ export const createPlaceOrder =
 ```
 
 The service is the one piece of code that sees the whole use case, so it opens the transaction through
-the common library's transaction port, hands the same `tx` to every repository method and to the outbox
+a driven port, `TransactionPort`, hands the same `tx` to every repository method and to the outbox
 port, and `run` commits when the callback returns. No repository decides which writes land together; the
-Order, the cleared Cart and the two messages commit as one. The `Transaction` type is the common
-library's opaque one, so no store client's name enters the service or the domain.
+Order, the cleared Cart and the two messages commit as one. The `Transaction` type is
+opaque, so no store client's name enters the service or the domain.

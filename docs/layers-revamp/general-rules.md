@@ -239,7 +239,7 @@ architecture for every system (Assumptions).
 **SVC-7**
 *Scope:* a service or a driving adapter reaches the outside: a store, a mail provider, the clock,
 another system.
-*Statement:* It MUST do so through a port of its system.
+*Statement:* It MUST do so through a port.
 *Relies on:* —
 *Why:* What a module imports, or receives from its caller, says what it holds, not what it calls:
 the common library holds store clients, and a factory receives one where it needs one. A service
@@ -257,7 +257,10 @@ driven port follows Richardson (CQRS: a view database "designed specifically to 
 query"). Against: MS performs the
 queries "by simple SQL statements using Dapper", "out of the domain model", from the application
 layer, with no port.
-*Examples:* —
+*Examples:* breach examples/svc-7-breach-server-action-raw-sql-through-common-pool.md · breach
+examples/svc-7-breach-service-queries-handed-drizzle-client.md · ok
+examples/svc-7-ok-order-overview-through-query-port.md · ok
+examples/svc-7-ok-payment-reaches-stripe-through-gateway-port.md
 
 ## Driving adapters
 
@@ -458,7 +461,7 @@ a logger, a tracer.
 *Statement:* It MAY be imported as a ready-made instance.
 *Relies on:*
 - ASM-2: a factory receives each client of something outside the process from its caller.
-- SVC-7: a service or a driving adapter reaches the outside through a port of its system.
+- SVC-7: a service or a driving adapter reaches the outside through a port.
 *Why:* Telemetry reaches outside the process, a logger to its transport, a tracer to its
 exporter, and a service calls it where it imports it, through no port. The line is behavior, not
 substitution: a meter falls under this rule, a feature-flag client, whose answer changes what the
@@ -817,7 +820,8 @@ it is retried.
 done using MessageId", and a repeat sent otherwise "cannot be deduplicated unless" it carries "the
 same MessageId"), carried here from the receiver to the external system's key. The external
 system's key is this document's.
-*Examples:* —
+*Examples:* breach examples/tx-31-breach-3pl-booking-keyed-by-fresh-uuid.md · ok
+examples/tx-31-ok-3pl-booking-keyed-by-shipment-id.md
 
 **TX-28**
 *Scope:* a hook is called before the change it tells of commits in the external system.
@@ -841,7 +845,9 @@ to a change the use case makes; here the change is the external system's.
 *Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
 cancels"; "When an entity agrees to perform a tentative operation, it agrees to let another entity
 decide the outcome"). The hook before the commit is this document's.
-*Examples:* —
+*Examples:* breach examples/tx-28-breach-after-change-hook-revalidates-page.md · ok
+examples/tx-28-ok-before-change-hook-vetoes-sku-change.md · ok
+examples/tx-28-ok-after-change-hook-records-revalidation-request.md
 
 **TX-29**
 *Scope:* an external system this codebase configures calls a hook that tells of its change before
@@ -862,7 +868,8 @@ rather than tells, a veto, falls outside the Scope. A deviation's ADR names what
 tentative operation instead.
 *Provenance:* The outbox follows Richardson (Transactional outbox) and Khononov p. 144–145. Writing
 it in an external system's transaction is this document's.
-*Examples:* —
+*Examples:* breach examples/tx-28-ok-after-change-hook-records-revalidation-request.md · ok
+examples/tx-29-ok-catalog-writes-product-changed-in-payload-transaction.md
 
 **TX-30**
 *Scope:* this system holds a tentative operation, or waits on another system's answer.
@@ -879,7 +886,8 @@ nobody confirmed and that changes nothing. Each ends the waiting.
 *Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
 cancels") and NServiceBus (Saga timeouts: how long a saga waits for a message that comes late or not
 at all is the business's to say).
-*Examples:* —
+*Examples:* breach examples/tx-30-breach-payment-pending-until-webhook.md · ok
+examples/tx-30-ok-payment-asks-stripe-at-deadline.md
 
 **TX-6**
 *Scope:* a use case writes a message about a change it makes.
@@ -1168,7 +1176,8 @@ system's to own, and this system keeps a snapshot of it or a replica.
 *Provenance:* Follows Evans p. 114 ("Processes outside the object system should not access such an
 object store. They could violate the invariants enforced by the objects") and Helland 2005 §1.3 (no
 access to the data "unless it is mediated by the application logic of the service").
-*Examples:* —
+*Examples:* breach examples/sys-12-breach-shop-price-editable-in-payload-admin.md · ok
+examples/sys-12-ok-shop-price-read-only-in-payload-admin.md
 
 ## Tests
 

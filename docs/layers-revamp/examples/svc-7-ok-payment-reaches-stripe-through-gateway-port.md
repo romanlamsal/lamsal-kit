@@ -1,18 +1,20 @@
 ---
 breaches: []
-satisfies: [SYS-11]
+satisfies: [SVC-7, DVN-4, TX-5]
 situation: payment creates a Stripe PaymentIntent and handles Stripe's webhooks
 ---
 
-# Stripe's terms stop in payment's `stripe/` module
+# Payment reaches Stripe through its `PaymentGateway` port; Stripe's terms stop in `stripe/`
 
 ```ts
-// packages/payment/domain/ports/payment-gateway.ts — driven port, payment's terms
+// packages/payment/service/ports/payment-gateway.ts — driven port, payment's terms
 export interface PaymentGateway {
   authorize(input: { paymentId: string; amount: Money }): Promise<{ externalRef: string; clientSecret: string }>
 }
 
 // packages/payment/stripe/gateway.ts — driven adapter, the way out
+import Stripe from "stripe"                                   // the external system's package (DVN-4)
+
 export const stripePaymentGateway = (stripe: Stripe): PaymentGateway => ({
   async authorize({ paymentId, amount }) {
     const intent = await stripe.paymentIntents.create(
@@ -36,4 +38,8 @@ export const stripeWebhook =
   }
 ```
 
-Stripe is an upstream whose code this codebase does not write, so payment puts an anti-corruption layer between them: one module, `stripe/`, holds the driven adapter that calls out and the hook Stripe calls into. `PaymentIntent`, `client_secret`, `payment_intent.succeeded` appear here and nowhere else; the domain's `Payment` holds an `externalRef` and an `outcome`, and `SettlePayment` is a port in payment's terms. When Stripe's API version renames a status or the webhook payload changes, the change is absorbed in these two files and the compiler shows nothing to do in domain or services.
+Payment's service reaches Stripe through `PaymentGateway`, a driven port in payment's terms, and
+its test hands it a fake gateway. `stripe` is imported by the driven adapter and the hook, nowhere
+else: `PaymentIntent`, `client_secret` and `payment_intent.succeeded` stop at `stripe/`. The hook
+is the way in: it hands `SettlePayment` Stripe's event id as the message id, since Stripe delivers
+an event again and out of order, and the use case behind it claims the id (TX-5).

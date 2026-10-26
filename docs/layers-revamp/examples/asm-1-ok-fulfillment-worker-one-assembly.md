@@ -34,7 +34,7 @@ await relay.start()
 
 The worker process has exactly one place where ports meet implementations: `main.ts`. It calls the
 system builders the worker needs, the handler and outbox reader builders of fulfillment and the open
-host service builder of shop, and hands each builder its upstreams and the one transaction port. The
+host service builder of shop, and hands each builder its upstreams and the one `tx`. The
 preloaded `otel.ts` configures common library plumbing with one configuration for the process and
 builds no port implementation, so it is not a second assembly; it has to load before `pg` is
 imported, which `--import` guarantees without moving any wiring out of `main.ts`. One pool, one

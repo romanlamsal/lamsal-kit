@@ -47,6 +47,17 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
   `TX-24`'s Scope changed. `tx-12-ok-shipment-status-replica-from-fulfillment-messages.md` calls
   the replica "shop's own aggregate" and filters a listing by it, which `TX-27` may now reach. The
   saga gained step 6.
+- Left by issue 07: `SVC-7`, `TX-28` to `TX-31`, `SYS-12` are new; `TX-21`'s Statement, `ASM-4`'s
+  Statement, `DRV-3`'s Scope, `DVN-4`'s and `SVC-6`'s lists changed; the Assumptions put external
+  systems outside the rules. The fixture's catalog owns price, sku and tax class; the `SYS-12`
+  examples are a variant outside the fixture. `TransactionPort` is a code name in about 35
+  examples, a driven port the common library declares: a lead for whether `SVC-1`'s "a system
+  declares a port" leaves it unplaced. The examples left under ids issue 05 retired are gone or
+  relabeled; whatever still cites a retired id is a finding. Eight examples keep the old backdrop,
+  shop syncing its price into Payload, for rules it does not touch: `asm-1-breach-payload-config-builds-shop`,
+  `asm-2-breach-adapter-builds-payload`, `asm-2-ok-payload-adapter-takes-instance`,
+  `asm-2-ok-assembly-hands-upstreams-to-builder`, `asm-3-ok-actor-through-driving-port`,
+  `asm-3-ok-hook-passes-editor`, `sys-1-ok-shop-export-paths`, `svc-6-ok-opaque-transaction`.
 - From issue 04's proposal: MAY "breaches" are listed under the rule that governs once the MAY's
   Scope fails. The README's examples entry gains it.
 

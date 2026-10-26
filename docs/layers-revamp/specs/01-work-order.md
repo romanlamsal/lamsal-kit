@@ -19,7 +19,7 @@ the step's issue. It checks the step in the commit that lands it.
   `TX-1` and `SVC-2`, whose guarantees it changes.
 - [x] 6. **The world, issue 11.** Before products: it sweeps `general-rules.md` and the README
   for the glossary changes and `the-world.md`, so steps 7 to 9 work against both.
-- [ ] 7. **Products and external systems, issue 07.** A grill. It decides once the items it shares
+- [x] 7. **Products and external systems, issue 07.** A grill. It decides once the items it shares
   with issue 01: a hook that never arrives with recovery of a message that fails for good; an
   external system that answers only synchronously with a tentative operation left open; the
   idempotency key with NServiceBus's repeat. It may revise general rules between systems.

@@ -1,8 +1,7 @@
 ---
-breaches: [DRV-8]
-satisfies: []
+breaches: [SVC-7]
+satisfies: [DRV-8]
 situation: shop cancels an order from a server action
-finding: adversarial
 ---
 
 # Server action writes the orders table with raw SQL on the common library's pool
@@ -28,4 +27,9 @@ export async function cancelOrderAction(orderId: string, customerId: string) {
 }
 ```
 
-The adapter imports nothing from shop's service or driven-adapter layer: the two shop imports are domain, and `pool` is the common library, whose store clients DRV-8's list allows. The Statement is satisfied, and SVC-4 says nothing either because no use case is writing. The Why's harm is complete: the adapter reads state, decides by it, writes outside any use case and any transaction a service holds, and no `OrderCancelled` reaches the outbox. The list's "the common library" lets the store client in; "the common library but its store clients" would hold here.
+Every import is on DRV-8's list: the two shop imports are domain, and `pool` is the common library,
+which holds store clients. What the adapter does with `pool` is the breach: it reaches the store
+through no port. It reads state, decides by it and writes outside any use case and any transaction
+a service holds, and no `OrderCancelled` reaches the outbox. Through a driving port, the cancel is
+shop's use case, which loads the Order through its repository, asks the specification and writes
+the message with the change.

@@ -36,7 +36,7 @@ export async function register() {
 ```
 
 The web process now has two assemblies: `payload.config.ts` wires shop for the hooks, `register()`
-wires it for the route handlers. Two pools, two transaction ports, two billing instances exist where
+wires it for the route handlers. Two pools, two `tx`, two billing instances exist where
 one should; a cart cleared through the route's shop and a price synced through the hook's shop run
 on clients that know nothing of each other. `deferredPayloadCatalog()` is the cycle being fought
 in the wrong place: the config cannot have the Payload instance that shop's driven adapter needs,

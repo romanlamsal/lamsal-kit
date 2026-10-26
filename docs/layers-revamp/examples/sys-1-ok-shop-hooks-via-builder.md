@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [SYS-1]
+satisfies: [SYS-1, ASM-4, DRV-3]
 situation: Payload's config needs shop's hooks, the hooks need services, the services need the Payload instance
 ---
 
@@ -31,4 +31,4 @@ const shop = buildShopOpenHostService({ db, payload })
 courier.fill(shop)
 ```
 
-The hooks are shop's driving adapters, so they are not part of shop's offer and no export path carries them directly; what crosses the package boundary is `buildShopHooks`, a system builder, which SYS-1 allows. The cycle from the fixture is cut in assembly, the one place that sees all three: it builds the hooks before the Payload instance exists and hands them a courier, builds Payload with them, builds shop's services with the Payload instance, fills the courier. Catalog's config module never imports a file of shop's, and shop's hook file stays inside the package.
+The hooks are shop's driving adapters, so they are not part of shop's offer and no export path carries them directly; what crosses the package boundary is `buildShopHooks`, a system builder, which SYS-1 allows. The cycle from the fixture is cut in assembly, the one place that sees all three: it builds the hooks before the Payload instance exists and hands them a courier, builds Payload with them, builds shop's services with the Payload instance, fills the courier. Catalog's config module never imports a file of shop's, and shop's hook file stays inside the package. Assembly constructs the hooks, but before shop's services exist, since those are built from the Payload instance the hooks are built into; so the hooks read the courier (ASM-4, DRV-3).

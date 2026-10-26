@@ -1,5 +1,5 @@
 ---
-breaches: [SVC-6]
+breaches: [SVC-6, SVC-7]
 satisfies: []
 situation: shop's OrderRepository takes Drizzle's transaction type
 ---
@@ -30,4 +30,4 @@ export const createFakeOrderRepository = (): OrderRepository => ({
 })
 ```
 
-Typing the parameter with the real transaction type is what autocomplete offers, and it type-checks the adapter for free. But the port is in shop's service layer, so `drizzle-orm/node-postgres` is now imported by the service, a store client's type that is not on SVC-6's list. The service opens the transaction with `db` to produce a value of that type, so the store client is in the service too, and the fake repository, and every test of a service, has to name Drizzle's type to compile.
+Typing the parameter with the real transaction type is what autocomplete offers, and it type-checks the adapter for free. But the port is in shop's service layer, so `drizzle-orm/node-postgres` is now imported by the service, a store client's type that is not on SVC-6's list. The service opens the transaction with `db` to produce a value of that type, so the store client is in the service too, and the fake repository, and every test of a service, has to name Drizzle's type to compile. Opening it with `db.transaction`, the service reaches the store through no port (SVC-7).

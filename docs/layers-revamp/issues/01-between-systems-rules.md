@@ -80,9 +80,11 @@ Forwarded from issue 09, detail in its Consequences:
 - the open host service's schemas and errors kept compatible: `SYS-2` relies on `TX-7`, which
   covers messages.
 
-Moved to issue 07, decided there with the external system items they pair with: recovery of a
-message that fails for good, beside `TX-21`; NServiceBus's repeat and the idempotency key; a
-tentative operation left open. From issue 06, changed here under the glossary's tier rules:
+Moved to issue 07 and decided there: a message that fails for good stays kept, parked in a
+dead-letter queue (`TX-21`); what happens when an answer or a confirmation does not come is a
+business rule's (`TX-30`), which also ends a tentative operation left open; the idempotency key is
+one the message carries (`TX-31`), so it needs no id kept across repeats; a hook call is a
+delivered message (`TX-5`'s Why). The saga gap's refusal and late payment stay here. From issue 06, changed here under the glossary's tier rules:
 whose published language holds a command, with Upstream and downstream; Message, Saga, Handler,
 Bus; Reconciliation. Order: `specs/01-work-order.md`, step 8.
 

@@ -29,7 +29,7 @@ import { Money } from "@teeladen/kernel"
 export const Invoice = z.object({ id: z.string(), orderId: z.string(), total: Money, lines: z.array(InvoiceLine) })
 ```
 
-Common library holds the transaction port, relay, bus, the ambient registry, logger and tracer, and
+Common library holds store clients, `TransactionPort`, the relay, the bus, the courier, logger and tracer, and
 no schema: a change to any of them is a plumbing change, with no system's rule inside it. `Money`
 and `Sku` are a model two systems agree on, and they sit in a package that is not the common
 library, imported by the domains as a library that computes from its arguments. Which systems
