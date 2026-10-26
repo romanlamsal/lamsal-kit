@@ -186,6 +186,9 @@ A review after closing changed, with no new issue:
   from the common library; `svc-7-breach-server-action-raw-sql-through-common-pool` names its clock;
   `tx-28-ok-after-change-hook-records-revalidation-request` reads the version through a port of its
   own.
+- The Assumptions drop "its configuration included": `TX-29` and `SYS-12` rule on the configuration,
+  so the parts that touch a system of this codebase are inside the rules; Payload's own business
+  rules, layers and transactions stay outside.
 - Sources checked: Payload runs `beforeChange` and `afterChange` before its commit, and a write
   passing `req` joins the transaction; Stripe keeps a key 24 hours and resends a webhook for three
   days.

@@ -23,9 +23,11 @@ Tooling sits outside the layers and the rules. It builds systems through their b
 replaces their internals: an in-memory outbox, a CLI as relay and bus. What it reaches past an
 export path is no offer (SYS-1), and a system changes it without notice.
 
-An external system, its configuration included, sits outside the rules: its exports, its layers
-and its transactions are its own, even where this codebase writes its configuration. What a system
-of this codebase does with it, the adapters that call it and the hooks it calls, is inside them.
+An external system sits outside the rules: its exports, its layers and its transactions are its own,
+even where this codebase writes its configuration. What a system of this codebase does with it is
+inside them: the adapters that call it, the hooks it calls, and the parts of its configuration that
+touch the system: what may change the system's records it keeps (SYS-12), how it tells the system of
+a change (TX-29).
 
 Not covered: where UI code goes, which is `components.md`; library, framework and file-naming
 conventions, which are the stack document's; whether a module that straddles two layers should be
