@@ -26,5 +26,5 @@ the step's issue. It checks the step in the commit that lands it.
 - [x] 8. **What is left of issue 01.** Commands, routing to one receiver, the refusal coming back,
   trace context across the bus, the saga gap's remainder; the messaging terms from step 2; the gaps
   issue 09 forwarded.
-- [ ] 9. **Readers, issue 08.** Last: steps 5 to 8 revise general rules, and readers run before
-  them would read text about to change.
+- [x] 9. **Readers, issue 08.** Last: steps 5 to 8 revise general rules, and readers run before
+  them would read text about to change. Ran as the full review that opened spec 02.

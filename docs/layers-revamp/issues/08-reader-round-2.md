@@ -1,6 +1,6 @@
 # 08 — Reader round 2
 
-**Status:** open
+**Status:** closed, superseded by spec 02
 
 ## Context
 
@@ -67,8 +67,16 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
 
 ## Decision
 
-—
+Not worked as written. The readers ran once over the state at commit `ccfa1e9`, before the
+Examples lines were filled: every kind the README defines, over the input files and over the
+distilled output, as `specs/02-review-findings.md` records. The findings are in that spec's
+issues.
 
 ## Consequences
 
-—
+- To issue 19: every item of the Problem that names an example file or a missing one, and the
+  README's examples entry gaining the MAY rule.
+- To issue 14: `drv-8-breach-mailer-subscribed-to-bus-in-assembly`,
+  `drv-8-breach-adapter-reads-repository-to-check-owner`,
+  `svc-6-breach-drizzle-transaction-in-port`.
+- To issue 15: the `payload: unknown` lead.
