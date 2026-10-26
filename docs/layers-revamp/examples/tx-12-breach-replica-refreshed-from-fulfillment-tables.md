@@ -31,7 +31,7 @@ export const createDrizzleShipmentsSource = (db: Db): ShipmentsSource => ({
 ```
 
 The copy is kept, and the filter works, but it is fed by a query against fulfillment's storage rather
-than by fulfillment's published messages, one of the two ways TX-12 permits the read.
+than by fulfillment's published events, one of the two ways TX-12 permits the read.
 Fulfillment's rules are bypassed: a shipment fulfillment later marks `returned_to_sender` stays
 "shipped" in shop, because the query knows one status string and nothing of what fulfillment means by
 it. The raw SQL compiles against any schema, so fulfillment's renaming `dispatched_at` breaks shop at

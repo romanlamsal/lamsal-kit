@@ -56,9 +56,10 @@ interface layer, driven adapters the infrastructure layer.
 
 ## Between systems
 
-**Message.** What one system tells another, or itself, so that it may act. An *event* says something
-happened; a *command* says do this. *Published*: meant for other systems. *Private*: meant only for
-the system that wrote it.
+**Message.** What one system tells another, or itself, so that it may act. It has an id, the same on
+every delivery of it. An *event* says something happened; no receiver can refuse it. A *command* says
+do this, to the one system that offers it, which may refuse. *Published*: meant for other systems.
+*Private*: meant only for the system that wrote it.
 
 **Outbox.** Where a system's outgoing messages wait until they are delivered. The *outbox port* is
 the driven port a service writes messages through. The *outbox reader* is what the relay reads the
@@ -81,8 +82,8 @@ possibility of cancellation. It changes nothing it asks for: its confirmation do
 **Open host service.** The driving ports a system offers to other systems.
 
 **Published language.** What another system needs to talk to this one, or to translate from it:
-the schemas, types and errors its open host service's driving ports take, return and raise, and
-its published messages.
+the schemas, types and errors its open host service's driving ports take, return and raise, the
+events it publishes, and the commands it takes from other systems.
 
 **Reconciliation.** A use case that compares, after the fact, what this system recorded with what
 another system holds, and repairs this system's record, or starts the step that repairs the
@@ -101,11 +102,11 @@ commands to the others.
 ## Other systems
 
 **Upstream system.** Of two systems that talk, the one the other depends on: it offers the open
-host service the other calls, the messages the other handles, and the published language both are
-written in. It changes on its own terms.
+host service the other calls, the commands the other sends, the events the other handles, and the
+published language both are written in. It changes on its own terms.
 
 **Downstream system.** The one that depends on the upstream: it calls the upstream's open host
-service, handles its messages, and adapts to its changes.
+service, sends its commands, handles its events, and adapts to its changes.
 
 **Conformist.** A downstream system that takes the upstream as it is: its ports become the
 downstream's driven ports and its published language is used untranslated, in any layer including

@@ -1,6 +1,6 @@
 # 01 — Rules between systems made explicit
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -88,6 +88,51 @@ message (`TX-5`'s Why). The saga gap's refusal and late payment stay here. From 
 here under the glossary's tier rules: whose published language holds a command, with Upstream and
 downstream; Message, Saga, Handler, Bus; Reconciliation. Order: `specs/01-work-order.md`, step 8.
 
+Worked as step 8. No group file and no section of its own: every ruling holds for any system that
+sends or handles messages (issue 07's reasoning). New rules go beside their kin in Transactions and
+Other systems; ids are labels.
+
+- **Glossary.** *Message*: an id, the same on every delivery; no receiver can refuse an event; a
+  command goes to the one system that offers it, which may refuse. *Published language*: the events
+  it publishes and the commands it takes from other systems: a command is the receiver's (Khononov
+  p. 235, NServiceBus "logical owner"). *Upstream* and *Downstream* follow: the sender of a command is
+  downstream. Saga, Handler, Bus unchanged; Reconciliation kept, `TX-24` and `TX-30` use it.
+- **Commands.** `SYS-13`: a command to another system of this codebase is one the receiver's
+  published language declares. `TX-33`: only the declaring system's handler subscribes to it. Routing
+  to one receiver follows: the receiver's assembly subscribes, the relay and bus import nothing
+  (`ASM-5`); how the bus finds handlers is the stack document's (Assumptions). The sender imports the
+  command through the receiver's export path (`SYS-9`); a conformist's service writes it, an
+  anti-corruption layer's driven adapter does.
+- **The refusal coming back.** `TX-34`: a use case refusing another system's command publishes an
+  event telling of it, and succeeds. Throwing loops through redelivery into the dead-letter queue.
+  Refusals only: a command's success may come late, through an external system.
+- **The saga gap.** `TX-35`: an event that tells a system its part cannot go on as it stands, a
+  refusal or a payment after the cancel, gets a business rule's decision. Choreography or
+  orchestration is the repository's (Assumptions); `gap-checkout-saga-sequence-holder` becomes a
+  `SYS-13` ok example.
+- **Trace context across the bus.** No rule: telemetry, so `ASM-3` and `ASM-7` let the outbox
+  adapter read it and the envelope carry it.
+- **Issue 09's gaps.** The id kept across repeats: the glossary's Message. The order on overriding
+  messages: `TX-32`, a version, rising with each change; `TX-19` relies on it. Imports of a published
+  language and a shared kernel: `SYS-14`, a closed list; `DOM-1` relies on it. The open host service
+  kept compatible: `TX-7`'s Scope widens to a port called from another process; `SYS-2`'s line
+  follows.
+- **Issue 11's item**, a downstream acting on an acting use case's result: no rule. `TX-3` leaves no
+  acting call into another system of this codebase; an external system's answer recorded under
+  `TX-22` and told again by its hook is `TX-5`'s repeat.
+- **Swept.** `TX-12` reads the owner's published events, not messages; `TX-17`'s Why puts commands
+  outside its Scope.
+- **Fixture.** Refunds and the disputed charge (payment), credit notes and the dunning stage
+  (billing), pay-by-invoice refused in dunning (shop), saga step 7, a payment after the cancel.
+
 ## Consequences
 
-—
+- New rules, each with a breach and an ok example: `TX-32`, `TX-33`, `TX-34`, `TX-35`, `SYS-13`,
+  `SYS-14`.
+- Changed: `TX-7` Scope and Statement, `TX-12` Statement, `TX-19` Relies on and Why, `DOM-1` and
+  `SYS-2` Relies on, `TX-17` Why, the Assumptions' Not covered.
+- Examples relabeled: `tx-17-breach-published-command-named-for-receiver` to
+  `sys-13-breach-shop-declares-reserve-stock`; `gap-checkout-saga-sequence-holder` to
+  `sys-13-ok-checkout-process-sends-receivers-commands`. New:
+  `asm-3-ok-trace-context-crosses-bus-in-envelope`.
+- To issue 08: see its Problem.

@@ -37,7 +37,7 @@ used: a mail provider (shop, billing).
 - **shop**
   - Checkout must return a Stripe `client_secret` in the same request; payment creates it.
   - Checkout also offers pay-by-invoice: no Stripe payment, the customer pays by bank transfer
-    after the order ships.
+    after the order ships. Not to a customer billing has put into dunning.
   - Checkout copies each line's price, sku and tax class from catalog's product.
   - Sends an order-confirmation mail once the order commits.
   - Calls billing's open host service in-process while holding its own ambient transaction.
@@ -47,6 +47,8 @@ used: a mail provider (shop, billing).
     in the same call.
   - Stripe webhooks arrive at least once, out of order, in Stripe's terms. Stripe stops resending
     a webhook after three days.
+  - Refunds a payment when shop asks for it. A payment whose charge the customer disputes at Stripe
+    is not refunded.
 - **billing**
   - Creates an invoice on shop's `OrderPaid` message, or on `OrderPlaced` for an order paid by
     invoice.
@@ -54,7 +56,9 @@ used: a mail provider (shop, billing).
     for tea, 19% for accessories.
   - The bank API reports incoming transfers in the bank's terms; billing matches them to open
     invoices. Some match none: a wrong reference, an amount short.
-  - Scheduled dunning runs over unpaid invoices.
+  - Scheduled dunning runs over unpaid invoices; a customer's dunning stage rises with each
+    reminder and clears once they pay.
+  - Issues a credit note for each refund.
 - **fulfillment**
   - Reserves stock on `OrderPlaced`; releases it on `OrderCancelled`.
   - `OrderPaid` or `OrderCancelled` can arrive before `OrderPlaced`; a dropped cancel leaves
@@ -82,6 +86,8 @@ used: a mail provider (shop, billing).
    message, and shop's deadline does not apply. Billing matches the bank transfer and publishes
    `InvoicePaid`. Shop marks the order paid and publishes `OrderPaid`, which billing and
    fulfillment have already acted on for this order.
+7. A payment can succeed after shop's deadline cancelled the order: the customer paid in the last
+   second, or Stripe's webhook came late. The customer gets the money back.
 
 ## Cross-cutting reads
 

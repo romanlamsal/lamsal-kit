@@ -39,6 +39,6 @@ export const createListMyOrders =
 
 Fulfillment's open host service offers `getShipmentsForOrder(orderId)`; "the shipped orders of this
 customer" is a listing filtered by a term fulfillment does not know, so the read comes from its published
-messages instead, kept as a replica. The replica is shop's own aggregate with shop's schema, updated by nothing but
-fulfillment's published messages through shop's handler, and the listing reads it like any shop data.
+events instead, kept as a replica. The replica is shop's own aggregate with shop's schema, updated by nothing but
+fulfillment's published events through shop's handler, and the listing reads it like any shop data.
 It lags by the relay's moment.

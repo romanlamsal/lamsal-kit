@@ -23,7 +23,7 @@ the step's issue. It checks the step in the commit that lands it.
   with issue 01: a hook that never arrives with recovery of a message that fails for good; an
   external system that answers only synchronously with a tentative operation left open; the
   idempotency key with NServiceBus's repeat. It may revise general rules between systems.
-- [ ] 8. **What is left of issue 01.** Commands, routing to one receiver, the refusal coming back,
+- [x] 8. **What is left of issue 01.** Commands, routing to one receiver, the refusal coming back,
   trace context across the bus, the saga gap's remainder; the messaging terms from step 2; the gaps
   issue 09 forwarded.
 - [ ] 9. **Readers, issue 08.** Last: steps 5 to 8 revise general rules, and readers run before

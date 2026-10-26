@@ -31,9 +31,11 @@ a change (TX-29).
 
 Not covered: where UI code goes, which is `components.md`; library, framework and file-naming
 conventions, which are the stack document's; whether a module that straddles two layers should be
-split now; whether a downstream conforms to an upstream or builds an anti-corruption layer, which
-a repository's ADRs decide; how a driving adapter is tested, and when the integration suite runs,
-which are the repository's.
+split now; whether a downstream conforms to an upstream or builds an anti-corruption layer, and
+whether work spanning systems is choreographed or orchestrated, which a repository's ADRs decide;
+how a driving adapter is tested, and when the integration suite runs, which are the repository's;
+how the bus finds a message's handlers, by its type or by each handler filtering, which is the
+stack document's.
 
 ## Domain
 
@@ -44,6 +46,8 @@ language of an upstream this system conforms to, a library that computes from it
 *Relies on:*
 - SYS-10: loading a path that exports a system's published language loads no module of that
   system outside its published language.
+- SYS-14: a module of a published language or of a shared kernel imports nothing but modules of
+  it, a shared kernel and libraries that compute from their arguments.
 *Why:* The domain is pure and knows no runtime (glossary). The test for a module is two
 questions: does calling it reach outside the process, and does it exist on every runtime? A store
 client, an HTTP client, a mailer SDK, `node:fs` and a clock reach outside, so they stay behind
@@ -894,6 +898,33 @@ at all is the business's to say).
 *Examples:* breach examples/tx-30-breach-payment-pending-until-webhook.md · ok
 examples/tx-30-ok-payment-asks-stripe-at-deadline.md
 
+**TX-35**
+*Scope:* a use case is called for an event that tells this system its part of work spanning systems
+cannot go on as it stands: a command it sent was refused, a payment came for an order it has
+cancelled.
+*Statement:* A business rule of its system MUST decide what follows.
+*Relies on:*
+- DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
+- TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
+- TX-3: a use case changes data another system of this codebase owns by writing a message to its
+  own outbox.
+*Why:* Each system commits its own step, so a step can be refused, or land after the others moved
+on. The use case that meets it has two easy ways out, and both leave a half no business rule
+allows. It returns, the order being cancelled, and the customer's card stays charged for nothing.
+It throws, the handler does not acknowledge, the bus delivers the event again until it parks it,
+and the card stays charged there. Neither is written down as a choice. A business rule decides
+instead, in the domain, where a reader finds it: a compensating step that undoes the other system's,
+the payment refunded, asked of its owner through the outbox; going on after all, the order
+reinstated; or accepting the state as it stands, written down. The system the event reaches decides,
+holding the state the event meets; the step it undoes stays its owner's.
+*Provenance:* Follows Richardson (Saga: when a step "fails because it violates a business rule, the
+changes made by the completed steps are undone by compensating transactions"; the order service's
+handler "either approves or rejects the Order"), Khononov p. 235 ("The only thing that can be done
+to overturn an event is to issue a compensating action—a command, as it's carried out in the saga
+pattern").
+*Examples:* breach examples/tx-35-breach-late-payment-dropped.md · ok
+examples/tx-35-ok-late-payment-refunded.md
+
 **TX-6**
 *Scope:* a use case writes a message about a change it makes.
 *Statement:* It MUST write the message in the transaction that commits the change.
@@ -971,30 +1002,59 @@ NServiceBus deduplicates within a retention window.
 **TX-19**
 *Scope:* a use case is called for a delivered message.
 *Statement:* It MUST reach the same result whatever order the messages arrive in.
-*Relies on:* —
+*Relies on:*
+- TX-32: messages of one system of which a later one overrides an earlier carry a version of what
+  they tell of, rising with each change.
 *Why:* Messages overtake each other: fulfillment's `OrderCancelled` arrives before the `OrderPlaced`
 it cancels. A use case that reads "not found" as "already handled" drops the cancel, and the
 reservation made a moment later stays for a dead order; "not found" is not "already handled".
-Messages that override each other, two price updates, need something to order them by, which the
-publisher puts on them. Between two publishers, which message wins is the domain's decision.
-*Provenance:* Follows Khononov p. 245 ("Events will arrive out of order"; the publisher's version to
-order by), Helland 2007 p. 138 and MS (an older price event overwriting a newer one).
+Messages that override each other, two changes of a dunning stage, are ordered by their version: the
+use case keeps the higher and drops the lower. Between two publishers, which message wins is the
+domain's decision.
+*Provenance:* Follows Khononov p. 245 ("Events will arrive out of order"), Helland 2007 p. 138 and
+MS (an older price event overwriting a newer one).
 *Examples:* —
 
+**TX-32**
+*Scope:* a system writes messages of which a later one overrides an earlier: two changes of a
+customer's dunning stage, two statuses of one shipment.
+*Statement:* Each MUST carry a version of what it tells of, rising with each change.
+*Relies on:* —
+*Why:* A receiver of messages that override each other keeps the last: the stage, the status.
+Arriving out of order, the older lands last and stays: the customer paid, billing cleared the
+dunning stage, and shop's replica holds the reminder stage that came after, refusing pay-by-invoice
+to a customer who owes nothing. The receiver cannot tell the older from the message alone. When it
+arrived says nothing, and a time on the message is the clock of the process that wrote it, which
+another process disagrees with. The writer knows the order it changed the thing in, and only the
+writer: one counter per thing, raised in the transaction that changes it, the aggregate's version
+where it carries one (TX-23). Messages that do not override each other, a reservation and its
+release, are ordered by what they say.
+*Provenance:* Follows Khononov p. 245 ("When publishing messages, ensure that the subscribers will
+be able to deduplicate the messages and identify and reorder out-of-order messages"), which puts
+the means on the publisher. The version is this document's.
+*Examples:* breach examples/tx-32-breach-dunning-stage-changed-without-version.md · ok
+examples/tx-32-ok-dunning-stage-changed-carries-version.md
+
 **TX-7**
-*Scope:* the schema of a message changes, or a new message takes over from another.
-*Statement:* The change MUST keep messages old code writes readable by new code, and messages new
-code writes readable by old code, each field keeping its meaning.
+*Scope:* the schema of a message changes, or of what an open host service's driving port takes,
+returns or raises where code of another process calls it; or a new message or port takes over from
+another.
+*Statement:* The change MUST keep what old code writes readable by new code, and what new code
+writes readable by old code, each field keeping its meaning.
 *Relies on:* —
 *Why:* A message is handled by code older or newer than the code that wrote it. One written before a
 deploy sits in the outbox and is handled after it; one deployment does not clear the outbox. A
 handler still on old code, in a process not yet restarted, reads one written by new code. The type
 checker sees none of this: the stored message is not in the program, so a renamed field compiles and
-fails at runtime, on a message nobody re-sends. An optional field added or removed keeps both
+fails at runtime, on a message nobody re-sends. An open host service called from another process
+meets old and new code the same way: a deploy replaces processes one at a time, so a downstream
+process still on old code calls the upstream's new one, and an error the new code raises reaches a
+caller that knows none of it. Called in the same process, port and caller are compiled and deployed
+together, and the type checker sees both sides. An optional field added or removed keeps both
 directions; a field renamed, a required one added or removed, a type changed, an enum value added or
 removed, a meaning changed, an amount from cents to euros, breaks one. A change that cannot keep
-both goes through versions: new code writes the old message and the new while old readers run, and
-reads the old until none waits.
+both goes through versions: new code writes the old message and the new, or offers the old port
+beside the new, while old readers run, and reads the old until none waits.
 *Provenance:* Follows protobuf (Dos and Don'ts: "Clients and servers are never updated at exactly
 the same time"), Confluent (full compatibility lets producers and consumers upgrade independently;
 an incompatible change as a new topic) and Khononov p. 55 ("only possible if the modified
@@ -1012,25 +1072,68 @@ upgrade order; Helland 2005 §3.4 goes further, every change a new version.
 each receiver's decision, made by subscribing its handler (glossary: Bus). A publisher that names
 its handlers changes whenever a system starts or stops listening, and imports what it names, so the
 dependency runs from upstream to downstream, against the one the published language establishes.
+A command is outside the Scope: it is its receiver's, declared in the receiver's published language
+(glossary: Published language), and the sender imports it as a downstream does.
 *Provenance:* Follows EIP (Publish-Subscribe Channel), Richardson (Messaging), NServiceBus (Events),
 MS (the publisher does not need "to know the subscribers") and Khononov p. 233.
 *Examples:* —
 
+**TX-33**
+*Scope:* a handler is subscribed to a command.
+*Statement:* It MUST be a handler of the system whose published language declares the command.
+*Relies on:* —
+*Why:* A command asks, and its receiver may refuse (glossary: Message). Another system's handler
+that acts on it acts on a request as if it were done: billing, subscribed to payment's
+`RefundPayment`, issues a credit note for a refund payment refused on a disputed charge. Two systems
+acting on one command each do what the sender asked of one. And the command is the receiver's offer,
+shaped for the receiver's use case and changed on its terms; a second system's handler breaks where
+the receiver changes it. What did happen the receiver tells as an event, which any system may handle.
+*Provenance:* Follows NServiceBus (Messages, events, and commands: "a command should only be
+consumed by a single consumer"; a command "Cannot be subscribed to or unsubscribed from") and
+Khononov p. 235 ("the command's target can refuse to execute the command").
+*Examples:* breach examples/tx-33-breach-billing-handles-refund-payment.md · ok
+examples/tx-33-ok-billing-handles-payment-refunded.md
+
+**TX-34**
+*Scope:* a use case called for a command another system sent refuses it: a business rule of its
+system says no.
+*Statement:* It MUST publish an event that tells of the refusal.
+*Relies on:*
+- DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
+- TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
+- TX-1: a use case that writes runs in one transaction, which its service opens, hands to each call
+  into its store and commits.
+*Why:* A refusal that throws fails the use case: the handler does not acknowledge, the bus delivers
+the command again, the same business rule refuses it again, until the bus parks it, and the sender
+learns nothing. Shop asked payment for a refund, payment refuses it for a disputed charge, and shop
+tells the customer the money is on its way. A refusal is an outcome, not a failure: the use case
+writes the event to its outbox and commits, it has succeeded, and the handler acknowledges. The
+event is the receiver's, in its published language, naming no sender; the sender handles it as a
+downstream handles any event of its upstream. A failure that a retry may cure, a store down, a save
+that lost to a concurrent one (TX-23), is no refusal: the use case fails and the bus delivers again.
+*Provenance:* Follows Khononov p. 235 (a command "can be rejected", "if the command is invalid or if
+it contradicts the system's business rules") and Richardson (Saga: the participant "emits an event
+indicating the outcome"). Departs: Richardson's orchestrated participant "sends back a reply
+message", and NServiceBus replies to the sender; here the receiver publishes, and the sender
+subscribes.
+*Examples:* breach examples/tx-34-breach-refund-refusal-thrown.md · ok
+examples/tx-34-ok-refund-refusal-published.md
+
 **TX-12**
 *Scope:* a use case of this system reads data another system owns.
-*Statement:* It MUST read it from the owner's open host service or from its published messages.
+*Statement:* It MUST read it from the owner's open host service or from its published events.
 *Relies on:*
 - SYS-2: the modules that declare a published language import nothing of the domain.
 - TX-7: a changed message schema keeps messages old code writes readable by new code and the
   reverse, each field keeping its meaning.
-*Why:* The owner's open host service and its published messages are what it offers on purpose, in
+*Why:* The owner's open host service and its published events are what it offers on purpose, in
 its published language. Reading its store directly, a join across both systems' tables, a query
 against its records, binds this system to the owner's storage: the owner's schema change breaks this
 system's query with no compile error, and the owner's business rules, which decide what a record
 means, are bypassed. In-process the open host service is a function call behind a driven port; going
-through it costs a port, not a network hop. A replica is filled from the owner's published messages
+through it costs a port, not a network hop. A replica is filled from the owner's published events
 or what its open host service returns, so reading it reads those. The replica lags by a moment.
-Where the components can settle for that, the published messages are the rule of thumb: the read
+Where the components can settle for that, the published events are the rule of thumb: the read
 then needs the owner neither running nor fast.
 *Provenance:* Follows Richardson (Database per service: data "accessible only via its API"; API
 Composition; CQRS), Helland 2005 §1.3 and §6.5 (no access to the data "unless it is mediated by
@@ -1146,8 +1249,8 @@ depend on nothing"). TypeScript's type-only exports are the mechanism.
 *Scope:* a system declares its published language.
 *Statement:* The modules that declare it MUST NOT import the domain.
 *Relies on:*
-- TX-7: a changed message schema keeps messages old code writes readable by new code and the
-  reverse, each field keeping its meaning.
+- TX-7: a changed schema of a message, or of an open host service called from another process,
+  keeps what old code writes readable by new code and the reverse, each field keeping its meaning.
 - SVC-6: a service module's allowed imports include its system's domain and its published language.
 *Why:* A published language that re-exports the domain's schemas, picks from them, extends them or
 re-uses a domain enum is the domain: every refactoring of the model is a change to the contract, and
@@ -1166,6 +1269,47 @@ implementation must be different"). Departs: Khononov p. 207 makes it conditiona
 retrofitting ("If changes in the implementation details of one component often ripple … consider
 making it an open-host service").
 *Examples:* —
+
+**SYS-13**
+*Scope:* a system sends a command to another system of this codebase.
+*Statement:* The command MUST be one the receiver's published language declares.
+*Relies on:* —
+*Why:* A command asks the receiver to run one of its use cases; what it takes, and when the receiver
+refuses, are the receiver's business rules. Declared in the sender's published language, the
+receiver's use case is named and shaped by the sender: shop's `ReserveStock` carries
+`reserveUntil`, fulfillment's reservation deadline worked out in shop, so fulfillment's reservation
+rule changes and shop's published language changes with it, while commands in the old shape wait in
+shop's outbox. The sender is then upstream of a system it gives orders to, and the receiver adapts
+to it. Declared by the receiver, the command is part of its offer like a driving port of its open
+host service: the sender imports it from the receiver's export path and is the downstream, and the
+receiver changes it on its own terms. A sender that conforms writes it from its service; one with an
+anti-corruption layer hands its own terms to a driven port, whose adapter writes the receiver's
+command to the outbox in the transaction it is handed.
+*Provenance:* Follows NServiceBus (Messages, events, and commands: a command "Has one logical
+owner" and "Should be sent to the logical owner") and Khononov p. 235 (the command's target) and
+p. 149–150 (the saga's commands executed on their targets). Fowler (What do you mean by
+"Event-Driven"?) warns of the reverse disguise, an event used as a "passive-aggressive command".
+*Examples:* breach examples/sys-13-breach-shop-declares-reserve-stock.md · ok
+examples/sys-13-ok-checkout-process-sends-receivers-commands.md
+
+**SYS-14**
+*Scope:* a module of a published language or of a shared kernel imports a module.
+*Statement:* The import MUST be one of: another module of the same published language or shared
+kernel, a shared kernel, a library that computes from its arguments.
+*Relies on:* —
+*Why:* Both are imported where the rest of their system is not: a shared kernel into the domain of
+every system that shares it, a published language into a downstream's adapters, into its domain
+where it conforms (DOM-1), into a browser parsing a form. What they import, every importer loads. A
+`Money` that imports the common library's logger to report a rounding puts pino into each domain
+that imports `Money` and into the browser bundle, past DOM-1, whose list names the shared kernel and
+not what it imports. SYS-2 keeps the domain out of a published language and SYS-10 the rest of its
+system; neither bounds what else it imports. The list is DOM-1's, narrowed to what both are for: a
+model of values, computed from arguments. It is closed, like DOM-1's.
+*Provenance:* Follows Evans p. 251 (the shared kernel: "some subset of the domain model that the two
+teams agree to share") and
+Garrido §6.2.1 (ports that "would depend on nothing"). The list is this document's.
+*Examples:* breach examples/sys-14-breach-money-imports-common-logger.md · ok
+examples/sys-14-ok-money-returns-remainder.md
 
 **SYS-12**
 *Scope:* a record this system owns is kept by an external system.
