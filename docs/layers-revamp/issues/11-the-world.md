@@ -224,3 +224,27 @@ not state it again. A reader that changes a property on purpose was weighed and 
 - To issue 07: ownership settled; the shared document under `TX-1` and `TX-23`, and `sys-8`, stay.
 - To issue 08: `TX-26` has no examples; `ASM-7` has no breach example; the fixture's bank API and
   pay-by-invoice are new situations for the readers.
+
+## Review
+
+A review after closing found every replica breaching `the-world.md` P11: *Owner* gave a replica's
+records to the system it copies, and `TX-26` had the keeping system write them. Decided there, with
+no new issue:
+
+- Glossary. *Owner*: a record no business rule decides is the keeping system's; a replica's
+  records are its keeper's, what they copy the owner's to decide. *Replica*: a copy under the
+  owner's ids, shaped as it is written, refreshed from what the owner publishes or returns.
+  *Aggregate* drops "It has one owner"; no source states ownership over aggregates. *Shared
+  kernel*: agreed on together, since *Owner* speaks of records, not models. P11 stands.
+- `TX-26`: written from the owner's events, or from what the owner returns or replies to the
+  keeping system's own calls and commands; relies on `TX-3`, which now keeps other systems out.
+- `TX-27`, new: a decision by a replica is one a business rule accepts on lagging data. `TX-24`'s
+  Scope leaves a replica out, else every such decision needed an ADR; `SVC-2`'s line follows.
+- `TX-3` drops its replica sentence; `TX-12`'s Why follows *Replica*; `TX-22` says owner, not
+  holder, and a repeat a business rule has to allow.
+- Fixture: the checkout saga's step 6, pay-by-invoice.
+
+Sources: the copy sits in the keeper's store, in its own shape, written by it, kept unchanged
+(Fowler, Khononov p. 238, p. 245–246, Richardson, Helland 2005 §6.6); the owner shapes its
+published language for its consumers (Khononov p. 244, Evans Reference p. 32) and none has it push
+into a keeper.

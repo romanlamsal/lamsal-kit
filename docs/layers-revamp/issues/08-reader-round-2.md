@@ -43,6 +43,10 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
 - Left by issue 11: `TX-26` is new, with no example files; `SVC-4`'s Scope narrowed to records of
   an aggregate. The fixture gained pay-by-invoice with a bank API, the tax class, and the 3PL's
   article master.
+- Left by issue 11's review: `TX-27` is new, with no example files; `TX-26`'s Statement and
+  `TX-24`'s Scope changed. `tx-12-ok-shipment-status-replica-from-fulfillment-messages.md` calls
+  the replica "shop's own aggregate" and filters a listing by it, which `TX-27` may now reach. The
+  saga gained step 6.
 - From issue 04's proposal: MAY "breaches" are listed under the rule that governs once the MAY's
   Scope fails. The README's examples entry gains it.
 

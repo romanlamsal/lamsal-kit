@@ -166,8 +166,8 @@ whether the stock suffices, whether the order is still open.
   included.
 - TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
   changed in the store since the load.
-- TX-24: by default, the data a decision has to hold by when the use case commits belongs to
-  aggregates the use case saves.
+- TX-24: by default, the data a decision has to hold by when the use case commits, other than a
+  replica, belongs to aggregates the use case saves.
 - DRV-8: a driving adapter reaches its system through driving ports, importing no driven port,
   driven adapter or service of it.
 - SYS-1: a system exports no service, driven port or adapter to other code.
@@ -623,8 +623,8 @@ instead, which the Statement admits too.
 *Examples:* —
 
 **TX-24**
-*Scope:* a use case decides by what this system has stored, and the decision has to hold when the
-use case commits: the stock suffices, the order is still open.
+*Scope:* a use case decides by what this system has stored, other than a replica, and the decision
+has to hold when the use case commits: the stock suffices, the order is still open.
 *Statement:* The data it decides by SHOULD belong to aggregates the use case saves.
 *Relies on:*
 - TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
@@ -638,7 +638,8 @@ the stock with its reservations in `Stock`, the second save fails. Where the dec
 the aggregates one use case saves, it is a business rule across aggregates, which holds after a
 delay: a later use case, a reconciliation, a compensating step repairs it. A deviation's ADR names
 what holds the data still instead: a lock on what the decision read, an isolation level under which
-the second commit fails.
+the second commit fails. A replica falls outside: it lags its owner, and no save here fails on a
+change there (TX-27).
 *Provenance:* Follows Evans p. 91 (invariants within an aggregate "enforced with the completion of
 each transaction"; "Any rule that spans AGGREGATES will not be expected to be always up to date")
 and p. 97 (the line item holds its own price, the purchase order's invariant kept inside it),
@@ -707,8 +708,7 @@ owner after the commit does not help: a crash between the commit and the call, o
 loses the change, and nobody retries. Written to the outbox in the same transaction, the message is
 exactly as committed as the change it tells of; the owner's handler acts on it, and redelivery
 retries it until it lands. A tentative operation changes nothing (glossary), so asking for one
-falls outside the Scope, from any system; confirming it does not. A replica written from what the
-owner publishes or offers copies a change the owner made, and falls outside the Scope too (TX-26).
+falls outside the Scope, from any system; confirming it does not.
 *Provenance:* Asynchrony across systems follows Evans Reference p. 16 ("Across boundaries, handle
 updates asynchronously", said of aggregates, so of systems a fortiori), MS (integration events
 "must be based on asynchronous communication"), Richardson (Database per service: transactions
@@ -723,26 +723,26 @@ alternative. Departs: Khononov's simple saga calls the other context directly (p
 **TX-22**
 *Scope:* a use case of this system changes something outside its store that no system of this
 codebase owns: a mail sent, a shipment booked with an external system.
-*Statement:* The change MUST go through this system's outbox, on behalf of its holder.
+*Statement:* The change MUST go through this system's outbox, on behalf of its owner.
 *Relies on:*
 - TX-6: a message about a change commits in the transaction that commits the change.
 - TX-20: the relay hands each message it reads from an outbox to the bus at least once.
 - TX-21: the bus delivers a message to a handler again until the handler acknowledges it.
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
 - TX-5: a repeated delivery changes nothing.
-*Why:* The holder reads no bus, so this system acts for it. The use case that decides the change
-writes a message instead of making it; this system's handler handles that message on the holder's
+*Why:* The owner reads no bus, so this system acts for it. The use case that decides the change
+writes a message instead of making it; this system's handler handles that message on the owner's
 behalf, and the use case it calls makes the change and writes to no store of this system. The
 decision commits with the message and the call is apart from it, so a retry repeats the call and
 decides nothing again. A use case that marks the reservation and books the 3PL in one attempt
 decides again on redelivery, the order cancelled meanwhile, while the booking stands. The call's use
-case reaches idempotence through the holder's idempotency key, the message id; a record of handled
-ids cannot help, being outside any transaction the call is in. Where the holder takes no key, a
-repeat stays possible, and the domain accepts it: a second mail. The holder's answer comes back as
-its own message or its hook. A request designed as a tentative operation changes nothing (glossary)
-and falls outside the Scope: the way around a holder that has no asynchronous answer. An event from
-another system that leads to a mail takes two hops: this system's use case decides, and its message
-drives the mail.
+case reaches idempotence through the owner's idempotency key, the message id; a record of handled
+ids cannot help, being outside any transaction the call is in. Where the owner takes no key, a
+repeat stays possible, which a business rule has to allow: a second mail. The owner's answer comes
+back as its own message or its hook. A request designed as a tentative operation changes nothing
+(glossary) and falls outside the Scope: the way around an owner that has no asynchronous answer. An
+event from another system that leads to a mail takes two hops: this system's use case decides, and
+its message drives the mail.
 *Provenance:* Follows Khononov p. 148, p. 149–150 (the handler executes the command; "the command
 execution logic should be moved out of the saga itself") and p. 293 (the outbox: "it can be used
 for sending email messages"). Departs: Khononov p. 150 has the relay execute the commands, which
@@ -876,9 +876,9 @@ against its records, binds this system to the owner's storage: the owner's schem
 system's query with no compile error, and the owner's business rules, which decide what a record
 means, are bypassed. In-process the open host service is a function call behind a driven port; going
 through it costs a port, not a network hop. A replica is filled from the owner's published messages
-or reads of its open host service, so reading it reads those. The replica lags by a moment. Where
-the components can settle for that, the published messages are the rule of thumb: the read then
-needs the owner neither running nor fast.
+or what its open host service returns, so reading it reads those. The replica lags by a moment.
+Where the components can settle for that, the published messages are the rule of thumb: the read
+then needs the owner neither running nor fast.
 *Provenance:* Follows Richardson (Database per service: data "accessible only via its API"; API
 Composition; CQRS), Helland 2005 §1.3 and §6.5 (no access to the data "unless it is mediated by
 the application logic of the service") and §4.1 (versioned reference data, "somewhat out of
@@ -894,18 +894,41 @@ autonomy.
 
 **TX-26**
 *Scope:* a replica is written.
-*Statement:* It MUST be written by a use case of the system that keeps it.
+*Statement:* It MUST be written from the owner's events, or from what the owner returns or replies
+to the keeping system's own calls and commands.
 *Relies on:*
+- TX-3: a use case changes data another system of this codebase owns by writing a message to its
+  own outbox.
 - TX-17: a system that publishes an event names no system that handles it.
-*Why:* The owner publishes and offers without knowing who keeps a copy. An owner that writes the
-copy itself, into the keeping system's store or through a port the keeping system opens for it,
-knows its readers: it changes whenever a system starts or stops keeping one, and decides what
-another system keeps, in which shape, and how a late or repeated message lands there. The keeping
-system's handler, or its scheduled task reading the open host service, decides that against its
-own needs, and the owner stays unaware of it.
-*Provenance:* Follows Fowler (What do you mean by "Event-Driven"?, Event-Carried State Transfer:
-the recipient keeps its own copy), Khononov p. 238 and Richardson (CQRS: the view is kept by
-subscribing to the events the owner publishes).
+*Why:* The owner's code names no system that keeps a copy. An owner that pushes the copy, through a
+port the keeping system opens for it or by a command, changes whenever a system starts or stops
+keeping one, and decides what another system keeps, in which shape, and how a late or repeated
+message lands there. The keeping system decides that against its own needs: its handler of the
+owner's events, its scheduled task reading the open host service, its process manager keeping what
+the owner replies to its commands. The owner shapes its published language for the systems
+downstream; it does not start the exchange.
+*Provenance:* Follows Fowler (What do you mean by "Event-Driven"?, Event-Carried State Transfer: the
+recipient keeps its own copy), Khononov p. 238, Richardson (CQRS: the view is kept by subscribing to
+the events the owner publishes) and Helland 2005 §6.6 (the copy "kept unchanged"). The owner shaping
+its published language for its consumers follows Khononov p. 244 (the consumer-driven contract) and
+Evans Reference p. 32 (customer/supplier).
+*Examples:* —
+
+**TX-27**
+*Scope:* a use case decides by a replica.
+*Statement:* The decision MUST be one a business rule of its system accepts on data that lags the
+owner.
+*Relies on:* —
+*Why:* A replica lags its owner, and no save in this store fails on a change there: the decision may
+rest on a fact the owner has already changed. Whether that is acceptable depends on the use case, so
+the answer is a business rule, in the domain, where a reader finds it. Shop offers pay-by-invoice by
+its copy of billing's dunning stage; a business rule accepts a customer who entered dunning a moment
+ago. Where none accepts the lag, the decision is the owner's: a tentative operation, a message.
+*Provenance:* Follows Vernon EAD II p. 9 (domain experts "are often willing to allow for reasonable
+delays"), MS (Domain events: "it is in any case the responsibility of the domain experts to say
+whether particular operations need atomic transactions or not"), Helland 2005 §2.5 (the application
+logic "must reconcile" the now with the then) and Evans p. 91 ("Any rule that spans AGGREGATES will
+not be expected to be always up to date").
 *Examples:* —
 
 ## Other systems

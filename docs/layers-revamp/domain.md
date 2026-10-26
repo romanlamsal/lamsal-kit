@@ -77,6 +77,10 @@ used: a mail provider (shop, billing).
    fulfillment ships.
 5. shop's Order holds the payment deadline. On `PaymentFailed`, or once the deadline passes, shop
    cancels the order and publishes `OrderCancelled`; fulfillment releases the reservation.
+6. Paid by invoice: `OrderPlaced` says so. Billing invoices it and fulfillment ships it on that
+   message, and shop's deadline does not apply. Billing matches the bank transfer and publishes
+   `InvoicePaid`. Shop marks the order paid and publishes `OrderPaid`, which billing and
+   fulfillment have already acted on for this order.
 
 ## Cross-cutting reads
 

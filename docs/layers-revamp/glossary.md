@@ -113,8 +113,8 @@ the domain.
 into its own in every adapter that touches the upstream: the driven adapters that call into it and
 the driving adapters it calls into. The upstream's terms stop at those adapters.
 
-**Shared kernel.** A model several systems of this codebase share as code and none owns alone, each
-importing it into its domain: `Money`, `Sku`. A change to it is a change to each.
+**Shared kernel.** A model several systems of this codebase share as code and agree on together,
+each importing it into its domain: `Money`, `Sku`. A change to it is a change to each.
 
 **Hook.** A driving adapter an upstream system calls.
 
@@ -125,10 +125,11 @@ driving through its hooks.
 ## Domain
 
 **Aggregate.** A cluster of records changed as one unit and addressed by one id; a repository loads
-and saves it whole. It has one owner.
+and saves it whole.
 
-**Owner.** The system whose business rules decide what a record holds, wherever it is kept. A store
-may keep records of several owners, and a system may keep records another system owns: a replica.
+**Owner.** The system whose business rules decide what a record holds, wherever it is kept; of a
+record no business rule decides, the system that keeps it. A store may keep records of several
+owners. A replica's records are its keeper's; what they copy stays the owner's to decide.
 
 **Specification.** A domain function that answers yes or no about one candidate: is it valid, may
 this happen, does it qualify.
@@ -138,8 +139,9 @@ this happen, does it qualify.
 **Snapshot.** A value an aggregate copies from another aggregate or from a message when a use
 case needs it, and keeps as its own fact from then on: the price the order was placed at.
 
-**Replica.** Another system's data kept in this system from what the owner publishes or offers:
-its messages, or reads of its open host service. It lags the owner.
+**Replica.** A copy of another system's data, kept under the owner's ids and shaped as this system
+writes it: translated, compacted or projected. It is refreshed from what the owner publishes or
+returns to it, and lags the owner.
 
 ## Driven adapters
 
