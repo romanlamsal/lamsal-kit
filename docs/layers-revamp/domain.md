@@ -34,8 +34,6 @@ used: a mail provider (shop, billing).
   - Editors see each product's stock in Payload's admin, read-only; fulfillment owns it.
   - Payload's config needs the hooks, the hooks need services, the services need the Payload
     instance: a cycle.
-  - Payload's before-write hook may change the record it saves, so a hook can embed data in the
-    document it is about to save.
 - **shop**
   - Checkout must return a Stripe `client_secret` in the same request; payment creates it.
   - Checkout also offers pay-by-invoice: no Stripe payment, the customer pays by bank transfer

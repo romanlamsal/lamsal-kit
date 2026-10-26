@@ -8,19 +8,22 @@ situation: the customer's account page lists their orders with line count and to
 
 ```ts
 // shop/service/order-overview.ts
-import type { Database } from "@teeladen/common/postgres"      // the common library's store client
-import { orders, orderLines } from "@teeladen/common/postgres/schema"
+import { sql, type Database } from "@teeladen/common/postgres"  // the common library's store client and its query tag
 
 export const createOrderOverview =
   ({ db }: { db: Database }): OrderOverview =>                  // received from assembly, as ASM-2 asks
-  ({ customerId }) =>
-    db.select({ orderId: orders.id, status: orders.status, lineCount: count(orderLines.id), total: orders.total })
-      .from(orders).leftJoin(orderLines, eq(orderLines.orderId, orders.id))
-      .where(eq(orders.customerId, customerId)).groupBy(orders.id)
+  async ({ customerId }) => {
+    const { rows } = await db.execute<OrderOverviewRow>(sql`
+      select o.id as "orderId", o.status, count(l.id)::int as "lineCount", o.total
+      from orders o left join order_lines l on l.order_id = o.id
+      where o.customer_id = ${customerId}
+      group by o.id`)
+    return rows
+  }
 ```
 
 Every import is the common library, which SVC-6 lists, and the client arrives from the caller, as
-ASM-2 has it. The service still reaches the store through no port. Shop's table names and Drizzle's
-query builder are in the service; renaming a column breaks a use case, and the service's test needs
-a database where a fake overview port would do. The next use case written beside it does the same
-for a write, past the repository.
+ASM-2 has it. The service still reaches the store through no port of shop's. Shop's table and column
+names and the SQL are in the service; renaming a column breaks a use case, and the service's test
+needs a database where a fake overview port would do. The next use case written beside it does the
+same for a write, past the repository.

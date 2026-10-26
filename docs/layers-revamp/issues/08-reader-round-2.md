@@ -22,8 +22,6 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
     situations.
   - `asm-7-breach-logger-substituted-by-module-mock.md`: deleted by issue 11; `ASM-7`'s line is
     behavior now, not substitution, and its loop breached `TX-1`. `ASM-7` has no breach example.
-  - `drv-8-breach-server-action-raw-sql-through-common-pool.md` (adversarial): `DRV-8`'s list
-    allows the common library, store clients included.
   - Examples that still import a published language re-exporting the domain, or declare driven
     ports outside `service/ports`, predate `SYS-2`'s flip and `SVC-1`'s move; the export-path and
     port examples were moved, the rest were not.
@@ -33,11 +31,10 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
 - Left by the import-only lists (`SVC-6`, `DRV-8`, `DVN-4`; issue 05's Consequences):
   - `drv-8-breach-mailer-subscribed-to-bus-in-assembly`: a handler written inside assembly
     imports nothing, so it loses `DRV-8`; a lead for the Gap reader.
-  - `drv-8-breach-adapter-reads-repository-to-check-owner` reads the repository from the courier
-    and keeps only `SVC-2`.
+  - `drv-8-breach-adapter-reads-repository-to-check-owner` reads the repository from the courier and
+    keeps only `SVC-2`; `SVC-7` lets it through, a repository being a port of its system.
   - `svc-6-breach-drizzle-transaction-in-port`: whether a store client library's type counts as
     a library that computes from its arguments.
-  - The raw-SQL example above is issue 07's now (store clients).
 - Left by issue 10: `TX-23`, `TX-24`, `TX-25` are new, with no example files; the `tx-2-*` files
   show writes only, where `TX-2`'s Scope now covers reads.
 - Left by issue 11: `TX-26` is new, with no example files; `SVC-4`'s Scope narrowed to records of
@@ -50,14 +47,13 @@ produce no new example. Order: `specs/01-work-order.md`, step 9.
 - Left by issue 07: `SVC-7`, `TX-28` to `TX-31`, `SYS-12` are new; `TX-21`'s Statement, `ASM-4`'s
   Statement, `DRV-3`'s Scope, `DVN-4`'s and `SVC-6`'s lists changed; the Assumptions put external
   systems outside the rules. The fixture's catalog owns price, sku and tax class; the `SYS-12`
-  examples are a variant outside the fixture. `TransactionPort` is a code name in about 35
-  examples, a driven port the common library declares: a lead for whether `SVC-1`'s "a system
-  declares a port" leaves it unplaced. The examples left under ids issue 05 retired are gone or
-  relabeled; whatever still cites a retired id is a finding. Eight examples keep the old backdrop,
-  shop syncing its price into Payload, for rules it does not touch: `asm-1-breach-payload-config-builds-shop`,
-  `asm-2-breach-adapter-builds-payload`, `asm-2-ok-payload-adapter-takes-instance`,
-  `asm-2-ok-assembly-hands-upstreams-to-builder`, `asm-3-ok-actor-through-driving-port`,
-  `asm-3-ok-hook-passes-editor`, `sys-1-ok-shop-export-paths`, `svc-6-ok-opaque-transaction`.
+  examples are a variant outside the fixture. The examples left under ids issue 05 retired are gone
+  or relabeled; whatever still cites a retired id is a finding. Eight examples keep the old
+  backdrop, shop syncing its price into Payload, for rules it does not touch:
+  `asm-1-breach-payload-config-builds-shop`, `asm-2-breach-adapter-builds-payload`,
+  `asm-2-ok-payload-adapter-takes-instance`, `asm-2-ok-assembly-hands-upstreams-to-builder`,
+  `asm-3-ok-actor-through-driving-port`, `asm-3-ok-hook-passes-editor`,
+  `sys-1-ok-shop-export-paths`, `svc-6-ok-opaque-transaction`.
 - From issue 04's proposal: MAY "breaches" are listed under the rule that governs once the MAY's
   Scope fails. The README's examples entry gains it.
 

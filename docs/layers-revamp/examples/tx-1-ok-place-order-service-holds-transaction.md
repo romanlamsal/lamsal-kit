@@ -8,9 +8,9 @@ situation: shop places the order, clears the cart and publishes OrderPlaced
 
 ```ts
 // shop/service/place-order.ts
-import type { Transaction, TransactionPort } from "@teeladen/common/transaction"
+import type { Transaction } from "@teeladen/common/transaction"
 import { placeOrder, orderPlaced, sendOrderConfirmation } from "../domain"
-import type { CartRepository, OrderRepository, ShopOutbox } from "../service/ports"
+import type { CartRepository, OrderRepository, ShopOutbox, TransactionPort } from "../service/ports"
 
 type Deps = { transaction: TransactionPort; carts: CartRepository; orders: OrderRepository; outbox: ShopOutbox }
 
@@ -29,8 +29,9 @@ export const createPlaceOrder =
     })
 ```
 
-The service is the one piece of code that sees the whole use case, so it opens the transaction through
-a driven port, `TransactionPort`, hands the same `tx` to every repository method and to the outbox
-port, and `run` commits when the callback returns. No repository decides which writes land together; the
-Order, the cleared Cart and the two messages commit as one. The `Transaction` type is
-opaque, so no store client's name enters the service or the domain.
+The service is the one piece of code that sees the whole use case, so it opens the transaction
+through `TransactionPort`, a driven port of shop's, hands the same `tx` to every repository method
+and to the outbox port, and `run` commits when the callback returns. No repository decides which
+writes land together; the Order, the cleared Cart and the two messages commit as one. The
+`Transaction` type is the common library's opaque one, so no store client's name enters the service
+or the domain.

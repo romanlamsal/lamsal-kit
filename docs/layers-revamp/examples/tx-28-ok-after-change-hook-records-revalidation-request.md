@@ -22,10 +22,10 @@ export const createRequestPageRevalidation =
 
 // shop/service/revalidate-product-page.ts — called by shop's handler of RevalidateProductPage
 export const createRevalidateProductPage =
-  ({ catalog, pages, clock }: Deps): RevalidateProductPage =>
+  ({ catalogVersions, pages, clock }: Deps): RevalidateProductPage =>
   async ({ productId, slug, version, writtenAt }) => {
-    const product = await catalog.byId(productId)
-    if (product && product.version >= version) return pages.revalidate(`/products/${slug}`)
+    const committed = await catalogVersions.of(productId)          // driven port: the committed version, or null
+    if (committed !== null && committed >= version) return pages.revalidate(`/products/${slug}`)
     if (givesUpWaiting(writtenAt, clock.now())) return            // shop's rule: ten minutes, the page's own TTL does the rest
     throw new NotCommittedYet(productId)                           // redelivered after a back-off
   }

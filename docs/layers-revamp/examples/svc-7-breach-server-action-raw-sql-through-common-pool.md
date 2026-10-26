@@ -29,7 +29,7 @@ export async function cancelOrderAction(orderId: string, customerId: string) {
 
 Every import is on DRV-8's list: the two shop imports are domain, and `pool` is the common library,
 which holds store clients. What the adapter does with `pool` is the breach: it reaches the store
-through no port. It reads state, decides by it and writes outside any use case and any transaction
-a service holds, and no `OrderCancelled` reaches the outbox. Through a driving port, the cancel is
-shop's use case, which loads the Order through its repository, asks the specification and writes
-the message with the change.
+through no port of shop's, and `new Date()` reaches the clock the same way. It reads state, decides
+by it and writes outside any use case and any transaction a service holds, and no `OrderCancelled`
+reaches the outbox. Through a driving port, the cancel is shop's use case, which loads the Order
+through its repository, asks the specification and writes the message with the change.

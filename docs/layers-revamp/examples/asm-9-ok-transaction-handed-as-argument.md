@@ -10,6 +10,9 @@ situation: shop's checkout writes Order and Cart in one transaction, then calls 
 // common/src/transaction.ts — opaque to every domain that names it
 declare const brand: unique symbol
 export type Transaction = { readonly [brand]: "Transaction" }
+
+// shop/src/service/ports/transaction-port.ts — shop's driven port, implemented by the common library
+import type { Transaction } from "@teeladen/common"
 export type TransactionPort = {
   begin(): Promise<Transaction>
   commit(t: Transaction): Promise<void>

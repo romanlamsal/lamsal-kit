@@ -151,13 +151,16 @@ The Problem items, as placed:
 Examples:
 
 - Retired with their situations: `sys-8-ok-product-two-aggregates-one-document`, both `tx-16-*`,
-  `tx-22-breach-repository-writes-whole-document`, `tx-22-breach-shop-product-aggregate-is-whole-document`,
-  the three `sys-7-*` (a dropped message no longer drops: `TX-21`), `gap-own-write-refires-own-hook`,
-  `gap-before-change-hook-embeds-data`, `dom-3-breach-payload-collection-redeclares-price`.
-- Relabeled: `gap-hook-inside-payload-transaction` to `tx-28-breach-after-change-hook-revalidates-page`;
+  `tx-22-breach-repository-writes-whole-document`,
+  `tx-22-breach-shop-product-aggregate-is-whole-document`, the three `sys-7-*` (a dropped message no
+  longer drops: `TX-21`), `gap-own-write-refires-own-hook`, `gap-before-change-hook-embeds-data`,
+  `dom-3-breach-payload-collection-redeclares-price`.
+- Relabeled: `gap-hook-inside-payload-transaction` to
+  `tx-28-breach-after-change-hook-revalidates-page`;
   `sys-11-ok-payment-stripe-anti-corruption-layer` to
-  `svc-7-ok-payment-reaches-stripe-through-gateway-port`; `sys-11-ok-payload-terms-stop-in-shop-payload-module`
-  to `dvn-4-ok-payload-adapter-imports-external-package`;
+  `svc-7-ok-payment-reaches-stripe-through-gateway-port`;
+  `sys-11-ok-payload-terms-stop-in-shop-payload-module` to
+  `dvn-4-ok-payload-adapter-imports-external-package`;
   `drv-8-breach-server-action-raw-sql-through-common-pool` to `svc-7-breach-*`.
 - New for `SVC-7`, `TX-28` to `TX-31`, `SYS-12`. `svc-6-breach-drizzle-transaction-in-port` also
   breaches `SVC-7`; `sys-1-ok-shop-hooks-via-builder` satisfies `ASM-4`, `DRV-3`; `dom-1-ok` no
@@ -165,3 +168,24 @@ Examples:
 - `TransactionPort` stays a code name in the examples: a driven port, no glossary term.
 - To issue 01: the items above it shared; a hook call is a delivered message.
 - To issue 08: see its Problem.
+
+## Review
+
+A review after closing changed, with no new issue:
+
+- `SVC-7` keeps "a port of its system": under "a port", the common library's `Database` type, an
+  interface too, would count. Of the 30 examples naming `TransactionPort`, four declared it in the
+  common library or imported it from there; the system declares it in its `service/ports` now, and
+  the common library keeps the opaque `Transaction` and `createTransactionPort`, which implements
+  it. `ASM-7`'s line follows; issue 08's lead on it goes.
+- `SVC-7`'s Why says the import lists do not rule calls; its MS line has `IOrderQueries` with no
+  driven port behind it. `SYS-12`'s Why says code in the configuration; Helland 2005 §6.5, not §1.3.
+  `TX-29`'s outbox is Khononov p. 145–147.
+- The fixture loses the before-write hook embedding data, a situation of shop writing into Payload.
+  `svc-7-breach-service-queries-handed-drizzle-client` runs SQL instead of importing shop's tables
+  from the common library; `svc-7-breach-server-action-raw-sql-through-common-pool` names its clock;
+  `tx-28-ok-after-change-hook-records-revalidation-request` reads the version through a port of its
+  own.
+- Sources checked: Payload runs `beforeChange` and `afterChange` before its commit, and a write
+  passing `req` joins the transaction; Stripe keeps a key 24 hours and resends a webhook for three
+  days.

@@ -83,10 +83,10 @@ Forwarded from issue 09, detail in its Consequences:
 Moved to issue 07 and decided there: a message that fails for good stays kept, parked in a
 dead-letter queue (`TX-21`); what happens when an answer or a confirmation does not come is a
 business rule's (`TX-30`), which also ends a tentative operation left open; the idempotency key is
-one the message carries (`TX-31`), so it needs no id kept across repeats; a hook call is a
-delivered message (`TX-5`'s Why). The saga gap's refusal and late payment stay here. From issue 06, changed here under the glossary's tier rules:
-whose published language holds a command, with Upstream and downstream; Message, Saga, Handler,
-Bus; Reconciliation. Order: `specs/01-work-order.md`, step 8.
+one the message carries (`TX-31`), so it needs no id kept across repeats; a hook call is a delivered
+message (`TX-5`'s Why). The saga gap's refusal and late payment stay here. From issue 06, changed
+here under the glossary's tier rules: whose published language holds a command, with Upstream and
+downstream; Message, Saga, Handler, Bus; Reconciliation. Order: `specs/01-work-order.md`, step 8.
 
 ## Consequences
 

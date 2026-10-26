@@ -11,7 +11,7 @@ situation: shop's system builder fetches the Payload instance and builds billing
 import { getPayload } from "payload"
 import config from "@payload-config"
 import { buildBilling } from "@teeladen/billing"
-import type { TransactionPort } from "@teeladen/common"
+import type { TransactionPort } from "./service/ports"
 import { createPayloadCatalog } from "./adapters/payload-catalog"
 import { createCheckout } from "./service/checkout"
 import { createOrderRepository, createCartRepository, createShopOutbox } from "./adapters/drizzle"

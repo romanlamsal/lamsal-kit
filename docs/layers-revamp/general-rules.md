@@ -239,24 +239,26 @@ architecture for every system (Assumptions).
 **SVC-7**
 *Scope:* a service or a driving adapter reaches the outside: a store, a mail provider, the clock,
 another system.
-*Statement:* It MUST do so through a port.
+*Statement:* It MUST do so through a port of its system.
 *Relies on:* —
-*Why:* What a module imports, or receives from its caller, says what it holds, not what it calls:
-the common library holds store clients, and a factory receives one where it needs one. A service
-handed the store client and querying with it reads the store's records in the store's terms, past
-the repository and the aggregate it loads whole; the store's name is in the service, and its test
-needs the store. A server action doing the same skips the service, and the business rules with it. A
-service reaches the outside through a driven port, in its own terms, and its test hands it a fake; a
-driving adapter reaches it through a driving port, and the service behind it does the rest. A read
-that skips the aggregates, a list joined for one screen, is a driven port that returns it, and the
-driven adapter behind it holds the query.
-*Provenance:* Follows Cockburn (Intent: the application is "blissfully ignorant" of what lies on
-the other side of its ports; "A port identifies a purposeful conversation") and Garrido §2.3
-("Ports are interfaces that the application offers to the outside world"). The read behind a
-driven port follows Richardson (CQRS: a view database "designed specifically to support that
-query"). Against: MS performs the
-queries "by simple SQL statements using Dapper", "out of the domain model", from the application
-layer, with no port.
+*Why:* The import lists, SVC-6 and DRV-8, let a service or a driving adapter hold a store client:
+the common library holds store clients, and a factory receives one where it needs one. What the
+module calls with it, the lists do not rule. A service handed the store client and querying with it
+reads the store's records in the store's terms, past the repository and the aggregate it loads
+whole; the store's name is in the service, and its test needs the store. A server action doing the
+same skips the service, and the business rules with it. A service reaches the outside through a
+driven port, in its own terms, and its test hands it a fake; a driving adapter reaches it through a
+driving port, and the service behind it does the rest. A store client's type is an interface too,
+but in the store's terms; a port of the system is declared in its service layer (SVC-1), in the
+system's. A read that skips the aggregates, a list joined for one screen, goes through a driven port
+that returns the list, and the driven adapter behind it holds the query.
+*Provenance:* Follows Cockburn (Intent: the application is "blissfully ignorant" of what lies on the
+other side of its ports; "A port identifies a purposeful conversation") and Garrido §2.3 ("Ports are
+interfaces that the application offers to the outside world"). The read behind a driven port follows
+Richardson (CQRS: a view database "designed specifically to support that query"). Against: MS
+(Designing the infrastructure persistence layer) performs the queries "out of the domain model,
+performed by simple SQL statements using Dapper": the controller calls `IOrderQueries`, whose
+implementation runs the SQL on a connection string it holds, with no driven port.
 *Examples:* breach examples/svc-7-breach-server-action-raw-sql-through-common-pool.md · breach
 examples/svc-7-breach-service-queries-handed-drizzle-client.md · ok
 examples/svc-7-ok-order-overview-through-query-port.md · ok
@@ -461,7 +463,7 @@ a logger, a tracer.
 *Statement:* It MAY be imported as a ready-made instance.
 *Relies on:*
 - ASM-2: a factory receives each client of something outside the process from its caller.
-- SVC-7: a service or a driving adapter reaches the outside through a port.
+- SVC-7: a service or a driving adapter reaches the outside through a port of its system.
 *Why:* Telemetry reaches outside the process, a logger to its transport, a tracer to its
 exporter, and a service calls it where it imports it, through no port. The line is behavior, not
 substitution: a meter falls under this rule, a feature-flag client, whose answer changes what the
@@ -866,7 +868,7 @@ system's handler after the commit: nothing waits, nothing is confirmed. The outb
 system's, in its store, and assembly hands the relay its reader (glossary: Outbox). A hook that asks
 rather than tells, a veto, falls outside the Scope. A deviation's ADR names what confirms the
 tentative operation instead.
-*Provenance:* The outbox follows Richardson (Transactional outbox) and Khononov p. 144–145. Writing
+*Provenance:* The outbox follows Richardson (Transactional outbox) and Khononov p. 145–147. Writing
 it in an external system's transaction is this document's.
 *Examples:* breach examples/tx-28-ok-after-change-hook-records-revalidation-request.md · ok
 examples/tx-29-ok-catalog-writes-product-changed-in-payload-transaction.md
@@ -1167,14 +1169,14 @@ making it an open-host service").
 *Statement:* The external system's own ways in MUST NOT change it.
 *Relies on:* —
 *Why:* The owner's business rules decide what the record holds (glossary: Owner). An external
-system's own ways in, its admin, its API, its hooks other than this system's, write by the external
-system's rules: no use case of this system runs, its business rules are bypassed, no message tells
-of the change, and this system's next save writes over it or is written over. The external system
-lets this system configure them: a field an editor cannot change, an API key that cannot write it.
-A record whose changes have to come through the external system's ways in is the external
-system's to own, and this system keeps a snapshot of it or a replica.
+system's own ways in, its admin, its API, code in its configuration, write by the external system's
+rules: no use case of this system runs, its business rules are bypassed, no message tells of the
+change, and this system's next save writes over it or is written over. The external system lets this
+system configure them: a field an editor cannot change, an API key that cannot write it. A record
+whose changes have to come through the external system's ways in is the external system's to own,
+and this system keeps a snapshot of it or a replica.
 *Provenance:* Follows Evans p. 114 ("Processes outside the object system should not access such an
-object store. They could violate the invariants enforced by the objects") and Helland 2005 §1.3 (no
+object store. They could violate the invariants enforced by the objects") and Helland 2005 §6.5 (no
 access to the data "unless it is mediated by the application logic of the service").
 *Examples:* breach examples/sys-12-breach-shop-price-editable-in-payload-admin.md · ok
 examples/sys-12-ok-shop-price-read-only-in-payload-admin.md
