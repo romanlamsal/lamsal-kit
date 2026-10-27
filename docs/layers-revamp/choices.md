@@ -30,3 +30,48 @@ nobody having chosen them.
 publish, or orchestrated, one system telling the others what to do next.
 *Bound:* P16, P17.
 *Refused:* Two systems' parts of the work in one transaction, so that it cannot stop halfway.
+
+**C3**
+
+*Status:* open, from review 02 (issue 12).
+*Situation:* Where the cut between systems lies: wide systems that each hold several parts of the
+business, or narrow ones.
+*Bound:* P3, P11, P19.
+*Refused:* One system whose business rules change for different reasons yet share one model, so
+that a billing change edits checkout's code.
+
+**C4**
+
+*Status:* open, from review 02 (issue 12).
+*Situation:* A record an external system keeps is owned by the external system, its business
+rules in the external system's configuration, or by a system of this codebase, the external
+system's own ways in kept from changing it.
+*Bound:* P11; SYS-12.
+*Refused:* A system of this codebase deciding the record by its business rules while the external
+system's own ways in change it as well.
+
+**C5**
+
+*Status:* open, from review 02 (issue 12).
+*Situation:* Where the relay keeps its marks of an external system's outbox: on the external
+system's records or apart from them.
+*Bound:* P8, P9; TX-20.
+*Refused:* A relay that marks a message before the bus has it.
+
+**C6**
+
+*Status:* open, from review 02 (issue 12).
+*Situation:* A use case that needs an answer from another system of this codebase now calls that
+system's open host service, or the work goes by messages and the caller waits on the answer.
+*Bound:* P15, P17; TX-12, TX-30.
+*Refused:* A call made where no business rule needs the answer now, so that the caller is down
+whenever the other system is.
+
+**C7**
+
+*Status:* open, from review 02 (issue 12).
+*Situation:* A migration that changes a deployed store runs as tooling, or as code of the system
+whose records it changes.
+*Bound:* P11, P14.
+*Refused:* A migration that changes what a record means while code still running reads it the old
+way.

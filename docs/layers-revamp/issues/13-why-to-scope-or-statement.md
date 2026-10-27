@@ -28,6 +28,8 @@ tentative operation changes nothing (glossary) and falls outside the Scope". The
 Implementer, reading the Scopes, could not comply twice: payment cannot create the PaymentIntent
 through its outbox and return the `client_secret` in the same call, and shop's checkout cannot
 call payment inside TX-3. The raw readers got through on the Why. The Scopes carry it.
+Answered by issue 12: TX-36, a MAY to ask for a tentative operation by a call; both Whys lost the
+sentence.
 
 TX-22's Why also rules: "Where the owner takes no key, a repeat stays possible, which a business
 rule has to allow". The sentence is this issue's; what to rule is issue 15's.
@@ -40,13 +42,16 @@ reader therefore read ASM-7 as excepting DOM-1 and SYS-14 too, under which
 `sys-14-breach-money-imports-common-logger` is no breach. The raw Contradiction reader read it as
 permitting the import and not the call: a service recording spans through no port breaches SVC-7
 where the tracer's export is Outside. Decide what ASM-7 excepts and how far it reaches, and have
-the Statement say it; or have the distiller keep a MAY's Relies on, decided here as well.
+the Statement say it; or have the distiller keep a MAY's Relies on, decided here as well. Since
+issue 12, P5 reads "only through ports assembly hands it": a ready-made logger stands against the
+property too, not only against SVC-7.
 
 ### Rules whose purpose Scope and Statement do not tell
 
 The distilled Adversarial guessed at: every TST rule (issue 12, a property on tests), SVC-1,
 ASM-1, ASM-10, ASM-5, ASM-6, DRV-1, DRV-6, SYS-10, TX-33. For each, the Scope says what it
-protects, or the Statement is sharpened until it refuses the harm.
+protects, or the Statement is sharpened until it refuses the harm. Issue 12 gave tests no
+property: the TST rules are preference, and their Scopes need not name what they protect.
 
 ### Breaches the raw Adversarial found and the distilled could not
 

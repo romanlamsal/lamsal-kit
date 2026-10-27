@@ -26,13 +26,13 @@ ready, its metrics. `/health`, `/metrics`.
 
 ## The layers
 
-**Use case.** One goal a caller can reach through the system, and how the system responds.
+**Use case.** One goal a caller can reach through the system, and how the system responds. An
+*acting* use case changes the system and may return what it did; an *answering* one changes
+nothing. An *acting call* is a call to an acting use case.
 
-- **Domain.** The model: business rules, schemas, specifications. It is pure and knows no runtime.
-- **Service.** The application layer. It carries out the system's use cases. It holds no business
-  rule of its own; the business rules are the domain's. What it holds is the sequence within one
-  use case: what to load, which business rule to ask, what to save. Each use case either acts or
-  answers.
+- **Domain.** The model; it holds the business rules. It is pure and knows no runtime.
+- **Service.** The application layer. It carries out the system's use cases. What it holds is the
+  sequence within one use case.
 - **Driven adapters.** Implementations of driven ports.
 - **Driving adapters.** Callers adapted to driving ports.
 
@@ -51,8 +51,8 @@ interface layer, driven adapters the infrastructure layer.
 
 - A *driven adapter* implements a driven port. A port may have several: a database today, another
   store or a fake tomorrow. Swapping one changes nothing on the system's side of the port.
-- A *driving adapter* adapts one caller to a driving port. There are as many driving adapters as
-  there are ways into the process, like a server function, a CLI command, a webhook.
+- A *driving adapter* adapts one way in to the driving ports it calls, translating in both
+  directions. There are as many driving adapters as there are ways into the process.
 
 ## Between systems
 
@@ -73,11 +73,12 @@ assembly does.
 **Relay.** The mechanism that reads outboxes and hands each message to the bus. Assembly hands it
 the outbox readers.
 
-**Idempotent.** An operation is idempotent when repeating it leads to the same result as performing
-it once.
+**Idempotent.** An operation is idempotent when repeating it leaves the records as performing it
+once left them, and answers as the first did.
 
 **Tentative operation.** A request to another system for a commitment that leaves open the
-possibility of cancellation. It changes nothing it asks for: its confirmation does.
+possibility of cancellation. It holds what it asks for without giving it: its confirmation gives
+it, its cancellation releases it.
 
 **Open host service.** The driving ports a system offers to other systems.
 
@@ -96,8 +97,8 @@ earlier ones.
 No one holds the whole sequence.
 
 **Orchestration.** One system's *process manager* holds the sequence across systems: an aggregate
-whose state is where the sequence stands. Each step is a use case of that system that sends
-commands to the others.
+whose state is where the sequence stands and whose business rules decide the next step. Each step
+is a use case of that system that sends the commands its process manager decides to the others.
 
 ## Other systems
 
@@ -113,13 +114,14 @@ downstream's driven ports and its published language is used untranslated, in an
 the domain.
 
 **Anti-corruption layer.** A downstream system that translates the upstream's published language
-into its own in every adapter that touches the upstream: the driven adapters that call into it and
-the driving adapters it calls into. The upstream's terms stop at those adapters.
+into its own in every adapter that touches the upstream: the driven adapters that call the
+upstream and the driving adapters the upstream reaches. The upstream's terms stop at those
+adapters.
 
 **Shared kernel.** A model several systems of this codebase share as code and agree on together,
 each importing it into its domain: `Money`, `Sku`. A change to it is a change to each.
 
-**Hook.** A driving adapter an upstream system calls.
+**Hook.** A driving adapter an external system calls.
 
 **External system.** A bounded context whose code this codebase does not write, though it may
 configure it: bought or adopted, run by its vendor or by us, in its own process or in ours. Its
@@ -140,11 +142,11 @@ this happen, does it qualify.
 
 **Repository.** A specialized driven port over exactly one aggregate: loads it, saves it, finds it.
 
-**Snapshot.** A value an aggregate copies from another aggregate or from a message when a use
-case needs it, and keeps as its own fact from then on: the price the order was placed at.
+**Snapshot.** A value an aggregate copies when a use case needs it, projected into this system's
+terms, and keeps unchanged as its own fact from then on.
 
-**Replica.** A copy of another system's data, kept under the owner's ids and shaped as this system
-writes it: translated, compacted or projected. It is refreshed from what the owner publishes or
+**Replica.** A copy of another system's data, kept under the owner's ids and projected into this
+system's terms. It is refreshed from what the owner publishes or
 returns to it, and lags the owner.
 
 ## Driven adapters
@@ -153,8 +155,9 @@ returns to it, and lags the owner.
 another.
 
 **Store.** What lies behind one or more driven ports whose writes can be committed in one
-transaction. Two clients are one store when their writes commit together, two stores until they
-do.
+transaction. Two clients are one store when one transaction can carry the writes of both, two
+stores until it can: two clients of one database whose transactions cannot be shared are two
+stores.
 
 ## Driving adapters
 

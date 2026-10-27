@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [TX-22, TX-1, TX-5]
+satisfies: [TX-22, TX-36, TX-1, TX-5]
 situation: payment requests a Stripe Checkout Session and returns its client_secret in the same call
 ---
 
@@ -32,9 +32,9 @@ export const createRecordPayment =
     })
 ```
 
-A Checkout Session changes nothing it asks for: Stripe holds no money for it, and it expires
-unused at the order's payment deadline. It is a tentative operation (glossary), outside TX-22's
-Scope, so payment may request it in the call and hand the `client_secret` back. Payment's record
+A Checkout Session holds a payment without taking it: Stripe takes no money for it, and it
+expires unused at the order's payment deadline. It is a tentative operation (glossary), so payment
+may request it in the call (TX-36) and hand the `client_secret` back. Payment's record
 of a payment begins with the confirmation: Stripe's webhook reaches payment's hook, and one use
 case records the payment and publishes `PaymentSucceeded` in one transaction. A request repeated
 after a timeout gets the same session by its idempotency key, and an abandoned one leaves nothing

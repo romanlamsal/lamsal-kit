@@ -1,6 +1,6 @@
 ---
 breaches: []
-satisfies: [TX-3, TX-1, TX-6]
+satisfies: [TX-3, TX-36, TX-1, TX-6]
 situation: shop checkout returns Stripe client_secret in the same request
 ---
 
@@ -31,10 +31,10 @@ export const createCheckout =
 ```
 
 The browser needs the `client_secret` in this response, so checkout asks payment for it
-synchronously. That is no change to payment's data: `requestCheckoutSession` is a tentative
-operation, a Stripe Checkout Session that commits nobody to anything, and payment records nothing
-until Stripe's webhook confirms a payment (`tx-22-ok-payment-requests-checkout-session.md`). TX-3's
-Scope, a change to data another system holds, does not hold for the request, and the order and
-its messages commit in shop's one transaction before it. If the request fails, the order stays
+synchronously. That is no change to payment's data: `requestCheckoutSession` asks for a tentative
+operation, a Stripe Checkout Session that holds the payment without taking it, and payment records
+nothing until Stripe's webhook confirms a payment (`tx-22-ok-payment-requests-checkout-session.md`).
+Checkout asks by a call (TX-36), and the order and its messages commit in shop's one transaction
+before it. If the request fails, the order stays
 placed and unpaid, and the payment deadline it carries cancels it; a session nobody pays expires
 on the same deadline.

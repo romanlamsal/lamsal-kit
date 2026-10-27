@@ -26,8 +26,8 @@ Settled when it was opened:
   replica. Both Implementers built a replica to stay inside TX-27: a detour.
 - An outside effect with no idempotency key. TX-5 against a mail provider that takes none:
   claim the message id, then send, and a crash loses the mail, which P8 forbids and no rule
-  does; send, then claim, and a crash doubles it. Idempotent's "the same result" does not say
-  whether the mail counts (issue 12). The same for the 3PL and the bank. TX-22's Why rules it
+  does; send, then claim, and a crash doubles it. Idempotent counts records, not the mail (issue
+  12). The same for the 3PL and the bank. TX-22's Why rules it
   today ("a repeat stays possible, which a business rule has to allow"); issue 13 moves the
   sentence, this issue decides what it says.
 - A polled answer (distilled). The bank's transfers are applied again on every poll: TX-5 covers
@@ -54,6 +54,9 @@ Settled when it was opened:
   ways in (raw Implementer N11).
 - An external system's Local API as this system's way in: is Payload's Local API catalog's open
   host service for TX-12 (raw Implementer N3, both Gaps). Fact in issue 17, rule here.
+- Properties no rule delivers, since issue 12. P15: TX-12 lets a use case read another system's
+  open host service whether or not a business rule needs the answer now; with the first gap
+  above. P19: no rule speaks of a term's meaning within a system.
 
 ### Loose Statements
 
@@ -80,7 +83,9 @@ Settled when it was opened:
   pair hangs on "receive it from its caller"; the distilled says DRV-3 governs. Say which.
 - ASM-4: is a typed courier accessor the reader (raw Implementer N8).
 - Words issue 12 leaves to the rules: a request id as "what it answers" (TX-34), ASM-3's reach
-  into a domain function the service calls.
+  into a domain function the service calls, DRV-7's "succeeded" (a use case that returns without
+  committing, a refusal recorded and committed), TX-19's "the same result" (Idempotent's no
+  longer says "result").
 
 ## Decision
 

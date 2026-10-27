@@ -788,8 +788,8 @@ not decide into this system's transaction, and the owner's model into this servi
 owner after the commit does not help: a crash between the commit and the call, or a failed call,
 loses the change, and nobody retries. Written to the outbox in the same transaction, the message is
 exactly as committed as the change it tells of; the owner's handler acts on it, and redelivery
-retries it until it lands. A tentative operation changes nothing (glossary), so asking for one
-falls outside the Scope, from any system; confirming it does not.
+retries it until it lands. Asking for a tentative operation is TX-36's; confirming one is a change
+like any other.
 *Provenance:* Asynchrony across systems follows Evans Reference p. 16 ("Across boundaries, handle
 updates asynchronously", said of aggregates, so of systems a fortiori), MS (integration events
 "must be based on asynchronous communication"), Richardson (Database per service: transactions
@@ -823,15 +823,38 @@ the order cancelled meanwhile, while the booking stands. The call's use case rea
 through the owner's idempotency key, one the message carries (TX-31). Where the owner takes no key,
 a repeat stays possible, which a business rule has to allow: a second mail. The owner's answer comes
 back in the response, as its own message or by its hook. A request designed as a tentative operation
-changes nothing (glossary) and falls outside the Scope: the way around an owner that has no
-asynchronous answer. An event from another system that leads to a mail takes two hops: this system's
-use case decides, and its message drives the mail.
+is the way around an owner that has no asynchronous answer (TX-36). An event from another system
+that leads to a mail takes two hops: this system's use case decides, and its message drives the
+mail.
 *Provenance:* Follows Khononov p. 148, p. 149–150 (the handler executes the command; "the command
 execution logic should be moved out of the saga itself") and p. 293 (the outbox: "it can be used
 for sending email messages"). Departs: Khononov p. 150 has the relay execute the commands, which
 the glossary's relay does not (glossary: Relay). Against: EIP (Command Message) and Richardson
 (Messaging), the synchronous call. Evans p. 55 and Cockburn do not rule on the timing.
 *Examples:* —
+
+**TX-36**
+*Scope:* a use case asks another system for a tentative operation.
+*Statement:* It MAY ask by a call, apart from its outbox.
+*Relies on:*
+- TX-3: a use case changes data another system of this codebase owns by writing a message to its
+  own outbox.
+- TX-22: a use case's change outside its store that no system of this codebase owns goes through
+  its outbox.
+- TX-30: a business rule of this system decides what happens when a confirmation or an answer
+  does not come.
+*Why:* A tentative operation holds what it asks for and gives nothing until it is confirmed
+(glossary). A request lost to a crash, or made for a change that then rolled back, leaves a hold
+nobody confirms, and the hold is cancelled or lapses by a business rule; the outbox's guarantee
+that the request lands buys nothing. An answer the caller needs now, the `client_secret` checkout
+returns to the browser, cannot wait for a handler. A call that confirms, a payment captured, gives
+what it asks for and is no tentative operation, whatever it is named: TX-3 and TX-22 hold for it.
+*Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
+cancels"; "When an entity agrees to perform a tentative operation, it agrees to let another entity
+decide the outcome"). Asking by a call outside the outbox is this document's.
+*Examples:* breach examples/tx-36-breach-payment-captured-by-call.md · ok
+examples/tx-22-ok-payment-requests-checkout-session.md · ok
+examples/tx-3-ok-checkout-requests-checkout-session.md
 
 **TX-31**
 *Scope:* a use case called for a message changes something in an external system that takes an

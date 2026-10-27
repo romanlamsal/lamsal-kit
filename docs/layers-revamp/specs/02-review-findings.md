@@ -17,7 +17,7 @@ did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
 - [x] 2. **A rule placing business rules.** In the session that wrote this spec, no issue: no
   Scope holds for where a business rule sits; four readers of both sets found it, and P2 to P4
   hang on it.
-- [ ] 3. **The world and the glossary, issue 12.** First: the top tier, whose change sweeps every
+- [x] 3. **The world and the glossary, issue 12.** First: the top tier, whose change sweeps every
   lower one. Steps 4 to 7 cite its properties and terms; step 9's stop keys to them.
 - [ ] 4. **Why to Scope or Statement, issue 13.**
 - [ ] 5. **Lists out of the distilled, issue 14.**
