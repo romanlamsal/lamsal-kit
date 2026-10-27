@@ -119,11 +119,15 @@ The layers), so whoever looks for a business rule opens the domain. A rate compu
 a condition in a server action, a check in a hook is a statement of the rule where nobody looks
 for one: the next change edits the domain and leaves it standing, and the system decides one way
 here and another there. A second statement in the domain drifts the same way. Stated once, a
-change is one edit. An external system's configuration is that system's own, even where this
-codebase writes it (Assumptions): a business rule written there is the external system's, about
-the records it keeps, and none of this system's. A business rule of this system that an external
-system asks before it writes, catalog's veto of a sku change, stays here; the external system
-reaches it through its hook, a way out of that system into this one's driving adapter.
+change is one edit. A key the keeper enforces, a unique index, a unique field, is no second
+statement: the domain states the key as part of the record's shape, and the store fails the write
+that breaks it (Assumptions). An external system's configuration is that system's own, even where
+this codebase writes it (Assumptions): a business rule written there is the external system's
+where it decides a record the external system keeps and no business rule of this system decides;
+about a record this system's business rules decide, it is a second statement. A business rule of
+this system that an external system asks before it writes, catalog's veto of a sku change, stays
+here; the external system reaches it through its hook, a way out of that system into this one's
+driving adapter.
 *Provenance:* Follows Evans p. 53 (the domain layer is "responsible for representing concepts of
 the business, information about the business situation, and business rules"; the application
 layer "does not contain business rules or knowledge, but only coordinates tasks") and MS ("all
