@@ -71,16 +71,16 @@ Statement refuse it; if not, the ruling moves.
 - TST-5: `pushSchema` from the adapter's tables.
 - TST-6: the contract suite omits the stale save.
 
-### Scopes that illustrate after a colon
+### Whys that rule about a repository's ADRs
 
-DOM-3, SVC-2, SVC-7, DRV-1, ASM-10, ASM-7, TX-24, TX-22 and TX-32 end their Scope with a list of
-instances. The README has the Scope state the situation in prose and the Examples field carry the
-examples. Added at spec 02 step 2, where the requester refused such a list for DOM-7; whether
-these go is decided here, and a Scope unclear without its list is reworded.
+TX-24's and TX-29's Whys say what "A deviation's ADR names". The README's Strength no longer
+speaks of ADRs: how a repository deviates is its own. The sentences go; what they protected moves
+as above where a Scope or Statement needs it.
 
 ### Elsewhere
 
-P5's and P1's Whys: issue 12. The import lists: issue 14.
+P5's and P1's Whys: issue 12. Lists, the import lists and the Scopes that illustrate after a
+colon among them: issue 14.
 
 ## Decision
 

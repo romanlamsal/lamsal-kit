@@ -1,12 +1,12 @@
 # Spec 02 — Work order after the full review
 
 A session told "the next in the spec" works the first unchecked step, as a fresh session: the
-README, `glossary.md`, `the-world.md` and `general-rules.md` first (README, Working here), then
-the step's issue. It checks the step in the commit that lands it.
+README, `glossary.md`, `the-world.md`, `general-rules.md` and `choices.md` first (README, Working
+here), then the step's issue. It checks the step in the commit that lands it.
 
 The review that opened these issues ran at commit `ccfa1e9`: the README's seven reader kinds,
-once over the input files and once over the output of `distill.mjs`. The reader files were
-temporary (README, Peer review); the issues are the record of what the requester accepted. The
+once over the input files and once over the output of `distill.mjs`. The reader files are
+`reviews/02/`; the issues are the record of what the requester accepted. The
 distilled output is what a repository reads, so a finding the distilled set made and the raw set
 did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
 
@@ -20,7 +20,7 @@ did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
 - [ ] 3. **The world and the glossary, issue 12.** First: the top tier, whose change sweeps every
   lower one. Steps 4 to 7 cite its properties and terms; step 9's stop keys to them.
 - [ ] 4. **Why to Scope or Statement, issue 13.**
-- [ ] 5. **Lists to reach, issue 14.**
+- [ ] 5. **Lists out of the distilled, issue 14.**
 - [ ] 6. **Gaps and loose Statements, issue 15.** After steps 4 and 5, so it rules on settled
   text.
 - [ ] 7. **Relies-on sweep, issue 16.** After every Scope and Statement change: the lines claim

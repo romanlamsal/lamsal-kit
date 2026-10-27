@@ -20,8 +20,8 @@ edited by hand. No Why, Relies on or Provenance: what binds is here.
   forces a property holds against; *Except*, what it does not cover.
 - A rule is its Scope and Statement read as one. Where the Scope does not hold, the rule says
   nothing. Where two Scopes hold, the narrower governs.
-- MUST, MUST NOT: no deviation. SHOULD, SHOULD NOT: the default; deviating takes an ADR naming
-  the rule id. MAY: a permission where another rule would forbid.
+- MUST, MUST NOT: no deviation. SHOULD, SHOULD NOT: the default; a codebase may deviate. MAY: a
+  permission where another rule would forbid.
 - Examples name files by their absolute path in the repository; \`—\` means unfinished.`
 
 /** @param {string} name */

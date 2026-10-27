@@ -1,4 +1,4 @@
-# 14 — Lists to reach
+# 14 — Lists out of the distilled
 
 **Status:** open
 
@@ -11,6 +11,13 @@ named or it is a question for the rule. The full review (spec 02) found the form
 ways: a list bounds imports where the harm is in reaches, no list is complete, and the lists
 disagree with each other. Order: `specs/02-review-findings.md`, step 5.
 
+Widened after the review, when the README gained "nothing the distiller keeps names instances"
+(Rule shape, What binds): this issue sweeps every list in the distilled output, in any document. A
+list that is the ruling becomes a reach statement, its items example files; a list that
+illustrates goes, an item becoming an example file where it is worth one. Among them the Scopes of
+DOM-3, SVC-2, SVC-7, DRV-1, ASM-10, ASM-7, TX-24, TX-22 and TX-32, the forces, and the glossary
+entries issue 12 does not reword. The check is a read of the distilled output.
+
 Settled when it was opened:
 
 - Each Statement says the reach, what the module may read or call, which is what each list tried
@@ -22,8 +29,9 @@ Settled when it was opened:
 - Reach is what the sources rule: Cockburn's inside that knows nothing of the outside, Evans's
   dependency direction, Khononov's business logic layer depending on no infrastructure. A reach
   Statement is no stricter than they are.
-- The import list moves under Examples, where an ok example may be concrete and a script may
-  still check it. The Provenance keeps that the list was this document's.
+- The import list becomes example files, named from Examples, where an ok example may be
+  concrete and a script may still check it. The Provenance keeps that the list was this
+  document's.
 - Every example listing one of the five rules is re-read by issue 19; every Relies-on line naming
   one by issue 16.
 

@@ -17,8 +17,8 @@ Settled when it was opened:
   or term; the README and `domain.md` for the terms.
 - The distilled output keeps no property Why. A ruling in a Why binds nobody who reads the
   distilled: it goes into the heading, or becomes a property, or stays a reason.
-- A sentence two drafts read two ways is either a choice left open on purpose, then it says so,
-  or one reading, then it says that one.
+- A sentence two drafts read two ways is either a choice, then a `choices.md` entry and the
+  sentence stays, or one reading, then it says that one.
 
 ## Problem
 
@@ -51,8 +51,8 @@ Proposed by the Red teams, to accept, reword or refuse:
 - P23: which ports a use case reaches is told at assembly (raw).
 - P24: a conformist keeps its own business rules in its own terms (raw).
 
-Open with them: does a Why bind; is a call a message, P14 covering records and messages and not a
-call across a deploy; is a reader of records a downstream system; P7's and P15's "own", owned or
+Open with them: is a call a message, P14 covering records and messages and not a call across a
+deploy; is a reader of records a downstream system; P7's and P15's "own", owned or
 kept; P10's "a business rule accepts" refuses nothing where any business rule counts.
 
 ### Property Whys that rule
@@ -123,9 +123,11 @@ caller and port, or per way in.
 
 ### A glossary sentence that rules
 
-Service: "It holds no business rule of its own; the business rules are the domain's" is a ruling,
-DOM-7's since spec 02 step 2, and the README keeps what a term may do out of the glossary. Decide
-whether the entry keeps it as part of the layer's definition or loses it.
+Service: "It holds no business rule of its own; the business rules are the domain's" is DOM-7
+stated a second time and goes: a sentence stays in a definition where it tells the term from a
+neighbouring term (README, Documents). Domain and Service are told apart by what each holds, Domain
+the business rules, Service the sequence of a use case. Reword both so, without their lists
+(README, What binds).
 
 ### Housekeeping
 

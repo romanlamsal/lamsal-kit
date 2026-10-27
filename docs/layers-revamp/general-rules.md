@@ -31,11 +31,9 @@ a change (TX-29).
 
 Not covered: where UI code goes, which is `components.md`; library, framework and file-naming
 conventions, which are the stack document's; whether a module that straddles two layers should be
-split now; whether a downstream conforms to an upstream or builds an anti-corruption layer, and
-whether work spanning systems is choreographed or orchestrated, which a repository's ADRs decide;
-how a driving adapter is tested, and when the integration suite runs, which are the repository's;
-how the bus finds a message's handlers, by its type or by each handler filtering, which is the
-stack document's.
+split now; how a driving adapter is tested, and when the integration suite runs, which are the
+repository's; how the bus finds a message's handlers, by its type or by each handler filtering,
+which is the stack document's.
 
 ## Domain
 
