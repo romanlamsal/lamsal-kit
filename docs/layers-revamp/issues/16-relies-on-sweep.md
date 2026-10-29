@@ -39,6 +39,8 @@ Settled when it was opened:
 - SYS-10's line on SVC-1: "a system's ports" is wider than "declares" (minor).
 - A missing line: SYS-10 leans on SYS-14 (raw Adversarial).
 - Lines naming TX-21 use wording older than TX-21's Statement (issue 01's review).
+- Since issue 13: the lines of TX-37, TX-38, TX-39 and SYS-15 are new; TX-22's lines on TX-5 and
+  TX-31 moved to TX-37.
 
 ## Decision
 

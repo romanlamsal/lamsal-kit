@@ -16,7 +16,8 @@ Widened after the review, when the README gained "nothing the distiller keeps na
 list that is the ruling becomes a reach statement, its items example files; a list that
 illustrates goes, an item becoming an example file where it is worth one. Among them the Scopes of
 DOM-3, SVC-2, SVC-7, DRV-1, ASM-10, ASM-7, TX-24, TX-22 and TX-32, the forces, and the glossary
-entries issue 12 does not reword. The check is a read of the distilled output.
+entries issue 12 does not reword. The check is a read of the distilled output. ASM-7's and
+TX-22's Scopes lost their lists in issue 13.
 
 Settled when it was opened:
 
@@ -56,6 +57,7 @@ Settled when it was opened:
 - A global is no import: `crypto`, `process.env`, `Date.now()`, `toLocaleUpperCase()` reach the
   runtime and the locale past DOM-1 and SYS-14 with every Statement met (both Adversarials).
   `new Date()` in a server action, in four ok examples, reaches the clock past SVC-7's port.
+  The domain reading `TZ` past ASM-3's Scope, deferred here by issue 13.
 - What an allowed import hands over: SVC-6's "a library that computes from its arguments" lets
   Drizzle's transaction type into every port signature through the common library (raw
   Adversarial); `svc-6-breach-drizzle-transaction-in-port` asks whether a store client's type is

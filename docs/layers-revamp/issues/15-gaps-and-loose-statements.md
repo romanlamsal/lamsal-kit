@@ -28,7 +28,7 @@ Settled when it was opened:
   claim the message id, then send, and a crash loses the mail, which P8 forbids and no rule
   does; send, then claim, and a crash doubles it. Idempotent counts records, not the mail (issue
   12). The same for the 3PL and the bank. TX-22's Why rules it
-  today ("a repeat stays possible, which a business rule has to allow"); issue 13 moves the
+  today ("a repeat stays possible, which a business rule has to allow"); issue 13 removed the
   sentence, this issue decides what it says.
 - A polled answer (distilled). The bank's transfers are applied again on every poll: TX-5 covers
   delivered messages, a polled answer is none. An unmatched transfer is dropped: TX-35's Scope
@@ -79,13 +79,14 @@ Settled when it was opened:
 - TX-19 (distilled Contradiction): alone, it may leave no code for scarce or numbered allocation
   under F5, the last unit or a gapless number.
 - TX-22's Scope read literally holds for the handler's own use case too (raw Contradiction N8).
+  Settled by issue 13: TX-22's Scope is a use case that decides, TX-37 the one that makes.
 - ASM-2 against DRV-3 on the Payload cycle: the raw set says neither Scope is narrower and the
   pair hangs on "receive it from its caller"; the distilled says DRV-3 governs. Say which.
 - ASM-4: is a typed courier accessor the reader (raw Implementer N8).
 - Words issue 12 leaves to the rules: a request id as "what it answers" (TX-34), ASM-3's reach
   into a domain function the service calls, DRV-7's "succeeded" (a use case that returns without
-  committing, a refusal recorded and committed), TX-19's "the same result" (Idempotent's no
-  longer says "result").
+  committing, a refusal recorded and committed; a conflict committed as a refusal is TX-38's
+  since issue 13), TX-19's "the same result" (Idempotent's no longer says "result").
 
 ## Decision
 

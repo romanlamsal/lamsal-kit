@@ -112,6 +112,10 @@ Settled when it was opened:
 - Round 1's finding files: `gap-admin-dashboard-belongs-to-no-system`,
   `gap-health-and-metrics-endpoints` (issue 15).
 - Whatever still cites a retired id is a finding.
+- Since issue 13: TX-37, TX-38, TX-39 and SYS-15 have no file. Rules it sharpened have the raw
+  Adversarial's breaches as candidates (`reviews/02/raw-adversarial.md`): DRV-6, ASM-5, SVC-4,
+  TX-21, TX-22 (the Payload mirror), TX-25, TX-31, SYS-2, TST-5, TST-6. ASM-7's ok is read
+  against its new Scope.
 
 ## Decision
 
