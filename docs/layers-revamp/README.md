@@ -79,9 +79,11 @@ Statement alone refuses every breach the Why describes; a breach only the Why re
 the Statement.
 
 Nothing the distiller keeps names instances of what it speaks of: not after a colon, not in a
-series, not one. A list in a ruling goes stale and reads as closed. An instance worth showing is
-an example file, named from the Examples field. Why, Provenance, `choices.md` and `domain.md` may
-name instances.
+series, not one. A list in a ruling goes stale and reads as closed. A series whose members can
+each be swapped for another of their kind is a list of instances. One whose members together are
+the whole of what the term means, so that dropping one changes the meaning, is the definition and
+stays. An instance worth showing is an example file, named from the Examples field. Why,
+Provenance, `choices.md` and `domain.md` may name instances.
 
 ### Strength
 

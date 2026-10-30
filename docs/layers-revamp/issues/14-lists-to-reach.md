@@ -12,7 +12,8 @@ ways: a list bounds imports where the harm is in reaches, no list is complete, a
 disagree with each other. Order: `specs/02-review-findings.md`, step 5.
 
 Widened after the review, when the README gained "nothing the distiller keeps names instances"
-(Rule shape, What binds): this issue sweeps every list in the distilled output, in any document. A
+(Rule shape, What binds): this issue sweeps every list of instances in the distilled output
+(README, What binds), in any document. A
 list that is the ruling becomes a reach statement, its items example files; a list that
 illustrates goes, an item becoming an example file where it is worth one. Among them the Scopes of
 DOM-3, SVC-2, SVC-7, DRV-1, ASM-10, ASM-7, TX-24, TX-22 and TX-32, the forces, and the glossary
