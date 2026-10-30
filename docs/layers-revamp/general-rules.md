@@ -20,7 +20,7 @@ Not everything gets a layer. Assembly, a system's export paths and the common li
 the layers. So do probes.
 
 Tooling sits outside the layers and the rules. It builds systems through their builders or
-replaces their internals: an in-memory outbox, a CLI as relay and bus. What it reaches past an
+replaces their internals. What it reaches past an
 export path is no offer (SYS-1), and a system changes it without notice.
 
 An external system sits outside the rules: its exports, its layers and its transactions are its own,
@@ -54,7 +54,7 @@ like it. `node:path` reaches nowhere outside the process and still breaks in a b
 `process`, `window` and the DOM are one runtime's. A domain that imports any of these loads on
 one runtime, and whoever imports it elsewhere, a browser rendering a form from the schema, another
 system's domain, gets a load error or the server's store client along with the model. The common
-library is not on the list: its courier would hand the domain a value no caller passed.
+library is not on the list: a courier kept there would hand the domain a value no caller passed.
 The list is closed: an import of a kind it does not name is a question for this rule, not a
 permission.
 *Provenance:* The direction follows Khononov p. 77 (the model "devoid of any infrastructural or
@@ -68,8 +68,7 @@ subdomains; this document picks one architecture for every system (Assumptions).
 *Examples:* —
 
 **DOM-3**
-*Scope:* a business rule about the shape of a record: which fields it has, what each holds, which
-values a status takes.
+*Scope:* a business rule about the shape of a record.
 *Statement:* It MUST be stated once, as a schema in the domain.
 *Relies on:* —
 *Why:* A schema says what the functions beside it say, in a form that also checks at runtime, and
@@ -193,8 +192,7 @@ single layer) and Evans p. 57 pick the architecture per subdomain; this document
 *Examples:* —
 
 **SVC-2**
-*Scope:* a use case decides by what this system has stored: whether this caller is allowed,
-whether the stock suffices, whether the order is still open.
+*Scope:* a use case decides by what this system has stored.
 *Statement:* The service that acts MUST enforce the decision itself, in the call that acts.
 *Relies on:*
 - TX-1: a use case that writes runs in one transaction its service opens, hands to each call into
@@ -273,12 +271,11 @@ architecture for every system (Assumptions).
 *Examples:* —
 
 **SVC-7**
-*Scope:* a service or a driving adapter reaches the outside: a store, a mail provider, the clock,
-another system.
+*Scope:* a service or a driving adapter reaches the outside.
 *Statement:* It MUST do so through a port of its system.
 *Relies on:* —
 *Why:* The import lists, SVC-6 and DRV-8, let a service or a driving adapter hold a store client:
-the common library holds store clients, and a factory receives one where it needs one. What the
+the common library may hold store clients, and a factory receives one where it needs one. What the
 module calls with it, the lists do not rule. A service handed the store client and querying with it
 reads the store's records in the store's terms, past the repository and the aggregate it loads
 whole; the store's name is in the service, and its test needs the store. A server action doing the
@@ -322,7 +319,7 @@ document's.
 *Examples:* —
 
 **DRV-1**
-*Scope:* a driving adapter handles one call from its caller: a request, a message, a tick.
+*Scope:* a driving adapter handles one call from its caller.
 *Statement:* It MUST make at most one acting call.
 *Relies on:*
 - SVC-2: the service that acts enforces a decision by stored state itself, in the call that acts.
@@ -349,8 +346,7 @@ this document's. A batch in one transaction is Dahan's, in Vernon EAD II p. 10.
 
 **DRV-3**
 *Scope:* a driving adapter assembly cannot construct, or cannot hand what it calls when it
-constructs it: the framework finds and calls it, or what it calls is built from what it is built
-into.
+constructs it.
 *Statement:* It MUST read what it calls from a courier.
 *Relies on:*
 - ASM-8: assembly fills the courier before any driving adapter reads it.
@@ -481,8 +477,7 @@ Thoughts) gives Service Locator "a slight edge" for application classes.
 *Examples:* —
 
 **ASM-10**
-*Scope:* a factory needs something the same in every instance, process and test: a domain
-function, a schema, a constant.
+*Scope:* a factory needs something the same in every instance, process and test.
 *Statement:* It SHOULD import it.
 *Relies on:*
 - ASM-2: a factory receives a port's implementation, a client of something outside the process
@@ -556,8 +551,8 @@ calls when it constructs it.
 *Why:* Read anywhere else, the courier is a service locator: whoever reads it gets a dependency
 without anyone handing it over, so the graph of who depends on what leaves assembly, the one
 place it is visible. A factory that reads it has a dependency it did not receive; code that is no
-factory, a service function, passes every other rule, since the courier lives in the common
-library its layer may import. Two kinds of code have no caller to hand them what they call: a
+factory, a service function, passes every other rule, since a courier kept in the common
+library is one its layer may import. Two kinds of code have no caller to hand them what they call: a
 driving adapter the framework constructs, and one assembly constructs before what it calls exists,
 because what it calls is built from what the adapter is built into (DRV-3).
 *Provenance:* Follows Seemann ("Service Locator is an Anti-Pattern", comments of 2010-02-04): the
@@ -721,7 +716,7 @@ instead, which the Statement admits too.
 
 **TX-24**
 *Scope:* a use case decides by what this system has stored, other than a replica, and the decision
-has to hold when the use case commits: the stock suffices, the order is still open.
+has to hold when the use case commits.
 *Statement:* The data it decides by SHOULD belong to aggregates the use case saves.
 *Relies on:*
 - TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
@@ -999,8 +994,7 @@ examples/tx-30-ok-payment-asks-stripe-at-deadline.md
 
 **TX-35**
 *Scope:* a use case is called for an event that tells this system its part of work spanning systems
-cannot go on as it stands: a command it sent was refused, a payment came for an order it has
-cancelled.
+cannot go on as it stands.
 *Statement:* A business rule of its system MUST decide what follows.
 *Relies on:*
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
@@ -1121,8 +1115,7 @@ MS (an older price event overwriting a newer one).
 *Examples:* —
 
 **TX-32**
-*Scope:* a system writes messages of which a later one overrides an earlier: two changes of a
-customer's dunning stage, two statuses of one shipment.
+*Scope:* a system writes messages of which a later one overrides an earlier.
 *Statement:* Each MUST carry a version of what it tells of, rising with each change.
 *Relies on:* —
 *Why:* A receiver of messages that override each other keeps the last: the stage, the status.
@@ -1640,8 +1633,7 @@ your own fake where the owners will not.
 
 **TST-7**
 *Scope:* a test asserts.
-*Statement:* It SHOULD assert on inputs and observable results: which port was called with what,
-what came back, what was stored.
+*Statement:* It SHOULD assert on inputs and observable results.
 *Relies on:* —
 *Why:* A test that survives a rewrite of the thing it tests is one that names what goes in and
 what comes out. One that asserts the order of internal calls, or that a private helper ran, breaks

@@ -18,13 +18,13 @@ Out of scope: throughput and load, security, user interfaces.
 
 ## Forces
 
-- **F1. What lies behind the ports changes.** A store, a mail provider, a framework is replaced;
-  a new caller arrives: a CLI command, a webhook, a test.
+- **F1. What lies behind the ports changes.** What serves a port is replaced; a new caller
+  arrives.
 - **F2. The business changes, and so does what is known of it.** Business rules change, the
   model grows, the cut between systems moves.
 - **F3. Edits are partial.** People and agents change code having read only part of it.
 - **F4. Processes stop and are replaced.** A process can stop between any two of its
-  instructions: a crash, a deploy, a timeout. A deploy replaces processes one at a time, and
+  instructions. A deploy replaces processes one at a time, and
   records and messages outlive the code that wrote them.
 - **F5. Delivery repeats and reorders.** A message can arrive more than once, a redelivery while
   the first attempt still runs, and after one sent later.

@@ -4,10 +4,9 @@ Definitions only, read as a whole. What a term may do is in the rules.
 
 ## Business domain
 
-**Business domain.** A company's main area of activity: selling tea online. The domain models it.
+**Business domain.** A company's main area of activity. The domain models it.
 
-**Business rule.** What the business domain allows, requires or forbids: an order ships only once
-paid.
+**Business rule.** What the business domain allows, requires or forbids.
 
 ## System
 
@@ -16,13 +15,11 @@ repository may hold several. Another bounded context is another system, even whe
 imported in-process.
 
 **Outside.** Other systems and third parties, the operating system among them, whether they
-drive the system or it drives them: a store, a mail provider, the clock, the file system.
+drive the system or it drives them.
 
-**Tooling.** Code that runs in no process of the deployed application: a developer CLI, a seed
-script, a test that asserts about the source tree.
+**Tooling.** Code that runs in no process of the deployed application.
 
-**Probe.** Code a process runs to report on itself rather than on a system: whether it is alive or
-ready, its metrics. `/health`, `/metrics`.
+**Probe.** Code a process runs to report on itself rather than on a system.
 
 ## The layers
 
@@ -41,7 +38,7 @@ interface layer, driven adapters the infrastructure layer.
 
 **Port.** An interface, never the code behind it.
 
-- A *driven port* is a way out of the system. Send a mail, save to the database, read from disk.
+- A *driven port* is a way out of the system.
 - A *driving port* is the way in. It names one use case the system offers and what a caller must
   bring, in the system's terms, not its store's. It does not know how it is reached.
 - Who starts the call decides which. Seen from the caller, this system's driving port lies
@@ -49,8 +46,8 @@ interface layer, driven adapters the infrastructure layer.
 
 **Adapter.** Code on the far side of a port.
 
-- A *driven adapter* implements a driven port. A port may have several: a database today, another
-  store or a fake tomorrow. Swapping one changes nothing on the system's side of the port.
+- A *driven adapter* implements a driven port. A port may have several. Swapping one changes
+  nothing on the system's side of the port.
 - A *driving adapter* adapts one way in to the driving ports it calls, translating in both
   directions. There are as many driving adapters as there are ways into the process.
 
@@ -119,7 +116,7 @@ upstream and the driving adapters the upstream reaches. The upstream's terms sto
 adapters.
 
 **Shared kernel.** A model several systems of this codebase share as code and agree on together,
-each importing it into its domain: `Money`, `Sku`. A change to it is a change to each.
+each importing it into its domain. A change to it is a change to each.
 
 **Hook.** A driving adapter an external system calls.
 
@@ -137,8 +134,7 @@ and saves it whole.
 record no business rule decides, the system that keeps it. A store may keep records of several
 owners. A replica's records are its keeper's; what they copy stays the owner's to decide.
 
-**Specification.** A domain function that answers yes or no about one candidate: is it valid, may
-this happen, does it qualify.
+**Specification.** A domain function that answers yes or no about one candidate.
 
 **Repository.** A specialized driven port over exactly one aggregate: loads it, saves it, finds it.
 
@@ -151,26 +147,21 @@ returns to it, and lags the owner.
 
 ## Driven adapters
 
-**Record.** What a store holds and a write changes: a row in a relational store, its equivalent in
-another.
+**Record.** What a store holds and a write changes.
 
 **Store.** What lies behind one or more driven ports whose writes can be committed in one
 transaction. Two clients are one store when one transaction can carry the writes of both, two
-stores until it can: two clients of one database whose transactions cannot be shared are two
-stores.
+stores until it can.
 
 ## Driving adapters
 
 **Scheduled task.** A driving adapter the clock calls.
 
 **Ambient value.** A value a function reads without receiving it as an argument. Two scopes: per
-process, set once for the process's life, like what assembly produced, a ready-made logger or an
-environment variable; per request, what the current request carries, like a request id, a trace
-context or a locale.
+process, set once for the process's life; per request, what the current request carries.
 
 **Courier.** How a driving adapter reaches what assembly produced when assembly cannot hand it over
-as an argument. Example implementations are per-process ambient values or the stack's context
-objects.
+as an argument.
 
 ## Assembly
 
@@ -186,19 +177,15 @@ thing or many.
 place where port and implementation meet. It calls the system builders and produces what the
 process's driving adapters call into.
 
-**Common library.** Plumbing every system may import: store clients, a logger, a tracer, the relay,
-the bus, the courier.
+**Common library.** Plumbing every system may import.
 
 ## Tests
 
-**Fake.** A working implementation of a port that reaches nothing outside the process: a
-repository over an in-memory map.
+**Fake.** A working implementation of a port that reaches nothing outside the process.
 
-**Integration test.** A test that uses a real external dependency running where the test runs: a
-database or a broker in a container.
+**Integration test.** A test that uses a real external dependency running where the test runs.
 
-**End-to-end test.** A test that uses a real external dependency running elsewhere: an external
-system's own service, such as Stripe in test mode, or a mail provider's sandbox.
+**End-to-end test.** A test that uses a real external dependency running elsewhere.
 
 **Default suite.** The tests run by default: every test that is neither an integration test nor an
 end-to-end test.
