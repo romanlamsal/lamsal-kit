@@ -138,6 +138,20 @@ left them. On top of the lists above:
 - DOM-4: every `dom-4-*` file, the Scope since issue 13.
 - The `gap-*` files cite retired ids.
 
+### Since issue 20
+
+- Reach transitive, through a port as the port:
+  `svc-6-breach-service-reaches-repository-behind-port` is no breach;
+  `dom-1-breach-order-type-from-drizzle-table` stays a breach with `import type`.
+- Code of a system by role, the offer for code of this codebase: the seven SYS-1 files above are
+  read again; a route under the framework's files importing its system's ports is ok.
+- The builder builds its own clients: the five ASM-2 files above are ok where the client is built
+  from configuration the builder received.
+- Pure: `tx-17-ok` and `tx-22-ok-order-confirmation` take the id and the time as arguments.
+- An ok example of a domain that imports no common library (DOM-1).
+- TX-28 "the external system's change as pending", TX-30 "confirmation or answer", TX-36 the
+  PaymentIntent as a tentative operation: their examples against the new words.
+
 ## Decision
 
 —

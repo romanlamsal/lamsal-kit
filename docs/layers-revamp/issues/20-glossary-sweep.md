@@ -1,6 +1,6 @@
 # 20 — Glossary sweep after spec 02
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -174,8 +174,84 @@ ASM-5, SYS-14).
 
 ## Decision
 
-—
+The grep ran at `7eeb049` before any edit; hits as listed under Context, plus "other code" in
+SYS-1's Scope and "code outside a system" in SYS-9's. One subsection per term, the definition
+first, then the rules.
+
+- **Reach.** Transitive, in the definition: a module reaches what it reads, calls or is typed
+  by, and what those reach in turn; what it reaches through a port it reaches as the port, not as
+  the code behind it. The six reach lists stand unchanged: the adapter behind a port and what
+  assembly handed it are the port's. `import type` is a reach: a domain typed by the store's row
+  type breaches DOM-1. DOM-1's, SVC-6's and DRV-8's Whys say so.
+- **Pure.** "Every runtime of the language." The clause on handing back nothing stays: the
+  domain takes ids and the time as arguments (DOM-1's Why). A service reaches a runtime global
+  that is not pure, `randomUUID()`, `Date.now()`, through no list of SVC-6's: meant, it takes
+  them through a port or the common library, so a test hands a fake; SVC-6 stands.
+- **Offer.** "For code of this codebase outside it"; the fakes are the open host service's
+  driving ports' only; a builder returns what assembly hands on. Code of a system is by role,
+  not by package: the glossary's System says a module is of the system whose layer or offer it
+  belongs to, wherever the repository keeps it. So a route beside the framework's files is its
+  system's driving adapter, imports the system's ports as the system's code, and the framework
+  reaches it by its way in. SYS-1's Scope: "for code of this codebase outside it to import";
+  SYS-9's: "code of this codebase outside a system". The framework and an external system are
+  the outside, no code of this codebase; tooling stays as the Assumptions have it. What a builder
+  returns beyond the definition is a rule, issue 15's.
+- **System builder against ASM-2.** The builder is assembly's part: it receives the
+  configuration and what the process holds once, and builds its system's own from them, a client
+  its adapters alone use among them. ASM-2's Scope and Statement stand; its Why argues the
+  builder. Assembly knows no more of payment than payment's configuration.
+- **External system against P2.** A definition, reworded without the modal: business rules its
+  configuration holds are its own, in its terms, even where this codebase writes them. P2 holds
+  for a system of this codebase; F9 exempts the external system. C4 stays open on purpose, its
+  Bound gaining P2 and DOM-7, whose Why rules the second-statement case.
+- **acting, answering.** Acting: changes the system, or the outside through it. A use case that
+  only asks an external system is acting; DRV-1's one acting call counts it.
+- **Idempotent.** "Its system's records": a Record is what a store holds (glossary), so an
+  effect outside, a mail, is no record, and the handler without a key is issue 15's gap. The five
+  TX-5 lines restate the new sense.
+- **Tentative operation.** The holding clause goes: it gives nothing until it is confirmed, by
+  the requester or by whoever else the other system takes the confirmation from; confirmation
+  gives what it asks for, cancellation ends it. An unconfirmed PaymentIntent is one, confirmed by
+  the customer's browser, so TX-36 lifts TX-3 and TX-22 for it and C8 stays a choice. TX-28 loses
+  the term: "beyond recording the external system's change as pending"; a record of its own or a
+  private message for a handler are both such a record, which settles the TX-28 against TX-22
+  reading. TX-29's line and Why follow. TX-30's Scope: "holds a tentative operation, or waits on
+  another system's confirmation or answer", so the hook's pending change is in it and TX-28's
+  line on TX-30 holds.
+- **Store.** Unchanged; it is physical. TX-1's Statement: "hand it to each call it makes into its
+  store"; the restating lines follow. Its Why: a call into another system's open host service is
+  no call into the store and takes no transaction (TX-25), so two systems' tables in one store
+  leave the other's reads apart. The fixture's schema and role per system is issue 17's. The
+  Context's "TX-9" is no rule; "a transaction is one store's" is in TX-22's and TX-6's Whys and
+  still holds.
+- **Common library.** "A package of this codebase that belongs to no system, written for every
+  system to import." P5's Except excepts what it did under the old sense: the outside reached
+  through the library's code, where the output changes neither how a use case acts nor what it
+  answers; ASM-7 delivers it unchanged. DOM-1's Why says why the library is off its list.
+- **Settle.** Gone.
+- **Configuration value.** Defined: a value a process is given when it starts and keeps for its
+  life, which no record holds. A number in a business rule arriving that way is issue 15's.
+- **README.** Tiers, Glossary: the sweep starts with the grep and lists the hits. The General
+  rules sentence on re-reading examples was there since the issue opened.
+
+Guessed, not agreed, open to overturn: what a builder returns beyond the glossary is a rule
+(issue 15), not a sharper definition; SVC-6 unchanged for the id generator; TX-30's Scope
+widened rather than TX-28's line on it narrowed; the Context's "TX-9" stays a slip.
 
 ## Consequences
 
-—
+- To issue 15: what a builder may return beyond the glossary; a business rule's number arriving
+  as a configuration value (DOM-7 against ASM-2); the handler without a key, "its system's
+  records" settled.
+- To issue 16: lines rewritten here, read again there: the five TX-5 lines; TX-1's lines in
+  SVC-2, SVC-3, TX-2, TX-23, TX-24, TX-15, TX-37, TX-6, TX-5, TX-34, DRV-1, DRV-7, TX-25, TX-28,
+  TX-38 for "each call it makes"; TX-29's on TX-28; DVN-4's on SYS-9.
+- To issue 17: a schema and a role per system, or one store for all.
+- To issue 19: under transitive Reach, `svc-6-breach-service-reaches-repository-behind-port` is
+  no breach; the seven SYS-1 ok files are judged by role and by the narrowed offer; the five
+  ASM-2 ok files building clients in the builder are ok; `tx-17-ok` and `tx-22-ok` take ids and
+  the time as arguments; `dom-1-breach-order-type-from-drizzle-table` stays a breach with
+  `import type`; an ok example of a domain that imports no common library; TX-28's and TX-30's
+  examples against the new words.
+- Freeze: no term changes again without the README's grep.
+

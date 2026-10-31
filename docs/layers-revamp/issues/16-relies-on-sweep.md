@@ -46,6 +46,9 @@ Settled when it was opened:
   nothing and TX-37's Why stands on it. SVC-2's line on DRV-8 re-found, with the reach now
   transitive (issue 20): the line should claim no driven port, no repository, no store, which is
   all SVC-2 needs.
+- Since issue 20, rewritten there and read again here: the five TX-5 lines, now the new sense of
+  Idempotent; TX-1's restating lines, "each call it makes into its store"; TX-29's line on TX-28,
+  "recording the change as pending"; DVN-4's line on SYS-9, "code of this codebase".
 
 ## Decision
 

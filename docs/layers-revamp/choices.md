@@ -46,7 +46,7 @@ that a billing change edits checkout's code.
 *Situation:* A record an external system keeps is owned by the external system, its business
 rules in the external system's configuration, or by a system of this codebase, the external
 system's own ways in kept from changing it.
-*Bound:* P11; SYS-12.
+*Bound:* P2, P11; DOM-7, SYS-12.
 *Refused:* A system of this codebase deciding the record by its business rules while the external
 system's own ways in change it as well.
 

@@ -53,6 +53,8 @@ Settled when it was opened:
   shop; the fixture says catalog. "Open order" undefined; read as waiting for payment.
 - The customer: who owns identity, email and the shipping address; `OrderPlaced` carries what
   (raw Implementer N24).
+- Since issue 20: the one Postgres is one store for every system, or a schema and a role per
+  system make it one store each (glossary: Store). All four Fresh drafts chose the second.
 
 ### Shapes
 

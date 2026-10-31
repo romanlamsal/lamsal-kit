@@ -46,25 +46,28 @@ upstream its system conforms to, pure code of no system.
   system outside its published language.
 - SYS-14: a published language or a shared kernel reaches nothing but a shared kernel and pure
   code of no system.
-*Why:* The domain is pure and knows no runtime (glossary). The test for a module is two
-questions: does calling it reach outside the process, and does it exist on every runtime? A store
-client, an HTTP client, a mailer SDK, `node:fs` and a clock reach outside, so they stay behind
-ports. A validation library takes arguments and returns, so it passes, and so does any library
-like it. `node:path` reaches nowhere outside the process and still breaks in a browser; `Buffer`,
-`process`, `window` and the DOM are one runtime's. A domain that imports any of these loads on
-one runtime, and whoever imports it elsewhere, a browser rendering a form from the schema, another
-system's domain, gets a load error or the server's store client along with the model. The common
-library is not on the list: a courier kept there would hand the domain a value no caller passed.
-A shared kernel is a model several systems agree on and import into each domain; the common
-library holds no model, since a model there is one every system shares and no system's business
-rules decide it, so the kernel is the home the domains can share, and what it imports is bounded
-as the domain's is (SYS-14). A conformist's domain is written in its upstream's terms (glossary:
-Conformist): its business rules take the upstream's schemas as arguments and import them from the
-upstream's export path; a schema restated here is a second declaration of the upstream's,
-drifting on the upstream's schedule. Loading that path loads nothing of the upstream beyond its
-published language (SYS-10).
-The list is closed: a reach of a kind it does not name is a question for this rule, not a
-permission.
+*Why:* The domain is pure and knows no runtime (glossary). The test for a module is three questions:
+does calling it reach outside the process, does it exist on every runtime of the language, and does
+it hand its caller anything the caller did not pass? A store client, an HTTP client, a mailer SDK,
+`node:fs` and a clock reach outside, so they stay behind ports. An id generator and the clock hand
+back what nobody passed, so the domain takes the id and the time as arguments. A type is a reach too
+(glossary: Reach): a domain typed by the store client's row type is shaped by the store, and `import
+type` brings the store's name in with nothing running. A validation library takes arguments and
+returns, so it passes, and so does any library like it. `node:path` reaches nowhere outside the
+process and still breaks in a browser; `Buffer`, `process`, `window` and the DOM are one runtime's.
+A domain that imports any of these loads on one runtime, and whoever imports it elsewhere, a browser
+rendering a form from the schema, another system's domain, gets a load error or the server's store
+client along with the model. The common library is not on the list: it is of this codebase and of no
+system, and it is not pure, its telemetry reaching outside the process and a courier kept there
+handing the domain a value no caller passed. A shared kernel is a model several systems agree on and
+import into each domain; the common library holds no model, since a model there is one every system
+shares and no system's business rules decide it, so the kernel is the home the domains can share,
+and what it imports is bounded as the domain's is (SYS-14). A conformist's domain is written in its
+upstream's terms (glossary: Conformist): its business rules take the upstream's schemas as arguments
+and import them from the upstream's export path; a schema restated here is a second declaration of
+the upstream's, drifting on the upstream's schedule. Loading that path loads nothing of the upstream
+beyond its published language (SYS-10). The list is closed: a reach of a kind it does not name is a
+question for this rule, not a permission.
 *Provenance:* The direction follows Khononov p. 77 (the model "devoid of any infrastructural or
 technological concerns"), MS ("the domain model layer must not directly depend on any infrastructure
 framework"), Evans Reference p. 10 and Garrido §3 ("Hexagon depends on nothing, maybe just on
@@ -178,28 +181,28 @@ it conforms to, pure code of no system.
 - ASM-2: a factory receives port implementations, store clients and other clients of something
   outside the process from its caller.
 - SYS-1: an upstream exports nothing but its offer.
-*Why:* A service that knows the route that calls it, or the store client that saves for it,
-changes whenever either changes, and a second way in, or a second store, means rewriting the use
-case. It reaches driven adapters through the ports they implement, handed in, so a swapped adapter
-leaves it untouched. The published language is on the list because the service translates both
-ways between it and the domain. An external system has no export path (Assumptions); for a service
-that conforms to it, its package takes that place. A store client's type in a port's signature is
-the store's name in the service, one step removed. With the list, the system is replaced from the
-outside in, a new
-driving adapter, a swapped driven adapter, with service and domain untouched. The common library
-holds no model (ASM-6): the opaque transaction a service opens and hands to each port,
-the telemetry it calls where it uses it. Holding either tells the service nothing of a store or a
-caller; what a service does with a store client it holds is a question of what it calls, not what
-it imports. A library that takes arguments and returns, a validator, reaches nothing outside the
-process and exists on every runtime, so it names no store and no caller; a store client's type
-fails that test, the store's name one step removed. A shared kernel underlies the domain's values,
-`Money` in an `Order`: a service that sums them, or a port typed by them, names what its domain
-already loads and adds no dependency the domain lacks. A conformist declares no port for its
-upstream: the upstream's driving port type is its driven port and the upstream's published
-language the shapes its service passes through, so both come from the upstream's export path,
-where SYS-1 bounds what it finds; the implementation still arrives from assembly, the upstream's
-service in-process, an adapter out of it, so moving the upstream out of process changes assembly
-and nothing in this service.
+*Why:* A service that knows the route that calls it, or the store client that saves for it, changes
+whenever either changes, and a second way in, or a second store, means rewriting the use case. It
+reaches driven adapters through the ports they implement, handed in, so a swapped adapter leaves it
+untouched; what it reaches through a port it reaches as the port (glossary: Reach), the adapter
+behind it and what assembly handed that adapter being the port's, not the service's. The published
+language is on the list because the service translates both ways between it and the domain. An
+external system has no export path (Assumptions); for a service that conforms to it, its package
+takes that place. A store client's type in a port's signature is the store's name in the service,
+one step removed. With the list, the system is replaced from the outside in, a new driving adapter,
+a swapped driven adapter, with service and domain untouched. The common library holds no model
+(ASM-6): the opaque transaction a service opens and hands to each port, the telemetry it calls where
+it uses it. Holding either tells the service nothing of a store or a caller; what a service does
+with a store client it holds is a question of what it calls, not what it imports. A library that
+takes arguments and returns, a validator, reaches nothing outside the process and exists on every
+runtime, so it names no store and no caller; a store client's type fails that test, the store's name
+one step removed. A shared kernel underlies the domain's values, `Money` in an `Order`: a service
+that sums them, or a port typed by them, names what its domain already loads and adds no dependency
+the domain lacks. A conformist declares no port for its upstream: the upstream's driving port type
+is its driven port and the upstream's published language the shapes its service passes through, so
+both come from the upstream's export path, where SYS-1 bounds what it finds; the implementation
+still arrives from assembly, the upstream's service in-process, an adapter out of it, so moving the
+upstream out of process changes assembly and nothing in this service.
 *Provenance:* The direction follows Cockburn (Intent: the application is "blissfully ignorant" of
 the adapters on every side), Martin (The Dependency Rule: source code dependencies point inward;
 Crossing boundaries: the use case calls an interface the adapter implements), Garrido §6.2.1 and
@@ -215,8 +218,8 @@ single layer) and Evans p. 57 pick the architecture per subdomain; this document
 *Scope:* a use case decides by what this system has stored.
 *Statement:* The service that acts MUST enforce the decision itself, in the call that acts.
 *Relies on:*
-- TX-1: a use case that writes runs in one transaction its service opens, hands to each call into
-  its store, reads included, and commits.
+- TX-1: a use case that writes runs in one transaction its service opens, hands to each call it
+  makes into its store, reads included, and commits.
 - TX-2: a driven adapter handed a transaction makes each call into its store inside it, reads
   included.
 - TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
@@ -330,20 +333,23 @@ upstream, the common library, pure code of no system.
 *Why:* A driving adapter that skips the service and reaches a driven adapter, a repository or the
 store reads state and decides by it, or writes outside any use case and outside the transaction a
 service holds, and the business rules in the domain are bypassed for that one way in. Typed by the
-driving port, the adapter calls whichever service assembly handed it, a fake in a test. The
-published language is what it parses its caller's input with where the caller is another system.
-The adapter is the caller's shape adapted to a driving port: a route, a server action, a hook is
-typed and invoked by its framework, and that import is the adaptation itself, stopping at the
-adapter, so the service behind the port learns nothing of it. It parses its caller's input into
-the domain's shapes and asks a specification about input it holds; a schema restated beside the
-domain's is a second declaration of the same business rule, and the two drift. The domain is pure
-and loads on the adapter's runtime, so the import brings nothing else along. A shared kernel
-underlies the domain's values, so the input it parses, a `Money` total, is typed by what the
-domain already loads. The courier an adapter the framework finds reads its service from, and the
-telemetry it calls, may live in the common library, which holds no model (ASM-6); a store client
-held from there is held, not queried, and what the adapter calls with it is a question of what it
-calls, not what it imports. Verifying a signature or parsing a body takes arguments and returns;
-such a library reaches nothing outside the process and opens no second way to the store.
+driving port, the adapter calls whichever service assembly handed it, a fake in a test, and reaches
+the port, not the service behind it (glossary: Reach). The published language is what it parses its
+caller's input with where the caller is another system. The adapter is the caller's shape adapted to
+a driving port: a route, a server action, a hook is typed and invoked by its framework, and that
+import is the adaptation itself, stopping at the adapter, so the service behind the port learns
+nothing of it. The file the framework finds is the way in, no export path (SYS-1), and the adapter
+is its system's code wherever the framework wants the file kept (glossary: System), reaching the
+system's ports as the system's own code does. It parses its caller's input into the domain's shapes
+and asks a specification about input it holds; a schema restated beside the domain's is a second
+declaration of the same business rule, and the two drift. The domain is pure and loads on the
+adapter's runtime, so the import brings nothing else along. A shared kernel underlies the domain's
+values, so the input it parses, a `Money` total, is typed by what the domain already loads. The
+courier an adapter the framework finds reads its service from, and the telemetry it calls, may live
+in the common library, which holds no model (ASM-6); a store client held from there is held, not
+queried, and what the adapter calls with it is a question of what it calls, not what it imports.
+Verifying a signature or parsing a body takes arguments and returns; such a library reaches nothing
+outside the process and opens no second way to the store.
 *Provenance:* The conversion at the edge is Cockburn's adapter (Intent) and Garrido's (§2.4,
 "the driver adapter has a configurable dependency on the driver port", §3). The list is this
 document's.
@@ -439,7 +445,7 @@ requeues the unacknowledged). Khononov, Evans and Cockburn do not rule on it.
 domain, a shared kernel, the common library, pure code of no system.
 *Relies on:*
 - SYS-1: everything a system exports is of its offer.
-- SYS-9: code outside a system reaches it through that system's offer.
+- SYS-9: code of this codebase outside a system reaches it through that system's offer.
 *Why:* A driven adapter exists to talk to the outside on the system's behalf. One that calls a
 service has a use case inside it, in the layer meant to do nothing but talk to the outside; one
 that imports another adapter or a service of its system is tied to how that one is built.
@@ -491,24 +497,27 @@ outside the process, or a configuration value.
 *Relies on:*
 - ASM-1: a process has one assembly.
 *Why:* A dependency built in place breaks substitution: a service that builds its own adapter is
-stuck with it, so its tests need the real thing, and a second instance of what exists once
-appears. A system builder is a factory for its system, and its upstreams are dependencies like any
-other: in-process, assembly hands the downstream the upstream's service itself; out of process, a
-driven adapter of the downstream, an HTTP client. Moving the upstream out of process then changes
-assembly and adds that adapter, and nothing in the downstream's services or domain; each instance
-exists once, the graph is visible in one place, and a test hands the builder a fake upstream.
-Built in place, this breach is invisible to the other rules: the code sits in the right layer and
-calls in the right direction. A module that exports a ready-made instance beside its factory is
-the breach one step removed: the importer receives nothing, it imports the built thing. A
-configuration value is what a test varies, a base URL pointed at a stub, a key for a test mode.
-Read in place from the environment, it is in no signature: the test does not set it, the module
-that read it at load runs in every process that imports it, the test run included, where the
-variable is unset and the first use fails, and the built thing is substituted by module mock or
-not at all. A store client built in place opens its pool when the module loads, in every process
-that imports it and in every test run; the contract suite cannot hand the adapter a client over a
-test container, it talks to whatever the module connected to, and a second pool exists beside
-assembly's, so what one use case writes through it another reads through a client that knows
-nothing of the first.
+stuck with it, so its tests need the real thing, and a second instance of what exists once appears.
+A system builder is a factory for its system and assembly's own part (glossary: System builder): it
+receives the configuration and what the process holds once, the store client, its upstreams; a
+client its own adapters alone use, the payment provider's SDK, it builds from the configuration it
+received, so the client is built by assembly, in the one place, once, and assembly knows no more of
+the system than its configuration. Its upstreams are dependencies like any other: in-process,
+assembly hands the downstream the upstream's service itself; out of process, a driven adapter of the
+downstream, an HTTP client. Moving the upstream out of process then changes assembly and adds that
+adapter, and nothing in the downstream's services or domain; each instance exists once, the graph is
+visible in one place, and a test hands the builder a fake upstream. Built in place, this breach is
+invisible to the other rules: the code sits in the right layer and calls in the right direction. A
+module that exports a ready-made instance beside its factory is the breach one step removed: the
+importer receives nothing, it imports the built thing. A configuration value is what a test varies,
+a base URL pointed at a stub, a key for a test mode. Read in place from the environment, it is in no
+signature: the test does not set it, the module that read it at load runs in every process that
+imports it, the test run included, where the variable is unset and the first use fails, and the
+built thing is substituted by module mock or not at all. A store client built in place opens its
+pool when the module loads, in every process that imports it and in every test run; the contract
+suite cannot hand the adapter a client over a test container, it talks to whatever the module
+connected to, and a second pool exists beside assembly's, so what one use case writes through it
+another reads through a client that knows nothing of the first.
 *Provenance:* Follows Garrido §3 (Configurable Dependency: "a dependency of an object on an
 interface", passed to the constructor at runtime) and §2.5 (the composition root sets up the
 adapters), Cockburn (secondary actor adapters swapped, the application "without actually knowing
@@ -698,8 +707,8 @@ serve many applications.
 
 **TX-1**
 *Scope:* a use case writes.
-*Statement:* Its service MUST run it in one transaction: open it, hand it to each call into its
-store, commit it.
+*Statement:* Its service MUST run it in one transaction: open it, hand it to each call it makes
+into its store, commit it.
 *Relies on:*
 - TX-2: a driven adapter writes to its store inside the transaction it is handed.
 - DRV-1: a driving adapter makes at most one acting call per call it handles, a message included.
@@ -707,14 +716,16 @@ store, commit it.
 whole use case, so it is the one that knows which writes land together; a repository that opened the
 transaction would be deciding that for writes it does not see. One acting use case is one
 transaction, several aggregates included: the order placed and the cart cleared land or fail
-together. An answering use case writes nothing and falls outside the Scope. Every call into the
-store takes the transaction, the reads too, and the record of a handled message commits with the
-writes it guards. A store is what one transaction commits, so a use case that writes writes one
-store; a change outside it is TX-22's. Where the transaction is a required parameter, a forgotten
-one is a type error. Opening it through a driven
-port keeps the store's name out of the service and the client's type out of the domain. A handler
-calls one use case per message, so each message gets a transaction of its own, apart from the one
-that wrote it.
+together. An answering use case writes nothing and falls outside the Scope. Every call the service
+makes into the store takes the transaction, the reads too, and the record of a handled message
+commits with the writes it guards. A store is what one transaction commits, so a use case that
+writes writes one store; a change outside it is TX-22's. A call into another system's open host
+service is no call into the store and takes no transaction (TX-25), so where two systems keep their
+records in one store, the other system's reads and writes stay apart from this transaction. Where
+the transaction is a required parameter, a forgotten one is a type error. Opening it through a
+driven port keeps the store's name out of the service and the client's type out of the domain. A
+handler calls one use case per message, so each message gets a transaction of its own, apart from
+the one that wrote it.
 *Provenance:* The service holding the transaction follows Fowler (Service Layer: "controlling
 transactions"), Evans p. 111 ("Leave transaction control to the client"), Khononov p. 86 n. 7 and
 p. 123, Vernon EAD I p. 3 (the transactional application service) and MS (the command handler
@@ -734,8 +745,8 @@ aggregates see no "transactional collisions".
 *Scope:* a driven adapter is handed a transaction.
 *Statement:* Each call it makes into its store MUST run inside that transaction.
 *Relies on:*
-- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
-  its store and commits.
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call it
+  makes into its store and commits.
 *Why:* A write outside it, through the global client or a transaction the adapter opens itself,
 commits on its own: a failure between the writes leaves the use case half done, and the
 transaction's rollback leaves this write in place. A read outside it sees none of the use case's
@@ -753,8 +764,8 @@ inside the transaction are this document's.
 *Scope:* a repository saves an aggregate that was loaded through it.
 *Statement:* The save MUST fail where the aggregate has changed in the store since it was loaded.
 *Relies on:*
-- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
-  its store and commits.
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call it
+  makes into its store and commits.
 - TX-2: a driven adapter handed a transaction makes each call into its store inside it.
 - SVC-4: a use case writes a record of an aggregate by saving the whole aggregate through the
   aggregate's repository.
@@ -783,8 +794,8 @@ has to hold when the use case commits.
 *Relies on:*
 - TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
   changed in the store since the load.
-- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
-  its store and commits.
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call it
+  makes into its store and commits.
 *Why:* The aggregates a use case saves fail on a change. Data in one it reads and does not save
 changes before the commit and nothing fails: two reservations both read a stock of 1 from `Stock`,
 each saves a `Reservation` of its own, and both commit. Held in the aggregate the use case saves,
@@ -829,13 +840,14 @@ port is this document's.
 *Statement:* It SHOULD leave each write it does not rely on to a handler, through a message in its
 outbox.
 *Relies on:*
-- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
-  its store and commits.
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call it
+  makes into its store and commits.
 - TX-6: a message about a change commits in the transaction that commits the change.
 - TX-20: the relay hands each message it reads from an outbox to the bus at least once.
 - TX-21: the bus delivers a message to a handler again until the handler acknowledges it.
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
-- TX-5: a repeated delivery changes nothing.
+- TX-5: a use case called for a delivered message, repeated, leaves its system's records as once
+  left and answers as the first did.
 *Why:* A use case relies on a write when its goal (glossary: Use case) is not reached without it:
 checkout relies on the order and the emptied cart, not on a statistic. A write it does not rely on
 holds its lock until the commit, and its failure aborts the rest; moved to a handler, it is retried
@@ -856,7 +868,8 @@ use case relies on more (TX-1).
 - TX-20: the relay hands each message it reads from an outbox to the bus at least once.
 - TX-21: the bus delivers a message to a handler again until the handler acknowledges it.
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
-- TX-5: a repeated delivery changes nothing.
+- TX-5: a use case called for a delivered message, repeated, leaves its system's records as once
+  left and answers as the first did.
 *Why:* The owner's business rules decide its data (glossary: Owner), so a change to it is the
 owner's use case, and this system at most asks for it. Changing it directly, writing the owner's
 record or calling the owner inside this transaction, puts a write this system's business rules do
@@ -916,9 +929,10 @@ it, by the business rules of its system or by the state of its records.
 *Relies on:*
 - TX-22: the use case that decided the change wrote a message asking for it to its outbox, and did
   not make it.
-- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
-  its store and commits.
-- TX-5: a repeated delivery changes nothing.
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call it
+  makes into its store and commits.
+- TX-5: a use case called for a delivered message, repeated, leaves its system's records as once
+  left and answers as the first did.
 - TX-35: a business rule of the system decides what follows when an event tells it its part of
   work spanning systems cannot go on as it stands.
 - TX-31: by default, a use case called for a message passes the external system a key the message
@@ -948,12 +962,14 @@ document's.
   system of this codebase owns, writes a message asking for it to its outbox, and does not make it.
 - TX-30: a business rule of this system decides what happens when a confirmation or an answer
   does not come.
-*Why:* A tentative operation holds what it asks for and gives nothing until it is confirmed
-(glossary). A request lost to a crash, or made for a change that then rolled back, leaves a hold
-nobody confirms, and the hold is cancelled or lapses by a business rule; the outbox's guarantee
-that the request lands buys nothing. An answer the caller needs now, the `client_secret` checkout
-returns to the browser, cannot wait for a handler. A call that confirms, a payment captured, gives
-what it asks for and is no tentative operation, whatever it is named: TX-3 and TX-22 hold for it.
+*Why:* A tentative operation gives nothing until it is confirmed, whoever confirms it (glossary):
+the customer's browser confirms a PaymentIntent, and until then it is a request Stripe holds and
+this system may cancel. A request lost to a crash, or made for a change that then rolled back,
+leaves a request nobody confirms, which is cancelled or lapses by a business rule; the outbox's
+guarantee that the request lands buys nothing. An answer the caller needs now, the `client_secret`
+checkout returns to the browser, cannot wait for a handler. A call that confirms, a payment
+captured, gives what it asks for and is no tentative operation, whatever it is named: TX-3 and TX-22
+hold for it.
 *Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
 cancels"; "When an entity agrees to perform a tentative operation, it agrees to let another entity
 decide the outcome"). Asking by a call outside the outbox is this document's.
@@ -989,8 +1005,8 @@ examples/tx-31-ok-3pl-booking-keyed-by-shipment-id.md
 
 **TX-28**
 *Scope:* an external system calls a hook before its change commits.
-*Statement:* The use case it calls MUST NOT change this system beyond recording a tentative
-operation.
+*Statement:* The use case it calls MUST NOT change this system beyond recording the external
+system's change as pending.
 *Relies on:*
 - TX-25: a driving port takes no transaction.
 - TX-1: a use case that writes runs in one transaction its own service opens and commits.
@@ -1000,8 +1016,8 @@ hook returns, by a later hook, a failed validation, a crash. The use case runs i
 its own, which commits whatever the external system does next. A change there that takes the
 external change as done, a record updated, a page revalidated, a published event, stands for a
 change a rollback undoes. Two answers stay safe. Answering changes nothing, and the external system
-can refuse its change by the answer: a veto. Recording a tentative operation, a pending record or a
-private message for a handler that checks the external system's committed state, leaves the change
+can refuse its change by the answer: a veto. Recording the change as pending, a record of its own or
+a private message for a handler that checks the external system's committed state, leaves the change
 to a confirmation that comes after the commit: a message the external system publishes, a later
 hook, a read that finds the change committed. A read can come before the commit and find nothing
 yet, so what happens when no confirmation comes is a business rule's (TX-30). TX-6 binds a message
@@ -1020,24 +1036,26 @@ transaction can write a message to an outbox.
 before the change commits.
 *Relies on:*
 - TX-28: the use case a hook calls before the external system's change commits changes this system
-  no further than recording a tentative operation.
+  no further than recording the change as pending.
 - TX-20: the relay hands each message it reads from an outbox to the bus at least once.
 - TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
-*Why:* Through the hook, this system holds a tentative operation that waits on a confirmation: a
+*Why:* Through the hook, this system holds a change recorded as pending that waits on a
+confirmation: a
 read of the external system's state can run before the commit and find nothing yet, and a
 confirmation the external system sends afterwards is its to send or lose. A message written in the
 external system's transaction commits with the change or not at all, and the relay hands it to this
 system's handler after the commit: nothing waits, nothing is confirmed. The outbox is the external
 system's, in its store, and assembly hands the relay its reader (glossary: Outbox). A hook that asks
-rather than tells, a veto, falls outside the Scope. Deviating, the hook's tentative operation waits
-on a confirmation, and TX-28 and TX-30 hold for it.
+rather than tells, a veto, falls outside the Scope. Deviating, the hook's pending change waits on a
+confirmation, and TX-28 and TX-30 hold for it.
 *Provenance:* The outbox follows Richardson (Transactional outbox) and Khononov p. 145–147. Writing
 it in an external system's transaction is this document's.
 *Examples:* breach examples/tx-28-ok-after-change-hook-records-revalidation-request.md · ok
 examples/tx-29-ok-catalog-writes-product-changed-in-payload-transaction.md
 
 **TX-30**
-*Scope:* this system holds a tentative operation, or waits on another system's answer.
+*Scope:* this system holds a tentative operation, or waits on another system's confirmation or
+answer.
 *Statement:* A business rule of this system MUST decide what happens when the confirmation or answer
 does not come.
 *Relies on:* —
@@ -1091,8 +1109,8 @@ examples/tx-35-ok-late-payment-refunded.md
 *Scope:* a use case writes a message about a change it makes.
 *Statement:* It MUST write the message in the transaction that commits the change.
 *Relies on:*
-- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
-  its store and commits.
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call it
+  makes into its store and commits.
 - TX-2: a driven adapter writes to its store inside the transaction it is handed.
 *Why:* Written before the commit and outside the transaction, the message survives a rollback of the
 change and tells of something that did not happen. Written after the commit, the process dies
@@ -1111,7 +1129,8 @@ Departs: EIP (Event Message) finds guaranteed delivery "usually not very helpful
 *Scope:* the relay reads a message from an outbox.
 *Statement:* It MUST hand it to the bus at least once.
 *Relies on:*
-- TX-5: a repeated delivery changes nothing.
+- TX-5: a use case called for a delivered message, repeated, leaves its system's records as once
+  left and answers as the first did.
 *Why:* A relay that marks the message before the bus has it loses it when the process dies between
 the two, and the change it tells of reaches nobody. Marked after, a crash hands it over again: a
 repeat, which the receiving use case absorbs, instead of a loss, which nothing can.
@@ -1126,7 +1145,8 @@ outbox) and NServiceBus (Outbox).
 the handler acknowledges it.
 *Relies on:*
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
-- TX-5: a repeated delivery changes nothing.
+- TX-5: a use case called for a delivered message, repeated, leaves its system's records as once
+  left and answers as the first did.
 - TX-20: the relay hands each message it reads from an outbox to the bus at least once.
 *Why:* A handler fails, a process dies mid-message, a store is briefly down. Delivered once, the
 message is lost with the attempt; delivered again, the attempt that fails is retried. A bus that
@@ -1146,8 +1166,8 @@ Letter Channel). Khononov p. 147's at-least-once is the relay's (TX-20).
 *Scope:* a use case is called for a delivered message.
 *Statement:* It MUST be idempotent.
 *Relies on:*
-- TX-1: a use case that writes runs in one transaction, which its service hands to each call into
-  its store and commits.
+- TX-1: a use case that writes runs in one transaction, which its service hands to each call it
+  makes into its store and commits.
 - TX-2: a driven adapter writes to its store inside the transaction it is handed.
 *Why:* Delivery repeats: a handler that failed after acting is delivered the message again, a relay
 that crashed after handing a message over hands it over again, and a redelivery can run while the
@@ -1283,7 +1303,7 @@ refusal and names no system that sent the command.
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
 - TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
 - TX-1: a use case that writes runs in one transaction, which its service opens, hands to each call
-  into its store and commits.
+  it makes into its store and commits.
 - TX-38: a use case called for a message that is stopped by no business rule of its system fails
   and commits nothing.
 *Why:* A refusal that throws fails the use case: the handler does not acknowledge, the bus delivers
@@ -1398,7 +1418,7 @@ not be expected to be always up to date").
 ## Other systems
 
 **SYS-1**
-*Scope:* a system exports a path for other code to import.
+*Scope:* a system exports a path for code of this codebase outside it to import.
 *Statement:* Everything it exports MUST be of its offer.
 *Relies on:* —
 *Why:* Driven ports, services and adapters are what a system needs, not what it offers; a downstream
@@ -1409,7 +1429,10 @@ need to talk to it, the published language and the open host service's port type
 needs to build it, the builders. In-process, a downstream's driven adapter, or a conformist's driven
 port, is typed by the upstream's driving port type, so the port types serve production as well as
 tests. A fake of the open host service is part of the offer for tests, on a path of its own
-(SYS-15).
+(SYS-15). A driving adapter the framework finds, a route, a server action, and a hook an external
+system calls are reached by what calls them (DRV-8): the file is the way in, no export for code of
+this codebase, and it is the system's code wherever it sits (glossary: System), reaching the
+system's ports as the system's own code does.
 *Provenance:* An offer apart from the internals follows Evans p. 263 (a protocol opened to "all who
 need to integrate"), Khononov p. 55 (the supplier decouples the implementation model from the
 public interface), Garrido §2.3 ("Ports are interfaces that the application offers to the outside
@@ -1435,15 +1458,17 @@ implementation should write and maintain a fake"). Its own path is this document
 *Examples:* —
 
 **SYS-9**
-*Scope:* code outside a system reaches it.
+*Scope:* code of this codebase outside a system reaches it.
 *Statement:* It MUST reach it through that system's offer.
 *Relies on:*
 - SYS-1: everything a system exports is of its offer.
-*Why:* A deep import past an export path reaches a service, a driven port or an adapter, the
-inside, and holds whatever file layout it found there, so the system's change is tied to its
-importer's. Assembly is outside every system too: it reaches a system through its builders, not its
-adapters. A linter holds this boundary from import paths alone, so the breach shows in the diff and
-costs nothing to find.
+*Why:* A deep import past an export path reaches a service, a driven port or an adapter, the inside,
+and holds whatever file layout it found there, so the system's change is tied to its importer's.
+Assembly is outside every system too: it reaches a system through its builders, not its adapters.
+The framework that calls a driving adapter and the external system that calls a hook are the
+outside, no code of this codebase: they reach the adapter by its way in, and tooling reaches past
+the offer at its own risk (Assumptions). A linter holds this boundary from import paths alone, so
+the breach shows in the diff and costs nothing to find.
 *Provenance:* Follows Khononov p. 41 ("Each bounded context should be implemented as an individual
 service/project, meaning it is implemented, evolved, and versioned independently") and intrusive
 coupling (coupling.dev, Integration strength). The linter is this document's.

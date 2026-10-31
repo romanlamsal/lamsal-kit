@@ -21,7 +21,7 @@ did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
   lower one. Steps 4 to 7 cite its properties and terms; step 9's stop keys to them.
 - [x] 4. **Why to Scope or Statement, issue 13.**
 - [x] 5. **Lists out of the distilled, issue 14.**
-- [ ] 6. **Glossary sweep, issue 20.** The terms steps 3 and 5 changed, swept into every rule and
+- [x] 6. **Glossary sweep, issue 20.** The terms steps 3 and 5 changed, swept into every rule and
   world line that leans on their old sense; Reach is transitive. Review 03 (`reviews/03/`, at
   `7858b71`) traced its four cannot-complies to them. Before step 7, so issue 15 rules on words
   that mean one thing.

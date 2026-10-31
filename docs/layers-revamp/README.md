@@ -138,7 +138,9 @@ change rises with the tier.
 
 - **Glossary.** Adding a term is cheap. Changing one —
   rewording, narrowing, dropping — is an issue, and a fresh session works it: it sweeps every
-  lower tier for the term and re-decides whatever the change touched, inside that issue.
+  lower tier for the term and re-decides whatever the change touched, inside that issue. The
+  sweep starts with a grep for the term and its old wording over every document, and the issue
+  lists the hits before any edit.
 - **The world.** Changing a force or a property is an issue. No rule names the property it serves,
   so the issue reads every rule, general or group, against the change.
 - **General rules.** Changing a rule's Scope or Statement is an issue that also visits every

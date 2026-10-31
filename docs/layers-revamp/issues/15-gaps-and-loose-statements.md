@@ -116,6 +116,16 @@ stay in its SUMMARY, not accepted here.
 - Test words no rule or term gives: "double" (TST-5, TST-10), "flag" (TST-8), "contract suite"
   (TST-6) (dist Implementer N20).
 
+### Since issue 20
+
+- What a system builder returns: the glossary says what assembly hands on; a builder returning
+  its repositories breaches no Statement, since SYS-9 is met through the builder.
+- A business rule's number arriving as a configuration value (glossary since issue 20): DOM-7
+  wants the rule in the domain, ASM-2 the value from the caller; which holds for the deadline's
+  minutes.
+- "Its system's records" in Idempotent settles that a mail is no record: the handler without a
+  key is this issue's gap, not the glossary's.
+
 Closed since this issue was opened, by issues 12 to 14, per review 03: the probe's way to the
 store (glossary Probe), the admin dashboard (SYS-9's Scope), instrumentation before assembly,
 ASM-2 against DRV-3 on the Payload cycle. Each is checked against the rule that closed it, not
