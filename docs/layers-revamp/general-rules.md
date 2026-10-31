@@ -187,7 +187,7 @@ that conforms to it, its package takes that place. A store client's type in a po
 the store's name in the service, one step removed. With the list, the system is replaced from the
 outside in, a new
 driving adapter, a swapped driven adapter, with service and domain untouched. The common library
-is plumbing with no model in it: the opaque transaction a service opens and hands to each port,
+holds no model (ASM-6): the opaque transaction a service opens and hands to each port,
 the telemetry it calls where it uses it. Holding either tells the service nothing of a store or a
 caller; what a service does with a store client it holds is a question of what it calls, not what
 it imports. A library that takes arguments and returns, a validator, reaches nothing outside the
@@ -340,7 +340,7 @@ domain's is a second declaration of the same business rule, and the two drift. T
 and loads on the adapter's runtime, so the import brings nothing else along. A shared kernel
 underlies the domain's values, so the input it parses, a `Money` total, is typed by what the
 domain already loads. The courier an adapter the framework finds reads its service from, and the
-telemetry it calls, may live in the common library, plumbing with no model in it; a store client
+telemetry it calls, may live in the common library, which holds no model (ASM-6); a store client
 held from there is held, not queried, and what the adapter calls with it is a question of what it
 calls, not what it imports. Verifying a signature or parsing a body takes arguments and returns;
 such a library reaches nothing outside the process and opens no second way to the store.
@@ -456,7 +456,7 @@ system's layers in. A shared kernel underlies the domain's values, so a row mapp
 how it talks to the outside, and the adapter is the one layer that holds them, so the store's name
 stops there; the instance arrives from assembly, the import is its type and its query builder. The
 opaque transaction it is handed may be the common library's, narrowed to its store's on the
-adapter's side, and the telemetry it calls may live there too, plumbing with no model in it.
+adapter's side, and the telemetry it calls may live there too, as it holds no model (ASM-6).
 Mapping a row or serializing a request takes arguments and returns; such a library adds no second
 outside to the one the adapter already talks to.
 *Provenance:* That an adapter depends on the inside follows Garrido §6.2.1 ("adapters depend on
@@ -664,7 +664,7 @@ single transaction across aggregates).
 *Statement:* It MUST reach it through what assembly hands it.
 *Relies on:*
 - ASM-2: a factory receives a port's implementation from its caller.
-*Why:* The common library is plumbing every system imports. One that knows a system, by an import
+*Why:* Every system imports the common library. One that knows a system, by an import
 or by a name, changes with it, and a new system means a change to the library: a relay that
 imports a system knows its outbox readers, a bus that imports a system knows its handlers, a relay
 that lists the outbox tables by name knows every system's store and misses an outbox kept in
@@ -684,7 +684,7 @@ targets, so his relay knows the systems it calls.
 *Scope:* the common library.
 *Statement:* It MUST hold no model: no schema, no aggregate, no business rule of any system.
 *Relies on:* —
-*Why:* The common library is plumbing every system imports. A model in it is one every system
+*Why:* Every system imports the common library. A model in it is one every system
 shares: a change made for one system's reason reaches all of them, and no system's business rules
 decide it, because a system's business rules are in its domain.
 *Provenance:* Follows MS (Integration events: share only "final application blocks, like the Event
