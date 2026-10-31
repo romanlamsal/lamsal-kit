@@ -27,7 +27,7 @@ drive the system or it drives them.
 *acting* use case changes the system and may return what it did; an *answering* one changes
 nothing. An *acting call* is a call to an acting use case.
 
-- **Domain.** The model; it holds the business rules. It is pure and knows no runtime.
+- **Domain.** The model; it holds the business rules. It is pure.
 - **Service.** The application layer. It carries out the system's use cases. What it holds is the
   sequence within one use case.
 - **Driven adapters.** Implementations of driven ports.
@@ -35,6 +35,9 @@ nothing. An *acting call* is a call to an acting use case.
 
 In DDD vocabulary, domain is the model, service is the application layer, driving adapters are the
 interface layer, driven adapters the infrastructure layer.
+
+**Pure.** A module is pure when calling it reaches nothing outside the process, it loads on every
+runtime, and it hands its caller nothing the caller did not pass.
 
 **Port.** An interface, never the code behind it.
 
@@ -65,6 +68,10 @@ assembly does.
 
 **Handler.** A driving adapter that acts on messages delivered to its system.
 
+**Settle.** A handler settles a message by telling what delivered it that the message is done:
+the bus, through its acknowledgement; the external system behind a hook, through the hook's
+answer.
+
 **Bus.** What delivers a message to the handlers subscribed to it. Assembly hands it the handlers.
 
 **Relay.** The mechanism that reads outboxes and hands each message to the bus. Assembly hands it
@@ -82,6 +89,9 @@ it, its cancellation releases it.
 **Published language.** What another system needs to talk to this one, or to translate from it:
 the schemas, types and errors its open host service's driving ports take, return and raise, the
 events it publishes, and the commands it takes from other systems.
+
+**Offer.** What a system makes public for other code: its published language, its open host
+service's driving port types, its system builders and the fakes of those ports.
 
 **Reconciliation.** A use case that compares, after the fact, what this system recorded with what
 another system holds, and repairs this system's record, or starts the step that repairs the
@@ -177,7 +187,7 @@ thing or many.
 place where port and implementation meet. It calls the system builders and produces what the
 process's driving adapters call into.
 
-**Common library.** Plumbing every system may import.
+**Common library.** A package of no system that every system may import.
 
 ## Tests
 
