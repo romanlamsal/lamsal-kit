@@ -6,13 +6,32 @@ did this change resolve, leave or break anything. It discovers nothing; the Impl
 Fresh repo readers do that, once per spec (README, Testing). Tiers:
 
 1. `node docs/layers-revamp/affected.mjs <base> <head>`: the affected set, mechanical. Stored as
-   `reviews/NN/regression/<issue>-affected.md`.
-2. This reader, over the affected set. Stored as `reviews/NN/regression/<issue>.md`.
+   `reviews/NN/regression/${ISSUE}-affected.md`.
+2. This reader, over the affected set. Stored as `reviews/NN/regression/${ISSUE}.md`.
 3. The regular readers, once per spec, as `reviews/NN+1/`.
+
+## Setup, in the requester's session
+
+Placeholders: `${ROOT}` the absolute path of `docs/layers-revamp`; `${ISSUE}` the issue file's
+basename without `.md`, `20-glossary-sweep`; `${NN}` the last review, the highest
+`reviews/NN/`; `${BASE}`, `${HEAD}` shas.
+
+1. Tree clean.
+2. `${HEAD}`: the commit that closed the issue,
+   `git log --format=%h -S'**Status:** closed' -- ${ROOT}/issues/${ISSUE}.md`; one sha. Not
+   necessarily the current HEAD.
+3. `${BASE}`: the last state judged. The `Head` sha in the newest file of
+   `${ROOT}/reviews/${NN}/regression/` that is not an `-affected.md`; none yet, the sha
+   `reviews/${NN}/SUMMARY.md` cites as the state it read. Where `${BASE}` is not an ancestor of
+   `${HEAD}`'s parent, say so and use `${HEAD}^`.
+4. `node ${ROOT}/affected.mjs ${BASE} ${HEAD} > ${ROOT}/reviews/${NN}/regression/${ISSUE}-affected.md`.
+5. The reader, below. It writes `${ROOT}/reviews/${NN}/regression/${ISSUE}.md`, first line
+   `Base ${BASE}, head ${HEAD}.`; the next run reads it in step 3.
+6. Commit the two files: `docs(layers-revamp): regression, issue <N>`.
 
 ## Prompt
 
-Fill the angle brackets. Absolute paths; the agent does not `cd`. Opus, effort high.
+Fill the placeholders. Absolute paths; the agent does not `cd`. Opus, effort high.
 
 ```
 You check whether a change to a set of rules resolved known findings, and whether it broke
@@ -20,25 +39,25 @@ anything that held. You discover nothing new: a problem the change did not cause
 to report.
 
 Read whole, in this order:
-1. <abs>/docs/layers-revamp/reviews/<NN>/distilled.md — the rules as the last review read them.
-2. The diff: run `git -C <abs> diff <base> <head> -- docs/layers-revamp/glossary.md
+1. ${ROOT}/reviews/${NN}/distilled.md — the rules as the last review read them.
+2. The diff: run `git -C ${ROOT}/../.. diff ${BASE} ${HEAD} -- docs/layers-revamp/glossary.md
    docs/layers-revamp/the-world.md docs/layers-revamp/general-rules.md`.
-3. <abs>/docs/layers-revamp/reviews/<NN>/regression/<issue>-affected.md — the affected set.
-4. <abs>/docs/layers-revamp/reviews/<NN>/checklist.md — the findings, one id each.
-5. <abs>/docs/layers-revamp/issues/<issue>.md — what the change meant to do (Decision).
+3. ${ROOT}/reviews/${NN}/regression/${ISSUE}-affected.md — the affected set.
+4. ${ROOT}/reviews/${NN}/checklist.md — the findings, one id each.
+5. ${ROOT}/issues/${ISSUE}.md — what the change meant to do (Decision).
 6. The previous builds, for the systems the change touches:
-   <abs>/docs/layers-revamp/reviews/<NN>/raw-implementer.md, section "How the fixture is built";
-   <abs>/docs/layers-revamp/reviews/<NN>/dist-implementer.md, the same section.
-7. Every example file the affected set names, under <abs>/docs/layers-revamp/examples/.
-8. <abs>/docs/layers-revamp/domain.md, for the fixture's facts.
+   ${ROOT}/reviews/${NN}/raw-implementer.md, section "How the fixture is built";
+   ${ROOT}/reviews/${NN}/dist-implementer.md, the same section.
+7. Every example file the affected set names, under ${ROOT}/examples/.
+8. ${ROOT}/domain.md, for the fixture's facts.
 
 Judge from Scope and Statement of the rules as they now stand (the diff applied to the
 distilled), with the glossary as it now stands. Why, Relies on and Provenance bind nobody.
 
-Write <abs>/docs/layers-revamp/reviews/<NN>/regression/<issue>.md:
+Write ${ROOT}/reviews/${NN}/regression/${ISSUE}.md. First line: `Base ${BASE}, head ${HEAD}.`
 
 ## Checklist
-One line per checklist id, every id, in order: `- R<NN>-k: resolved | unchanged | newly broken |
+One line per checklist id, every id, in order: `- R${NN}-k: resolved | unchanged | newly broken |
 out of scope — <one sentence why, naming the rule or term>`. "Out of scope" means the change
 touched nothing the item hangs on. "Resolved" means the code or situation the item names now
 satisfies the rules as written, or the rule no longer holds for it; say which.
@@ -64,6 +83,14 @@ See above.
 
 Be terse. Cite rule ids and glossary terms as spelled. Do not propose rewordings.
 ```
+
+## Fresh session
+
+> Run the regression reader per `docs/layers-revamp/reviews/regression-reader.md` for issue <N>.
+> Setup, then the reader; show me its Checklist section and stop before committing.
+
+The session reads the README first (Working here, 1), then this file. It derives the shas; the
+requester names only the issue.
 
 ## After it runs
 
