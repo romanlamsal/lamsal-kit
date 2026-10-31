@@ -117,6 +117,27 @@ Settled when it was opened:
   TX-21, TX-22 (the Payload mirror), TX-25, TX-31, SYS-2, TST-5, TST-6. ASM-7's ok is read
   against its new Scope.
 
+### Since review 03
+
+Review 03 (`reviews/03/SUMMARY.md` §4) re-read every ok file against the rules as issues 12 to 14
+left them. On top of the lists above:
+
+- SYS-1 "offer": `sys-1-ok`, `svc-1-ok`, `sys-10-ok`, `asm-4-ok`, `drv-3-ok`, `drv-6-ok`,
+  `sys-12-ok` export what the offer does not name (issue 20 decides the word).
+- DOM-1 and Pure: `tx-17-ok-fulfillment-subscribes-to-order-placed`,
+  `tx-22-ok-order-confirmation-mail-through-outbox`, `randomUUID()` in the domain (issue 20).
+- ASM-2 "needs": `asm-1-ok`, `asm-7-ok`, `tst-8-ok`, `asm-2-ok-assembly-hands-upstreams-to-builder`,
+  `asm-8-ok`.
+- DOM-7: `tx-12-ok`, `sys-14-ok`, `tx-28-ok-before-change`, `tx-30-ok`, a business rule outside
+  the domain.
+- TX-37 against TX-28: `tx-28-ok-after-change-hook-records-revalidation-request`, named twice in
+  the distilled, under TX-28 ok and TX-29 breach.
+- TX-1, a load before the transaction, beyond the files above: `asm-3-ok-hook-passes-editor`.
+- SVC-4: the `tx-31-*` files save a part.
+- SVC-6: `tx-35-ok` reaches past the list.
+- DOM-4: every `dom-4-*` file, the Scope since issue 13.
+- The `gap-*` files cite retired ids.
+
 ## Decision
 
 —

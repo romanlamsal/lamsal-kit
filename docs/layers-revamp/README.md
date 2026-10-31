@@ -142,8 +142,8 @@ change rises with the tier.
 - **The world.** Changing a force or a property is an issue. No rule names the property it serves,
   so the issue reads every rule, general or group, against the change.
 - **General rules.** Changing a rule's Scope or Statement is an issue that also visits every
-  rule, general or group, whose Relies on names it. Changing Relies on, Why, Provenance or
-  Examples is not.
+  rule, general or group, whose Relies on names it, and re-reads the rule's own examples.
+  Changing Relies on, Why, Provenance or Examples is not.
 - **Group rules.** Changeable without touching the tiers above. Where a situation cannot be ruled
   without changing a general rule or a term, the same issue makes that change, upward, under the
   rules of the tier it touches.

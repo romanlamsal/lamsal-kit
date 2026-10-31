@@ -21,15 +21,20 @@ did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
   lower one. Steps 4 to 7 cite its properties and terms; step 9's stop keys to them.
 - [x] 4. **Why to Scope or Statement, issue 13.**
 - [x] 5. **Lists out of the distilled, issue 14.**
-- [ ] 6. **Gaps and loose Statements, issue 15.** After steps 4 and 5, so it rules on settled
+- [ ] 6. **Glossary sweep, issue 20.** The terms steps 3 and 5 changed, swept into every rule and
+  world line that leans on their old sense; Reach is transitive. Review 03 (`reviews/03/`, at
+  `7858b71`) traced its four cannot-complies to them. Before step 7, so issue 15 rules on words
+  that mean one thing.
+- [ ] 7. **Gaps and loose Statements, issue 15.** After steps 4 to 6, so it rules on settled
   text.
-- [ ] 7. **Relies-on sweep, issue 16.** After every Scope and Statement change: the lines claim
+- [ ] 8. **Relies-on sweep, issue 16.** After every Scope and Statement change: the lines claim
   against them.
-- [ ] 8. **Fixture facts, issue 17.** Before examples: writers that invent a fact or a shape
+- [ ] 9. **Fixture facts, issue 17.** Before examples: writers that invent a fact or a shape
   disagree with each other.
-- [ ] 9. **The stop, issue 18.** Before examples: step 10's writers report a detour instead of
+- [ ] 10. **The stop, issue 18.** Before examples: step 11's writers report a detour instead of
   building it.
-- [ ] 10. **Examples, issue 19.** Last of the writing steps: it illustrates the rules as steps 2
-  to 7 leave them.
-- [ ] 11. **Readers.** The requester runs them, as for this review: both sets, every kind, over
-  the state step 10 leaves. No issue; what they find opens the next spec.
+- [ ] 11. **Examples, issue 19.** Last of the writing steps: it illustrates the rules as steps 2
+  to 8 leave them.
+- [ ] 12. **Readers.** The requester runs them over the state step 11 leaves: the regular readers,
+  Implementer and Fresh repo, both sets (README, Testing); the optional kinds on request. No
+  issue; what they find opens the next spec.
