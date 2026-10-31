@@ -38,7 +38,12 @@ example files, nothing else of this folder.
   and the rules' Assumptions whole; of a property its heading, Except and Against; of a rule its
   Scope, Statement and Examples. `node docs/layers-revamp/distill.mjs > distilled.md`.
 - `reviews/NN/`: what a review's readers wrote, and the distilled they read. The issues are the
-  record of what the requester accepted.
+  record of what the requester accepted. `reviews/NN/checklist.md`: the review's cooperative
+  findings, one id each; `reviews/NN/regression/`: what the regression reader found after each
+  step that followed the review.
+- `affected.mjs`: the affected set of a change, mechanical: changed terms, properties and rules,
+  and the Relies-on lines, example files and rule texts below them.
+  `node docs/layers-revamp/affected.mjs <base> <head>`.
 
 ## Rule shape
 
@@ -129,6 +134,12 @@ The Implementer is the regular reader, both sets: it measures whether a cooperat
 build the fixture under the rules. Gap, Contradiction and Adversarial are optional, run on request
 or once after a tier change. Review 03 showed their findings grow with each new or changed term
 faster than the text closes them (`reviews/03/SUMMARY.md`).
+
+Between reviews, a change to a tier is checked in two cheaper tiers before the next step
+(`reviews/regression-reader.md`): `affected.mjs` lists what the change touches below itself, and
+one regression reader re-judges that set against the last review's checklist, marking each
+finding resolved, unchanged or newly broken. It discovers nothing; the regular readers do, once
+per spec. A glossary or world change also gets two Fresh repo drafts.
 
 ## Tiers
 
