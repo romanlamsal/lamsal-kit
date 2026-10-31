@@ -41,6 +41,8 @@ example files, nothing else of this folder.
   record of what the requester accepted. `reviews/NN/checklist.md`: the review's cooperative
   findings, one id each; `reviews/NN/regression/`: what the regression reader found after each
   step that followed the review.
+  `reviews/regular-review.md`: how a review is run, the six reader prompts verbatim; a fresh
+  session runs one from it. `reviews/regression-reader.md`: the cheaper check between reviews.
 - `affected.mjs`: the affected set of a change, mechanical: changed terms, properties and rules,
   and the Relies-on lines, example files and rule texts below them.
   `node docs/layers-revamp/affected.mjs <base> <head>`.
