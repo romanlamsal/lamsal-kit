@@ -88,6 +88,39 @@ Settled when it was opened:
   committing, a refusal recorded and committed; a conflict committed as a refusal is TX-38's
   since issue 13), TX-19's "the same result" (Idempotent's no longer says "result").
 
+### Since review 03, cooperative readers only
+
+The Implementers and Fresh drafts of review 03 (`reviews/03/`); the optional readers' findings
+stay in its SUMMARY, not accepted here.
+
+- TX-37 "deciding again by the state of its records": does a `handled.claim` before an outside
+  effect decide, does a record step that keeps the first answer, does a lapse rule of this
+  system (`tx-28-ok-after-change-hook-records-revalidation-request`, raw Implementer N17, dist
+  Implementer tx-37-breach and purpose list). Every handler example claims first; TX-37 read
+  literally forbids it.
+- TX-38 with TX-21 and DRV-7: a use case that can never succeed, a refund of an order never
+  invoiced (`tx-33-ok-billing-handles-payment-refunded`), fails and is delivered again forever.
+  No rule parks it; P17 does not hold for parked deliveries (dist Implementer, two Fresh drafts).
+- ASM-3 and TX-15: Scopes compliant code leaves. The compliant alternative, the value passed as
+  an argument, the write left to a handler, is outside the Scope, so an ok example satisfies
+  nothing (raw Implementer N8).
+- A published language that states a rule of its system, `quantity` positive, the tax class enum,
+  states it twice: SYS-2 forbids reaching the domain, DOM-1 forbids the domain reaching the
+  published language, DOM-7 wants the rule in the domain (dist Implementer tension,
+  `sys-14-ok-money-returns-remainder`).
+- "Conforms": DOM-1 and SVC-6 admit an upstream its system conforms to, and nothing says how a
+  system declares that (`tx-35-ok-late-payment-refunded`, dist Implementer N20).
+- "Another system of this codebase" (TX-3, TX-22, TX-34): whether an external system this
+  codebase configures is one decides TX-3 against TX-22 whenever shop writes catalog's records
+  (raw Implementer N17).
+- Test words no rule or term gives: "double" (TST-5, TST-10), "flag" (TST-8), "contract suite"
+  (TST-6) (dist Implementer N20).
+
+Closed since this issue was opened, by issues 12 to 14, per review 03: the probe's way to the
+store (glossary Probe), the admin dashboard (SYS-9's Scope), instrumentation before assembly,
+ASM-2 against DRV-3 on the Payload cycle. Each is checked against the rule that closed it, not
+ruled again.
+
 ## Decision
 
 —

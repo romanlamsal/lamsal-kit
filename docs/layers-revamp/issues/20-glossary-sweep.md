@@ -75,6 +75,25 @@ ASM-5, SYS-14).
   what a builder returns, in the definition or in a rule.
 - "The fakes of those ports": the open host service's ports only (two drafts) or every port of
   the system (two). Say which.
+- Code of a system: by package or by role. A route file under `apps/web/app` that is shop's
+  driving adapter by role imports shop's ports by deep path and SYS-1, SYS-9 are not engaged; code
+  outside shop by location may import the offer only, and checkout's port is none. Four ok files
+  do the first; the raw Implementer built a route builder on shop's build path (N5). Nothing says
+  which reading holds.
+
+### System builder against ASM-2 "needs" (issue 14)
+
+- The glossary's System builder "takes configuration and returns implementations"; ASM-2 read as
+  "a factory receives what it needs" has assembly constructing Stripe, Resend and `fetch` and
+  handing them in, so assembly knows payment uses Stripe (raw Implementer N6; five ok files hang
+  on the reading). Decide what a builder needs from outside: clients, or the configuration to
+  build them.
+
+### External system against P2 (issue 12)
+
+- The entry says the external system's configuration holds its business rules; all four Fresh
+  drafts read it over P2 and put rules into Payload's config (`choices.md` C4). Decide whether the
+  sentence is a definition or a ruling P2 should carry, and whether C4 is open on purpose.
 
 ### acting, answering, acting call (new, issue 12)
 
@@ -109,6 +128,9 @@ ASM-5, SYS-14).
   sets, raw Contradiction). Decide: widen the term to a commitment or its preparation; or TX-36's
   Scope covers asking for one or preparing one; or the fixture creates the intent after the
   commit, which is review 03's choice candidate (SUMMARY §6 K) and issue 17's.
+- "Its confirmation gives it": the definition has the requester confirm; a PaymentIntent is
+  confirmed by the customer's browser, a Checkout Session by the customer paying. Say whether a
+  third party's confirmation counts (dist Implementer N9).
 - A Payload hook before the change commits (TX-28) that writes a revalidation request to the
   outbox (TX-22): TX-28 allows "recording a tentative operation", TX-22 wants an outbox message,
   and the reader could not tell whether the message is the record (dist Implementer

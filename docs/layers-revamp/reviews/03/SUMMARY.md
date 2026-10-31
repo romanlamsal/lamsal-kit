@@ -34,6 +34,10 @@ More findings everywhere. Part is the readers reading harder (42 contradiction c
 20), part is new rules with new edges (TX-36, TX-37, TX-38 account for a third of the new
 adversarial and gap findings), part is the examples not yet rewritten against the changed rules.
 
+Folded into the issues after this review: the Implementers' and Fresh drafts' findings only
+(issues 15, 16, 17, 19, 20; `choices.md` C8, C9). §2.3 to §2.6 and §3's Red team are from the
+optional readers and were not accepted.
+
 ## 1. Review 02's findings, one by one
 
 § numbers are review 02's SUMMARY.

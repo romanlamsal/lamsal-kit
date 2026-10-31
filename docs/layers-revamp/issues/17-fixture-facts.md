@@ -43,6 +43,16 @@ Settled when it was opened:
 - The admin dashboard: over the owners' tables or over replicas (issue 15).
 - Catalog's config reading fulfillment's stock: a read of a table, or of fulfillment's open host
   service (issue 15).
+- Since review 03 (both Implementers): `PaymentFailed`, terminal or not. Stripe's
+  `payment_failed` lets the customer retry on the same intent; published as is, shop cancels and a
+  later success is refunded. Both builds publish it only once the intent cannot succeed.
+- An order wanting more than is on hand: refused, with a fulfillment event and a shop rule
+  (TX-35), or reserved below zero and shipped when stock arrives. Both builds chose the second.
+- The sku veto: catalog's rule in catalog's config with shop answering a count, or shop's rule,
+  which then needs an acting use case and a hold per sku (raw Implementer N9). DOM-7's Why says
+  shop; the fixture says catalog. "Open order" undefined; read as waiting for payment.
+- The customer: who owns identity, email and the shipping address; `OrderPlaced` carries what
+  (raw Implementer N24).
 
 ### Shapes
 

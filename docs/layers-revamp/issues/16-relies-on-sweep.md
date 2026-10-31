@@ -41,6 +41,11 @@ Settled when it was opened:
 - Lines naming TX-21 use wording older than TX-21's Statement (issue 01's review).
 - Since issue 13: the lines of TX-37, TX-38, TX-39 and SYS-15 are new; TX-22's lines on TX-5 and
   TX-31 moved to TX-37.
+- Since review 03 (raw Implementer): TX-37's line on TX-31 drops TX-31's Scope condition, an
+  external system "that takes an idempotency key"; for one that takes none TX-31 guarantees
+  nothing and TX-37's Why stands on it. SVC-2's line on DRV-8 re-found, with the reach now
+  transitive (issue 20): the line should claim no driven port, no repository, no store, which is
+  all SVC-2 needs.
 
 ## Decision
 

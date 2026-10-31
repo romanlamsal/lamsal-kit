@@ -75,3 +75,21 @@ whose records it changes.
 *Bound:* P11, P14.
 *Refused:* A migration that changes what a record means while code still running reads it the old
 way.
+
+**C8**
+
+*Status:* open, from review 03 (Fresh repo, two drafts each way).
+*Situation:* A PaymentIntent is asked for inside the request that places the order, as a
+tentative operation, and the order commits after; or the order commits first and the intent is
+asked for by a message, the browser fetching its `client_secret` from a second endpoint.
+*Bound:* P8, P16; TX-3, TX-22, TX-36.
+*Refused:* The intent created and the order committed in one step with neither tentative nor
+after, so that a stop between them leaves a charge no order knows.
+
+**C9**
+
+*Status:* open, from review 03 (Fresh repo, two drafts each way).
+*Situation:* Card payments are a system of their own, or a part of the system that takes orders
+or of the one that invoices.
+*Bound:* P3, P11.
+*Refused:* Payment state decided by two systems' rules at once.
