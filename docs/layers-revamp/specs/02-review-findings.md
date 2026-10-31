@@ -20,7 +20,7 @@ did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
 - [x] 3. **The world and the glossary, issue 12.** First: the top tier, whose change sweeps every
   lower one. Steps 4 to 7 cite its properties and terms; step 9's stop keys to them.
 - [x] 4. **Why to Scope or Statement, issue 13.**
-- [ ] 5. **Lists out of the distilled, issue 14.**
+- [x] 5. **Lists out of the distilled, issue 14.**
 - [ ] 6. **Gaps and loose Statements, issue 15.** After steps 4 and 5, so it rules on settled
   text.
 - [ ] 7. **Relies-on sweep, issue 16.** After every Scope and Statement change: the lines claim

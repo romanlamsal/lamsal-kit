@@ -16,12 +16,12 @@ too. That is this document's choice. The sources pick the architecture per subdo
 simple logic read and write the store directly; here no system is judged simple enough, and none
 is rewritten when it grows business rules.
 
-Not everything gets a layer. Assembly, a system's export paths and the common library sit outside
-the layers. So do probes.
+Not everything gets a layer. Assembly, a system's offer and the common library sit outside the
+layers. So do probes.
 
 Tooling sits outside the layers and the rules. It builds systems through their builders or
-replaces their internals. What it reaches past an
-export path is no offer (SYS-1), and a system changes it without notice.
+replaces their internals. What it reaches past the offer (SYS-1) a system changes without
+notice.
 
 An external system sits outside the rules: its exports, its layers and its transactions are its own,
 even where this codebase writes its configuration. What a system of this codebase does with it is
@@ -38,14 +38,14 @@ which is the stack document's.
 ## Domain
 
 **DOM-1**
-*Scope:* a domain module imports a module.
-*Statement:* The import MUST be one of: another domain module, a shared kernel, the published
-language of an upstream this system conforms to, a library that computes from its arguments.
+*Scope:* the domain reaches past itself.
+*Statement:* What it reaches MUST be one of: a shared kernel, the published language of an
+upstream its system conforms to, pure code of no system.
 *Relies on:*
 - SYS-10: loading a path that exports a system's published language loads no module of that
   system outside its published language.
-- SYS-14: a module of a published language or of a shared kernel imports nothing but modules of
-  it, a shared kernel and libraries that compute from their arguments.
+- SYS-14: a published language or a shared kernel reaches nothing but a shared kernel and pure
+  code of no system.
 *Why:* The domain is pure and knows no runtime (glossary). The test for a module is two
 questions: does calling it reach outside the process, and does it exist on every runtime? A store
 client, an HTTP client, a mailer SDK, `node:fs` and a clock reach outside, so they stay behind
@@ -63,7 +63,7 @@ Conformist): its business rules take the upstream's schemas as arguments and imp
 upstream's export path; a schema restated here is a second declaration of the upstream's,
 drifting on the upstream's schedule. Loading that path loads nothing of the upstream beyond its
 published language (SYS-10).
-The list is closed: an import of a kind it does not name is a question for this rule, not a
+The list is closed: a reach of a kind it does not name is a question for this rule, not a
 permission.
 *Provenance:* The direction follows Khononov p. 77 (the model "devoid of any infrastructural or
 technological concerns"), MS ("the domain model layer must not directly depend on any infrastructure
@@ -169,16 +169,15 @@ choosing the 'wrong' number of ports", and MS has one handler per command.
 *Examples:* —
 
 **SVC-6**
-*Scope:* a module of the service layer imports a module.
-*Statement:* The import MUST be one of: its system's domain, a shared kernel, a port declared in
-its service layer, its system's published language, the common library, the export path of an
-upstream its system conforms to, the package of an external system it conforms to, a library that
-computes from its arguments.
+*Scope:* the service layer reaches past itself.
+*Statement:* What it reaches MUST be one of: its system's domain, a shared kernel, a port of its
+system, its system's published language, the common library, the published language and the open
+host service of an upstream its system conforms to, the published language of an external system
+it conforms to, pure code of no system.
 *Relies on:*
 - ASM-2: a factory receives port implementations, store clients and other clients of something
   outside the process from its caller.
-- SYS-1: an upstream's export path holds its published language, its open host service's driving
-  port types, system builders and fakes of those ports, and nothing else.
+- SYS-1: an upstream exports nothing but its offer.
 *Why:* A service that knows the route that calls it, or the store client that saves for it,
 changes whenever either changes, and a second way in, or a second store, means rewriting the use
 case. It reaches driven adapters through the ports they implement, handed in, so a swapped adapter
@@ -224,8 +223,7 @@ single layer) and Evans p. 57 pick the architecture per subdomain; this document
   changed in the store since the load.
 - TX-24: by default, the data a decision has to hold by when the use case commits, other than a
   replica, belongs to aggregates the use case saves.
-- DRV-8: a driving adapter reaches its system through driving ports, importing no driven port,
-  driven adapter or service of it.
+- DRV-8: a driving adapter reaches no driven port, driven adapter or service of its system.
 - SYS-1: a system exports no service, driven port or adapter to other code.
 *Why:* A driving port does not know how it is reached, so a check made in a driving adapter
 protects one way in; another adapter, or a downstream calling the port directly, bypasses it. The
@@ -268,7 +266,7 @@ by writing a part of the aggregate, through the repository or past it.
 - TX-3: a use case changes data another system of this codebase owns by writing a message to its
   own outbox.
 - TX-2: a driven adapter that writes to a store writes inside the transaction it is handed.
-- DRV-8: a driving adapter imports a driving port of its system, and no repository.
+- DRV-8: a driving adapter reaches a driving port of its system, and no repository.
 - TST-4: by default, a service's test hands it fakes for its driven ports.
 - TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
   changed in the store since the load.
@@ -321,10 +319,10 @@ examples/svc-7-ok-payment-reaches-stripe-through-gateway-port.md
 ## Driving adapters
 
 **DRV-8**
-*Scope:* a driving adapter imports a module.
-*Statement:* The import MUST be one of: the framework that calls it, a driving port of its
-system, its system's domain, a shared kernel, its system's published language, the common
-library, a library that computes from its arguments.
+*Scope:* a driving adapter reaches past itself.
+*Statement:* What it reaches MUST be one of: what calls it, a driving port of its system, its
+system's domain, a shared kernel, its system's published language, the published language of an
+upstream, the common library, pure code of no system.
 *Relies on:*
 - ASM-2: a factory receives a port's implementation from its caller.
 - DRV-3: a driving adapter assembly cannot construct, or cannot hand what it calls when it
@@ -436,13 +434,12 @@ requeues the unacknowledged). Khononov, Evans and Cockburn do not rule on it.
 ## Driven adapters
 
 **DVN-4**
-*Scope:* a driven adapter imports a module.
-*Statement:* The import MUST be one of: a client of something outside the process, an external
-system's package, the port it implements, its system's domain, a shared kernel, the common library,
-the export path of an upstream, a library that computes from its arguments.
+*Scope:* a driven adapter reaches past itself.
+*Statement:* What it reaches MUST be one of: the outside, the port it implements, its system's
+domain, a shared kernel, the common library, pure code of no system.
 *Relies on:*
-- SYS-1: everything a system exports is its published language, its open host service's driving
-  port types, a system builder or a fake of its open host service's driving ports.
+- SYS-1: everything a system exports is of its offer.
+- SYS-9: code outside a system reaches it through that system's offer.
 *Why:* A driven adapter exists to talk to the outside on the system's behalf. One that calls a
 service has a use case inside it, in the layer meant to do nothing but talk to the outside; one
 that imports another adapter or a service of its system is tied to how that one is built.
@@ -546,10 +543,10 @@ dependencies") and Seemann, "Volatile Dependencies" (2006: stable dependencies n
 *Examples:* —
 
 **ASM-7**
-*Scope:* a service or an adapter uses plumbing of the common library whose output changes neither
+*Scope:* a service or an adapter uses code of the common library whose output changes neither
 how a use case acts nor what it answers.
-*Statement:* It MAY import a ready-made instance of that plumbing, instead of receiving one from
-its caller, and call it through no port of its system.
+*Statement:* It MAY import a ready-made instance of it, instead of receiving one from its caller,
+and call it through no port of its system.
 *Relies on:*
 - ASM-2: a factory receives each client of something outside the process from its caller.
 - SVC-7: a service or a driving adapter reaches the outside through a port of its system.
@@ -664,8 +661,7 @@ single transaction across aggregates).
 
 **ASM-5**
 *Scope:* a module of the common library reaches a system's code or data.
-*Statement:* It MUST reach it through what assembly hands it, and not by importing, naming or
-addressing any of that system's code or data itself.
+*Statement:* It MUST reach it through what assembly hands it.
 *Relies on:*
 - ASM-2: a factory receives a port's implementation from its caller.
 *Why:* The common library is plumbing every system imports. One that knows a system, by an import
@@ -1334,7 +1330,7 @@ is "moved to the error queue"). The line between a refusal and a failure is this
 *Scope:* a use case of this system reads data another system owns.
 *Statement:* It MUST read it from the owner's open host service or from its published events.
 *Relies on:*
-- SYS-2: the modules that declare a published language neither import the domain nor are
+- SYS-2: the modules that declare a published language neither reach the domain nor are
   generated from it.
 - TX-7: a changed schema of a message, or of an open host service called from another process,
   keeps what old code writes readable by new code and the reverse, each field keeping its meaning.
@@ -1403,8 +1399,7 @@ not be expected to be always up to date").
 
 **SYS-1**
 *Scope:* a system exports a path for other code to import.
-*Statement:* Everything it exports MUST be one of: its published language, its open host service's
-driving port types, a system builder, a fake of its open host service's driving ports.
+*Statement:* Everything it exports MUST be of its offer.
 *Relies on:* —
 *Why:* Driven ports, services and adapters are what a system needs, not what it offers; a downstream
 that imports one couples to the inside, and the system changes its adapters by changing its
@@ -1440,11 +1435,10 @@ implementation should write and maintain a fake"). Its own path is this document
 *Examples:* —
 
 **SYS-9**
-*Scope:* code outside a system imports from it.
-*Statement:* It MUST import from one of that system's export paths.
+*Scope:* code outside a system reaches it.
+*Statement:* It MUST reach it through that system's offer.
 *Relies on:*
-- SYS-1: everything an export path exports is the system's published language, its open host
-  service's driving port types, a system builder or a fake of those ports.
+- SYS-1: everything a system exports is of its offer.
 *Why:* A deep import past an export path reaches a service, a driven port or an adapter, the
 inside, and holds whatever file layout it found there, so the system's change is tied to its
 importer's. Assembly is outside every system too: it reaches a system through its builders, not its
@@ -1461,7 +1455,7 @@ types.
 *Statement:* Loading it MUST load no module of the system outside its published language.
 *Relies on:*
 - SVC-1: a system's ports are declared in its service layer.
-- SYS-2: the modules that declare the published language neither import the domain nor are
+- SYS-2: the modules that declare the published language neither reach the domain nor are
   generated from it.
 *Why:* A downstream, or a browser, imports the published language for the schemas. A path that
 also loads a service, because the port types sit beside it and were exported as values, pulls the
@@ -1475,11 +1469,11 @@ depend on nothing"). TypeScript's type-only exports are the mechanism.
 
 **SYS-2**
 *Scope:* a system declares its published language.
-*Statement:* The modules that declare it MUST NOT import the domain, nor be generated from it.
+*Statement:* The modules that declare it MUST NOT reach the domain, nor be generated from it.
 *Relies on:*
 - TX-7: a changed schema of a message, or of an open host service called from another process,
   keeps what old code writes readable by new code and the reverse, each field keeping its meaning.
-- SVC-6: a service module's allowed imports include its system's domain and its published language.
+- SVC-6: what the service layer reaches includes its system's domain and its published language.
 *Why:* A published language that re-exports the domain's schemas, picks from them, extends them or
 re-uses a domain enum is the domain: every refactoring of the model is a change to the contract, and
 the contract then keeps both directions readable for changes nobody made to it. Kept apart, the
@@ -1523,9 +1517,8 @@ p. 148–150 (the saga's commands executed on their targets). Fowler (What do yo
 examples/sys-13-ok-checkout-process-sends-receivers-commands.md
 
 **SYS-14**
-*Scope:* a module of a published language or of a shared kernel imports a module.
-*Statement:* The import MUST be one of: another module of the same published language or shared
-kernel, a shared kernel, a library that computes from its arguments.
+*Scope:* a published language or a shared kernel reaches past itself.
+*Statement:* What it reaches MUST be one of: a shared kernel, pure code of no system.
 *Relies on:* —
 *Why:* Both are imported where the rest of their system is not: a shared kernel into the domain of
 every system that shares it, a published language into a downstream's adapters, into its domain
@@ -1570,8 +1563,8 @@ examples/sys-12-ok-shop-price-read-only-in-payload-admin.md
 *Scope:* a business rule is tested.
 *Statement:* The test SHOULD call the domain function directly.
 *Relies on:*
-- DOM-1: a domain module imports nothing but other domain modules, a shared kernel, the published
-  language of an upstream its system conforms to and libraries that compute from their arguments.
+- DOM-1: the domain reaches nothing but a shared kernel, the published language of an upstream its
+  system conforms to and pure code of no system.
 *Why:* The domain is pure: the test needs no fixture, no fake and no setup, and fails for one
 reason. Tested through a service, the same business rule needs fakes for every port the service
 takes, and a failure is the service's, the fake's or the business rule's. Most of what is worth
@@ -1587,8 +1580,8 @@ architecture for every system (Assumptions).
 *Scope:* a test of a domain function reaches another domain module.
 *Statement:* It SHOULD NOT replace it with a double.
 *Relies on:*
-- DOM-1: a domain module imports nothing but other domain modules, a shared kernel, the published
-  language of an upstream its system conforms to and libraries that compute from their arguments.
+- DOM-1: the domain reaches nothing but a shared kernel, the published language of an upstream its
+  system conforms to and pure code of no system.
 *Why:* The domain is pure, so the real module is fast and deterministic. A double of a pure
 function restates what the function returns, and the two drift: the test passes against the
 double's answer while the real function's has changed.

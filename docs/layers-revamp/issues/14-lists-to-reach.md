@@ -1,6 +1,6 @@
 # 14 — Lists out of the distilled
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -75,8 +75,41 @@ Settled when it was opened:
 
 ## Decision
 
-—
+Three passes, each settled with the requester before any edit.
+
+- Lists that illustrate went: seventeen glossary clauses, F1 and F4, the tooling clause of the
+  Assumptions, the Scopes of DOM-3, SVC-2, SVC-7, DRV-1, DRV-3, ASM-10, TX-24, TX-32, TX-35 and
+  TST-7's Statement. The README's swap test tells an illustration from a definition: members each
+  swappable for another of their kind are instances; members that together are the term go on
+  being the definition. Partitions and definitions stayed.
+- Every item a Scope or Statement lists is argued in its rule's Why, the reasoning inline, no Why
+  pointing at another Why. Where the Why was silent the Why grew; no Statement moved on a guess.
+- Reach. Glossary: a module reaches what running it reads or calls, however the code got hold of
+  it. Pure, Offer and Settle entered alongside. The five import rules rule the reach: Scope "X
+  reaches past itself", Statement "What it reaches MUST be one of:" the kinds, in glossary terms.
+  "A library that computes from its arguments" is "pure code of no system"; a sibling module is
+  the module. DRV-8 gained an upstream's published language, "the framework that calls it" became
+  "what calls it". DVN-4's client, external package and upstream export path are "the outside".
+  SVC-6 reaches "the published language and the open host service of an upstream its system
+  conforms to", not its whole offer. SYS-1 exports nothing but the offer; SYS-9 reaches a system
+  through its offer; SYS-2 and ASM-5 say reach, ASM-5 losing its list of mechanisms. ASM-10 and
+  ASM-7 keep "import": there the mechanism is the ruling. The Assumptions say offer, not export
+  path.
 
 ## Consequences
 
-—
+- Problems above: the upstream published language is in DRV-8; SVC-2's DRV-8 line is now
+  guaranteed; a module beside a module is inside the Scope's "itself"; a global that hands back
+  what nobody passed is not pure, so DOM-1 and SYS-14 catch it; a store client's type is not
+  pure code of no system; a handler inside assembly is judged by what it reaches; the repository
+  through the courier is a driven port, on no driving adapter's list. The courier accessor's
+  export stays a SYS-1 finding.
+- To issue 19: every example naming DOM-1, SVC-6, DRV-8, DVN-4, SYS-14, SYS-9, SYS-1, SYS-2 or
+  ASM-5 is re-read. Expected flips: `drv-8-breach-adapter-reads-repository-to-check-owner` and
+  `svc-6-breach-drizzle-transaction-in-port` become clean breaches; the three DRV-8 ok examples
+  importing shop's schema become ok.
+- To issue 16: the Relies-on lines on the nine rules were rewritten here; DVN-4 gained a SYS-9
+  line.
+- Open elsewhere: "plumbing" in P5's Except and three Whys; `new Date()` in a service is SVC-7's,
+  reach wording already; TX-30's saga-reply side is unargued by agreement; ASM-3's TZ read is
+  covered by DOM-1's pure clause now.

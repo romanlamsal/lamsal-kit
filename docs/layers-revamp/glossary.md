@@ -36,6 +36,8 @@ nothing. An *acting call* is a call to an acting use case.
 In DDD vocabulary, domain is the model, service is the application layer, driving adapters are the
 interface layer, driven adapters the infrastructure layer.
 
+**Reach.** A module reaches what running it reads or calls, however the code got hold of it.
+
 **Pure.** A module is pure when calling it reaches nothing outside the process, it loads on every
 runtime, and it hands its caller nothing the caller did not pass.
 
