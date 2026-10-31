@@ -125,6 +125,11 @@ over the fixture and the distilled output, each producing example files:
   harm each Why describes and checks each Relies-on line against the Scope and Statement of the
   rule it names; a line that rule does not guarantee is a finding.
 
+The Implementer is the regular reader, both sets: it measures whether a cooperative agent can
+build the fixture under the rules. Gap, Contradiction and Adversarial are optional, run on request
+or once after a tier change. Review 03 showed their findings grow with each new or changed term
+faster than the text closes them (`reviews/03/SUMMARY.md`).
+
 ## Tiers
 
 The documents depend downward: the glossary and `the-world.md` on top; general rules use both;
@@ -162,6 +167,9 @@ issues or the other documents; it writes what it finds to `reviews/NN/`. The req
   the distilled glossary and world and designs architectures that hold every property and are
   plainly bad: a distributed monolith, every system reading one shared schema, one system owning
   everything. Each design that holds is a finding: a force or a property missing.
+
+The Fresh repo readers run with every regular review, beside the Implementer. The Red team is
+optional: on request, or once after a change to `the-world.md`.
 
 ## Working here
 

@@ -13,6 +13,14 @@ properties (P19), headings of P1, P3, P5, P6, P9, P11, P15 rewritten, glossary g
 Settle, Reach, lists become reach statements, Whys moved into Scopes and Statements. Examples: 5
 files touched; 60 of 73 rules still show `*Examples:* —`.
 
+## Next run
+
+Regular: Implementer and Fresh repo A/B, both sets, six readers. Optional, on request or once after
+a tier change: Gap, Contradiction, Adversarial, Red team. The cooperative readers measure what the
+documents are for, an agent building a repository; the adversarial ones measure resistance to a
+reader the documents do not have, and their findings grew with every new or changed term in both
+reviews (§2, §5).
+
 | reader | 02 raw | 03 raw | 02 dist | 03 dist |
 | --- | --- | --- | --- | --- |
 | Implementer | 0 cannot-comply; 26 of 70 ok files flagged; 6 Relies-on | 1 cannot-comply; 46 of 70 flagged; 2 Relies-on; 18 new ok | 2 cannot-comply; 2 of 14 flagged | 3 cannot-comply, 1 tension; 14 of 16 flagged; 12 purpose-not-told |
