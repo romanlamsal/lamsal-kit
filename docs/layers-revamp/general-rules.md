@@ -55,6 +55,14 @@ like it. `node:path` reaches nowhere outside the process and still breaks in a b
 one runtime, and whoever imports it elsewhere, a browser rendering a form from the schema, another
 system's domain, gets a load error or the server's store client along with the model. The common
 library is not on the list: a courier kept there would hand the domain a value no caller passed.
+A shared kernel is a model several systems agree on and import into each domain; the common
+library holds no model, since a model there is one every system shares and no system's business
+rules decide it, so the kernel is the home the domains can share, and what it imports is bounded
+as the domain's is (SYS-14). A conformist's domain is written in its upstream's terms (glossary:
+Conformist): its business rules take the upstream's schemas as arguments and import them from the
+upstream's export path; a schema restated here is a second declaration of the upstream's,
+drifting on the upstream's schedule. Loading that path loads nothing of the upstream beyond its
+published language (SYS-10).
 The list is closed: an import of a kind it does not name is a question for this rule, not a
 permission.
 *Provenance:* The direction follows Khononov p. 77 (the model "devoid of any infrastructural or
@@ -179,7 +187,20 @@ ways between it and the domain. An external system has no export path (Assumptio
 that conforms to it, its package takes that place. A store client's type in a port's signature is
 the store's name in the service, one step removed. With the list, the system is replaced from the
 outside in, a new
-driving adapter, a swapped driven adapter, with service and domain untouched.
+driving adapter, a swapped driven adapter, with service and domain untouched. The common library
+is plumbing with no model in it: the opaque transaction a service opens and hands to each port,
+the telemetry it calls where it uses it. Holding either tells the service nothing of a store or a
+caller; what a service does with a store client it holds is a question of what it calls, not what
+it imports. A library that takes arguments and returns, a validator, reaches nothing outside the
+process and exists on every runtime, so it names no store and no caller; a store client's type
+fails that test, the store's name one step removed. A shared kernel underlies the domain's values,
+`Money` in an `Order`: a service that sums them, or a port typed by them, names what its domain
+already loads and adds no dependency the domain lacks. A conformist declares no port for its
+upstream: the upstream's driving port type is its driven port and the upstream's published
+language the shapes its service passes through, so both come from the upstream's export path,
+where SYS-1 bounds what it finds; the implementation still arrives from assembly, the upstream's
+service in-process, an adapter out of it, so moving the upstream out of process changes assembly
+and nothing in this service.
 *Provenance:* The direction follows Cockburn (Intent: the application is "blissfully ignorant" of
 the adapters on every side), Martin (The Dependency Rule: source code dependencies point inward;
 Crossing boundaries: the use case calls an interface the adapter implements), Garrido §6.2.1 and
@@ -313,6 +334,18 @@ store reads state and decides by it, or writes outside any use case and outside 
 service holds, and the business rules in the domain are bypassed for that one way in. Typed by the
 driving port, the adapter calls whichever service assembly handed it, a fake in a test. The
 published language is what it parses its caller's input with where the caller is another system.
+The adapter is the caller's shape adapted to a driving port: a route, a server action, a hook is
+typed and invoked by its framework, and that import is the adaptation itself, stopping at the
+adapter, so the service behind the port learns nothing of it. It parses its caller's input into
+the domain's shapes and asks a specification about input it holds; a schema restated beside the
+domain's is a second declaration of the same business rule, and the two drift. The domain is pure
+and loads on the adapter's runtime, so the import brings nothing else along. A shared kernel
+underlies the domain's values, so the input it parses, a `Money` total, is typed by what the
+domain already loads. The courier an adapter the framework finds reads its service from, and the
+telemetry it calls, may live in the common library, plumbing with no model in it; a store client
+held from there is held, not queried, and what the adapter calls with it is a question of what it
+calls, not what it imports. Verifying a signature or parsing a body takes arguments and returns;
+such a library reaches nothing outside the process and opens no second way to the store.
 *Provenance:* The conversion at the edge is Cockburn's adapter (Intent) and Garrido's (§2.4,
 "the driver adapter has a configurable dependency on the driver port", §3). The list is this
 document's.
@@ -416,7 +449,19 @@ that imports another adapter or a service of its system is tied to how that one 
 In-process, the adapter for an upstream calls the upstream's open host service and is typed by
 its export path. An external system has none (Assumptions); its package is what the adapter
 imports, a client of something outside the process where the external system runs elsewhere, the
-external system itself where it runs in this process: Payload's Local API.
+external system itself where it runs in this process: Payload's Local API. The adapter is an
+implementation of a driven port declared in its system's service layer: importing the port is
+what makes it one, and the compiler holds it to the port's signature. The signature is in the
+domain's types, and the adapter parses what the outside returns with the domain's schema rather
+than restating it, so the two cannot drift; the domain is pure, so the import pulls none of the
+system's layers in. A shared kernel underlies the domain's values, so a row mapped to a price as
+`Money` names what the domain already loads. The store client, the HTTP client, the mailer SDK are
+how it talks to the outside, and the adapter is the one layer that holds them, so the store's name
+stops there; the instance arrives from assembly, the import is its type and its query builder. The
+opaque transaction it is handed may be the common library's, narrowed to its store's on the
+adapter's side, and the telemetry it calls may live there too, plumbing with no model in it.
+Mapping a row or serializing a request takes arguments and returns; such a library adds no second
+outside to the one the adapter already talks to.
 *Provenance:* That an adapter depends on the inside follows Garrido §6.2.1 ("adapters depend on
 hexagon") and Martin (The Dependency Rule). Evans p. 55 has the infrastructure layer below the
 domain, knowing nothing of it: the 2003 layering hexagonal replaces. The list is this document's.
@@ -457,7 +502,16 @@ assembly and adds that adapter, and nothing in the downstream's services or doma
 exists once, the graph is visible in one place, and a test hands the builder a fake upstream.
 Built in place, this breach is invisible to the other rules: the code sits in the right layer and
 calls in the right direction. A module that exports a ready-made instance beside its factory is
-the breach one step removed: the importer receives nothing, it imports the built thing.
+the breach one step removed: the importer receives nothing, it imports the built thing. A
+configuration value is what a test varies, a base URL pointed at a stub, a key for a test mode.
+Read in place from the environment, it is in no signature: the test does not set it, the module
+that read it at load runs in every process that imports it, the test run included, where the
+variable is unset and the first use fails, and the built thing is substituted by module mock or
+not at all. A store client built in place opens its pool when the module loads, in every process
+that imports it and in every test run; the contract suite cannot hand the adapter a client over a
+test container, it talks to whatever the module connected to, and a second pool exists beside
+assembly's, so what one use case writes through it another reads through a client that knows
+nothing of the first.
 *Provenance:* Follows Garrido §3 (Configurable Dependency: "a dependency of an object on an
 interface", passed to the constructor at runtime) and §2.5 (the composition root sets up the
 adapters), Cockburn (secondary actor adapters swapped, the application "without actually knowing
@@ -500,7 +554,12 @@ its caller, and call it through no port of its system.
 - ASM-2: a factory receives each client of something outside the process from its caller.
 - SVC-7: a service or a driving adapter reaches the outside through a port of its system.
 *Why:* Telemetry reaches outside the process, a logger to its transport, a tracer to its
-exporter, and a service calls it where it imports it, through no port. The line is behavior, not
+exporter, and a service calls it where it imports it, through no port. An adapter is in the same
+place: its constructor is a factory that would otherwise receive the logger from its caller, and a
+driving adapter would otherwise reach the exporter through a port. The 3PL client that imports the
+tracer behaves the same with no SDK registered, its spans no-ops, and its test asserts on what the
+stub received, not on a span; the outbox adapter puts the trace context on the envelope through
+the same import, and the handler's spans join the request's trace. The line is behavior, not
 substitution: a logger, a tracer and a meter fall under this rule, a feature-flag client, whose
 answer changes what the system does, does not. The domain, a shared kernel and a published
 language are no service and no adapter: they load where no telemetry is configured, a browser
@@ -533,7 +592,10 @@ happened to call. What the use case acts by arrives through its driving port. Th
 gets recorded too: the locale a mail is rendered in and the user an audit column records arrive
 as arguments, since the handler that renders the mail runs outside the request. A value the
 handler needs from the request that wrote the message reaches it in the message, or by a query
-the message points to, or not at all. Telemetry, which changes neither, stays ambient.
+the message points to, or not at all. A per-process value is the same harm by another route: the
+processes of one deployment run with different environments, the old image with `TZ` set beside
+the new one without, and two orders placed in the same second get deadlines hours apart by which
+process took the request. Telemetry, which changes neither, stays ambient.
 *Provenance:* A use case receiving what it acts by follows Seemann ("Service Locator violates
 encapsulation"); his interview ("Ambient Context is also best avoided") goes wider, against ambient
 dependencies altogether. The message carrying what the handler needs follows Khononov p. 91 (a
@@ -612,7 +674,11 @@ imports a system knows its outbox readers, a bus that imports a system knows its
 that lists the outbox tables by name knows every system's store and misses an outbox kept in
 another shape. Outbox readers and handlers implement the library's ports and arrive from the
 assembly of the process that runs the relay and the bus. A library module that imports a system's
-schema puts a model in the common library.
+schema puts a model in the common library. A relay that reaches an outbox by where it sits, a
+table in the store, a slot in a registry the system filled at module load, knows the system
+through a side channel: the worker that does not load the system relays nothing of it and nobody
+notices, a reader registered in one test drains the next test's outbox, and assembly cannot hand
+the relay fakes because the readers do not pass through it.
 *Provenance:* MS shares only "final application blocks, like the Event Bus client API". Otherwise
 no source states it. Departs: Khononov p. 150 has the outbox relay execute commands on their
 targets, so his relay knows the systems it calls.
@@ -982,7 +1048,12 @@ does not come.
 *Why:* Another system can fail after it said yes, stop resending a hook, or not answer at all, and a
 message can wait in a dead-letter queue. Waiting decides nothing, and what it leaves is a state a
 customer finds: payment still pending for a webhook Stripe stopped sending, while the card was
-charged; stock reserved for a checkout nobody completes. A business rule
+charged; stock reserved for a checkout nobody completes. A system waiting for another's message
+holds a state the message is to end, an order placed and not yet paid, stock reserved for an
+order fulfillment has not heard the end of; the delivery rules reach no message the other system
+stopped sending or a dead-letter queue keeps, so nothing here changes until it arrives. The
+deadline sits in the waiting system's own aggregate, so it acts when it passes, whatever the
+other system does. A business rule
 decides instead: a deadline that cancels, as shop's payment deadline cancels the order; a
 reconciliation that asks the other system; or accepting the state as it stands, a PaymentIntent
 nobody confirmed and that changes nothing. Each ends the waiting.
@@ -1465,7 +1536,10 @@ not what it imports. SYS-2 keeps the domain out of a published language and SYS-
 system; neither bounds what else it imports. The list is DOM-1's, narrowed to what both are for: a
 model of values, computed from arguments. DOM-1's published language of an upstream stays off the
 list: a published language or a shared kernel that imports one passes the upstream's changes on to
-every system that imports it, on the upstream's schedule. It is closed, like DOM-1's.
+every system that imports it, on the upstream's schedule. A published message carries kernel
+values, a line's price as `Money`, so a published language imports the kernel it is built from,
+and a kernel module its sibling; what either drags in is bounded by this same rule, so an
+importer loads a model of values and nothing of any system. It is closed, like DOM-1's.
 *Provenance:* Follows Khononov p. 51 ("Ideally, the shared kernel will consist only of integration
 contracts and data structures") and Garrido §3 (the hexagon "depends on nothing, maybe just on
 utilities"). The list is this document's. Departs: Evans p. 251 shares "the subset of code or of the
