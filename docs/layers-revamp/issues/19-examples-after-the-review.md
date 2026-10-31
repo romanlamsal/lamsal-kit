@@ -151,6 +151,11 @@ left them. On top of the lists above:
 - An ok example of a domain that imports no common library (DOM-1).
 - TX-28 "the external system's change as pending", TX-30 "confirmation or answer", TX-36 the
   PaymentIntent as a tentative operation: their examples against the new words.
+- Regression on issue 20 (`reviews/03/regression/20-glossary-sweep.md`):
+  `sys-1-ok-shop-hooks-via-builder` and `sys-1-ok-shop-export-paths` read as SYS-1 breaches under
+  System builder's list (N1), until issue 15 rules; `drv-8-breach-mailer-subscribed-to-bus-in-assembly`
+  and `tx-22-breach-claim-rolled-back-after-3pl-call` lose their listed TX-5 breach under
+  Idempotent, their front matter follows.
 
 ## Decision
 

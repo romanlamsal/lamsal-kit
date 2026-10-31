@@ -126,6 +126,23 @@ stay in its SUMMARY, not accepted here.
 - "Its system's records" in Idempotent settles that a mail is no record: the handler without a
   key is this issue's gap, not the glossary's.
 
+Regression on issue 20 (`reviews/03/regression/20-glossary-sweep.md`, N1 to N3 and Noticed):
+
+- N1, System builder against SYS-1. The definition now lists what a builder returns: driving port
+  implementations, handlers, outbox readers. A hook, a route and a scheduled task are none, so a
+  builder returning them is no system builder and the path exporting it breaches SYS-1; both
+  review 03 builds have one. The list is also instances in distilled text (README, What binds).
+- N2, Pure against DRV-8. "Loads on every runtime of the language" makes a Node built-in impure,
+  so a Node-only driving adapter verifying a webhook signature with `node:crypto` reaches what
+  DRV-8 does not list. Same cluster: DRV-8 lists no entry for an external system's SDK doing the
+  verification; it passes only as "what calls it".
+- N3, Reach against SVC-7. Through a port as the port: a service querying the store through a
+  common-library interface reaches the interface, so SVC-7's Scope fails and the store is reached
+  through no port of its system. The same clause resolves R03-24.
+- A ready-made common-library clock: issue 20 lets a service take the time "through a port or the
+  common library"; a clock is no port and reaches the operating system, and neither SVC-6 nor
+  ASM-7 admits it.
+
 Closed since this issue was opened, by issues 12 to 14, per review 03: the probe's way to the
 store (glossary Probe), the admin dashboard (SYS-9's Scope), instrumentation before assembly,
 ASM-2 against DRV-3 on the Payload cycle. Each is checked against the rule that closed it, not
