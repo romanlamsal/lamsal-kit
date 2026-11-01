@@ -261,8 +261,7 @@ single layer) and Evans p. 57 pick the architecture per subdomain; this document
 
 **SVC-2**
 *Scope:* a use case decides by what this system has stored.
-*Statement:* The service that acts MUST enforce the decision itself, in the call that acts and on
-the state that call saves.
+*Statement:* The service that acts MUST enforce the decision itself, in the call that acts.
 *Relies on:*
 - TX-1: a use case that writes runs in one transaction its service opens, hands to each call it
   makes into its store, reads included, and commits.
@@ -279,10 +278,8 @@ protects one way in; another adapter, or a downstream calling the port directly,
 service sees every call. A check made before the acting call, by another call, is stale by the
 time the act runs: what it read changes between the two. So the acting service loads the data in
 the transaction that writes, asks the domain's specification, which decides, and refuses where it
-says no; where what it loaded changes before the commit, its save fails and the act with it. A
-service that answers the failed save by loading again and saving again applies a decision made on
-the first state to the second, which nobody decided on: the use case fails instead, and a retry,
-a redelivery or the caller's, decides afresh.
+says no; where what it loaded changes before the commit, its save fails and the act with it, and
+a retry, a redelivery or the caller's, decides afresh on the new state.
 *Provenance:* Follows Khononov p. 85 (the aggregate's public interface validates the input and
 enforces all business rules, "in one place") and Cockburn (Motivation: business logic infiltrating
 the user interface). The stale check is CWE-367's (Time-of-check Time-of-use: "the resource's
@@ -380,8 +377,7 @@ examples/svc-7-ok-payment-reaches-stripe-through-gateway-port.md
 
 **SVC-8**
 *Scope:* a system declares a driven port.
-*Statement:* What it takes and returns MUST be in the system's terms, not in the terms of what lies
-behind it.
+*Statement:* What it takes and returns MUST be in the system's terms.
 *Relies on:*
 - SVC-1: a system's ports are declared in its service layer.
 *Why:* A port in the store's or the carrier's terms tells nothing: a `Sql` port that takes a query
@@ -391,7 +387,8 @@ there is nothing behind it to swap. The meaning of the conversation then lives i
 the port, and the service's test hands it a fake that has to understand SQL. In the system's terms,
 `forCustomer(customerId)` returning overview rows, the port says what the system asks and the
 adapter holds how the store answers it. A value every system shares, an instant, an amount of a
-shared kernel's `Money`, is in the system's terms too.
+shared kernel's `Money`, is in the system's terms too, and so is the published language of an
+upstream the system conforms to: a conformist's terms are its upstream's (glossary).
 *Provenance:* Follows Cockburn ("A port identifies a purposeful conversation"; the application
 "blissfully ignorant" of what lies on the other side), Garrido §2.3 and P5. The rule on the port's
 terms is this document's; the glossary's driving port carries the same clause as a definition.
@@ -821,6 +818,8 @@ serve many applications.
 into its store, commit it.
 *Relies on:*
 - TX-2: a driven adapter writes to its store inside the transaction it is handed.
+- TX-47: a service opens, commits and rolls back a transaction through a driven port of its
+  system.
 - DRV-1: a driving adapter makes at most one acting call per call it handles, a message included.
 *Why:* A repository saves one aggregate whole and knows nothing of the others. The service sees the
 whole use case, so it is the one that knows which writes land together; a repository that opened the
@@ -851,6 +850,28 @@ cross aggregate boundaries") and Helland 2007 p. 135. For: MS calls it "the simp
 "valid in many business cases", and Vernon EAD II p. 10 breaks his rule where one user's
 aggregates see no "transactional collisions".
 *Examples:* —
+
+**TX-47**
+*Scope:* a service opens, commits or rolls back a transaction.
+*Statement:* It MUST do so through a driven port of its system.
+*Relies on:*
+- SVC-1: a system's ports are declared in its service layer.
+- SVC-7: a service reaches the outside through a port of its system.
+- ASM-2: a factory receives each client of something outside the process from its caller.
+*Why:* A transaction is the store reached: whether its commit lands decides whether the use case's
+writes exist and whether it throws, so its outcome changes how the use case acts and what it
+answers, and ASM-7's Scope does not hold for it. Reach stops at a port of its system and nowhere
+else: an interface the common library exports is no port of shop's, and a service calling it
+reaches the database behind it, which SVC-7 refuses. Declared in the system's service layer, the
+port stops the reach and names no store. The common library implements it without naming it, by
+shape, as it does any port whose implementation is the same for every system; assembly hands that
+implementation to the service's factory like any driven adapter, and the service's test hands a
+fake that commits nothing. The handle the port deals in stays opaque, a branded type the adapters
+narrow on their own side; the port is what the system declares, the handle's type is not.
+*Provenance:* Follows Cockburn (the application knows its ports and nothing behind them) and
+Fowler (Unit of Work: the port's shape); departs from MS and Fowler's Unit of Work shared through
+scope, as TX-1 does. The common library implementing a system's port is this document's.
+*Examples:* ok examples/asm-9-ok-transaction-handed-as-argument.md
 
 **TX-2**
 *Scope:* a driven adapter is handed a transaction.
@@ -1439,7 +1460,7 @@ examples/tx-32-ok-dunning-stage-changed-carries-version.md
 service's driving port takes, returns or raises where code of another process calls it; or a new
 message or port takes over from another.
 *Statement:* The change MUST keep what old code writes readable by new code, and what new code
-writes readable by old code as new code meant it, each field keeping its meaning.
+writes readable by old code, each field keeping its meaning.
 *Relies on:* —
 *Why:* A message is handled by code older or newer than the code that wrote it. One written before a
 deploy sits in the outbox and is handled after it; one deployment does not clear the outbox. A
@@ -1451,13 +1472,14 @@ process still on old code calls the upstream's new one, and an error the new cod
 caller that knows none of it. Called in the same process, port and caller are compiled and deployed
 together, and the type checker sees both sides. An optional field added or removed keeps both
 directions; a field renamed, a required one added or removed, a type changed, an enum value added or
-removed, a meaning changed, an amount from cents to euros, breaks one. So does an optional field
-old code can read and does not know: `paidByInvoice` added to `OrderPlaced`, old handlers invoice
-on an `OrderPaid` that never comes, and the order is never invoiced; old code read the message and
-took it to mean what it no longer means. A record meets the same deploy: the old process loads a
-row the new code wrote, drops the field it does not know, and saves it back. A change that cannot
-keep both goes through versions: new code writes the old message and the new, or offers the old port
-beside the new, while old readers run, and reads the old until none waits.
+removed, a meaning changed, an amount from cents to euros, breaks one. An optional field whose
+absence old code reads as a fact changes what the whole message means: `paidByInvoice` added to
+`OrderPlaced`, old handlers invoice on an `OrderPaid` that never comes, and the order is never
+invoiced. That is a new message taking over from the old, the Scope's last case; a gift message an
+old handler cannot show leaves the order it reads what it was. A record meets the same deploy: the
+old process loads a row the new code wrote, drops the field it does not know, and saves it back. A
+change that cannot keep both goes through versions: new code writes the old message and the new, or
+offers the old port beside the new, while old readers run, and reads the old until none waits.
 *Provenance:* Follows protobuf (Dos and Don'ts: "Clients and servers are never updated at exactly
 the same time"), Confluent (full compatibility lets producers and consumers upgrade independently;
 an incompatible change as a new topic) and Khononov p. 55 ("only possible if the modified

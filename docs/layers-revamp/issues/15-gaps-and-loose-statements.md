@@ -1,6 +1,6 @@
 # 15 — Gaps and loose Statements
 
-**Status:** open, reopened after the regression on `042da0f`
+**Status:** closed
 
 ## Context
 
@@ -181,17 +181,19 @@ as issues 12 to 14 and 20 leave them. A gap closes in a Scope, a Statement, a ne
 sentence in the Assumptions; a reading settles in binding text or in the glossary; a loose
 Statement is sharpened, or its breach is accepted and the reason recorded here for the ok example.
 Glossary changes under the freeze: the grep ran at `96ffa84`, hits listed per term. New ids: DOM-8,
-DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-46.
+DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-47.
 
 ### Glossary
 
 - **Reach** (N3): "What it reaches through a port *of its system* it reaches as the port." Hits of
   the old clause: glossary l. 41, SVC-6's Why l. 187. An interface of the common library is no port
   of its system, so the code behind it is reached: a service querying through a common-library
-  `Sql` interface reaches the store, and SVC-7 binds. The common library's `Transactions` and its
-  telemetry are reached the same way, and ASM-7 lets them through, their output changing neither
-  how the use case acts nor what it answers: R03-24 stays resolved, by ASM-7 instead of the
-  clause. The six reach lists stand. A conformist's upstream ports are its own driven ports
+  `Sql` interface reaches the store, and SVC-7 binds. The common library's telemetry is reached the
+  same way and ASM-7 lets it through, its output changing neither how the use case acts nor what
+  it answers. Its `Transactions` is not: a commit's outcome decides what the use case does and
+  answers, so the transaction is a driven port of the system (TX-47, Since regression below), and
+  R03-24 is resolved by the clause and TX-47. The six reach lists stand. A conformist's upstream
+  ports are its own driven ports
   (glossary), so they stop the reach.
 - **Pure** (N2): loses "it loads on every runtime of the language". Hits: glossary l. 44; DOM-1's
   Why l. 50 and Provenance l. 75; "pure code of no system" in the Statements of DOM-1, SVC-6, DRV-8,
@@ -255,8 +257,9 @@ DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-46.
   value. The deadline's minutes are the domain's; a value the business changes at runtime is a
   record.
 - **SVC-8** (P5, a port's terms). Scope: a system declares a driven port. Statement: what it takes
-  and returns MUST be in the system's terms, not in the terms of what lies behind it. A generic
-  `Sql` port in the service layer breaches. SVC-7's Why loses "in the system's".
+  and returns MUST be in the system's terms. A generic `Sql` port in the service layer breaches.
+  SVC-7's Why loses "in the system's". "Not in the terms of what lies behind it" was in the first
+  close and is withdrawn (N2).
 - **ASM-11** (what a builder returns, N1). Scope: a system builder returns. Statement: what it
   returns MUST be one of: an implementation of a driving port of its system, a driving adapter of
   its system, an outbox reader of its system. A hook, a route and a scheduled task are driving
@@ -268,14 +271,14 @@ DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-46.
 
 ### Sharpened
 
-- **SVC-2**: "in the call that acts and on the state that call saves". Reload and save again
-  breaches.
+- **SVC-2**: gained "and on the state that call saves" at the first close; withdrawn after the
+  regression (N4). Reload and save again is TX-23's and TX-24's.
 - **TX-23**: Scope "a repository saves an aggregate"; the save MUST fail where the aggregate in the
   store differs from what the use case loaded, or exists where it loaded none. The blind upsert
   breaches.
-- **TX-7**: Scope gains the schema of a record a system keeps (review 03 §2.3); Statement: "what
-  new code writes readable by old code as new code meant it". `paidByInvoice` ignored by old
-  handlers breaches; a field's meaning changed in place too.
+- **TX-7**: Scope gains the schema of a record a system keeps (review 03 §2.3). The Statement's
+  "as new code meant it" of the first close is withdrawn (N3); `paidByInvoice` is a new message
+  taking over, the Scope's last case; a field's meaning changed in place breaches.
 - **TX-12**: "from its published events delivered to a handler of this system". Reading the
   owner's outbox table breaches.
 - **TX-17**: "It MUST publish one event of what happened, which names no system that handles it."
@@ -304,6 +307,28 @@ DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-46.
   data that can change at the owner before the use case commits. Checkout committing on billing's
   live dunning stage is in the Scope; the replica built for a rule to stand under is a detour.
 - **DOM-1, SYS-14**: the runtime qualifier, see Pure.
+
+### Since regression
+
+- N1: new rule **TX-47**, after TX-1. Scope: a service opens, commits or rolls back a transaction.
+  Statement: it MUST do so through a driven port of its system. The common library implements the
+  port by shape, without naming it; `asm-9-ok-transaction-handed-as-argument` already shows it and
+  is the ok example. `svc-6-ok-opaque-transaction` imports the common library's `Transactions` as
+  the port and breaches TX-47 (issue 19). TX-1 gains a Relies-on line on TX-47; TX-1's Why already
+  argued it. The Reach bullet above is corrected: ASM-7 does not admit the transaction. P5's
+  Except is untouched, a port of its system being P5's main clause (R03-58).
+- N2: **SVC-8**'s Statement loses "not in the terms of what lies behind it"; the Why says a
+  conformist's terms are its upstream's. `asm-2-ok-shop-reads-invoice-through-driven-port` and
+  `tx-12-ok-invoice-number-through-billing-port` hold.
+- N3: **TX-7**'s Statement returns to "readable by old code". The clause caught every optional
+  field an old reader ignores. `paidByInvoice` changes what the whole message means, which the
+  Scope's "a new message takes over from another" holds for; the Why says so.
+  `tx-7-ok-gift-message-added-optional` holds.
+- N4: **SVC-2**'s Statement returns to "in the call that acts". The clause duplicated TX-24 as a
+  MUST over replicas and over decisions that need not hold at commit, against TX-27. The Why's
+  sentence refusing reload-and-save-again, a ruling, goes too.
+- Fresh draft A, S4 (Reach with "Domain ... It is pure"): DOM-1 lists no port among what the
+  domain reaches, so the ruling stands; no change.
 
 ### Accepted, no change
 
@@ -346,12 +371,15 @@ to the Consequences.
 
 ## Consequences
 
-- To issue 16: the lines of the twelve new rules are new; TX-34's on TX-38 and TX-45, ASM-8's on
-  ASM-4 rewritten here; the lines checked above are read again there.
+- To issue 16: the lines of the thirteen new rules are new; TX-34's on TX-38 and TX-45, ASM-8's on
+  ASM-4 rewritten here, TX-1's on TX-47 added; the lines checked above are read again there.
 - To issue 17: the store per system decides whether TX-43 leans on narrower-governs; the bank
   polled or calling a hook decides whether TX-46 holds for it; Payload's Local API as catalog's
   open host service is ruled (Assumptions); the sku veto stays catalog's (issue 20).
-- To issue 19: examples for the twelve new rules; ASM-11 names two existing files; every example
+- To issue 19: examples for the thirteen new rules; ASM-11 names two existing files, TX-47 one
+  ok file and its breach is regression N1's body
+  (`reviews/03/regression/15-gaps-and-loose-statements.md`); `svc-6-ok-opaque-transaction` lists
+  TX-47 as breached or moves the port into shop; every example
   naming a sharpened rule is re-read (SVC-2, TX-23, TX-7, TX-12, TX-17, TX-19, TX-30, TX-35,
   TX-37, TX-38, TX-34, DRV-7, ASM-3, ASM-4, TX-27, DOM-1, SYS-14);
 `gap-health-and-metrics-endpoints`   becomes ASM-4's ok,
@@ -361,6 +389,7 @@ task's use case and satisfies TX-44; `svc-3-breach-clear-cart-service-behind-dri
 DVN-4; `drv-8-breach-mailer-subscribed-to-bus-in-assembly` and  
 `tx-22-breach-claim-rolled-back-after-3pl-call` list TX-41 where TX-5 left.
 - Glossary changed (Reach, Pure, System builder, Double): the regression reader and two Fresh
-  repo drafts ran after the first close (`reviews/03/regression/15-*`); their findings are Since
-  regression, above, and this issue closes again when they are ruled.
+  repo drafts ran after the first close (`reviews/03/regression/15-*`); their findings are ruled
+  in Since regression. The second close changes rules only, so the regression reader runs again
+  and no Fresh draft does (`reviews/regression-reader.md`, After it runs).
 - `choices.md` C6 bounded by TX-40; README's Examples entry gains the out-of-Scope ok.
