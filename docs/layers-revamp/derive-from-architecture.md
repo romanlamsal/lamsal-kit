@@ -77,6 +77,21 @@ for the rules' purposes.
    the brief as directions, not as rules the drafter must cite. Also `choices.md` entries the
    requester still holds. The brief is the drafter's only input beyond glossary, the-world and
    `brief.md`.
+
+   Two things MUST be in it, whatever else is left open: the list of systems, each with its kind
+   and what it owns (drafts A and B of review 04 diverged on whether catalog exists or Payload
+   owns products); and, for everything two systems touch, who owns it: the reservation
+   deadline, the order data billing invoices from, the stock on hand, each message's direction.
+   Anything two systems touch and the brief does not assign, the drafter assigns, and the rule
+   derived from it is the drafter's architecture, not the requester's.
+
+   The brief is grilled by an agent before it goes to the drafter. The agent's job is the
+   second pair of eyes on those two things: every system named, every cross-system thing owned.
+   It does not push for depth elsewhere. Gaps inside a system, which layer holds what, which
+   library, how a port is cut, are left open on purpose, so the drafter and later the
+   Implementer have something to fill; a brief that leaves none tests nothing. Review 04's
+   D-lists (33 and 43 decisions) are the checklist of what a drafter will decide if the brief
+   does not; the requester reads them after writing, for coverage, not before.
 1. **Static artifact.** The drafter produces a Fresh draft from the direction brief, or the
    requester takes the draft closest to it from reviews 03 or 04 and corrects it by hand into
    the architecture we mean. Add the `not:` lines where a choice was made. Commit as
