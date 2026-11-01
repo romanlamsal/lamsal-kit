@@ -27,28 +27,35 @@ An external system sits outside the rules: its exports, its layers and its trans
 even where this codebase writes its configuration. What a system of this codebase does with it is
 inside them: the adapters that call it, the hooks it calls, and the parts of its configuration that
 touch the system: what may change the system's records it keeps (SYS-12), how it tells the system of
-a change (TX-29).
+a change (TX-29), what it reads of the system's records (SYS-9). It is no system of this codebase
+where a rule says one. Where a rule names an open host service or a published language and the
+system is external, its API is the open host service and its package the published language.
 
 Not covered: where UI code goes, which is `components.md`; library, framework and file-naming
 conventions, which are the stack document's; whether a module that straddles two layers should be
 split now; how a driving adapter is tested, and when the integration suite runs, which are the
 repository's; how the bus finds a message's handlers, by its type or by each handler filtering,
-which is the stack document's.
+which is the stack document's; how telemetry crosses a message, a trace context on the envelope,
+which is the stack document's; where a system records that it conforms to an upstream (glossary:
+Conformist), which is the repository's.
 
 ## Domain
 
 **DOM-1**
 *Scope:* the domain reaches past itself.
 *Statement:* What it reaches MUST be one of: a shared kernel, the published language of an
-upstream its system conforms to, pure code of no system.
+upstream its system conforms to, pure code of no system that loads on every runtime of the
+language.
 *Relies on:*
 - SYS-10: loading a path that exports a system's published language loads no module of that
   system outside its published language.
 - SYS-14: a published language or a shared kernel reaches nothing but a shared kernel and pure
   code of no system.
-*Why:* The domain is pure and knows no runtime (glossary). The test for a module is three questions:
-does calling it reach outside the process, does it exist on every runtime of the language, and does
-it hand its caller anything the caller did not pass? A store client, an HTTP client, a mailer SDK,
+*Why:* The domain is pure (glossary) and loads wherever the language runs. The test for a module is
+three questions: does calling it reach outside the process, does it hand its caller anything the
+caller did not pass, and does it exist on every runtime of the language? The first two are Pure's;
+the third is this rule's, since the domain alone, with the kernel and the published language
+(SYS-14), is imported where no server runs. A store client, an HTTP client, a mailer SDK,
 `node:fs` and a clock reach outside, so they stay behind ports. An id generator and the clock hand
 back what nobody passed, so the domain takes the id and the time as arguments. A type is a reach too
 (glossary: Reach): a domain typed by the store client's row type is shaped by the store, and `import
@@ -135,13 +142,49 @@ where it decides a record the external system keeps and no business rule of this
 about a record this system's business rules decide, it is a second statement. A business rule of
 this system that an external system asks before it writes, catalog's veto of a sku change, stays
 here; the external system reaches it through its hook, a way out of that system into this one's
-driving adapter.
+driving adapter. The published language may state what a rule here states, as the contract's
+constraint (SYS-16). A number the rule decides by is part of its statement (DOM-9).
 *Provenance:* Follows Evans p. 53 (the domain layer is "responsible for representing concepts of
 the business, information about the business situation, and business rules"; the application
 layer "does not contain business rules or knowledge, but only coordinates tasks") and MS ("all
 the domain logic should be contained in the domain classes […] but not within the command
 handler, which is a class from the application layer"). The once follows Evans p. 52, P2's
 Provenance: business rules diffused through other code are changed by tracing all of it.
+*Examples:* —
+
+**DOM-8**
+*Scope:* a term of a system's glossary is used in its code.
+*Statement:* It MUST have the meaning its glossary gives it, in every module of the system.
+*Relies on:* —
+*Why:* A system is one bounded context with its own glossary (glossary: System). "Order" meaning
+checkout's order in one module and the invoiceable order in the next is two models in one system: a
+change made for one meaning breaks code written for the other, and a reader of one module takes the
+meaning it found there for the system's. A word the glossary does not hold is either common language
+or the system's next term, entered before the code uses it. Where one word has to mean two things,
+one of them is renamed, or the system is split where the meanings part.
+*Provenance:* Follows Evans, Ubiquitous Language (p. 26) and Bounded Context (p. 239: "Keep the
+model strictly consistent within these bounds") and Khononov p. 46 ("ubiquitous language should be
+consistent within the scope of its bounded context"). The rule on code is this document's.
+*Examples:* —
+
+**DOM-9**
+*Scope:* a business rule of this system decides by a value.
+*Statement:* The value MUST come from the domain's code or from a record, not from a configuration
+value.
+*Relies on:*
+- DOM-7: a business rule of this system is stated once, in the domain.
+*Why:* The payment deadline's minutes, the VAT rate, the number of reminders before dunning: each is
+part of the rule it belongs to, and a rule stated in the domain with its number read from the
+environment is stated in two places (DOM-7), one of them in no module a reader of the domain opens.
+A configuration value is a process's for its life (glossary): the processes of one deployment run
+with different values, the old image beside the new one, and two orders placed in the same second
+get deadlines apart by which process took the request. What the business wants to change at runtime
+is a record, owned by this system, changed by a use case, read by the rule like any other record,
+and the same for every process. What a process needs to run, a key, a URL, a pool size, decides no
+business rule and stays configuration (ASM-2).
+*Provenance:* Follows Evans p. 52 (P2's Provenance: business rules diffused through other code) and
+Khononov p. 80 (validation and rules in the value objects). The line against configuration is this
+document's; no source rules on it.
 *Examples:* —
 
 ## Service
@@ -184,8 +227,10 @@ it conforms to, pure code of no system.
 *Why:* A service that knows the route that calls it, or the store client that saves for it, changes
 whenever either changes, and a second way in, or a second store, means rewriting the use case. It
 reaches driven adapters through the ports they implement, handed in, so a swapped adapter leaves it
-untouched; what it reaches through a port it reaches as the port (glossary: Reach), the adapter
-behind it and what assembly handed that adapter being the port's, not the service's. The published
+untouched; what it reaches through a port of its system it reaches as the port (glossary: Reach),
+the adapter behind it and what assembly handed that adapter being the port's, not the service's. An
+interface of the common library is no port of its system: a service calling the store through one
+reaches the store (SVC-7). The published
 language is on the list because the service translates both ways between it and the domain. An
 external system has no export path (Assumptions); for a service that conforms to it, its package
 takes that place. A store client's type in a port's signature is the store's name in the service,
@@ -216,7 +261,8 @@ single layer) and Evans p. 57 pick the architecture per subdomain; this document
 
 **SVC-2**
 *Scope:* a use case decides by what this system has stored.
-*Statement:* The service that acts MUST enforce the decision itself, in the call that acts.
+*Statement:* The service that acts MUST enforce the decision itself, in the call that acts and on
+the state that call saves.
 *Relies on:*
 - TX-1: a use case that writes runs in one transaction its service opens, hands to each call it
   makes into its store, reads included, and commits.
@@ -233,7 +279,10 @@ protects one way in; another adapter, or a downstream calling the port directly,
 service sees every call. A check made before the acting call, by another call, is stale by the
 time the act runs: what it read changes between the two. So the acting service loads the data in
 the transaction that writes, asks the domain's specification, which decides, and refuses where it
-says no; where what it loaded changes before the commit, its save fails and the act with it.
+says no; where what it loaded changes before the commit, its save fails and the act with it. A
+service that answers the failed save by loading again and saving again applies a decision made on
+the first state to the second, which nobody decided on: the use case fails instead, and a retry,
+a redelivery or the caller's, decides afresh.
 *Provenance:* Follows Khononov p. 85 (the aggregate's public interface validates the input and
 enforces all business rules, "in one place") and Cockburn (Motivation: business logic infiltrating
 the user interface). The stale check is CWE-367's (Time-of-check Time-of-use: "the resource's
@@ -302,11 +351,21 @@ module calls with it, the lists do not rule. A service handed the store client a
 reads the store's records in the store's terms, past the repository and the aggregate it loads
 whole; the store's name is in the service, and its test needs the store. A server action doing the
 same skips the service, and the business rules with it. A service reaches the outside through a
-driven port, in its own terms, and its test hands it a fake; a driving adapter reaches it through a
-driving port, and the service behind it does the rest. A store client's type is an interface too,
-but in the store's terms; a port of the system is declared in its service layer (SVC-1), in the
-system's. A read that skips the aggregates, a list joined for one screen, goes through a driven port
-that returns the list, and the driven adapter behind it holds the query.
+driven port, in its own terms, and its test hands it a fake; a driving adapter reaches it through
+a driving port, and the service behind it does the rest. A store client's type is an interface
+too, but in the store's terms; a port of the system is declared in its service layer (SVC-1) and
+speaks the system's terms (SVC-8). An interface of the common library is a port of no system
+(glossary: Reach): a service querying the store through a common-library `Sql` interface reaches
+the store and is in the Scope; the common library's transaction and its telemetry are in it too,
+and ASM-7 lets them through, their output changing neither how the use case acts nor what it
+answers. A read that skips the aggregates, a list joined for one screen, goes through a driven
+port that returns the list, and the driven adapter behind it holds the query. The clock and the
+random id are the operating system's, which is the outside (glossary: Outside): a service takes
+the time and its ids through a port of its system, a `Clock`, an id generator, whose
+implementation assembly hands it and may take from the common library, or as arguments of its
+driving port; a driving adapter takes them from what calls it. A ready-made common-library clock
+imported by either is the outside reached through no port, and ASM-7 does not hold for it, its
+output deciding deadlines.
 *Provenance:* Follows Cockburn (Intent: the application is "blissfully ignorant" of what lies on the
 other side of its ports; "A port identifies a purposeful conversation") and Garrido §2.3 ("Ports are
 interfaces that the application offers to the outside world"). The read behind a driven port follows
@@ -318,6 +377,25 @@ implementation runs the SQL on a connection string it holds, with no driven port
 examples/svc-7-breach-service-queries-handed-drizzle-client.md · ok
 examples/svc-7-ok-order-overview-through-query-port.md · ok
 examples/svc-7-ok-payment-reaches-stripe-through-gateway-port.md
+
+**SVC-8**
+*Scope:* a system declares a driven port.
+*Statement:* What it takes and returns MUST be in the system's terms, not in the terms of what lies
+behind it.
+*Relies on:*
+- SVC-1: a system's ports are declared in its service layer.
+*Why:* A port in the store's or the carrier's terms tells nothing: a `Sql` port that takes a query
+string and returns rows, declared in the service layer, is the store client one step removed, the
+table names and the join in the service, and swapping the adapter behind it changes nothing because
+there is nothing behind it to swap. The meaning of the conversation then lives in the code behind
+the port, and the service's test hands it a fake that has to understand SQL. In the system's terms,
+`forCustomer(customerId)` returning overview rows, the port says what the system asks and the
+adapter holds how the store answers it. A value every system shares, an instant, an amount of a
+shared kernel's `Money`, is in the system's terms too.
+*Provenance:* Follows Cockburn ("A port identifies a purposeful conversation"; the application
+"blissfully ignorant" of what lies on the other side), Garrido §2.3 and P5. The rule on the port's
+terms is this document's; the glossary's driving port carries the same clause as a definition.
+*Examples:* —
 
 ## Driving adapters
 
@@ -349,7 +427,12 @@ courier an adapter the framework finds reads its service from, and the telemetry
 in the common library, which holds no model (ASM-6); a store client held from there is held, not
 queried, and what the adapter calls with it is a question of what it calls, not what it imports.
 Verifying a signature or parsing a body takes arguments and returns; such a library reaches nothing
-outside the process and opens no second way to the store.
+outside the process and opens no second way to the store, and so does a runtime's own module that
+does the same, `node:crypto` in a route that runs on Node alone: the adapter is not imported where
+the runtime differs, so the list asks it only what is pure (glossary: Pure). An external system's
+package is its published language (Assumptions), so a hook parsing or verifying the external
+system's event with it reaches what the list names; a call through the same package that reaches
+the external system is the outside, which the list does not name (SVC-7).
 *Provenance:* The conversion at the edge is Cockburn's adapter (Intent) and Garrido's (§2.4,
 "the driver adapter has a configurable dependency on the driver port", §3). The list is this
 document's.
@@ -422,16 +505,18 @@ per object, not once at load.
 **DRV-7**
 *Scope:* a handler is delivered a message.
 *Statement:* It MUST NOT acknowledge it, to the bus or by its answer to the external system that
-delivered it, unless the use case it calls has succeeded.
+delivered it, unless the use case it calls has returned with what it wrote committed.
 *Relies on:*
 - TX-21: the bus delivers a message again until the handler acknowledges it.
 - TX-1: a use case that writes runs in one transaction its service opens and commits.
 *Why:* An acknowledged message is gone. A queue client that acknowledges on receipt, or a handler
 that catches the use case's error and returns, loses the message the moment the use case fails,
-and the change it tells of does not reach this system. A use case that writes nothing succeeds
-when it returns; one that writes succeeds when it has committed. A hook that is delivered a
-message has no bus: the external system stops resending once the hook answers, so one that
-answers at once and calls the use case afterwards loses the message the same way.
+and the change it tells of does not reach this system. A use case that writes nothing has returned
+and committed nothing, so it is done when it returns; one that writes is done when its transaction
+has committed, not when it has decided. A refusal written and committed is a return like any other
+(TX-34); a failure caught and committed as if it were one is TX-38's breach. A hook that is
+delivered a message has no bus: the external system stops resending once the hook answers, so one
+that answers at once and calls the use case afterwards loses the message the same way.
 *Provenance:* Follows Vernon EAD II p. 9 ("The modification can be retried if the subscriber does
 not acknowledge success"), Helland 2007 p. 134, EIP (Transactional Client) and MS (RabbitMQ
 requeues the unacknowledged). Khononov, Evans and Cockburn do not rule on it.
@@ -551,6 +636,26 @@ dependencies") and Seemann, "Volatile Dependencies" (2006: stable dependencies n
 "To distinguish them from stable dependencies, I suggest the term volatile dependencies").
 *Examples:* —
 
+**ASM-11**
+*Scope:* a system builder returns.
+*Statement:* What it returns MUST be one of: an implementation of a driving port of its system, a
+driving adapter of its system, an outbox reader of its system.
+*Relies on:*
+- SYS-1: a system exports nothing but its offer, its system builders among it.
+*Why:* The builder is on the export path (SYS-1), so whatever it returns crosses to assembly and to
+whoever else imports the path. A builder that returns its repositories "for the dashboard and for
+tests" hands a driven port, the inside, to every importer: the dashboard reads shop's store past
+every rule in shop's services, and shop changes its repository by changing its downstream. What
+assembly hands on is what the process's driving side calls into and what it gives the framework,
+the bus and the relay: the services behind the driving ports, the driving adapters assembly
+constructs, a hook for Payload's config, a route the framework takes from assembly, a scheduled
+task, a handler for the bus, and the outbox readers for the relay. A courier the builder fills is
+not returned (ASM-8); a client the builder builds for its adapters stays inside (ASM-2).
+*Provenance:* Follows Seemann ("Composition Root") and Garrido §2.5 (the start-up component builds
+the system and runs the driver adapters). What a builder returns is this document's.
+*Examples:* breach examples/sys-1-breach-builder-returns-repositories.md · ok
+examples/sys-1-ok-shop-hooks-via-builder.md
+
 **ASM-7**
 *Scope:* a service or an adapter uses code of the common library whose output changes neither
 how a use case acts nor what it answers.
@@ -586,7 +691,8 @@ answers.
 *Examples:* —
 
 **ASM-3**
-*Scope:* a service, or a driven adapter a service calls, reads an ambient value, in either scope.
+*Scope:* a service, or a driven adapter a service calls, reads an ambient value, itself or through
+what it calls, in either scope.
 *Statement:* The value MUST NOT change how the use case acts or what it answers.
 *Relies on:* —
 *Why:* An ambient value is in no signature. A use case that acts by one, the current user for a
@@ -613,7 +719,7 @@ The line between telemetry and everything else is this document's.
 **ASM-4**
 *Scope:* code reads the courier.
 *Statement:* It MUST be a driving adapter that assembly cannot construct, or cannot hand what it
-calls when it constructs it.
+calls when it constructs it, or a probe.
 *Relies on:*
 - ASM-1: a process has one assembly.
 *Why:* Read anywhere else, the courier is a service locator: whoever reads it gets a dependency
@@ -622,7 +728,11 @@ place it is visible. A factory that reads it has a dependency it did not receive
 factory, a service function, passes every other rule, since a courier kept in the common
 library is one its layer may import. Two kinds of code have no caller to hand them what they call: a
 driving adapter the framework constructs, and one assembly constructs before what it calls exists,
-because what it calls is built from what the adapter is built into (DRV-3).
+because what it calls is built from what the adapter is built into (DRV-3). A probe is a third: the
+framework constructs `/health` too, and a probe that opens a pool of its own reports on a pool no
+use case uses, so it reads the one assembly produced. A typed accessor the courier offers, or a
+module beside the adapter that calls `read` for it, is the courier's code or the adapter's; the
+reader is the code whose run performs the read.
 *Provenance:* Follows Seemann ("Service Locator is an Anti-Pattern", comments of 2010-02-04): the
 framework-created object reaches the container, and "from there on down, there will be no Service
 Locator available"; everything else gets an injected abstract factory. Seemann holds that a
@@ -637,7 +747,7 @@ depend on the locator; Evans Reference p. 17 gives every repository client globa
 *Relies on:*
 - DRV-6: a driving adapter reads the courier each time it runs, not when its module loads.
 - ASM-4: what reads the courier is a driving adapter assembly cannot construct, or cannot hand what
-  it calls when it constructs it.
+  it calls when it constructs it, or a probe.
 - ASM-1: a process has one assembly.
 *Why:* A reader gets what is there when it runs. Filled late, the first requests find it empty;
 filled by anything but assembly, a second place produces instances. A per-process courier is
@@ -721,7 +831,8 @@ makes into the store takes the transaction, the reads too, and the record of a h
 commits with the writes it guards. A store is what one transaction commits, so a use case that
 writes writes one store; a change outside it is TX-22's. A call into another system's open host
 service is no call into the store and takes no transaction (TX-25), so where two systems keep their
-records in one store, the other system's reads and writes stay apart from this transaction. Where
+records in one store, the other system's reads and writes stay apart from this transaction
+(TX-43). Where
 the transaction is a required parameter, a forgotten one is a type error. Opening it through a
 driven port keeps the store's name out of the service and the client's type out of the domain. A
 handler calls one use case per message, so each message gets a transaction of its own, apart from
@@ -761,8 +872,9 @@ inside the transaction are this document's.
 *Examples:* —
 
 **TX-23**
-*Scope:* a repository saves an aggregate that was loaded through it.
-*Statement:* The save MUST fail where the aggregate has changed in the store since it was loaded.
+*Scope:* a repository saves an aggregate.
+*Statement:* The save MUST fail where the aggregate in the store differs from what the use case
+loaded, or exists where it loaded none.
 *Relies on:*
 - TX-1: a use case that writes runs in one transaction, which its service hands to each call it
   makes into its store and commits.
@@ -778,7 +890,10 @@ whose state no longer held. A save that fails tells the second use case so, and 
 rolls back with nothing of it committed. A handler's use case runs again on redelivery; a
 request's fails to its caller. A version the aggregate carries, compared on save, is
 one way; a lock taken at the load and held to the commit, under which the aggregate cannot
-change, is another.
+change, is another. An aggregate saved without a load, an upsert of a reservation keyed by its
+order, writes over whatever another use case committed under that key with no version compared: a
+new aggregate's save fails where one exists, and the use case that wanted to change it loads it
+first.
 *Provenance:* Follows Khononov p. 86–87 (the concurrency check: the later transaction must not be
 "blindly overwriting the changes committed by the first one"; a version compared on save; "it's
 crucial to ensure that the database used for storing an aggregate's data supports concurrency
@@ -833,6 +948,28 @@ the downstream opened, and a port that stops working once the upstream runs in i
 *Provenance:* Follows Richardson (Database per service: "A service's transactions only involve
 its database") and Helland 2007 ("Atomic Transactions Cannot Span Entities"). The rule on the
 port is this document's.
+*Examples:* —
+
+**TX-43**
+*Scope:* a use case of this system calls another system.
+*Statement:* The call MUST NOT carry the use case's transaction.
+*Relies on:*
+- TX-25: a driving port of a system of this codebase takes no transaction, nor anything else that
+  reaches a store.
+- ASM-9: a transaction is no ambient value.
+*Why:* A transaction two systems share commits only where both let it, so neither changes alone
+(P16). TX-25 keeps it out of the ports a system of this codebase declares; an external system
+declares none and takes whatever its API takes: Payload's Local API takes a `req` whose
+`transactionID` puts shop's writes to catalog's tables into shop's transaction, so shop's rollback
+undoes a change catalog's hooks already acted on, and catalog's business rules ran inside shop's
+commit. Handed its own transaction, the other system commits or fails on its own, and what this
+system wants of it goes as a message (TX-3, TX-22) or a call outside the transaction (TX-36). Where
+two systems keep their tables in one store, TX-1 and TX-2 read as if the other system's tables were
+this use case's store; this rule is the narrower and governs, and the call into the other system
+takes no transaction.
+*Provenance:* Follows Helland 2007 ("Atomic Transactions Cannot Span Entities") and Richardson
+(Database per service: "A service's transactions only involve its database"). The caller's side of
+TX-25 is this document's.
 *Examples:* —
 
 **TX-15**
@@ -924,8 +1061,8 @@ the glossary's relay does not (glossary: Relay). Against: EIP (Command Message) 
 **TX-37**
 *Scope:* a use case is called for a message that asks for a change the transaction it runs in
 does not commit.
-*Statement:* It MUST make the change the message asks for without deciding again whether to make
-it, by the business rules of its system or by the state of its records.
+*Statement:* It MUST make the change the message asks for, deciding nothing again by the business
+rules of its system or by the state of its records beyond whether it has made it already.
 *Relies on:*
 - TX-22: the use case that decided the change wrote a message asking for it to its outbox, and did
   not make it.
@@ -946,7 +1083,12 @@ again, it records the owner's answer where there is one, a booking's id, and a r
 again. What happened meanwhile, the order cancelled, is the deciding system's to answer, by a
 business rule (TX-35). Deciding nothing, this use case falls outside TX-22's Scope, though its
 change lies outside its transaction too. The call reaches idempotence through the owner's
-idempotency key (TX-31).
+idempotency key (TX-31). Whether it has made the change already it may ask its records: the claim
+of the message id before the call, the booking id recorded by the first attempt and returned by
+the second, are TX-5's means, not a second decision. Whether the change is still wanted it may
+not ask: a handler that gives up after ten minutes decides by a business rule, and that rule's
+place is the use case that holds the pending change and its deadline, a scheduled task's (TX-30),
+not this one's. The owner's refusal is neither: it is recorded as the outcome (TX-45).
 *Provenance:* Follows Khononov p. 149–150 ("the command execution logic should be moved out of the
 saga itself"): the executor carries out what was decided. Deciding nothing again is this
 document's.
@@ -1003,6 +1145,28 @@ system's key is this document's.
 *Examples:* breach examples/tx-31-breach-3pl-booking-keyed-by-fresh-uuid.md · ok
 examples/tx-31-ok-3pl-booking-keyed-by-shipment-id.md
 
+**TX-41**
+*Scope:* a use case called for a message changes something in an external system that takes no
+idempotency key.
+*Statement:* A business rule of its system MUST accept the change being made again on a repeated
+delivery.
+*Relies on:*
+- TX-5: a use case called for a delivered message, repeated, leaves its system's records as once
+  left and answers as the first did.
+- TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
+*Why:* Idempotence counts the system's records (glossary: Idempotent), and a mail is none: the
+handler that claims the message id and sends is idempotent whichever order it does the two in, and
+the mail still goes twice when the process dies between the send and the commit, or never when it
+dies between the commit and the send. No sequence of a claim and a call closes that gap, since the
+call is outside the transaction and the provider takes no key that would let it tell the repeat.
+What remains is the business's: a second confirmation mail is accepted, a second parcel is not, so
+the 3PL that takes no key is asked whether a consignment for the shipment exists before one is
+created, and the race that remains is written down as accepted, or that 3PL is not used for
+anything a repeat of which the business refuses.
+*Provenance:* Follows P9's Provenance (EIP, Idempotent Receiver) and Helland 2007 p. 140; the
+business rule allowing the repeat is this document's, from P9.
+*Examples:* —
+
 **TX-28**
 *Scope:* an external system calls a hook before its change commits.
 *Statement:* The use case it calls MUST NOT change this system beyond recording the external
@@ -1053,11 +1217,32 @@ it in an external system's transaction is this document's.
 *Examples:* breach examples/tx-28-ok-after-change-hook-records-revalidation-request.md · ok
 examples/tx-29-ok-catalog-writes-product-changed-in-payload-transaction.md
 
+**TX-44**
+*Scope:* a use case of this system acts on an external system's change this system recorded as
+pending.
+*Statement:* It MUST NOT act on it before the external system has confirmed the change.
+*Relies on:*
+- TX-28: the use case a hook calls before the external system's change commits changes this system
+  no further than recording the change as pending.
+- TX-30: a business rule of this system decides what happens when a confirmation does not come, so
+  that the waiting ends.
+*Why:* The hook's use case recorded the change as pending because the external system had not
+committed it (TX-28); the handler that then acts on the record, revalidating the page, publishing
+the change, as soon as the message arrives, acts before the commit as surely as the hook would
+have, one hop later. The confirmation is whatever tells this system the change committed: a message
+the external system publishes, a later hook, a read of its state that finds the change there. A
+read that finds nothing yet is no refusal: the use case fails and is delivered again (TX-38), and a
+confirmation that never comes is TX-30's. A hook called after the commit records nothing as pending
+and is outside the Scope.
+*Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
+cancels"). The handler's side of TX-28 is this document's.
+*Examples:* —
+
 **TX-30**
 *Scope:* this system holds a tentative operation, or waits on another system's confirmation or
 answer.
 *Statement:* A business rule of this system MUST decide what happens when the confirmation or answer
-does not come.
+does not come, so that the waiting ends.
 *Relies on:* —
 *Why:* Another system can fail after it said yes, stop resending a hook, or not answer at all, and a
 message can wait in a dead-letter queue. Waiting decides nothing, and what it leaves is a state a
@@ -1070,7 +1255,9 @@ deadline sits in the waiting system's own aggregate, so it acts when it passes, 
 other system does. A business rule
 decides instead: a deadline that cancels, as shop's payment deadline cancels the order; a
 reconciliation that asks the other system; or accepting the state as it stands, a PaymentIntent
-nobody confirmed and that changes nothing. Each ends the waiting.
+nobody confirmed and that changes nothing. Each ends the waiting; a rule that postpones the
+question forever, or asks again forever, decides nothing and leaves the state the customer finds
+(P17).
 *Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
 cancels") and NServiceBus (Saga timeouts: how long a saga waits for a message that comes late or not
 at all is the business's to say).
@@ -1080,7 +1267,8 @@ examples/tx-30-ok-payment-asks-stripe-at-deadline.md
 **TX-35**
 *Scope:* a use case is called for an event that tells this system its part of work spanning systems
 cannot go on as it stands.
-*Statement:* A business rule of its system MUST decide what follows.
+*Statement:* A business rule of its system MUST decide what follows, so that its part of the work
+ends in a state the business rule allows.
 *Relies on:*
 - DRV-7: a handler acknowledges a message once the use case it calls has succeeded, not before.
 - TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
@@ -1093,8 +1281,9 @@ It throws, the handler does not acknowledge, the bus delivers the event again un
 and the card stays charged there. Neither is written down as a choice. A business rule decides
 instead, in the domain, where a reader finds it: a compensating step that undoes the other system's,
 the payment refunded, asked of its owner through the outbox; going on after all, the order
-reinstated; or accepting the state as it stands, written down. The system the event reaches decides,
-holding the state the event meets; the step it undoes stays its owner's.
+reinstated; or accepting the state as it stands, written down. Asking for the refund again forever
+is none of these: it ends nothing. The system the event reaches decides, holding the state the
+event meets; the step it undoes stays its owner's.
 *Provenance:* Follows Richardson (Saga: when a step "fails because it violates a business rule, the
 changes made by the completed steps are undone by compensating transactions"; the order service's
 handler "either approves or rejects the Order"), Khononov p. 235 ("The only thing that can be done
@@ -1185,9 +1374,32 @@ Helland 2007 p. 139 and MS, which prefers idempotent handling to deduplication. 
 NServiceBus deduplicates within a retention window.
 *Examples:* —
 
+**TX-46**
+*Scope:* a driving adapter asks another system for what it has to tell this one.
+*Statement:* It MUST hand each item to a use case as a message delivered to this system, with the id
+the other system gives the item.
+*Relies on:*
+- TX-5: a use case called for a delivered message, repeated, leaves its system's records as once
+  left and answers as the first did.
+- TX-19: a use case called for a delivered message leaves the records of what the message tells of
+  as they would be had the messages arrived in the order they were written.
+*Why:* A bank that calls no hook is polled: a scheduled task asks it for the transfers since the
+last poll and gets some of them again, and the same transfer twice in one answer. Applied as rows,
+each poll credits the invoice again, and a transfer that matches no invoice is dropped, since no
+rule holds for a row. Handed to the use case as a message with the bank's id for the transfer,
+each item is what the message rules govern: the use case is idempotent in the bank's id (TX-5), the
+order the bank lists them in does not matter (TX-19), and the transfer that matches nothing is an
+outcome a business rule decides (TX-35, TX-38). The task is a driving adapter and makes one acting
+call per item (DRV-1).
+*Provenance:* Follows EIP (Polling Consumer; Idempotent Receiver) and Richardson (Idempotent
+consumer). Treating the polled item as a delivered message is this document's.
+*Examples:* —
+
 **TX-19**
-*Scope:* a use case is called for a delivered message.
-*Statement:* It MUST reach the same result whatever order the messages arrive in.
+*Scope:* a use case is called for a delivered message, and a message written before or after it
+tells of the same thing.
+*Statement:* The records of that thing MUST end as they would had the messages arrived in the order
+they were written.
 *Relies on:*
 - TX-32: messages of one system of which a later one overrides an earlier carry a version of what
   they tell of, rising with each change.
@@ -1196,7 +1408,9 @@ it cancels. A use case that reads "not found" as "already handled" drops the can
 reservation made a moment later stays for a dead order; "not found" is not "already handled".
 Messages that override each other, two changes of a dunning stage, are ordered by their version: the
 use case keeps the higher and drops the lower. Between two publishers, which message wins is the
-domain's decision.
+domain's decision. Two `OrderPlaced` racing for the last unit tell of two orders, not of one thing:
+which arrives first is which was placed first as far as fulfillment can know, and a business rule
+that gives the unit to the first is the rule, not a breach (P10).
 *Provenance:* Follows Khononov p. 245 ("Events will arrive out of order"), Helland 2007 p. 138 and
 MS (an older price event overwriting a newer one).
 *Examples:* —
@@ -1221,11 +1435,11 @@ the means on the publisher. The version is this document's.
 examples/tx-32-ok-dunning-stage-changed-carries-version.md
 
 **TX-7**
-*Scope:* the schema of a message changes, or of what an open host service's driving port takes,
-returns or raises where code of another process calls it; or a new message or port takes over from
-another.
+*Scope:* the schema of a message changes, or of a record a system keeps, or of what an open host
+service's driving port takes, returns or raises where code of another process calls it; or a new
+message or port takes over from another.
 *Statement:* The change MUST keep what old code writes readable by new code, and what new code
-writes readable by old code, each field keeping its meaning.
+writes readable by old code as new code meant it, each field keeping its meaning.
 *Relies on:* —
 *Why:* A message is handled by code older or newer than the code that wrote it. One written before a
 deploy sits in the outbox and is handled after it; one deployment does not clear the outbox. A
@@ -1237,8 +1451,12 @@ process still on old code calls the upstream's new one, and an error the new cod
 caller that knows none of it. Called in the same process, port and caller are compiled and deployed
 together, and the type checker sees both sides. An optional field added or removed keeps both
 directions; a field renamed, a required one added or removed, a type changed, an enum value added or
-removed, a meaning changed, an amount from cents to euros, breaks one. A change that cannot keep
-both goes through versions: new code writes the old message and the new, or offers the old port
+removed, a meaning changed, an amount from cents to euros, breaks one. So does an optional field
+old code can read and does not know: `paidByInvoice` added to `OrderPlaced`, old handlers invoice
+on an `OrderPaid` that never comes, and the order is never invoiced; old code read the message and
+took it to mean what it no longer means. A record meets the same deploy: the old process loads a
+row the new code wrote, drops the field it does not know, and saves it back. A change that cannot
+keep both goes through versions: new code writes the old message and the new, or offers the old port
 beside the new, while old readers run, and reads the old until none waits.
 *Provenance:* Follows protobuf (Dos and Don'ts: "Clients and servers are never updated at exactly
 the same time"), Confluent (full compatibility lets producers and consumers upgrade independently;
@@ -1249,14 +1467,38 @@ subscribers' projection logic will fail"). Departs: Confluent defaults to one di
 upgrade order; Helland 2005 §3.4 goes further, every change a new version.
 *Examples:* —
 
+**TX-42**
+*Scope:* a system writes a message.
+*Statement:* Its shape MUST be stated once, as a schema.
+*Relies on:*
+- TX-7: a changed schema of a message keeps what old code writes readable by new code and the
+  reverse, each field keeping its meaning.
+- SYS-2: the modules that declare a published language neither reach the domain nor are generated
+  from it.
+*Why:* A message outlives the code that wrote it and is read by code older and newer (P14). One
+written as `payload: unknown` and parsed by hand in each handler has as many shapes as handlers,
+each drifting on its own, and a changed field is found by the handler that breaks. One schema,
+parsed with by the writer and every handler, is where TX-7 is kept: the change is made there and
+the compiler finds every reader. A published message's schema is its system's published language,
+declared apart from the domain (SYS-2); a private message's is the system's own, beside its domain's
+schemas, since nobody outside reads it. The envelope the relay and the bus carry a message in is the
+common library's and holds no system's shape (ASM-6).
+*Provenance:* Follows Khononov p. 243 (the event's schema and the subscribers' projection logic),
+protobuf (Dos and Don'ts) and Helland 2005 (stable data has an unambiguous interpretation). Stating
+it once is this document's, DOM-3's for messages.
+*Examples:* —
+
 **TX-17**
 *Scope:* a system publishes an event.
-*Statement:* Its code MUST NOT name a system that handles it.
+*Statement:* It MUST publish one event of what happened, which names no system that handles it.
 *Relies on:* —
 *Why:* The writer does not know its readers: it publishes, and which systems handle the event is
 each receiver's decision, made by subscribing its handler (glossary: Bus). A publisher that names
 its handlers changes whenever a system starts or stops listening, and imports what it names, so the
 dependency runs from upstream to downstream, against the one the published language establishes.
+One event per consumer, `OrderPlaced` cut once for billing and once for fulfillment under names
+that name nobody, is the same dependency: each consumer's needs shape an event of the publisher's,
+and the publisher changes when a consumer does.
 *Provenance:* Follows EIP (Publish-Subscribe Channel), Richardson (Messaging), NServiceBus (Events),
 MS (the publisher does not need "to know the subscribers") and Khononov p. 233.
 *Examples:* —
@@ -1295,8 +1537,8 @@ from the glossary's Private.
 *Examples:* —
 
 **TX-34**
-*Scope:* a use case called for a command another system of this codebase sent refuses it: a business
-rule of its system says no.
+*Scope:* a use case called for a command another system of this codebase sent does not carry it
+out: a business rule of its system says no, or the system it asked for the change refuses.
 *Statement:* It MUST publish an event of its own system's published language that tells of the
 refusal and names no system that sent the command.
 *Relies on:*
@@ -1304,8 +1546,10 @@ refusal and names no system that sent the command.
 - TX-21: the bus keeps a message and delivers it again until the handler acknowledges it.
 - TX-1: a use case that writes runs in one transaction, which its service opens, hands to each call
   it makes into its store and commits.
-- TX-38: a use case called for a message that is stopped by no business rule of its system fails
-  and commits nothing.
+- TX-38: a use case called for a message that is stopped by no business rule of its system and by
+  no refusal of another system fails and commits nothing.
+- TX-45: a use case called for a message whose change another system refuses commits the refusal as
+  the message's outcome.
 *Why:* A refusal that throws fails the use case: the handler does not acknowledge, the bus delivers
 the command again, the same business rule refuses it again, until the bus parks it, and the sender
 learns nothing. Shop asked payment for a refund, payment refuses it for a disputed charge, and shop
@@ -1314,8 +1558,9 @@ writes the event to its outbox and commits, it has succeeded, and the handler ac
 event declared in the sender's published language, or naming the sender, ties the receiver to its
 senders: it changes whenever a system starts or stops sending the command. In its own published
 language, naming no sender, the event is handled by
-the sender as a downstream handles any event of its upstream. A failure that a retry may cure is
-no refusal (TX-38).
+the sender as a downstream handles any event of its upstream. Stripe refusing the refund of a
+disputed charge is a refusal too: payment did not carry the command out, records that (TX-45), and
+tells the sender the same way. A failure that a retry may cure is no refusal (TX-38).
 *Provenance:* Follows Khononov p. 235 (a command "can be rejected", "if the command is invalid or if
 it contradicts the system's business rules") and p. 148 (the saga's command answered by
 "PublishingConfirmed and PublishingRejected events from the AdPublishing bounded context"). Departs:
@@ -1326,7 +1571,7 @@ examples/tx-34-ok-refund-refusal-published.md
 
 **TX-38**
 *Scope:* a use case called for a delivered message cannot complete, and what stops it is no
-business rule of its system.
+business rule of its system and no refusal by another system.
 *Statement:* It MUST fail, committing nothing, and not commit the stop as an outcome of the message.
 *Relies on:*
 - TX-1: a use case that writes runs in one transaction its service opens and commits.
@@ -1340,15 +1585,44 @@ a refusal, has succeeded by that measure: payment commits a conflict on `RefundP
 customer it was refused for a reason no business rule gave. Failing, nothing commits, the handler
 does not acknowledge, and the bus delivers the message again: a store briefly down or a lost race
 is cured by the retry, and a failure no retry cures parks the message where someone finds it
-(TX-21). A refusal by a business rule is an outcome, and TX-34 has it published.
+(TX-21). A refusal by a business rule is an outcome, and TX-34 has it published; a refusal by the
+system asked for the change is one too, recorded by TX-45. What is left here is what a retry may
+cure, or a bug, and parking is where a bug is found.
 *Provenance:* Follows EIP (Transactional Client: the message is consumed only when the transaction
 commits) and NServiceBus (Outbox: a message that "fails to process through all the retry attempts"
 is "moved to the error queue"). The line between a refusal and a failure is this document's.
 *Examples:* —
 
+**TX-45**
+*Scope:* a use case called for a message asks another system for a change, and that system refuses
+it.
+*Statement:* It MUST commit the refusal as the message's outcome, and not fail.
+*Relies on:*
+- TX-37: a use case called for a message that asks for a change its transaction does not commit
+  makes the change, deciding nothing again by its system's rules or records.
+- TX-38: a use case called for a message stopped by no business rule and by no refusal of another
+  system fails and commits nothing.
+- DRV-7: a handler acknowledges a message once the use case it calls has returned with what it
+  wrote committed.
+*Why:* Stripe refuses the refund of a disputed charge, the 3PL refuses a sku it does not know. The
+use case cannot make the change the message asks for (TX-37) and no retry will: failed (TX-38), the
+message is delivered again until the bus parks it, and the refund that will never happen waits in
+a dead-letter queue for an operator, while shop tells the customer the money is on its way (P17).
+A refusal is an answer, and the answer is recorded: the refund marked refused, the shipment marked
+unbooked with the 3PL's reason, committed with the handled message, and told as an event where the
+change was another system's command (TX-34), so the system that decided the change decides what
+follows (TX-35). The adapter tells a refusal from a failure in the external system's terms, a
+decline from a timeout, and that line is the adapter's to draw.
+*Provenance:* Follows Khononov p. 235 (a command "can be rejected") and p. 148 (rejection as an
+event the saga handles), Richardson (Saga: compensating transactions on a rejected step) and
+Helland 2007 p. 140 (a tentative operation cancels). Recording another system's refusal as the
+outcome is this document's.
+*Examples:* —
+
 **TX-12**
 *Scope:* a use case of this system reads data another system owns.
-*Statement:* It MUST read it from the owner's open host service or from its published events.
+*Statement:* It MUST read it from the owner's open host service, or from its published events
+delivered to a handler of this system.
 *Relies on:*
 - SYS-2: the modules that declare a published language neither reach the domain nor are
   generated from it.
@@ -1360,9 +1634,11 @@ against its records, binds this system to the owner's storage: the owner's schem
 system's query with no compile error, and the owner's business rules, which decide what a record
 means, are bypassed. In-process the open host service is a function call behind a driven port; going
 through it costs a port, not a network hop. A replica is filled from the owner's published events
-or what its open host service returns, so reading it reads those. The replica lags by a moment.
-Where the components can settle for that, the published events are the rule of thumb: the read
-then needs the owner neither running nor fast.
+or what its open host service returns, so reading it reads those. The owner's outbox table is not
+its published events: it is the owner's store, read past its published language, and a message
+there may yet roll back; the events reach this system through the bus, to its handler. The replica
+lags by a moment. Where no business rule needs the owner's answer now, TX-40 has the read go to the
+events: it then needs the owner neither running nor fast.
 *Provenance:* Follows Richardson (Database per service: data "accessible only via its API"; API
 Composition; CQRS), Helland 2005 §1.3 and §6.5 (no access to the data "unless it is mediated by
 the application logic of the service") and §4.1 (versioned reference data, "somewhat out of
@@ -1399,20 +1675,48 @@ Evans Reference p. 32 (customer/supplier).
 *Examples:* —
 
 **TX-27**
-*Scope:* a use case decides by a replica.
-*Statement:* The decision MUST be one a business rule of its system accepts on data that lags the
-owner.
+*Scope:* a use case decides by another system's data, from a replica or from what the owner
+answered.
+*Statement:* The decision MUST be one a business rule of its system accepts on data that can change
+at the owner before the use case commits.
 *Relies on:* —
-*Why:* A replica lags its owner, and no save in this store fails on a change there: the decision may
-rest on a fact the owner has already changed. Whether that is acceptable depends on the use case, so
-the answer is a business rule, in the domain, where a reader finds it. Shop offers pay-by-invoice by
-its copy of billing's dunning stage; a business rule accepts a customer who entered dunning a moment
-ago.
+*Why:* A replica lags its owner, and the owner's live answer is stale the moment it returns: no save
+in this store fails on a change there, so the decision may rest on a fact the owner has already
+changed. Checkout reading billing's dunning stage through its open host service and committing on
+it is in the same place as checkout reading its replica, a moment less behind; a replica built to
+have a rule to stand under is a detour, since this rule holds for both. Whether that is acceptable
+depends on the use case, so the answer is a business rule, in the domain, where a reader finds it.
+Shop offers pay-by-invoice by its copy of billing's dunning stage; a business rule accepts a
+customer who entered dunning a moment ago.
 *Provenance:* Follows Vernon EAD II p. 9 (domain experts "are often willing to allow for reasonable
 delays"), MS (Domain events: "it is in any case the responsibility of the domain experts to say
 whether particular operations need atomic transactions or not"), Helland 2005 §2.5 (the application
 logic "must reconcile" the now with the then) and Evans p. 91 ("Any rule that spans AGGREGATES will
 not be expected to be always up to date").
+*Examples:* —
+
+**TX-40**
+*Scope:* a use case of this system reads data another system owns, and no business rule of this
+system needs the owner's answer before the use case commits.
+*Statement:* It SHOULD read it from the owner's published events, not from its open host service.
+*Relies on:*
+- TX-12: a use case reads data another system owns from the owner's open host service or from its
+  published events delivered to a handler of this system.
+- TX-26: a replica is written from the owner's events or from what the owner returns to the keeping
+  system's own calls.
+- TX-27: a use case that decides by another system's data decides as a business rule of its system
+  accepts on data that can change at the owner.
+*Why:* A use case that calls the owner is down whenever the owner is, and slow whenever it is (P15).
+Where a business rule needs the owner's answer now, the customer pays now so the payment provider
+is asked now, that is the use case's nature and the call is right. Where none does, the invoice
+number shown on the order page, the dunning stage checked at checkout under a rule that accepts a
+stale one (TX-27), the call buys nothing and costs the owner's availability: the replica filled from
+the owner's events answers from this system's own store. Deviating, a system that calls for data no
+rule needs now says why, and TX-12 still bounds what it calls.
+*Provenance:* Follows Khononov p. 246 ("If the components can settle for eventually consistent
+data, use the event-carried state transfer message") and p. 238, Fowler (Event-Carried State
+Transfer) and MS (a synchronous call to another service counts against its autonomy). Departs:
+Fowler finds it "usually easier just to call the sender".
 *Examples:* —
 
 ## Other systems
@@ -1543,7 +1847,8 @@ examples/sys-13-ok-checkout-process-sends-receivers-commands.md
 
 **SYS-14**
 *Scope:* a published language or a shared kernel reaches past itself.
-*Statement:* What it reaches MUST be one of: a shared kernel, pure code of no system.
+*Statement:* What it reaches MUST be one of: a shared kernel, pure code of no system that loads on
+every runtime of the language.
 *Relies on:* —
 *Why:* Both are imported where the rest of their system is not: a shared kernel into the domain of
 every system that shares it, a published language into a downstream's adapters, into its domain
@@ -1557,13 +1862,38 @@ list: a published language or a shared kernel that imports one passes the upstre
 every system that imports it, on the upstream's schedule. A published message carries kernel
 values, a line's price as `Money`, so a published language imports the kernel it is built from,
 and a kernel module its sibling; what either drags in is bounded by this same rule, so an
-importer loads a model of values and nothing of any system. It is closed, like DOM-1's.
+importer loads a model of values and nothing of any system. The runtime clause is DOM-1's too, and
+for the same reason: both load in the browser and in other systems' processes, where a Node module
+fails to load; a service or an adapter is loaded by no one else, so their lists ask for pure code
+alone. It is closed, like DOM-1's.
 *Provenance:* Follows Khononov p. 51 ("Ideally, the shared kernel will consist only of integration
 contracts and data structures") and Garrido §3 (the hexagon "depends on nothing, maybe just on
 utilities"). The list is this document's. Departs: Evans p. 251 shares "the subset of code or of the
 database design" with the model.
 *Examples:* breach examples/sys-14-breach-money-imports-common-logger.md · ok
 examples/sys-14-ok-money-returns-remainder.md
+
+**SYS-16**
+*Scope:* a published language constrains what it takes or carries.
+*Statement:* It MAY state what a business rule of its system also states, as a constraint of the
+contract in its own terms.
+*Relies on:*
+- DOM-7: a business rule of this system is stated once, in the domain.
+- SYS-2: the modules that declare the published language neither reach the domain nor are generated
+  from it.
+*Why:* `quantity` positive, the tax class one of three: the domain states the rule, and the
+published schema that takes an order line says the same of what crosses. Under DOM-7 the second is
+a second statement; under SYS-2 it cannot be the first one re-exported. The two are two by design:
+the contract says what a downstream may send and what it will get, and holds still while the model
+moves (P13); the domain says what the business allows, and changes when the business does. Where
+the domain comes to allow a zero quantity, the contract still refuses it until the contract
+changes, on its own terms and under TX-7, and the service translating between the two is where the
+difference shows. The permission is the published language's alone: a driving adapter of this
+system restating the domain's schema beside it is DOM-3's breach.
+*Provenance:* Follows Evans p. 278 ("do not equate the interchange language and the model of the
+host") and MS (two-step validation: command DTOs validated beside the domain's own). The MAY
+against DOM-7 is this document's.
+*Examples:* —
 
 **SYS-12**
 *Scope:* a record this system owns is kept by an external system.

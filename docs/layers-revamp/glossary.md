@@ -38,11 +38,11 @@ In DDD vocabulary, domain is the model, service is the application layer, drivin
 interface layer, driven adapters the infrastructure layer.
 
 **Reach.** A module reaches what running it reads or calls and what it is typed by, however the
-code got hold of it, and what those reach in turn. What it reaches through a port it reaches as
-the port, not as the code behind it.
+code got hold of it, and what those reach in turn. What it reaches through a port of its system
+it reaches as the port, not as the code behind it.
 
-**Pure.** A module is pure when calling it reaches nothing outside the process, it loads on every
-runtime of the language, and it hands its caller nothing the caller did not pass.
+**Pure.** A module is pure when calling it reaches nothing outside the process and it hands its
+caller nothing the caller did not pass.
 
 **Port.** An interface, never the code behind it.
 
@@ -184,8 +184,7 @@ factory for a driving port; an adapter's constructor is a factory for a driven p
 **System builder.** The part of assembly a system provides, so that a process's assembly builds
 what it needs of the system without knowing its internals or their defaults: it takes
 configuration and what the process holds once, builds its system's own from them, and returns
-what assembly hands on: implementations of the system's driving ports, its handlers and its
-outbox readers. A system may have several, and one may return one thing or many.
+what assembly hands on. A system may have several, and one may return one thing or many.
 
 **Assembly.** The one place in a process where every port gets its implementation, and the only
 place where port and implementation meet. It calls the system builders and produces what the
@@ -198,6 +197,9 @@ no record holds.
 system to import.
 
 ## Tests
+
+**Double.** What a test puts in place of something the code under test reaches; a fake is one
+that works.
 
 **Fake.** A working implementation of a port that reaches nothing outside the process.
 

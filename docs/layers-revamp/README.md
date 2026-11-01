@@ -74,7 +74,9 @@ people and by scripts; a Statement is never judged alone. The other parts serve 
 - **Provenance.** Sources outside this repo: what the rule follows, where it departs from them.
   Never this repo's own history; that lives in git and the issues.
 - **Examples.** At least one breach and one ok, as `breach examples/<id>.md · ok
-  examples/<id>.md`.
+  examples/<id>.md`. Where the compliant shape leaves the Scope, the value passed as an argument
+  where the rule forbids an ambient one, the ok example shows that shape and says the Scope no
+  longer holds.
 
 ### What binds
 

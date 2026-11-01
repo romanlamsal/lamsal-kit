@@ -63,9 +63,9 @@ system's records or apart from them.
 *Status:* open, from review 02 (issue 12).
 *Situation:* A use case that needs an answer from another system of this codebase now calls that
 system's open host service, or the work goes by messages and the caller waits on the answer.
-*Bound:* P15, P17; TX-12, TX-30.
+*Bound:* P15, P17; TX-12, TX-30, TX-40.
 *Refused:* A call made where no business rule needs the answer now, so that the caller is down
-whenever the other system is.
+whenever the other system is (TX-40).
 
 **C7**
 

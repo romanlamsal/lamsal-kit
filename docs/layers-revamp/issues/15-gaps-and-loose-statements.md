@@ -1,6 +1,6 @@
 # 15 — Gaps and loose Statements
 
-**Status:** open
+**Status:** closed
 
 ## Context
 
@@ -150,8 +150,191 @@ ruled again.
 
 ## Decision
 
-—
+Method, settled with the requester before any edit: every item ruled against Scope and Statement
+as issues 12 to 14 and 20 leave them. A gap closes in a Scope, a Statement, a new rule or a
+sentence in the Assumptions; a reading settles in binding text or in the glossary; a loose
+Statement is sharpened, or its breach is accepted and the reason recorded here for the ok example.
+Glossary changes under the freeze: the grep ran at `96ffa84`, hits listed per term. New ids: DOM-8,
+DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-46.
+
+### Glossary
+
+- **Reach** (N3): "What it reaches through a port *of its system* it reaches as the port." Hits of
+  the old clause: glossary l. 41, SVC-6's Why l. 187. An interface of the common library is no port
+  of its system, so the code behind it is reached: a service querying through a common-library
+  `Sql` interface reaches the store, and SVC-7 binds. The common library's `Transactions` and its
+  telemetry are reached the same way, and ASM-7 lets them through, their output changing neither
+  how the use case acts nor what it answers: R03-24 stays resolved, by ASM-7 instead of the
+  clause. The six reach lists stand. A conformist's upstream ports are its own driven ports
+  (glossary), so they stop the reach.
+- **Pure** (N2): loses "it loads on every runtime of the language". Hits: glossary l. 44; DOM-1's
+  Why l. 50 and Provenance l. 75; "pure code of no system" in the Statements of DOM-1, SVC-6, DRV-8,
+  DVN-4, SYS-14 and the DOM-1 lines of TST-3 and TST-10. The runtime clause moves to where it
+  protects something: DOM-1 and SYS-14 list "pure code of no system that loads on every runtime of
+  the language", since the domain, the kernel and the published language are what a browser and
+  another system's process import. `node:crypto` in a driving adapter, a driven adapter or a
+  service is pure code of no system; `randomUUID()` and `Date.now()` still fail the handing clause.
+- **System builder** (N1): loses the list, "and returns what assembly hands on". Hits: glossary
+  l. 184 and 191, ASM-1's Why l. 480 and 489, ASM-2's Why l. 501, ASM-8's Why l. 645. What it may
+  return is ASM-11's.
+- **Double**, new: what a test puts in place of something the code under test reaches; a fake is
+  one that works. TST-5 and TST-10 use the word. "Flag" (TST-8) is common language; TST-6's
+  Statement defines "contract suite" inline.
+
+### Assumptions
+
+- The external-system paragraph: the configuration parts the rules reach gain "what it reads of
+  the system's records (SYS-9)"; it is no system of this codebase where a rule says one (TX-3
+  against TX-22); where a rule names an open host service or a published language and the system
+  is external, its API is the one and its package the other (TX-12, DRV-8, the SDK in a hook).
+- Not covered gains: how telemetry crosses a message, the trace context on the envelope, the
+  stack document's; where a system records that it conforms to an upstream, the repository's,
+  the glossary's Conformist saying how it shows in code.
+
+### New rules
+
+- **TX-40** (P15). Scope: a use case reads data another system owns, and no business rule of this
+  system needs the owner's answer before the use case commits. Statement: it SHOULD read it from
+  the owner's published events, not from its open host service. TX-12's Why loses the rule of
+  thumb. C6's Bound gains TX-40; the entry stays open, both its designs hold where a rule needs
+  the answer now.
+- **TX-41** (the keyless outside effect). Scope: a use case called for a message changes something
+  in an external system that takes no idempotency key. Statement: a business rule of its system
+  MUST accept the change being made again on a repeated delivery. TX-22's old "no key" sentence
+  lands here; P9's Why said it already.
+- **TX-42** (a message's shape). Scope: a system writes a message. Statement: its shape MUST be
+  stated once, as a schema. `payload: unknown` parsed by hand in each handler breaches. Published:
+  the published language (SYS-2); private: the system's own.
+- **TX-43** (P16, the caller's side). Scope: a use case of this system calls another system.
+  Statement: the call MUST NOT carry the use case's transaction. Payload's Local API handed shop's
+  transaction breaches; TX-25 stays the callee's side. Where one Postgres is one store (issue 17),
+  TX-1 and TX-2 read the other system's tables as this use case's store; TX-43 is the narrower
+  and governs.
+- **TX-44** (a pending external change). Scope: a use case of this system acts on an external
+  system's change this system recorded as pending. Statement: it MUST NOT act on it before the
+  external system has confirmed the change. The version check in
+  `tx-28-ok-after-change-hook-records-revalidation-request`'s handler is this.
+- **TX-45** (another system refuses). Scope: a use case called for a message asks another system
+  for a change, and that system refuses it. Statement: it MUST commit the refusal as the message's
+  outcome, and not fail. Stripe's disputed refund, the 3PL's unregistered sku: an outcome, not a
+  message parked forever.
+- **TX-46** (a polled answer). Scope: a driving adapter asks another system for what it has to
+  tell this one. Statement: it MUST hand each item to a use case as a message delivered to this
+  system, with the id the other system gives the item. TX-5, TX-19, TX-35 and TX-38 then hold for
+  the bank's transfers; whether the bank is polled stays issue 17's.
+- **DOM-8** (P19). Scope: a term of a system's glossary is used in its code. Statement: it MUST
+  have the meaning its glossary gives it, in every module of the system.
+- **DOM-9** (a business rule's number). Scope: a business rule of this system decides by a value.
+  Statement: the value MUST come from the domain's code or from a record, not from a configuration
+  value. The deadline's minutes are the domain's; a value the business changes at runtime is a
+  record.
+- **SVC-8** (P5, a port's terms). Scope: a system declares a driven port. Statement: what it takes
+  and returns MUST be in the system's terms, not in the terms of what lies behind it. A generic
+  `Sql` port in the service layer breaches. SVC-7's Why loses "in the system's".
+- **ASM-11** (what a builder returns, N1). Scope: a system builder returns. Statement: what it
+  returns MUST be one of: an implementation of a driving port of its system, a driving adapter of
+  its system, an outbox reader of its system. A hook, a route and a scheduled task are driving
+  adapters, so the review 03 builders comply and `sys-1-ok-shop-hooks-via-builder` is ok again;
+  `sys-1-breach-builder-returns-repositories` breaches ASM-11. Both named from its Examples.
+- **SYS-16** (MAY). Scope: a published language constrains what it takes or carries. Statement: it
+  MAY state what a business rule of its system also states, as a constraint of the contract in
+  its own terms. Relies on DOM-7, which it excepts.
+
+### Sharpened
+
+- **SVC-2**: "in the call that acts and on the state that call saves". Reload and save again
+  breaches.
+- **TX-23**: Scope "a repository saves an aggregate"; the save MUST fail where the aggregate in the
+  store differs from what the use case loaded, or exists where it loaded none. The blind upsert
+  breaches.
+- **TX-7**: Scope gains the schema of a record a system keeps (review 03 §2.3); Statement: "what
+  new code writes readable by old code as new code meant it". `paidByInvoice` ignored by old
+  handlers breaches; a field's meaning changed in place too.
+- **TX-12**: "from its published events delivered to a handler of this system". Reading the
+  owner's outbox table breaches.
+- **TX-17**: "It MUST publish one event of what happened, which names no system that handles it."
+  One event per consumer breaches.
+- **TX-19**: Scope: a use case is called for a delivered message, and a message written before or
+  after it tells of the same thing; Statement: the records of that thing MUST end as they would
+  had the messages arrived in the order they were written. Two orders racing for the last unit
+  tell of two things; arrival decides, as a business rule allows (P10). "The same result" is gone.
+- **TX-30**: "so that the waiting ends". **TX-35**: "so that its part of the work ends in a state
+  the business rule allows". Postponing or asking again forever breaches (P17).
+- **TX-37**: "deciding nothing again by the business rules of its system or by the state of its
+  records beyond whether it has made it already". The claim and a record that keeps the first
+  answer comply. A lapse rule in the handler does not: the deadline is the use case that holds
+  the pending change, a scheduled task's (TX-30).
+- **TX-38**: Scope gains "and no refusal by another system". **TX-34**: Scope "does not carry it
+  out: a business rule of its system says no, or the system it asked for the change refuses".
+- **DRV-7**: "unless the use case it calls has returned with what it wrote committed". The Why's
+  ruling on "succeeded" moves; a committed refusal is a return (TX-34), a committed failure TX-38's.
+- **ASM-3**: Scope "reads an ambient value, itself or through what it calls". The common-library
+  helper that reads the request for the service is in.
+- **ASM-4**: Statement gains "or a probe". Checking the closed probe gap found ASM-4 still
+  shutting the courier to it, so `/health` had no way to the pool a use case uses. Guessed, open to
+  overturn.
+- **TX-27**: Scope: a use case decides by another system's data, from a replica or from what the
+  owner answered; Statement: the decision MUST be one a business rule of its system accepts on
+  data that can change at the owner before the use case commits. Checkout committing on billing's
+  live dunning stage is in the Scope; the replica built for a rule to stand under is a detour.
+- **DOM-1, SYS-14**: the runtime qualifier, see Pure.
+
+### Accepted, no change
+
+- SVC-3 behind a driven port: DVN-4 refuses the adapter that calls a service of its system; the
+  example lists DVN-4 (issue 19).
+- TX-24 by a snapshot: a snapshot is the aggregate's own fact (glossary); whether a value may be
+  one is the business rule's (DOM-4).
+- TX-22's Scope for the handler's own use case: TX-37 (issue 13). ASM-2 against DRV-3: DRV-3 is
+  narrower and governs. Instrumentation before assembly: the stack document's (Assumptions), the
+  telemetry ASM-7's. The admin dashboard: SYS-9 refuses the owners' tables; the page is a driving
+  adapter (glossary) over three open host services, reads the courier (ASM-4), and each call
+  reaches the port of the system it belongs to; issue 19 turns the gap file into an ok example.
+- Trace context across the outbox: Assumptions, not covered. A request id on an outbox row: a
+  record, not an answer (glossary: Idempotent, Record).
+- The courier accessor: ASM-4 binds the code whose run performs the read; the accessor is the
+  courier's code or the adapter's (ASM-4's Why).
+- The clock and ids (regression, Noticed): the operating system is Outside; a service takes the
+  time and its ids through a port of its system, whose implementation assembly may take from the
+  common library, or as arguments; a driving adapter from what calls it. A ready-made
+  common-library clock breaches SVC-7 and ASM-7's Scope fails for it. Issue 20's "or the common
+  library" is overruled; SVC-7's Why says so.
+- The external system's SDK in a hook (regression, Noticed): the package is its published
+  language (Assumptions), on DRV-8's list; a call through it that reaches the external system is
+  the outside and SVC-7's.
+- ASM-3's and TX-15's Scopes compliant code leaves: an ok example may show the shape outside the
+  Scope and say so (README, Examples).
+- Test words: Double entered; the rest common language or defined inline.
+
+### Relies on
+
+Updated: ASM-8 on ASM-4 (the probe); TX-34 on TX-38 (no refusal by another system), with a new
+line on TX-45. New lines for every new rule. Checked and holding under the changed text: TX-23's
+three (narrower claim), DRV-7's eight ("succeeded" as a paraphrase of returned and committed),
+TX-7's two, TX-30's two, TX-35's, TX-37's, TX-17's, SVC-2's, DOM-1's two, SYS-14's.
+
+Guessed, not agreed, open to overturn: ASM-4 admitting the probe; TX-43 standing on
+narrower-governs against TX-1 and TX-2 until issue 17 decides the store per system; twelve new
+rules rather than fewer, each one ruling; the Fresh repo drafts after the glossary change deferred
+to the Consequences.
 
 ## Consequences
 
-—
+- To issue 16: the lines of the twelve new rules are new; TX-34's on TX-38 and TX-45, ASM-8's on
+  ASM-4 rewritten here; the lines checked above are read again there.
+- To issue 17: the store per system decides whether TX-43 leans on narrower-governs; the bank
+  polled or calling a hook decides whether TX-46 holds for it; Payload's Local API as catalog's
+  open host service is ruled (Assumptions); the sku veto stays catalog's (issue 20).
+- To issue 19: examples for the twelve new rules; ASM-11 names two existing files; every example
+  naming a sharpened rule is re-read (SVC-2, TX-23, TX-7, TX-12, TX-17, TX-19, TX-30, TX-35,
+  TX-37, TX-38, TX-34, DRV-7, ASM-3, ASM-4, TX-27, DOM-1, SYS-14);
+`gap-health-and-metrics-endpoints`   becomes ASM-4's ok,
+`gap-admin-dashboard-belongs-to-no-system` SYS-9's;  
+`tx-28-ok-after-change-hook-records-revalidation-request` moves `givesUpWaiting` to a scheduled  
+task's use case and satisfies TX-44; `svc-3-breach-clear-cart-service-behind-driven-port` lists  
+DVN-4; `drv-8-breach-mailer-subscribed-to-bus-in-assembly` and  
+`tx-22-breach-claim-rolled-back-after-3pl-call` list TX-41 where TX-5 left.
+- Glossary changed (Reach, Pure, System builder, Double): the regression reader runs, and two
+  Fresh repo drafts over the regenerated distilled glossary and world are owed
+  (`reviews/regression-reader.md`, After it runs); not run in this issue.
+- `choices.md` C6 bounded by TX-40; README's Examples entry gains the out-of-Scope ok.
