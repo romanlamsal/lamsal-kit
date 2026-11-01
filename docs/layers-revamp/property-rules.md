@@ -47,9 +47,9 @@ Conformist), which is the repository's.
 ### P1. The domain models the business domain and is shaped by nothing that serves it
 
 *Scope:* a module of a system's domain reaches code that is not of that domain.
-*Statement:* Everything it reaches there MUST be one of: a shared kernel; the published language
-of an upstream its system conforms to; pure code of no system that is in no terms of the outside
-and loads on every runtime of the language.
+*Statement:* Outside its domain, a module of the domain MUST reach only a shared kernel, the
+published language of an upstream its system conforms to, or pure code of no system. That pure code
+MUST be in no terms of the outside and MUST load on every runtime of the language.
 *Why:* What serves the domain is the outside and the code that speaks to it: the store and its
 client, the framework that calls in, the carrier and its SDK, the runtime the process runs on.
 Each is replaced on its own schedule (F1). A domain that reaches one is shaped by it: an `Order`
@@ -139,11 +139,10 @@ Conformist, Pure, Outside
 ### P2. A business rule lives in one place: the domain
 
 *Scope:* code of this codebase states a business rule of a system, or needs what one decides.
-*Statement:* A business rule of a system MUST be stated once, in that system's domain or in a
-shared kernel its domain imports, together with every value it decides by that is the same for
-every candidate, unless a record holds that value. Code anywhere else that needs what the rule
-decides, or the shape it gives a value, MUST get it from that statement, directly or through the
-system, and MUST NOT state the rule again nor replace it with a double.
+*Statement:* A business rule of a system MUST be stated once, in its domain or in a shared kernel
+that domain imports, with every value it decides by that is the same for every candidate and that no
+record holds. Code anywhere else that needs what it decides MUST get it from that statement,
+directly or through the system, and MUST NOT state it again.
 *Why:* A business rule stated twice is two rules the first time it changes. The edit lands where
 its author looked, an agent having read one file (F3), and the other statement stays; the system
 then decides one way through one path and another way through the next, and nothing fails,
@@ -258,10 +257,9 @@ is no business rule, P14's
 
 *Scope:* a business rule is stated anywhere in this codebase, a shared kernel and the common
 library included.
-*Statement:* Every business rule that decides what a record holds MUST be stated in the domain of
-the system that owns the record. A shared kernel MUST state no such rule and no record's schema,
-only values and what computes values from arguments; the common library MUST state no business
-rule.
+*Statement:* A business rule that decides what a record holds MUST be stated in the domain of the
+record's owner. A shared kernel MUST hold no such rule and no record's schema, only values and what
+computes values from arguments.
 *Why:* The harm is a business change that has to be made in code that does not know it belongs
 to it, or a change made for one system's reason that lands in another. Two routes lead there.
 One is a rule stated in the wrong system: fulfillment's reservation holds stock for thirty
@@ -330,13 +328,12 @@ consumers shaping an event bind a published language, not where a business rule 
 
 *Scope:* a use case runs, whichever driving adapter calls its driving port and whichever code
 behind its driven ports serves it.
-*Statement:* How a use case acts and what it answers MUST be computed by its service and its
-domain from the arguments its driving port takes and what its driven ports return. An ambient
-value or a configuration value MUST NOT change either, whether the service reads it or code behind
-a driven port does, except a configuration value choosing what lies behind a port. A driving
-adapter MUST make at most one acting call per call it handles, and MUST withhold a call to a
-driving port only where it cannot translate what it handles into that call's arguments, or where
-the service would refuse the call too.
+*Statement:* How a use case acts and what it answers MUST be computed by its service and its domain
+from the arguments its driving port takes and what its driven ports return, and from no other input.
+Code behind a driven port MUST use an ambient value or a configuration value only to reach the
+outside it adapts, and in nothing it writes or returns. A driving adapter MUST reach the system only
+through its driving ports, with at most one acting call per call it handles, and MUST NOT withhold a
+call the service would accept.
 *Why:* A tea shop's checkout is reached by a server function, a CLI the staff use, a handler and
 a test; its records are served by Postgres in production and by a fake in the test. P4 holds where
 all of them meet one computation, the service and the domain, fed by two inputs: what the caller
@@ -444,17 +441,13 @@ value, configuration value, acting call
 
 *Scope:* code of a system reaches the outside or the code behind a port, or anything outside a
 system reaches into it.
-*Statement:* Code of a system MUST reach the outside, and the code behind a port, only as a port
-of its system in the system's terms, unless it is an adapter or an outbox reader reaching the
-outside it adapts, or reaches pure code of no system; and anything outside a system MUST reach it
-only through its offer, whose system builders return nothing but implementations of its driving
-ports, its driving adapters and its outbox readers, or by a driving adapter's way in. A port's
-implementation, a client of the outside or a configuration value MUST reach code of a system as
-an argument from its caller, chosen by the process's assembly, or, for a driving adapter assembly
-does not construct or cannot hand it to when it does, from a courier only assembly fills, which
-the adapter reads each time it runs. A service or an adapter MAY import common-library code
-ready-made and reach the outside through it, through no port, where its output changes neither how
-a use case acts nor what it answers.
+*Statement:* A service MUST reach the outside only as a port of its system in the system's terms,
+and an adapter only as such a port or as the outside it adapts, either also through code of the
+common library whose output changes neither how a use case acts nor what it answers. Anything
+outside a system MUST reach into it only through its offer or by a driving adapter's way in. A
+port's implementation, a client of the outside or a configuration value MUST reach code of a system
+as an argument chosen by the process's assembly, or from a courier that only assembly fills and a
+driving adapter reads each time it runs.
 *Why:* An agent editing one file sees that file. Where every way out and every way in of a system
 is a port, the ports are a complete list of what the system needs and offers, and swapping what
 serves one, or adding a caller, is an edit at the port's far side and in assembly, nowhere else.
@@ -587,14 +580,13 @@ reach
 
 *Scope:* a test runs a use case: its service, the driven ports it reaches and what implements
 them, and code it reaches through no port of its system.
-*Statement:* Each driven port MUST have a fake, which the system that declares the port SHOULD
-provide, and a test of a use case SHOULD run its service on fakes for all its driven ports. One
-suite per port, written against the port and parameterized by the implementation it runs on, MUST
-assert each behavior of the port that a test of a use case relies on, and run on the fake in the
-default suite and on every other implementation, reaching the outside that implementation reaches
-in the deployed application, set up as it is set up there. Code a use case reaches through no port
-of its system MUST NOT need the outside for the use case to run, nor change how the use case acts
-or what it answers where the outside is absent.
+*Statement:* Each driven port MUST have a fake, which the system declaring the port SHOULD provide,
+and a test of a use case SHOULD run its service on fakes for all its driven ports. One suite per
+port, written against the port and parameterized by the implementation it runs on, MUST assert each
+behavior of the port that a test of a use case relies on, on the fake in the default suite and on
+every other implementation against the outside it reaches in the deployed application, set up as it
+is there. Code a use case reaches through no port of its system MUST run without the outside, and
+its absence MUST change neither how the use case acts nor what it answers.
 *Why:* A test that needs a store, a network or another system is slow, needs an environment and
 fails for reasons that are not the code's; the default suite, run on every save because nobody
 has to think about running it, cannot hold it, so it moves to a suite run less, and a broken use
@@ -706,11 +698,9 @@ and a driving adapter is no use case
 ### P7. A use case's writes to its own system's records land together or not at all
 
 *Scope:* a caller reaches a goal through a system, and reaching it writes the system's records.
-*Statement:* The one use case that reaches the goal MUST make every write the goal needs; code
-MUST NOT split those writes across several acting calls, nor leave one to a later use case. Every
-write a use case makes to its system's records MUST be in one transaction, which its service
-opens, hands to each call that writes, and commits once, after the last write. Where a write in
-it fails, the transaction MUST roll back whole.
+*Statement:* One use case MUST make every write the goal needs. Every write it makes to its system's
+records MUST be in one transaction, which its service opens, hands to each call that writes, and
+commits once after the last write. Where a write in it fails, the transaction MUST roll back whole.
 *Why:* A process can stop between any two instructions (F4), and a write can fail where the one
 before it succeeded. Between two writes that each commit on their own, the stop leaves records no
 business rule allows: the tea shop's order placed, the cart still full. Nothing read afterwards
@@ -799,16 +789,14 @@ write left out reaches its second store is P8's; ASM-9, ambient against argument
 
 *Scope:* a use case writes a message or decides a change its transaction does not commit, a message
 is delivered, or another system tells this system of a change before committing it.
-*Statement:* A message a use case writes, and a change it decides that its transaction does not
-commit, MUST go into the outbox in that transaction, the change as a message asking for it, not
-made beside it; the outbox MUST keep each message until the bus holds it, and the bus through any
-stop of a process until a handler acknowledges it, which the handler MUST NOT do before the use
-case it calls has returned with its writes committed. A use case called for a message that asks for
-a change its transaction does not commit MUST make that change, deciding nothing again but whether
-it has made it already; a request for a tentative operation MAY instead go by a call beside the
-transaction. A change another system tells of before committing it MUST change nothing in this
-system beyond a record of it as pending until it is confirmed, and an external system this codebase
-configures SHOULD tell of its change by a message its own transaction commits.
+*Statement:* A message a use case writes MUST go into the outbox in its transaction, and a change it
+decides that the transaction does not commit MUST leave it only as such a message asking for the
+change, or as a request for a tentative operation made beside the transaction. The outbox MUST keep
+each message until the bus holds it, and the bus through any stop of a process until a handler
+acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
+writes committed. A use case called for such a message MUST make the change, deciding nothing again,
+and a change another system tells of before committing it MUST change nothing in this system beyond
+a record of it as pending until it is confirmed.
 *Why:* A use case's writes are a fact once its transaction commits, and not before; a process can
 stop between any two instructions (F4). What leaves the transaction is not bound to that commit: a
 mail sent, a parcel booked with the 3PL, a command handed to another system, an event published, a
@@ -921,11 +909,11 @@ TX-3's ruling on who changes another system's data is P11's, only its timing is 
 *Scope:* an acting use case is called for a message, whether the bus delivered it, a hook was
 called with it, or a driving adapter asked another system for it.
 *Statement:* The use case MUST tell a repeat inside the transaction that commits its writes, by the
-message's id claimed there under a key the store refuses twice, or by the records it writes there;
-where it finds the first delivery's writes committed, it MUST commit nothing and return as the
-first delivery returned. A change it makes outside that transaction MUST pass the system that makes
-it a key the message carries, the same on every delivery, by which that system answers a repeat.
-Where no such key reaches a repeat, a business rule of its system MUST accept the change made twice.
+message's id claimed there under a key the store refuses twice or by the records it writes there,
+and finding the first delivery's writes committed MUST commit nothing and return as the first
+delivery returned. A change it makes outside that transaction MUST carry to the system that makes it
+a key the message carries, the same on every delivery, by which that system answers a repeat. Where
+no such key reaches a repeat, a business rule of its system MUST accept the change made twice.
 *Why:* The stock reserved twice. A message arrives more than once (F5): the relay hands one over
 again after a stop, the bus delivers again a message whose handler stopped after its use case
 committed, Stripe resends an event for days and at times twice at once, a poll returns items the
@@ -1014,11 +1002,10 @@ claim twice. Departs from TX-31: the key need be the same on every delivery of o
 
 *Scope:* an acting use case decides what it writes by data that other use cases, or other systems,
 can change while it runs.
-*Statement:* A use case MUST make each decision it commits on data read inside the transaction that
-commits it, which the store MUST fail where that data has changed, or come to exist, since the
-read; failed so, the use case fails and MUST NOT apply its change again to the changed data.
-Instead, it MAY decide by data that can change without failing that transaction only where a
-business rule of its system accepts deciding on it stale, including what follows where it changed
+*Statement:* A use case MUST decide by data read inside the transaction that commits the decision,
+and the store MUST fail that transaction's writes where the data has changed, or come to exist,
+since the read. A decision on data whose change fails no transaction of this store MUST rest on a
+business rule of its system that accepts the data stale and says what follows where it changed
 meanwhile. Its writes MUST NOT fail on a change to records that no business rule ties to the use
 case's goal.
 *Why:* Two checkouts read a stock of one, both decide to reserve, both commit; the later commit
@@ -1124,9 +1111,9 @@ system of this codebase owns.
 *Statement:* Such code MUST change a record another system owns only through the owner's open host
 service or a command the owner's published language declares, and MUST read it only through that
 open host service or the owner's published events delivered to a handler of the reading system.
-Where an external system keeps a record a system of this codebase owns, this codebase MUST
-configure it so that nothing but that owner's use cases change the record; its configuration MAY
-read the record where it keeps it.
+Where an external system keeps a record a system of this codebase owns, this codebase MUST configure
+it so that nothing but the owner's use cases changes the record, and its configuration MAY read the
+record where it keeps it.
 *Why:* The owner's business rules decide what a record holds (glossary: Owner). A write that runs
 none of the owner's use cases is a write those rules never saw: billing sets shop's order to
 `invoiced` with an `UPDATE` on the table both systems keep in one Postgres, and shop's rule that an
@@ -1215,12 +1202,11 @@ published), published language, handler, use case
 
 *Scope:* a system talks to an upstream system, an external system included, and its code meets
 that upstream's published language.
-*Statement:* A system MUST record each upstream it conforms to, and take that upstream's terms
-from its published language, not state them again. Towards an upstream it does not record
-conforming to, a module of the system MUST NOT reach that upstream's published language, nor be
-generated from it, unless the module is an adapter that carries a call or a message between the
-system and that upstream. A published language MUST NOT reach another system's published
-language, nor a shared kernel any system's.
+*Statement:* A system MUST record each upstream it conforms to, and take that upstream's terms from
+its published language, not state them again. The published language of an upstream the system does
+not record conforming to MUST be reached, or generated from, only by the system's adapters that
+carry a call or a message between the two. A published language MUST NOT reach another system's
+published language, nor a shared kernel any system's.
 *Why:* Every system that talks to another meets its terms: billing's `Invoice`, Stripe's
 `PaymentIntent`, Payload's generated `Product`. The harm is not that those terms enter but that
 nobody decided they would. Shop's domain imports billing's `DunningStage` because a schema was at
@@ -1325,12 +1311,12 @@ module, adapter, message, shared kernel
 
 *Scope:* a system is upstream of another: code of the other imports from it, calls its open host
 service, handles its events or sends it commands.
-*Statement:* Code of another system MUST import of a system only its offer, and of that only what
-is typed by its published language, a shared kernel and pure code of no system. What crosses
-between two systems, by a call or in a message, MUST be of the upstream system's published
-language. The modules that declare a published language MUST reach nothing of their system outside
-it, nor be generated from the rest of it, and MAY state in their own terms what a business rule of
-the domain also states.
+*Statement:* Code of another system MUST import of a system only its offer, and of that only what is
+typed by its published language, a shared kernel or pure code of no system. What crosses between two
+systems, by a call or in a message, MUST be of the upstream system's published language. The modules
+that declare a published language MUST reach nothing of their system outside it, nor be generated
+from the rest of it, and MAY state in their own terms what a business rule of the domain also
+states.
 *Why:* A downstream system breaks at a refactoring of its upstream's model wherever its code, or
 what it receives, names that model. There are three ways it comes to: the downstream imports the
 model, the upstream hands the model across, or the contract is the model under another name. The
@@ -1433,11 +1419,10 @@ message, event, command, domain, business rule
 *Scope:* a message, a record a system keeps, or an open host service's driving port called from
 another process: its schema as stated, and every change to it.
 *Statement:* Each message MUST have one schema, stated once, that its writer and every reader parse
-with. A change to the schema of any of them MUST let code written before the change and code
-written after it each read what the other produces as the other meant it and, where it saves it
-back, lose nothing of it. A change that cannot MUST be a new version: new code writes or offers
-the old beside it while code that knows only the old runs, and reads the old until nothing written
-in it waits.
+with. A change to the schema of any of them MUST let code written before it and code written after
+it each read what the other produces as the other meant it and, where it saves it back, lose nothing
+of it. A change that cannot MUST be a new version, which new code writes or offers beside the old
+while code that knows only the old runs, reading the old until nothing written in it waits.
 *Why:* A record or a message is read by code that did not write it, some of it not yet written. A
 deploy replaces processes one at a time, so old and new code run side by side. A message written
 before a deploy waits in the outbox and is handled after it, or waits days in a dead-letter queue;
@@ -1516,11 +1501,11 @@ goes further, every change a new version.
 ### P15. A use case works while other systems are down or slow, unless a business rule needs another system's answer now
 
 *Scope:* a use case needs to know something another system holds, or needs another system to act.
-*Statement:* A use case MUST NOT wait on another system's answer, behind a port or not, unless a
-business rule of its system needs that answer before the use case returns, or the use case is
-called for a message asking that system for a change and waits on the change alone. Otherwise,
-what it needs to know of another system it MUST read from records its own store keeps, a replica
-or a snapshot, and what it needs another system to do it MUST ask for by a message.
+*Statement:* A use case MUST wait on another system, behind a port or not, only for an answer a
+business rule of its system needs before the use case returns, or for the change that a message it
+is called for asks of that system. What else it needs to know of another system it MUST read from a
+replica or a snapshot its own store keeps, and what else it needs another system to do it MUST ask
+for by a message.
 *Why:* A use case that waits on another system is down whenever that system is, and slow whenever
 it is: checkout that asks billing for the customer's dunning stage takes no orders while billing
 deploys, and a use case that waits on three systems is up only while all three are. The wait is
@@ -1682,13 +1667,12 @@ P11's read past the published language, and this Statement refuses it without th
 *Scope:* a system's part of work spanning systems, under choreography or orchestration, a
 tentative operation included, from the first step it takes in that work until its part ends.
 *Statement:* A business rule of that system MUST decide how its part ends from each state it can
-stand in, on each answer, refusal or event another system can send it there and on none coming:
-by completing the work, by a step that undoes an earlier one, asked of the system that took it, or
-by accepting the state as it stands. Where its part waits on another system, the moment it decides
-on none coming MUST be held in an aggregate of its own, not left to that system. A refusal of a
-step, by a business rule of the system asked or by a system it asks in turn, MUST be committed as
-the step's outcome and reach the system that decided the step; a stop that neither gave MUST NOT
-be committed as one.
+stand in, on whatever another system can send it there and on none coming, by completing the work,
+by a step that undoes an earlier one, asked of the system that took it, or by accepting the state as
+it stands. Where its part waits on another system, the moment it decides on none coming MUST be held
+in an aggregate of its own. A refusal of a step MUST be committed as the step's outcome and reach
+the system that decided the step, and a failure that neither gave nor refused MUST NOT be committed
+as one.
 *Why:* Each system commits its own part (P16), so the parts diverge. Another system says yes and
 then fails, stops answering, refuses, or answers after this one has moved on. Two harms follow,
 and both are found by a customer. Work that never ends: the tea shop's order waits as "payment
@@ -1785,12 +1769,11 @@ refusal and a failure are this document's.
 cases called for them.
 *Statement:* A use case called for a message MUST leave the records of what it tells of as the
 messages about that thing, applied in the order they were written, would leave them, telling that
-order from what the messages carry, not from when they arrive; messages about different things it
-MAY handle in the order they arrive. Where a later message about one thing overrides an earlier,
-the system that writes them MUST carry on each a version of that thing, raised in the transaction
-that commits the change, and the use case MUST keep the highest. Where messages written by
-different systems conflict over one thing, a business rule of the receiving system MUST decide
-which prevails.
+order from what the messages carry and not from when they arrive. Where a later message about one
+thing overrides an earlier, the system that writes them MUST carry on each a version of that thing,
+raised in the transaction that commits the change, and the use case MUST keep the highest. Where
+messages written by different systems conflict over one thing, a business rule of the receiving
+system MUST decide which prevails.
 *Why:* Arrival order is not the order of writing (F5). The relay hands a message over again after
 a crash, the bus retries one that failed and backs off before it does, parks it and retries it
 once the fault is fixed, and a redelivery runs while the first attempt still does; an external
@@ -1863,11 +1846,10 @@ which is P9's; once handed, their order is this rule's.
 
 *Scope:* code of a system uses a word with a meaning: in a module's names, schemas, messages,
 tests or prose.
-*Statement:* A system's glossary MUST give each of its terms one meaning, and a term MUST be in
-it before the system's code uses it. Every module of the system MUST use a term of the glossary
-in that meaning only. A word taken from another system's offer MUST be used in the meaning that
-system gives it, and, unless the glossary takes the word in that meaning, named apart from the
-system's own terms in every module that uses it.
+*Statement:* A term of a system MUST have one meaning, used in every module of the system. A word
+taken from another system's offer MUST keep the meaning that system gives it, and where this system
+has a term by that word in another meaning, every module that uses the word MUST name it apart from
+that term.
 *Why:* "Order" meaning checkout's order in one module and billing's invoiceable order in the next
 is two models in one system. A change made for one meaning breaks code written for the other, and
 an agent that read one module (F3) takes the meaning it found there for the system's and writes
