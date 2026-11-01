@@ -1,6 +1,6 @@
 # 15 — Gaps and loose Statements
 
-**Status:** closed
+**Status:** open, reopened after the regression on `042da0f`
 
 ## Context
 
@@ -147,6 +147,32 @@ Closed since this issue was opened, by issues 12 to 14, per review 03: the probe
 store (glossary Probe), the admin dashboard (SYS-9's Scope), instrumentation before assembly,
 ASM-2 against DRV-3 on the Payload cycle. Each is checked against the rule that closed it, not
 ruled again.
+
+### Since regression
+
+Regression on this issue's first close (`reviews/03/regression/15-gaps-and-loose-statements.md`,
+N1 to N4) and the two Fresh repo drafts (`15-fresh-a.md`, `15-fresh-b.md`), 16 checklist items
+resolved, one newly broken:
+
+- N1 (R03-24), Reach against SVC-7. Reach stops at a port of its system; the common library's
+  `Transactions` is none, so a service running a use case through it reaches the store, which
+  SVC-7 forbids. The Decision below says ASM-7 lets it through; it does not: a failed commit
+  changes how the use case acts, so ASM-7's Scope fails. Hits `svc-6-ok-opaque-transaction`, P5's
+  Except (R03-58) and the whole distilled build.
+- N2, SVC-8 against Conformist. SVC-8 has no exception for a conformist where DOM-1 and SVC-6
+  have one; `asm-2-ok-shop-reads-invoice-through-driven-port` and
+  `tx-12-ok-invoice-number-through-billing-port` declare a driven port in billing's published type.
+- N3, TX-7 against an added optional field. "Readable by old code as new code meant it" catches
+  every optional field an old reader ignores; `tx-7-ok-gift-message-added-optional` breaches.
+- N4, SVC-2 against TX-24 and TX-27. Under the reading the Decision's own example needs, what the
+  use case decides by is what the call saves, so SVC-2 is a MUST exactly where TX-24 does not
+  apply: replicas, and decisions that need not hold at commit. It refuses what TX-27 allows; hits
+  raw fulfillment's `planShipment` and dist checkout's replica fallback.
+- Fresh draft A, S4: Reach's "as the port" with "Domain ... It is pure" reads two ways, a domain
+  module calling a port reaches the interface and stays pure, or reaching a port whose
+  implementation leaves the process is reaching outside. Review 03's drafts raised no reading of
+  Reach; this sentence opened one. Pure's runtime reading (review 03 A S9) and System builder's
+  list reading (review 03 B S17) are gone; Double raised no reading.
 
 ## Decision
 
@@ -334,7 +360,7 @@ to the Consequences.
 task's use case and satisfies TX-44; `svc-3-breach-clear-cart-service-behind-driven-port` lists  
 DVN-4; `drv-8-breach-mailer-subscribed-to-bus-in-assembly` and  
 `tx-22-breach-claim-rolled-back-after-3pl-call` list TX-41 where TX-5 left.
-- Glossary changed (Reach, Pure, System builder, Double): the regression reader runs, and two
-  Fresh repo drafts over the regenerated distilled glossary and world are owed
-  (`reviews/regression-reader.md`, After it runs); not run in this issue.
+- Glossary changed (Reach, Pure, System builder, Double): the regression reader and two Fresh
+  repo drafts ran after the first close (`reviews/03/regression/15-*`); their findings are Since
+  regression, above, and this issue closes again when they are ruled.
 - `choices.md` C6 bounded by TX-40; README's Examples entry gains the out-of-Scope ok.

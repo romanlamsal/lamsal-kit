@@ -25,8 +25,8 @@ did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
   world line that leans on their old sense; Reach is transitive. Review 03 (`reviews/03/`, at
   `7858b71`) traced its four cannot-complies to them. Before step 7, so issue 15 rules on words
   that mean one thing.
-- [x] 7. **Gaps and loose Statements, issue 15.** After steps 4 to 6, so it rules on settled
-  text.
+- [ ] 7. **Gaps and loose Statements, issue 15.** After steps 4 to 6, so it rules on settled
+  text. Reopened after its regression (issue 15, Since regression).
 - [ ] 8. **Relies-on sweep, issue 16.** After every Scope and Statement change: the lines claim
   against them.
 - [ ] 9. **Fixture facts, issue 17.** Before examples: writers that invent a fact or a shape
