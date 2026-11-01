@@ -67,14 +67,26 @@ for the rules' purposes.
 
 ## Steps
 
-1. **Static artifact.** Take the Fresh draft closest to `choices.md` from reviews 03 or 04.
-   Correct it by hand into the architecture we mean. Add the `not:` lines where a choice was
-   made. Commit as `docs/layers-revamp/architecture.md`.
+0. **Direction brief.** The requester writes, in prose, the architecture they envision, as
+   far as they care to decide it, and the drafter fills the gaps. Per use case where it matters,
+   a few sentences, e.g.: "Stripe checkout is a tentative change, run synchronously in the
+   request, while stock is reserved for it. The reservation carries the deadline at which stock
+   is released and the payment counted as not happening. Stripe tells of a completed checkout
+   session by webhook, which closes the circle." Beside the prose, the old rules that are good
+   as they stand, DOM-1 for one, reworded so they no longer read as edge-casing; they go into
+   the brief as directions, not as rules the drafter must cite. Also `choices.md` entries the
+   requester still holds. The brief is the drafter's only input beyond glossary, the-world and
+   `brief.md`.
+1. **Static artifact.** The drafter produces a Fresh draft from the direction brief, or the
+   requester takes the draft closest to it from reviews 03 or 04 and corrects it by hand into
+   the architecture we mean. Add the `not:` lines where a choice was made. Commit as
+   `docs/layers-revamp/architecture.md`.
 2. **Traces.** One per use case of `domain.md`, about a dozen: place product, checkout by card,
    checkout by invoice, confirmation mail, deadline cancel, refund, dispute, invoice on payment,
    bank transfer match, dunning, reservation and release, shipment webhook, the dashboard reads,
-   health and metrics. Written by the requester, or drafted by an agent from the static artifact
-   and corrected. Commit beside the static artifact.
+   health and metrics. Drafted by an agent from the static artifact and the direction brief,
+   corrected by the requester; where the brief already tells a use case's story, the trace is
+   that story step by step. Commit beside the static artifact.
 3. **Grid.** Run each trace against F1 to F5. Fill only cells that need a mechanism. Name the
    property per cell. Check every dynamic property has at least one cell and every static
    property at least one line of the static artifact; a property with neither is either
