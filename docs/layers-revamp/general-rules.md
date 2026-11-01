@@ -269,6 +269,7 @@ single layer) and Evans p. 57 pick the architecture per subdomain; this document
   included.
 - TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
   changed in the store since the load.
+- TX-49: a use case whose save fails for an aggregate changed since its load fails.
 - TX-24: by default, the data a decision has to hold by when the use case commits, other than a
   replica, belongs to aggregates the use case saves.
 - DRV-8: a driving adapter reaches no driven port, driven adapter or service of its system.
@@ -923,6 +924,30 @@ database"; the stale copy's updates "are rejected"). Evans p. 94 locks the whole
 instead, which the Statement admits too.
 *Examples:* —
 
+**TX-49**
+*Scope:* a repository's save fails because the aggregate in the store changed since the use case
+loaded it.
+*Statement:* The use case MUST fail with it.
+*Relies on:*
+- TX-23: a repository's save of an aggregate loaded through it fails where the aggregate has
+  changed in the store since the load.
+- TX-1: a use case that writes runs in one transaction its service opens and commits.
+- DRV-7: a handler acknowledges a message once the use case it calls has returned with what it
+  wrote committed.
+*Why:* The save failed because the decision the use case enforced was made on a state that no
+longer holds. A use case that answers by loading the aggregate again and saving its change onto
+the new state applies a decision nobody made on that state: the specification was asked about the
+first, cancel was allowed on an order unpaid, and the second is paid. Failing hands the decision
+back to whoever can make it afresh: a request's caller, who sees the refusal or tries again on the
+order as it is now, a message's redelivery (DRV-7), which runs the use case again from the load.
+The transaction the service opened rolls back with the save (TX-1), so nothing of the first
+attempt is committed and the second starts clean.
+*Provenance:* Follows Fowler (Optimistic Offline Lock: on a conflict "the transaction is rolled
+back" and the user is told) and Vernon EAD I p. 2 (the stale copy's updates "are rejected").
+Retrying inside the use case, as MS does for a concurrency exception, is what this rule departs
+from.
+*Examples:* —
+
 **TX-24**
 *Scope:* a use case decides by what this system has stored, other than a replica, and the decision
 has to hold when the use case commits.
@@ -1487,6 +1512,28 @@ implementation model can be translated into the published language the consumers
 using"; "simultaneously expose multiple versions") and p. 243 ("if an event's schema changes, the
 subscribers' projection logic will fail"). Departs: Confluent defaults to one direction plus an
 upgrade order; Helland 2005 §3.4 goes further, every change a new version.
+*Examples:* —
+
+**TX-48**
+*Scope:* the schema of a message gains a field whose absence a handler reads as a fact.
+*Statement:* The change MUST be a new message that takes over from the old.
+*Relies on:*
+- TX-7: a new message taking over from another keeps what old code writes readable by new code
+  and what new code writes readable by old code.
+*Why:* An added optional field keeps both directions readable (TX-7), and that is not enough where
+the field's absence already says something to the code that reads the message without it. Before
+`paidByInvoice`, every `OrderPlaced` was paid by card, and billing's handler invoices when
+`OrderPaid` arrives; after it, an order placed with `paidByInvoice` reaches an old handler as an
+order without the field, the handler waits for an `OrderPaid` that never comes, and the order is
+never invoiced. Nothing failed, no field changed meaning, and the message said what it no longer
+means. A gift message is different: an old handler that cannot show it ships the parcel without
+the note, and what it read of the order was true. Under a new message, an old handler keeps
+handling the old one, written beside the new while old readers run (TX-7's Why), and a handler of
+the new message is written knowing the field; a reader that does not know of pay by invoice is
+told by its subscription that it does not.
+*Provenance:* Follows Confluent (an incompatible change as a new topic), Helland 2005 §3.4 (a
+changed meaning as a new version) and Khononov p. 55 (several versions of the published language
+exposed at once). The test, absence read as a fact, is this document's.
 *Examples:* —
 
 **TX-42**

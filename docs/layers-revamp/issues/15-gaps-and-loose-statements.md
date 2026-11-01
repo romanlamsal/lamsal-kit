@@ -181,7 +181,7 @@ as issues 12 to 14 and 20 leave them. A gap closes in a Scope, a Statement, a ne
 sentence in the Assumptions; a reading settles in binding text or in the glossary; a loose
 Statement is sharpened, or its breach is accepted and the reason recorded here for the ok example.
 Glossary changes under the freeze: the grep ran at `96ffa84`, hits listed per term. New ids: DOM-8,
-DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-47.
+DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-49.
 
 ### Glossary
 
@@ -330,6 +330,20 @@ DOM-9, SVC-8, ASM-11, SYS-16, TX-40 to TX-47.
 - Fresh draft A, S4 (Reach with "Domain ... It is pure"): DOM-1 lists no port among what the
   domain reaches, so the ruling stands; no change.
 
+Second regression (`reviews/03/regression/15-gaps-and-loose-statements-2.md`, on `28801e5`): N1
+to N4 resolved, R03-24 and R03-58 resolved, and two cases the withdrawn clauses had refused are
+admitted by every rule as written. Each gets the narrow rule the clause should have been:
+
+- **TX-48**, after TX-7. Scope: the schema of a message gains a field whose absence a handler
+  reads as a fact. Statement: the change MUST be a new message that takes over from the old.
+  `paidByInvoice` is in Scope; a gift message is not.
+- **TX-49**, after TX-23. Scope: a repository's save fails because the aggregate in the store
+  changed since the use case loaded it. Statement: the use case MUST fail with it. Reload and save
+  again breaches; replicas and TX-27 are untouched. SVC-2 gains a Relies-on line on it.
+- Noticed there: `svc-1-ok-driven-ports-in-service-layer` and `sys-10-ok` breach TX-47 beside
+  `svc-6-ok-opaque-transaction` (issue 19); `asm-9-ok-transaction-handed-as-argument`, TX-47's ok
+  file, carries R03-13 and R03-14 as before.
+
 ### Accepted, no change
 
 - SVC-3 behind a driven port: DVN-4 refuses the adapter that calls a service of its system; the
@@ -371,15 +385,17 @@ to the Consequences.
 
 ## Consequences
 
-- To issue 16: the lines of the thirteen new rules are new; TX-34's on TX-38 and TX-45, ASM-8's on
-  ASM-4 rewritten here, TX-1's on TX-47 added; the lines checked above are read again there.
+- To issue 16: the lines of the fifteen new rules are new; TX-34's on TX-38 and TX-45, ASM-8's on
+  ASM-4 rewritten here, TX-1's on TX-47 and SVC-2's on TX-49 added; the lines checked above are
+  read again there.
 - To issue 17: the store per system decides whether TX-43 leans on narrower-governs; the bank
   polled or calling a hook decides whether TX-46 holds for it; Payload's Local API as catalog's
   open host service is ruled (Assumptions); the sku veto stays catalog's (issue 20).
-- To issue 19: examples for the thirteen new rules; ASM-11 names two existing files, TX-47 one
+- To issue 19: examples for the fifteen new rules; ASM-11 names two existing files, TX-47 one
   ok file and its breach is regression N1's body
-  (`reviews/03/regression/15-gaps-and-loose-statements.md`); `svc-6-ok-opaque-transaction` lists
-  TX-47 as breached or moves the port into shop; every example
+  (`reviews/03/regression/15-gaps-and-loose-statements.md`); TX-48's and TX-49's breaches are the
+  second regression's Newly broken bodies; `svc-6-ok-opaque-transaction`, `svc-1-ok` and
+  `sys-10-ok` list TX-47 as breached or move the port into their system; every example
   naming a sharpened rule is re-read (SVC-2, TX-23, TX-7, TX-12, TX-17, TX-19, TX-30, TX-35,
   TX-37, TX-38, TX-34, DRV-7, ASM-3, ASM-4, TX-27, DOM-1, SYS-14);
 `gap-health-and-metrics-endpoints`   becomes ASM-4's ok,

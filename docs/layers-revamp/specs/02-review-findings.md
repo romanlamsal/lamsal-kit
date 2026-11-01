@@ -26,7 +26,8 @@ did not is a ruling that lives in a Why, a Relies-on line or a Provenance.
   `7858b71`) traced its four cannot-complies to them. Before step 7, so issue 15 rules on words
   that mean one thing.
 - [x] 7. **Gaps and loose Statements, issue 15.** After steps 4 to 6, so it rules on settled
-  text. Closed twice: its regression reopened it once (issue 15, Since regression).
+  text. Three passes: its regressions reopened it once and added TX-48 and TX-49 (issue 15,
+  Since regression).
 - [ ] 8. **Relies-on sweep, issue 16.** After every Scope and Statement change: the lines claim
   against them.
 - [ ] 9. **Fixture facts, issue 17.** Before examples: writers that invent a fact or a shape
