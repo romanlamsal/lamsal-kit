@@ -206,9 +206,11 @@ trigger, decides, and is refused. Third, an external system's configuration: the
 it holds are the external system's own where they decide a record the external system keeps and
 no business rule of this system decides. A rule about a record this system's business rules
 decide, written into the external system's field validation, is this system's rule stated
-outside its domain. Where the external system has to ask before it writes, catalog's veto of a
-sku change, the rule stays in catalog's domain, and the external system reaches it through its
-hook, a driving adapter that asks the domain. Who may change such a record is P11's.
+outside its domain. A system that has to be asked before a
+record is written holds a rule that decides what the record holds, so the record is that
+system's (glossary: Owner). The system that takes the write is one of the owner's ways in. A
+system asked only to protect records of its own decides nothing about the record written: it
+copies what it needs and is not asked. Who may change such a record is P11's.
 
 A shared kernel holds the rules several systems agree on, stated once and imported into each
 domain; a change to it is a change to each (glossary). Which rules belong there is P3's. The
@@ -855,7 +857,8 @@ The third sentence is the same property seen from the receiving side: another sy
 write is no fact here either. Payload calls catalog's hook before its change commits; the change can
 still roll back after the hook returns, by a later hook, a failed validation, a stop. A use case
 that revalidates the product page or publishes `ProductChanged` from the hook announces a change
-that may never be. Two answers stay safe. A veto answers and changes nothing. A record of the change
+that may never be. Two answers stay safe. A veto answers and changes nothing. Whose rule the
+veto states, and so whose record it is, is P2's, not this sentence's. A record of the change
 as pending, a record of its own or a private message for a handler, leaves the change to a
 confirmation that comes after the external commit: a message the external system publishes, a later
 hook, a read of its state that finds the change there. The handler that acts on the pending record
@@ -1161,12 +1164,14 @@ A shared kernel is a model shared as code, not records. The relay and the outbox
 system: the relay reaches each outbox through the reader its owner provides, which ASM-5 rules.
 Tooling, a migration or a one-off script, sits outside the rules (Assumptions).
 
-The exception is the external keeper. Payload keeps shop's price beside catalog's product: Payload
+The exception is the external keeper. An external system that keeps another system's record
 stores it, shows it, and its configuration reads it where it is kept, since that is what keeping
-is; what it may not do is change it by any way but shop's use cases, which reach it through shop's
-driven adapter. Where the business wants editors to change the record in the external system's
-admin, the record is the external system's to own, and shop keeps a snapshot or a replica of it:
-the price on the order is shop's snapshot, the price in the catalog is catalog's.
+is; what it may not do is change it by any way but the owner's use cases, which reach it through
+the owner's driven adapter. Where the business wants the record changed through the external
+keeper's ways in, the keeper hands the change to the owner's use case, and keeps the record as
+before. Another system that needs the record holds a copy, never the record: in a travel
+business the fare in the tariff is pricing's, the fare on an issued ticket is booking's snapshot,
+and the fares search answers from are search's replica.
 *Provenance:* Follows Evans, Bounded Context (p. 239, P11's), Evans p. 114 ("Processes outside the
 object system should not access such an object store. They could violate the invariants enforced
 by the objects"), Helland 2005 §1.3 (only the owner's logic changes its data) and §6.5 (no access

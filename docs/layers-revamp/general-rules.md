@@ -140,10 +140,10 @@ that breaks it (Assumptions). An external system's configuration is that system'
 this codebase writes it (Assumptions): a business rule written there is the external system's
 where it decides a record the external system keeps and no business rule of this system decides;
 about a record this system's business rules decide, it is a second statement. A business rule of
-this system that an external system asks before it writes, catalog's veto of a sku change, stays
-here; the external system reaches it through its hook, a way out of that system into this one's
-driving adapter. The published language may state what a rule here states, as the contract's
-constraint (SYS-16). A number the rule decides by is part of its statement (DOM-9).
+this system that another system has to ask before it writes decides what the record holds, so the
+record is this system's (glossary: Owner). The asking system is a way into this one. The
+published language may state what a rule here states, as the contract's constraint (SYS-16).
+A number the rule decides by is part of its statement (DOM-9).
 *Provenance:* Follows Evans p. 53 (the domain layer is "responsible for representing concepts of
 the business, information about the business situation, and business rules"; the application
 layer "does not contain business rules or knowledge, but only coordinates tasks") and MS ("all
@@ -1226,12 +1226,14 @@ hook returns, by a later hook, a failed validation, a crash. The use case runs i
 its own, which commits whatever the external system does next. A change there that takes the
 external change as done, a record updated, a page revalidated, a published event, stands for a
 change a rollback undoes. Two answers stay safe. Answering changes nothing, and the external system
-can refuse its change by the answer: a veto. Recording the change as pending, a record of its own or
-a private message for a handler that checks the external system's committed state, leaves the change
-to a confirmation that comes after the commit: a message the external system publishes, a later
-hook, a read that finds the change committed. A read can come before the commit and find nothing
-yet, so what happens when no confirmation comes is a business rule's (TX-30). TX-6 binds a message
-to a change the use case makes; here the change is the external system's.
+can refuse its change by the answer: a veto. This rule rules on what the answer may change, not on
+who owns the record: whose rule the veto states, and so whose record it is, is DOM-7's.
+Recording the change as pending, a record of its own or a private message for a handler that
+checks the external system's committed state, leaves the change to a confirmation that comes
+after the commit: a message the external system publishes, a later hook, a read that finds the
+change committed. A read can come before the commit and find nothing yet, so what happens when no
+confirmation comes is a business rule's (TX-30). TX-6 binds a message to a change the use case
+makes; here the change is the external system's.
 *Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
 cancels"; "When an entity agrees to perform a tentative operation, it agrees to let another entity
 decide the outcome"). The hook before the commit is this document's.
@@ -1972,9 +1974,10 @@ against DOM-7 is this document's.
 system's own ways in, its admin, its API, code in its configuration, write by the external system's
 rules: no use case of this system runs, its business rules are bypassed, no message tells of the
 change, and this system's next save writes over it or is written over. The external system lets this
-system configure them: a field an editor cannot change, an API key that cannot write it. A record
-whose changes have to come through the external system's ways in is the external system's to own,
-and this system keeps a snapshot of it or a replica.
+system configure them: a field an editor cannot change, an API key that cannot write it. Where a
+record this system owns is to be changed through an external system's ways in, the way in takes
+the change and a driving adapter of this system carries it to a use case. The external system is
+then one more way into this system, and the record keeps one writer.
 *Provenance:* Follows Evans p. 114 ("Processes outside the object system should not access such an
 object store. They could violate the invariants enforced by the objects") and Helland 2005 §6.5 (no
 access to the data "unless it is mediated by the application logic of the service").

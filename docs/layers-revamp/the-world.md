@@ -20,8 +20,9 @@ Out of scope: throughput and load, security, user interfaces.
 
 - **F1. What lies behind the ports changes.** What serves a port is replaced; a new caller
   arrives.
-- **F2. The business changes, and so does what is known of it.** Business rules change, the
-  model grows, the cut between systems moves.
+- **F2. The business changes, and so does what is known of it.** Business rules change and the
+  model grows. Subdomains are found and systems are designed (Khononov), so today's cut between
+  systems is a guess that a better-known domain moves.
 - **F3. Edits are partial.** People and agents change code having read only part of it.
 - **F4. Processes stop and are replaced.** A process can stop between any two of its
   instructions. A deploy replaces processes one at a time, and
