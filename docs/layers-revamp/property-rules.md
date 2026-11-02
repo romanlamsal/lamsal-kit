@@ -1537,9 +1537,11 @@ asks Stripe for a PaymentIntent and hands the browser its `client_secret`; at th
 a reconciliation asks Stripe whether the order was paid; a handler acting on an external system's
 change recorded as pending reads that system's committed state first (TX-44). Such a use case
 fails while the other system is down, visibly, and is slow while it is slow, and both are
-expected. The line between the first exception and a replica is drawn by TX-27's business rule:
-where one accepts a value that lags, nothing needs the answer now and the replica serves; where
-none accepts it, the answer is needed now. The second exception is the use case called for a
+expected. The line between the first exception and a replica is drawn by how old the business
+rule lets the answer be: where it accepts what the owner said a while ago, through the owner's
+downtime too, the replica serves; where it accepts only what the owner says now, the use case
+calls. Either way the answer can change before the commit, and what follows then is P10's, for
+the live answer as for the replica. The second exception is the use case called for a
 message that asks another system for a change: fulfillment's use case for `BookShipment` books
 the 3PL, a mail is sent for the message that asks for it. Its whole job is the wait. While the
 3PL is down it fails, and the bus keeps the message and delivers it again (TX-21, TX-38); no
