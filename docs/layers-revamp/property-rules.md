@@ -13,6 +13,10 @@ where it says *transaction*, and that can make a write fail where the record has
 was read, or where a record with the same key exists. It assumes no isolation between transactions
 beyond reading committed writes: a transaction may read what another commits while it runs.
 
+It also assumes the clock can start a use case once a moment has passed: a message held back until
+then, or a sweep run on the clock. Which one is the architecture's. Either can come late, never
+early.
+
 Every system gets the same architecture: domain, service, repositories and adapters, a simple one
 too. That is this document's choice. The sources pick the architecture per subdomain and let
 simple logic read and write the store directly; here no system is judged simple enough, and none
@@ -381,7 +385,8 @@ holds a sequence the glossary gives to the service: which second call to make, a
 the first succeeded and the second failed, are decided in one way in, outside any transaction, and
 repeated or missing in the next (DRV-1). A loop over acting calls is the same sequence. A bus that
 delivers several messages at once gets one acting call per message, each message being a call the
-handler handles; a use case over a batch is one acting call in one transaction. What the adapter
+handler handles; work over a batch is one acting call that writes one message per item (P7). What
+the adapter
 does before the call is translation: parsing its caller's input into the domain's shapes, routing
 by path or by message type to the driving port it calls, working out who the caller is, through an
 answering call where that takes this system's stored state, the answer becoming an argument of the
@@ -412,7 +417,7 @@ rules "in one place") and Cockburn (Motivation: business logic infiltrating the 
 The sequence out of the driving adapter follows Khononov p. 124 and Fowler (Service Layer);
 departs from Khononov p. 122 and p. 124, where a service layer "is not always necessary", and from
 Evans p. 77, which gives digesting the request to the application service. One acting call is this
-document's; a batch in one transaction is Dahan's, in Vernon EAD II p. 10. What the use case acts
+document's; one message per item follows Vernon EAD II p. 9. What the use case acts
 by arriving through its driving port follows Seemann ("Service Locator violates encapsulation");
 his interview goes wider ("Ambient Context is also best avoided"), which this rule does not, keeping
 telemetry ambient. The message carrying what its handler needs follows Khononov p. 91, Evans
@@ -700,23 +705,29 @@ and a driving adapter is no use case
 ### P7. A use case's writes to its own system's records land together or not at all
 
 *Scope:* a caller reaches a goal through a system, and reaching it writes the system's records.
-*Statement:* One use case MUST make every write the goal needs. Every write it makes to its system's
-records MUST be in one transaction, which its service opens, hands to each call that writes, and
-commits once after the last write. Where a write in it fails, the transaction MUST roll back whole.
+*Statement:* A use case MUST save at most one aggregate, in one transaction that its service opens,
+that carries every write the use case makes, and that its service commits once after the last write.
+The same transaction MUST carry the messages the use case writes to the outbox and the record of the
+message it is called for, and what else its goal needs MUST be asked for by such a message. Where a
+write in it fails, the transaction MUST roll back whole.
 *Why:* A process can stop between any two instructions (F4), and a write can fail where the one
 before it succeeded. Between two writes that each commit on their own, the stop leaves records no
-business rule allows: the tea shop's order placed, the cart still full. Nothing read afterwards
+business rule allows: a booking saved and the message asking for its invoice not, so no invoice ever
+follows. Nothing read afterwards
 tells a half-done use case from an intended state, so nothing repairs it. A store commits a
 transaction whole or not at all (Assumptions); the rule makes sure everything that has to land
 together is inside one, and that nothing commits beside it.
 
-The Statement draws the line in three places. First, what lands together: the writes the goal
-needs, the goal being the use case's (glossary: Use case). Checkout needs the order and the
-emptied cart; without either the customer's goal is not reached. Several aggregates included, the
-order and the cart are one transaction. A write the goal does not need, a sales statistic, may
-be left to a handler as its own use case, apart from this one; it is then that use case's write
-and lands with that use case's other writes. Left in, nothing ends up wrong; what it costs, locks
-held to the commit and a failure that aborts the rest, is P10's to weigh, not this rule's.
+The Statement draws the line in three places. First, what lands together: one aggregate, and the
+messages that tell of its change. An aggregate is what its business rules keep consistent, so a rule
+that needs two records changed at once draws them into one aggregate, and two aggregates no rule
+ties need no shared commit. What else the goal needs follows by message and lands with the aggregate
+of the use case that handles it. Two cases tempt a second aggregate into the transaction, and
+neither needs it. Where the caller has to see one change at once, the use case saves that aggregate
+and the rest follows: the traveller sees the seat held, and the invoice follows from its message.
+Where one aggregate must not commit before another agrees, the first asks the second for a tentative
+operation by message and later confirms or cancels it, and P17 delivers that the waiting ends. A
+write the goal does not need, a statistic, goes the same way.
 
 Second, who holds the transaction: the service. It is the only code that sees the whole use case
 (glossary: Service, the sequence within one use case), so it alone knows which writes land
@@ -741,9 +752,9 @@ afterwards, and the inner writes stay. Two use cases that need the same writes e
 repositories inside their own transaction, and the domain decides what the writes are. What the
 code around the acting call may still do is everything short of a second one: validate, translate,
 ask an answering use case for an argument, who the session belongs to. Several calls that each
-reach a goal of their own are not a split: a bus delivering a batch gives one call per message,
-a scheduled task polling a bank hands each transfer on as a message of its own, and a use case
-written over a whole batch reaches one goal in one transaction.
+reach a goal of their own are not a split: a bus delivering a batch gives one call per message. Work
+over many items, a scheduled task's or a poll's, is one acting call that writes one message per
+item, and each is handled as a use case of its own that saves its own item.
 
 Rolling back whole means no write of the use case commits once one has failed. A use case that
 catches the failed write, rolls back to a savepoint and commits the rest is the half-done use case
@@ -767,16 +778,17 @@ is carried by it.
 *Provenance:* The service holding the transaction follows Fowler (Service Layer: "controlling
 transactions"), Evans p. 111 ("Leave transaction control to the client"; the repository "will
 ordinarily not commit anything"), Khononov p. 86 n. 7 and p. 122–123, Vernon EAD I p. 3 and MS
-(the command handler commits). The writes a use case relies on in one transaction, the rest
-optionally eventual, follow Vernon EAD II p. 9 (Evans's test, whose job the consistency is) and
-MS. A batch in one transaction is Dahan's, in Vernon EAD II p. 10. A nested call recording no
+(the command handler commits). One aggregate per transaction follows Vernon EAD I p. 4, Khononov
+p. 87 and p. 93, Evans Reference p. 16, Fowler (DDD_Aggregate) and Helland 2007 p. 135. The rest by
+message follows Vernon EAD II p. 9 (each subscriber "in a separate transaction"; whose job the
+consistency is). The tentative operation between aggregates follows Helland 2007 p. 140, whose
+entities are each one transaction's. A nested call recording no
 intent follows Helland 2007 p. 138. One acting call per goal and no service calling another are
 this document's; no source rules on them. Departs: Khononov p. 122 and p. 124 make the service
 layer optional; MS runs domain-event handlers inside the command handler's transaction, one
 piece of application code driving another, and its IdentifiedCommand handler re-dispatches.
-Against several aggregates in one transaction: Vernon EAD I p. 4 ("a rule of thumb"), Khononov
-p. 87 and p. 93, Evans Reference p. 16, Fowler (DDD_Aggregate) and Helland 2007 p. 135; for: MS
-("valid in many business cases") and Vernon EAD II p. 10.
+Departs from Vernon EAD II p. 10, which breaks the rule for a batch created at once, and from MS
+("valid in many business cases").
 *Absorbs:* TX-1, TX-2, SVC-3, DRV-1
 *Drops:* TX-15, its SHOULD weighs locks and retries, P10's cost, its "relied on" kept as "needs";
 TX-49, failing rather than re-saving is P10's, its rollback is in this Statement; TX-22, how a
@@ -793,7 +805,8 @@ write left out reaches its second store is P8's; ASM-9, ambient against argument
 is delivered, or another system tells this system of a change before committing it.
 *Statement:* A message a use case writes MUST go into the outbox in its transaction, and a change it
 decides that the transaction does not commit MUST leave it only as such a message asking for the
-change, or as a request for a tentative operation made beside the transaction. The outbox MUST keep
+change, or as a request to another system for a tentative operation made beside the transaction. The
+outbox MUST keep
 each message until the bus holds it, and the bus through any stop of a process until a handler
 acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
 writes committed. A use case called for such a message MUST make the change, deciding nothing again,
@@ -1037,7 +1050,7 @@ writes where the data read changed, or came to exist where the read found none, 
 new aggregate's insert fails on a key already taken. The means are open: a version the aggregate
 carries, compared on save; a lock taken at the read and held to the commit, under which the data
 cannot change; a unique key; an isolation level under which the second commit fails. The cheapest
-is to keep the data a decision reads in the aggregates the use case saves: the stock with its
+is to keep the data a decision reads in the aggregate the use case saves: the stock with its
 reservations in one `Stock`, so the second reservation's save fails, where two `Reservation`s saved
 beside a `Stock` read and not saved both commit. That is the default the quarry preferred; the
 Statement asks for the failure, not for this means.
@@ -1050,8 +1063,8 @@ comes, and that a lost race is not committed as a refusal, is P9's and P17's: P1
 
 The stale read a business rule accepts. Some data no failure in this transaction can cover: a
 replica lags its owner, and another system's live answer is stale the moment it returns, since no
-save in this store fails on a change there. A business rule across aggregates that cannot sit in
-the aggregates one use case saves is in the same place. The second sentence lets the use case
+save in this store fails on a change there. A business rule across aggregates that cannot sit in the
+one aggregate a use case saves is in the same place. The second sentence lets the use case
 decide by such data only where a business rule of its system accepts it stale and says what follows
 where it changed meanwhile: shop offers pay-by-invoice by its copy of billing's dunning stage, a
 customer who entered dunning a moment ago accepted; a reconciliation, a later use case or a
@@ -1068,7 +1081,7 @@ aggregate drawn wider than its business rules, release scheduling and backlog pl
 along with itself: it fails whenever a use case changes the other, and where it does not fail it
 writes a stale copy over the other's change; held as the other's id, or as a snapshot that is this
 aggregate's own fact from then on, the price the order was placed at, it covers nothing of the
-other. A use case that writes, beside what its goal needs, a statistic in the same transaction fails
+other. A statistic written in the same transaction, a second aggregate P7 keeps out, would fail
 every checkout that races on the counter. Moved to a handler through a message in the outbox, the
 write fails alone and is retried alone. An aggregate drawn around what its business rules tie, and
 a use case writing what its goal relies on, fail each other exactly where the business says the two
@@ -1086,8 +1099,8 @@ rejected"); Evans p. 94 locks the purchase order, which the Statement admits. Th
 acting call follows Khononov p. 85 and CWE-367. Failing rather than reapplying follows Fowler
 (Optimistic Offline Lock: on a conflict "the transaction is rolled back"); departs from MS, which
 retries inside the use case on a concurrency exception. The data in the saved aggregates follows
-Evans p. 91 and p. 97, Evans Reference p. 16, Vernon EAD I p. 3 and Khononov p. 87; departs from
-Vernon EAD I p. 4's one aggregate per transaction. The stale read a business rule accepts follows
+Evans p. 91 and p. 97, Evans Reference p. 16, Vernon EAD I p. 3 and Khononov p. 87; follows Vernon
+EAD I p. 4's one aggregate per transaction. The stale read a business rule accepts follows
 Vernon EAD II p. 9, MS (Domain events: domain experts decide), Helland 2005 §2.5 and Evans p. 91.
 The id and the snapshot follow Vernon EAD II p. 8, Khononov p. 90, Evans p. 97 and Helland 2005
 §5.2; against: Evans p. 91–92 and Fowler (DDD_Aggregate) let objects hold other roots. The write
@@ -1566,8 +1579,8 @@ once, for an invoice mailed tomorrow, is asked for by a message.
 The rule governs the use case. A driving adapter that waits on another system before it calls the
 use case holds the way in the same way; what a driving adapter may reach is P5's, and P5 delivers
 this. A scheduled task that polls a bank for transfers (TX-46) is a driving adapter that waits
-with nobody waiting on it: it hands each transfer to a use case as a message, and a bank that is
-down delays the poll, not a caller.
+with nobody waiting on it: it hands the transfers to one acting call that writes a message for each
+(P7), and a bank that is down delays the poll, not a caller.
 *Provenance:* Follows Khononov p. 238 (event-carried state transfer: "the consumers can continue
 functioning even if the producer is not available") and p. 246 ("If the components can settle for
 eventually consistent data, use the event-carried state transfer message"), Fowler (What do you
@@ -1708,7 +1721,11 @@ delivers the executor's side).
 The second sentence makes the waiting end without the other system. The delivery rules reach no
 message the other system stopped sending, and none a dead-letter queue keeps: nothing in this
 system changes until it arrives, unless this system holds what makes it change. A deadline in its
-own aggregate, the order's payment deadline, acts when it passes whatever the other system does.
+own aggregate, the order's payment deadline, acts when it passes whatever the other system does. A
+deadline is a business fact, a grace period, the hours a hold lasts, so it is held where the
+business's facts are. What starts it once it passes is the clock (Assumptions), which can come late,
+so the use case it starts decides by the aggregate: a deadline the answer already met finds the
+answer there, and one moved since finds the new moment.
 At the deadline the rule may ask the other system, a reconciliation, but it still decides on no
 answer: a reconciliation that asks again forever is the waiting renamed. Held in the aggregate the
 late answer also loads, the deadline and the answer meet on one aggregate, and which of them wins
@@ -1759,8 +1776,10 @@ intervention"). The refusal as outcome follows Khononov p. 235 (a command "can b
 p. 148 (rejection as an event the saga handles); failure retried and parked follows EIP
 (Transactional Client) and NServiceBus (Outbox: the error queue). Departs: Richardson's
 orchestrated participant and NServiceBus reply to the sender; this rule leaves the route open. The
-closed list of endings, the deadline in the waiting system's own aggregate and the line between a
-refusal and a failure are this document's.
+deadline held in the aggregate follows Evans p. 161 and p. 163 (due date plus grace period, selected
+by the repository once past) and Khononov p. 88 and p. 102 (time left held and checked in the
+aggregate; the payment deadline in the order's event). The closed list of endings and the line
+between a refusal and a failure are this document's.
 *Absorbs:* TX-30, TX-35, TX-34, TX-45, TX-38
 *Drops:* —
 *Glossary notes:*

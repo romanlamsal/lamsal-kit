@@ -81,9 +81,10 @@ the outbox readers.
 **Idempotent.** An operation is idempotent when repeating it leaves its system's records as
 performing it once left them, and answers as the first did.
 
-**Tentative operation.** A request to another system for a commitment that leaves open the
-possibility of cancellation. It gives nothing until it is confirmed, by the requester or by
-whoever else the other system takes the confirmation from: its confirmation gives what it asks
+**Tentative operation.** A request to another aggregate or another system for a commitment that
+leaves open the possibility of cancellation. It gives nothing until it is confirmed, by the
+requester or by whoever else the holder takes the confirmation from: its confirmation gives what it
+asks
 for, its cancellation ends it.
 
 **Open host service.** The driving ports a system offers to other systems.
