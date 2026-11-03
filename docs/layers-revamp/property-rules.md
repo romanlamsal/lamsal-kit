@@ -1,10 +1,9 @@
 # Property rules
 
-*Draft.* One rule per property of `the-world.md`, written to be read whole: Scope and Statement
-are the rule, the Why is its reasoning, and the reader is an agent that reads all three. The
-glossary's terms, as spelled. Where a property needs nothing a reader could breach, the entry
-says so. Conventions at the end are taste, no property behind them. The Appendix is for the
-author, not the repository.
+*Draft.* One rule per property of `the-world.md`, written to be read whole: Scope and Statement are
+the rule, the Why is its reasoning, and the reader is an agent that reads all three. The glossary's
+terms, as spelled. Where a property needs nothing a reader could breach, the entry says so.
+Conventions at the end are taste, no property behind them.
 
 ## Assumptions
 
@@ -25,25 +24,23 @@ is rewritten when it grows business rules.
 Not everything gets a layer. Assembly, a system's offer and the common library sit outside the
 layers. So do probes.
 
-Tooling sits outside the layers and the rules. It builds systems through their builders or
-replaces their internals. What it reaches past the offer (SYS-1) a system changes without
-notice.
+Tooling sits outside the layers and the rules. It builds systems through their builders or replaces
+their internals. What it reaches past the offer a system changes without notice.
 
 An external system sits outside the rules: its exports, its layers and its transactions are its own,
 even where this codebase writes its configuration. What a system of this codebase does with it is
 inside them: the adapters that call it, the hooks it calls, and the parts of its configuration that
-touch the system: what may change the system's records it keeps (SYS-12), how it tells the system of
-a change (TX-29), what it reads of the system's records (SYS-9). It is no system of this codebase
-where a rule says one. Where a rule names an open host service or a published language and the
-system is external, its API is the open host service and its package the published language.
+touch the system: what may change the system's records it keeps (P11), how it tells the system of a
+change (P8), what it reads of the system's records (P11). Where a rule says a system of this
+codebase, an external system is not one. Where a rule names an open host service or a published
+language and the system is external, its API is the open host service, and what that API and the
+messages it writes are typed by, the types generated from this codebase's configuration of it
+included, the published language.
 
-Not covered: where UI code goes, which is `components.md`; library, framework and file-naming
-conventions, which are the stack document's; whether a module that straddles two layers should be
-split now; how a driving adapter is tested, and when the integration suite runs, which are the
-repository's; how the bus finds a message's handlers, by its type or by each handler filtering,
-which is the stack document's; how telemetry crosses a message, a trace context on the envelope,
-which is the stack document's; where a system records that it conforms to an upstream (glossary:
-Conformist), which is the repository's.
+Not covered, and the repository's: where UI code goes; library, framework and file-naming
+conventions; whether a module that straddles two layers should be split now; how a driving adapter
+is tested, and when the integration suite runs; how the bus finds a message's handlers, by its type
+or by each handler filtering; how telemetry crosses a message, a trace context on the envelope.
 
 
 ## Rules
@@ -87,24 +84,23 @@ The third item carries three tests, each closing one way in.
 
 "Of no system" keeps out every system's code: another system's domain, this system's service,
 adapters and assembly, and this system's own published language. The last serves the open host
-service, shaped for downstream systems and held still for them (P13 delivers this); a domain
-typed by it changes when what the contract serves changes, or freezes with it. An external
-system's package is its published language (general-rules, Assumptions), so it is a system's
-code too. Which other system's model may enter at all is P12's; this rule says only where a
-model chosen by conforming may enter the domain.
+service, shaped for downstream systems and held still for them (P13 delivers this); a domain typed
+by it changes when what the contract serves changes, or freezes with it. What an external system's
+API is typed by is its published language (Assumptions), so it is a system's code too. Which other
+system's model may enter at all is P12's; this rule says only where a model chosen by conforming may
+enter the domain.
 
-The cases the quarry carried, and how the Statement covers them:
-- DOM-1's list, its runtime test and its pure test are the list here; its store row type,
-  refused through Reach in its Why, is refused by the Statement's "in no terms of the outside".
-- The common library. DOM-1 kept it off the list whole. Here its modules are judged as any
-  library's: its logger reaches outside the process and a courier kept there hands the domain a
-  value no caller passed, so both fail purity; a pure helper in no terms of the outside passes,
-  as a validation library does. It holds no model (ASM-6), so passing it brings in none.
-- A shared kernel is part of the model, agreed with the systems that share it, not something
-  that serves the domain: `Money` in an `Order`. SYS-14's case, a `Money` that imports the common
-  library's logger to report a rounding, is the domain reaching the logger through the kernel:
-  refused here, in whichever module the import was written. What a kernel or a published
-  language may reach for its other importers, a downstream's adapter or a browser, is not P1's.
+Four cases, and how the Statement covers them:
+- A store's row type in the domain is refused by the Statement's "in no terms of the outside".
+- The common library. Its modules are judged as any library's: its logger reaches outside the
+  process and a courier kept there hands the domain a value no caller passed, so both fail purity; a
+  pure helper in no terms of the outside passes, as a validation library does. It holds no model, so
+  passing it brings in none.
+- A shared kernel is part of the model, agreed with the systems that share it, not something that
+  serves the domain: `Money` in an `Order`. A `Money` that imports the common library's logger to
+  report a rounding, is the domain reaching the logger through the kernel: refused here, in
+  whichever module the import was written. What a kernel or a published language may reach for its
+  other importers, a downstream's adapter or a browser, is not P1's.
 - The conformist, P1's one exception. Its domain is written in its upstream's terms (glossary:
   Conformist): its business rules take the upstream's schemas as arguments, imported from the
   upstream's export path; a schema restated beside them is a second declaration drifting on the
@@ -119,11 +115,10 @@ definition of the domain kept by P2 and P19; this rule keeps what is not the bus
 *Provenance:* The direction follows Evans, Layered Architecture (p. 53), Khononov p. 77 (the model
 "devoid of any infrastructural or technological concerns") and p. 126, MS ("the domain model layer
 must not directly depend on any infrastructure framework"), Evans Reference p. 10 and Garrido §3
-("Hexagon depends on nothing, maybe just on utilities"). The shared kernel follows Evans p. 251
-and Khononov p. 51 ("Ideally, the shared kernel will consist only of integration contracts and
-data structures"). The list, the runtime test and the outside's-terms test are this document's.
-Departs from DOM-1: the common library is judged per module, not refused whole. Departs: Martin
-(The Dependency Rule) keeps an outer circle's data formats out of an inner one, against the
+("Hexagon depends on nothing, maybe just on utilities"). The shared kernel follows Evans p. 251 and
+Khononov p. 51 ("Ideally, the shared kernel will consist only of integration contracts and data
+structures"). The list, the runtime test and the outside's-terms test are this document's. Departs:
+Martin (The Dependency Rule) keeps an outer circle's data formats out of an inner one, against the
 conformist's import. Against: Khononov p. 70 couples active records to the ORM for simple
 subdomains; this document picks one architecture for every system (Assumptions).
 *Absorbs:* DOM-1, SYS-14 (its bound on what the domain reaches through a shared kernel)
@@ -193,28 +188,28 @@ pure, fast and deterministic, so the double buys nothing. The fakes a service's 
 stand in for driven ports, not for the domain.
 
 Three things look like second statements and are not. The published language may constrain what
-crosses in its own terms where a business rule says the same: `quantity` positive in the schema
-that takes an order line. That constraint is the contract's, not the business rule's: when the
-domain comes to allow a zero quantity, the contract rightly keeps refusing it until it changes on
-its own terms (P13 and P14 deliver this), and the service translating between the two is where
-the difference shows. Leaving it behind is no error, so it is no statement of the rule. This
-holds for the published language alone: a driving adapter that restates the domain's schema is
-no contract and states the rule again. Second, a key the store enforces: the store fails a write
-where a record with the same key exists (general-rules Assumptions), and a new aggregate's save
-failing where one exists stands on it (P10 delivers this). The domain states the key as part of
-the shape; the store refuses a duplicate when two use cases race past the domain's check, and
-decides nothing the domain's statement does not; the adapter keeps it in step as it keeps every
-column, and its test against the store set up as production sets it up finds the store that
-disagrees (P6 delivers this). A condition the store checks beyond the key, a check constraint, a
-trigger, decides, and is refused. Third, an external system's configuration: the business rules
-it holds are the external system's own where they decide a record the external system keeps and
-no business rule of this system decides. A rule about a record this system's business rules
-decide, written into the external system's field validation, is this system's rule stated
-outside its domain. A system that has to be asked before a
-record is written holds a rule that decides what the record holds, so the record is that
-system's (glossary: Owner). The system that takes the write is one of the owner's ways in. A
-system asked only to protect records of its own decides nothing about the record written: it
-copies what it needs and is not asked. Who may change such a record is P11's.
+crosses in its own terms where a business rule says the same: `quantity` positive in the schema that
+takes an order line. That constraint is the contract's, not the business rule's: when the domain
+comes to allow a zero quantity, the contract rightly keeps refusing it until it changes on its own
+terms (P13 and P14 deliver this), and the service translating between the two is where the
+difference shows. Leaving it behind is no error, so it is no statement of the rule. This holds for
+the published language alone: a driving adapter that restates the domain's schema is no contract and
+states the rule again. Second, a key the store enforces: the store fails a write where a record with
+the same key exists (Assumptions), and a new aggregate's save failing where one exists stands on it
+(P10 delivers this). The domain states the key as part of the shape; the store refuses a duplicate
+when two use cases race past the domain's check, and decides nothing the domain's statement does
+not; the adapter keeps it in step as it keeps every column, and its test against the store set up as
+production sets it up finds the store that disagrees (P6 delivers this). A condition the store
+checks beyond the key, a check constraint, a trigger, decides, and is refused. A trigger that only
+raises a version decides nothing the business allows, and states no business rule (P18). Third, an
+external system's configuration: the business rules it holds are the external system's own where
+they decide a record the external system keeps and no business rule of this system decides. A rule
+about a record this system's business rules decide, written into the external system's field
+validation, is this system's rule stated outside its domain. A system that has to be asked before a
+record is written holds a rule that decides what the record holds, so the record is that system's
+(glossary: Owner). The system that takes the write is one of the owner's ways in. A system asked
+only to protect records of its own decides nothing about the record written: it copies what it needs
+and is not asked. Who may change such a record is P11's.
 
 A shared kernel holds the rules several systems agree on, stated once and imported into each
 domain; a change to it is a change to each (glossary). Which rules belong there is P3's. The
@@ -266,59 +261,57 @@ library included.
 *Statement:* A business rule that decides what a record holds MUST be stated in the domain of the
 record's owner. A shared kernel MUST hold no such rule and no record's schema, only values and what
 computes values from arguments.
-*Why:* The harm is a business change that has to be made in code that does not know it belongs
-to it, or a change made for one system's reason that lands in another. Two routes lead there.
-One is a rule stated in the wrong system: fulfillment's reservation holds stock for thirty
-minutes, and shop works out `reserveUntil` as now plus thirty; the warehouse wants an hour, the
-change is fulfillment's, the code is shop's, and a reader of fulfillment's domain never finds it.
-The other is a model several systems share: an `Order` in a shared kernel or the common library
-whose status rules serve checkout and billing alike, so billing's next invoicing change edits
-checkout's order and breaks checkout's tests. The mechanism groups by record. The rules that
-decide what one record holds change together, since a change to what the record means touches
-each of them; the owner is the one system whose business rules those are (glossary: Owner), so
-stating every one in its domain puts them together, and P2 delivers that within that domain each
-is stated once. Owner is singular: two systems' rules deciding one record is the breach, whichever
-system keeps it. Rules about records of different owners change for different reasons and land in
-different domains. Another system takes part in a record's rules only as input: it asks, the
-owner decides, a command may be refused (glossary: Message), and what it asks is decided by its
-own rules about its own request. So the line between shop's rule and fulfillment's runs through
-what fulfillment's command takes: where fulfillment holds stock until the time asked, the hold
-time is shop's to ask, decided by shop's rule about shop's request; where fulfillment holds for
-thirty minutes, `reserveUntil` computed in shop is fulfillment's rule stated in shop. A rule
-decides what a record holds when it is about that record: `Money`'s rounding is about any amount
-and reaches a record only through the owner's rule that calls it. A rule that decides no record,
-what an answering use case answers, is of the system whose use case it is, and P2 delivers its
-place. A shared kernel is imported into several domains, and a change to it is a change to each
-(glossary): values and what computes them from arguments, `Money` and its rounding, change when
-the value's meaning changes, which every importer shares; a rule about a record changes when that
-record's owner's business changes, which the other importers do not share. So the kernel holds
-none, a record's schema included, since a schema is the rule about a record's shape (DOM-3), and
-offers the values the owners' rules decide by. The common library belongs to no system and is
-written for every system to import (glossary): a business rule there is in no system's domain,
-and a change made for one system's reason reaches all of them; a value several systems share goes
-to a shared kernel they agree on. The envelope the relay and the bus carry is the common
+*Why:* The harm is a business change that has to be made in code that does not know it belongs to
+it, or a change made for one system's reason that lands in another. Two routes lead there. One is a
+rule stated in the wrong system: fulfillment's reservation holds stock for thirty minutes, and shop
+works out `reserveUntil` as now plus thirty; the warehouse wants an hour, the change is
+fulfillment's, the code is shop's, and a reader of fulfillment's domain never finds it. The other is
+a model several systems share: an `Order` in a shared kernel or the common library whose status
+rules serve checkout and billing alike, so billing's next invoicing change edits checkout's order
+and breaks checkout's tests. The mechanism groups by record. The rules that decide what one record
+holds change together, since a change to what the record means touches each of them; the owner is
+the one system whose business rules those are (glossary: Owner), so stating every one in its domain
+puts them together, and P2 delivers that within that domain each is stated once. Owner is singular:
+two systems' rules deciding one record is the breach, whichever system keeps it. Rules about records
+of different owners change for different reasons and land in different domains. Another system takes
+part in a record's rules only as input: it asks, the owner decides, a command may be refused
+(glossary: Message), and what it asks is decided by its own rules about its own request. So the line
+between shop's rule and fulfillment's runs through what fulfillment's command takes: where
+fulfillment holds stock until the time asked, the hold time is shop's to ask, decided by shop's rule
+about shop's request; where fulfillment holds for thirty minutes, `reserveUntil` computed in shop is
+fulfillment's rule stated in shop. A rule decides what a record holds when it is about that record:
+`Money`'s rounding is about any amount and reaches a record only through the owner's rule that calls
+it. A rule that decides no record, what an answering use case answers, is of the system whose use
+case it is, and P2 delivers its place. A shared kernel is imported into several domains, and a
+change to it is a change to each (glossary): values and what computes them from arguments, `Money`
+and its rounding, change when the value's meaning changes, which every importer shares; a rule about
+a record changes when that record's owner's business changes, which the other importers do not
+share. So the kernel holds none, a record's schema included, since a schema is the rule about a
+record's shape, and offers the values the owners' rules decide by. The common library belongs to no
+system and is written for every system to import (glossary): a business rule there is in no system's
+domain, and a change made for one system's reason reaches all of them; a value several systems share
+goes to a shared kernel they agree on. The envelope the relay and the bus carry is the common
 library's and holds no system's shape, so no business rule. Left to others: a published language
-that states a constraint the domain also states is the contract's own statement, two by design
-(SYS-16), and P2 and P13 deliver whether it may; a replica's record holds what its owner's rules
-decided, the keeper deciding which copy it keeps, never a value the owner did not decide
-(glossary: Replica). Business rules about a record an external system keeps for this system are
-this system's, in its domain; one in the external system's configuration about such a record is
-a second statement (DOM-7), and one about a record the external system owns is the external
-system's own. A conformist states its own rules in its upstream's terms (P1's Except); the
-upstream's rules about the upstream's records stay upstream. Rules that change together and stand
-apart from the rest, gathered under one owner, show where a system splits once the business
-domain is better known; splitting a system where one term comes to mean two things: P19 delivers
-this. Which records form one aggregate within a system: P10 delivers this.
+that states a constraint the domain also states is the contract's own statement, two by design, and
+P2 and P13 deliver whether it may; a replica's record holds what its owner's rules decided, the
+keeper deciding which copy it keeps, never a value the owner did not decide (glossary: Replica).
+Business rules about a record an external system keeps for this system are this system's, in its
+domain; one in the external system's configuration about such a record is a second statement, and
+one about a record the external system owns is the external system's own. A conformist states its
+own rules in its upstream's terms (P1's Except); the upstream's rules about the upstream's records
+stay upstream. Rules that change together and stand apart from the rest, gathered under one owner,
+show where a system splits once the business domain is better known; splitting a system where one
+term comes to mean two things: P19 delivers this. Which records form one aggregate within a system:
+P10 delivers this.
 *Provenance:* Grouping by bounded context follows Khononov p. 160 (changes "not encapsulated in a
 single bounded context signal ineffective design") and p. 161 (start with wider boundaries). The
-owner's logic alone deciding its data follows Helland 2005 §1.3. The common library follows
-ASM-6's: MS (share only "final application blocks, like the Event Bus client API", no common
-domain model) and Evans p. 244 ("Code reuse between BOUNDED CONTEXTS is a hazard to be
-avoided"). The kernel follows Evans p. 251 and Khononov p. 51–52 ("a pragmatic exception");
-values only follows Khononov p. 51 ("Ideally, the shared kernel will consist only of integration
-contracts and data structures"). Departs: Evans p. 251 shares "the subset of code or of the
-database design" with the model; Martin's entities may serve many applications. Placing a
-record's rules by its owner is this document's.
+owner's logic alone deciding its data follows Helland 2005 §1.3. The common library follows MS
+(share only "final application blocks, like the Event Bus client API", no common domain model) and
+Evans p. 244 ("Code reuse between BOUNDED CONTEXTS is a hazard to be avoided"). The kernel follows
+Evans p. 251 and Khononov p. 51–52 ("a pragmatic exception"); values only follows Khononov p. 51
+("Ideally, the shared kernel will consist only of integration contracts and data structures").
+Departs: Evans p. 251 shares "the subset of code or of the database design" with the model; Martin's
+entities may serve many applications. Placing a record's rules by its owner is this document's.
 *Absorbs:* ASM-6
 *Drops:* SYS-13, who declares a command sets the published language's direction, P12's and
 P13's; its case of a rule worked out for another system's record is covered here. TX-17,
@@ -334,12 +327,11 @@ consumers shaping an event bind a published language, not where a business rule 
 
 *Scope:* a use case runs, whichever driving adapter calls its driving port and whichever code
 behind its driven ports serves it.
-*Statement:* How a use case acts and what it answers MUST be computed by its service and its domain
-from the arguments its driving port takes and what its driven ports return, and from no other input.
-Code behind a driven port MUST use an ambient value or a configuration value only to reach the
-outside it adapts, and in nothing it writes or returns. A driving adapter MUST reach the system only
-through its driving ports, with at most one acting call per call it handles, and MUST NOT withhold a
-call the service would accept.
+*Statement:* How a use case acts and what it answers MUST be decided by its service and its domain
+from the arguments its driving port takes and what its driven ports return, and an ambient value or
+a configuration value MUST NOT change either, whether the service reads it or code behind a port
+does. A driving adapter MUST reach the system only through its driving ports, with at most one
+acting call per call or message it handles, and MUST NOT withhold a call the service would accept.
 *Why:* A tea shop's checkout is reached by a server function, a CLI the staff use, a handler and
 a test; its records are served by Postgres in production and by a fake in the test. P4 holds where
 all of them meet one computation, the service and the domain, fed by two inputs: what the caller
@@ -353,50 +345,52 @@ process holds and the next does not. Each such input makes the response a functi
 or what served, and a test that passes says nothing of the server function, nor the server
 function of the CLI.
 
-The first sentence puts the computation in the service and the domain and closes its inputs. A
-check a driving adapter makes and the service does not protects one way in: the order page refuses
-to cancel a shipped order, and the CLI, or a downstream calling the driving port, cancels it
-(SVC-2). A value read where it was not passed is in no signature: the current user taken from a
-request context decides a permission, the second driving adapter forgets to set it, the test does
-not, and the handler, running outside any request, finds none (ASM-3). A business rule deciding by
-a configuration value decides by which process took the request: during a deploy the old image and
-the new run side by side with different payment deadlines, and two orders placed in the same
-second get deadlines apart (DOM-9). What the business wants to change at runtime is a record, read
-through a driven port like any other record, and the same for every process. A ready-made clock or
-id generator the service imports is no argument and no driven port, and fails the same test; the
-time and the ids arrive through a `Clock` port and an id generator port, or as arguments. Pure code
-of no system and a shared kernel, called by the service or the domain, add no input: they compute
-from what they are passed and are part of the computation.
+The first sentence puts the computation in the service and the domain and closes its inputs. A check
+a driving adapter makes and the service does not protects one way in: the order page refuses to
+cancel a shipped order, and the CLI, or a downstream calling the driving port, cancels it. A value
+read where it was not passed is in no signature: the current user taken from a request context
+decides a permission, the second driving adapter forgets to set it, the test does not, and the
+handler, running outside any request, finds none. A business rule deciding by a configuration value
+decides by which process took the request: during a deploy the old image and the new run side by
+side with different payment deadlines, and two orders placed in the same second get deadlines apart.
+What the business wants to change at runtime is a record, read through a driven port like any other
+record, and the same for every process. A ready-made clock or id generator the service imports is no
+argument and no driven port, and fails the same test; the time and the ids arrive through a `Clock`
+port and an id generator port, or as arguments. Pure code of no system and a shared kernel, called
+by the service or the domain, add no input: they compute from what they are passed and are part of
+the computation.
 
-The second sentence follows the inputs behind the ports, where the first does not reach. A
-repository that filters by an ambient tenant returns, for the same arguments and the same records,
-what depends on who happened to call; a driven adapter that turns an instant into a date by the
-process's `TZ` returns what depends on which process ran it. Both pass the first sentence, the
-service deciding by what its port returned, and both break P4. A configuration value still reaches
-the code behind a port, which is where it belongs: a key, a URL, a pool size choose what lies
-behind the port or how it is reached, and a test that points the URL at a stub has swapped what
-serves the use case, which is P4's case and not its breach. What the use case records goes the
-same way: the user an audit column records and the locale a mail is rendered in arrive as
-arguments, and a handler that needs a value of the request that wrote its message gets it in the
-message, or by a query the message points to, or not at all.
+The first sentence reaches behind the ports too, because an input closed at the service comes back
+through them. A repository that filters by an ambient tenant returns, for the same arguments and the
+same records, what depends on who happened to call; a driven adapter that turns an instant into a
+date by the process's `TZ` returns what depends on which process ran it. The service decides only by
+what its port returned, and the use case still answers by who called or which process ran, so the
+value is refused wherever it is read. A configuration value that chooses what lies behind a port, a
+key, a URL, a pool size, changes nothing for the same records: a test that points the URL at a stub
+has swapped what serves the use case, which is P4's case and not its breach. A value the business
+decides on is part of how the use case acts: the sender a customer is meant to see on a mail is the
+business's, and is held in the domain or a record; a sender that only names the deployment to its
+mail provider changes nothing. What the use case records goes the same way: the user an audit column
+records and the locale a mail is rendered in arrive as arguments, and a handler that needs a value
+of the request that wrote its message gets it in the message, or by a query the message points to,
+or not at all.
 
-The third sentence is the driving adapter's side. A driving adapter that makes two acting calls
+The second sentence is the driving adapter's side. A driving adapter that makes two acting calls
 holds a sequence the glossary gives to the service: which second call to make, and what to do when
 the first succeeded and the second failed, are decided in one way in, outside any transaction, and
-repeated or missing in the next (DRV-1). A loop over acting calls is the same sequence. A bus that
-delivers several messages at once gets one acting call per message, each message being a call the
-handler handles; work over a batch is one acting call that writes one message per item (P7). What
-the adapter
-does before the call is translation: parsing its caller's input into the domain's shapes, routing
-by path or by message type to the driving port it calls, working out who the caller is, through an
-answering call where that takes this system's stored state, the answer becoming an argument of the
-acting call. A caller it cannot identify, input it cannot parse, a message of a type it has no
-driving port for: each it cannot translate, and withholding the call is the adapter's. An
-answering call asked whether to act is a guard: it withholds the acting call earlier where the
-service would refuse it too, and the service still refuses it. A guard the service does not
-repeat, a role check on the admin route alone, a webhook that skips events under some amount, is a
-decision that holds on one way in. Translating back is the adapter's too: JSON for the route, a
-line for the CLI, one answer.
+repeated or missing in the next. A loop over acting calls is the same sequence. A bus that delivers
+several messages at once gets one acting call per message. So does a poll: each item it returns,
+handed on under the id the other system gives it, is a message (P9), and the adapter makes one
+acting call per item, or one that writes one message per item (P7). What the adapter does before the
+call is translation: parsing its caller's input into the domain's shapes, routing by path or by
+message type to the driving port it calls, working out who the caller is, through an answering call
+where that takes this system's stored state, the answer becoming an argument of the acting call. A
+caller it cannot identify, input it cannot parse, a message of a type it has no driving port for:
+each it cannot translate, and withholding the call is the adapter's. An answering call asked whether
+to act is a guard: it withholds the acting call earlier where the service would refuse it too, and
+the service still refuses it. A guard the service does not repeat, a role check on the admin route
+alone, a webhook that skips events under some amount, is a decision that holds on one way in.
+Translating back is the adapter's too: JSON for the route, a line for the CLI, one answer.
 
 Telemetry is no input: a logger or tracer imported ready-made, a trace context the adapter puts in
 per request and the outbox adapter carries on the envelope, change neither how the use case acts
@@ -404,12 +398,11 @@ nor what it answers, so nothing here refuses them.
 
 What P4 needs beyond this rule other properties deliver. That a fake answers as the store does
 wherever the use case can tell: P6 delivers this. That the use case reaches the outside, and is
-reached, only through ports assembly hands it, in its system's terms: P5 delivers this. That a
-check by stored state is made in the transaction that acts, not in a call before it, the other
-half of SVC-2: P10 delivers this. That a caller's transaction does not run the use case: P16
-delivers this, and the glossary's driving port already takes what a caller brings in the system's
-terms, not its store's. That a business rule's number is stated in the domain, the other half of
-DOM-9: P2 delivers this.
+reached, only through ports assembly hands it, in its system's terms: P5 delivers this. That a check
+by stored state is made in the transaction that acts, not in a call before it: P10 delivers this.
+That a caller's transaction does not run the use case: P16 delivers this, and the glossary's driving
+port already takes what a caller brings in the system's terms, not its store's. That a business
+rule's number is stated in the domain: P2 delivers this.
 *Provenance:* Follows Cockburn, Intent: an application "equally" driven by users, programs,
 automated tests or batch scripts, and tested in isolation from its run-time devices and databases.
 The decision in the service follows Khononov p. 85 (the aggregate's interface enforces all business
@@ -422,11 +415,11 @@ by arriving through its driving port follows Seemann ("Service Locator violates 
 his interview goes wider ("Ambient Context is also best avoided"), which this rule does not, keeping
 telemetry ambient. The message carrying what its handler needs follows Khononov p. 91, Evans
 Reference p. 13 and Helland 2005 §1.6; Khononov p. 236 keeps event notifications lean, the
-subscriber asking for the rest. The line against configuration values, and the line between
-telemetry and every other ambient value, are this document's.
+subscriber asking for the rest. The line drawn by what a value changes, wherever it is read, is this
+document's.
 *Absorbs:* SVC-2, DRV-1, ASM-3, DOM-9
 *Drops:* DRV-8, its import list is P5's, and the bypass of one way in it guards against is this
-rule's first and third sentences; SVC-7, a driving adapter reaching the outside past its driving
+rule's first and second sentences; SVC-7, a driving adapter reaching the outside past its driving
 port is P5's; ASM-2, substitution of what serves a use case by handing it in is P5's; TST-6, the
 fake answering as the real adapter does is P6's; TX-25, a caller's transaction in a driving port is
 P16's; ASM-9, an ambient transaction is P16's; DRV-6, a courier read once holding the first
@@ -449,99 +442,96 @@ value, configuration value, acting call
 *Scope:* code of a system reaches the outside or the code behind a port, or anything outside a
 system reaches into it.
 *Statement:* A service MUST reach the outside only as a port of its system in the system's terms,
-and an adapter only as such a port or as the outside it adapts, either also through code of the
-common library whose output changes neither how a use case acts nor what it answers. Anything
-outside a system MUST reach into it only through its offer or by a driving adapter's way in. A
-port's implementation, a client of the outside or a configuration value MUST reach code of a system
-as an argument chosen by the process's assembly, or from a courier that only assembly fills and a
-driving adapter reads each time it runs.
-*Why:* An agent editing one file sees that file. Where every way out and every way in of a system
-is a port, the ports are a complete list of what the system needs and offers, and swapping what
-serves one, or adding a caller, is an edit at the port's far side and in assembly, nowhere else.
-Each way past the ports breaks that list in its own place. The tea shop's checkout service that
-queries Postgres with the client it was handed has the store's tables in a use case, a test that
-needs the store, and a second store meaning a rewritten use case. The service that builds its
-Stripe client from `process.env` is stuck with that client in every process and test that loads
-it, and opens a second pool beside assembly's. The service that pulls its repository from a
-registry filled at module load has a dependency in no signature, and what serves it changes where
-nobody looks. A port declared in the store's terms, a `Sql` port taking a query string, is the
-store client one step removed: there is nothing behind it to swap, and the meaning sits in the
-code behind it. The three sentences close those three gaps: what code reaches, how it gets hold of
-it, and what may reach in.
+and an adapter or an outbox reader only as such a port or as the outside it adapts, each also
+through code of the common library whose output changes neither how a use case acts nor what it
+answers. Anything outside a system MUST reach into it only through its offer or by a driving
+adapter's way in. A port's implementation, a client of the outside or a configuration value MUST
+reach code of a system as an argument chosen by the process's assembly, or from a courier that only
+assembly fills and a driving adapter reads each time it runs.
+*Why:* An agent editing one file sees that file. Where every way out and every way in of a system is
+a port, the ports are a complete list of what the system needs and offers, and swapping what serves
+one, or adding a caller, is an edit at the port's far side and in assembly, nowhere else. Each way
+past the ports breaks that list in its own place. The tea shop's checkout service that queries
+Postgres with the client it was handed has the store's tables in a use case, a test that needs the
+store, and a second store meaning a rewritten use case. The service that builds its Stripe client
+from `process.env` is stuck with that client in every process and test that loads it, and opens a
+second pool beside assembly's. The service that pulls its repository from a registry filled at
+module load has a dependency in no signature, and what serves it changes where nobody looks. A port
+declared in the store's terms, a `Sql` port taking a query string, is the store client one step
+removed: there is nothing behind it to swap, and the meaning sits in the code behind it. The three
+sentences close those three gaps: what code reaches, what may reach in, and how it gets hold of it.
 
-The first sentence is the seam. Reach is the glossary's: it counts what code is typed by, and
-stops at a port of its system and nowhere else. So a store client's type in a port's signature is
-the store reached, and an interface the common library exports is no port of the system: a service
+The first sentence is the seam. Reach is the glossary's: it counts what code is typed by, and stops
+at a port of its system and nowhere else. So a store client's type in a port's signature is the
+store reached, and an interface the common library exports is no port of the system: a service
 calling the store through a common-library `Sql`, or opening its transaction through the common
 library's interface, reaches the store and is refused; it opens, commits and rolls back through a
-driven port of its own, which the common library may implement by shape and assembly hands in.
-The clock, the random id and the environment are the operating system's, which is the outside: a
-service takes the time through a `Clock` port, or as an argument of its driving port, and a
-per-process value it reads ambiently, `TZ` deciding a payment deadline's hour, is the outside
-reached through no port. The adapters are the only code that touches the outside directly, each
-the outside it adapts: a driven adapter its store, its API, its SDK; a driving adapter what calls
-it, the framework's route types, the request, the external system's event parsed with that
-system's package. The same driven adapter querying a second store, or a hook calling the external
-system through the package it parsed with, reaches an outside it does not adapt and is refused.
-The outbox reader is named beside them because it reads a store and is no adapter by the glossary.
-"The code behind a port" refuses an import past a port inside a system too: a service that imports
-the Postgres repository rather than the repository port, a driven adapter that imports another
-driven adapter's module. Pure code of no system reaches nothing outside the process and hands back
-nothing its caller did not pass, so a validation library or a signature check passes. The domain,
-the system's own published language, a shared kernel and the published language of an upstream the
-system conforms to are the system's terms, not the outside; which of them a layer may reach, and
-on which runtime, is P1's and P12's to rule, and P1 delivers the domain's purity alongside the
-glossary's Pure.
+driven port of its own, which the common library may implement by shape and assembly hands in. The
+clock, the random id and the environment are the operating system's, which is the outside: a service
+takes the time through a `Clock` port, or as an argument of its driving port, and a per-process
+value it reads ambiently, `TZ` deciding a payment deadline's hour, is the outside reached through no
+port. The adapters are the only code that touches the outside directly, each the outside it adapts:
+a driven adapter its store, its API, its SDK; a driving adapter what calls it, the framework's route
+types, the request, the external system's event parsed with that system's package. The same driven
+adapter querying a second store, or a hook calling the external system through the package it parsed
+with, reaches an outside it does not adapt and is refused. The outbox reader is named beside them:
+it reads a store, and no port of its system stands in front of it, so by the glossary it is no
+adapter. "The code behind a port" refuses an import past a port inside a system too: a service that
+imports the Postgres repository rather than the repository port, a driven adapter that imports
+another driven adapter's module. Pure code of no system reaches nothing outside the process and
+hands back nothing its caller did not pass, so a validation library or a signature check passes. The
+domain, the system's own published language, a shared kernel and the published language of an
+upstream the system conforms to are the system's terms, not the outside; which of them a layer may
+reach, and on which runtime, is P1's and P12's to rule, and P1 delivers the domain's purity
+alongside the glossary's Pure.
 
-The second clause of the first sentence turns the seam around. A system is reached by other
-systems of this codebase, by assembly, by the relay and the bus, and by callers outside the
-codebase. Code of this codebase reaches it through its offer: the published language, the driving
-port types of its open host service, its system builders. A deep import past the offer reaches a
-service or an adapter and holds whatever file layout it found; a linter on import paths finds it.
-The builders are on the offer, so what they return crosses too: a builder that returns shop's
-repositories "for the dashboard" hands a driven port to every importer, and the dashboard reads
-shop's store past every rule in shop's services. What assembly hands on is what the process's
-driving side calls into: the services behind the driving ports, the driving adapters it constructs
-for a framework or the bus, and the outbox readers for the relay. A relay that imports a system,
-lists its outbox tables by name, or reads a slot a system filled at module load, reaches the
-system through none of these: the worker that does not load the system relays nothing of it, and
-assembly cannot hand the relay fakes. Callers outside the codebase, a framework, an external
-system, reach a driving adapter by its way in, the file the framework finds or the hook the
-external system calls, which is no export.
+The second sentence turns the seam around. A system is reached by other systems of this codebase, by
+assembly, by the relay and the bus, and by callers outside the codebase. Code of this codebase
+reaches it through its offer: the published language, the driving port types of its open host
+service, its system builders. A deep import past the offer reaches a service or an adapter and holds
+whatever file layout it found; a linter on import paths finds it. The builders are on the offer, so
+what they return crosses too: a builder that returns shop's repositories "for the dashboard" hands a
+driven port to every importer, and the dashboard reads shop's store past every rule in shop's
+services. What assembly hands on is what the process's driving side calls into: the services behind
+the driving ports, the driving adapters it constructs for a framework or the bus, and the outbox
+readers for the relay. A relay that imports a system, lists its outbox tables by name, or reads a
+slot a system filled at module load, reaches the system through none of these: the worker that does
+not load the system relays nothing of it, and assembly cannot hand the relay fakes. Callers outside
+the codebase, a framework, an external system, reach a driving adapter by its way in, the file the
+framework finds or the hook the external system calls, which is no export.
 
-The second sentence is "assembly hands it". A dependency built in place, or imported ready-made
-from a module that exports an instance beside its factory, is in no signature: the test cannot
-hand a fake, the module that built it runs in every process that loads it, the test run included,
-and a second instance of what exists once appears. Built in place, the breach passes every other
-check: the code sits in the right layer and calls in the right direction. A configuration value is
-what a test varies, a base URL pointed at a stub; read in place from the environment, it fails at
-first use in a process where the variable is unset. The glossary makes assembly one per process and
-the only place a port meets its implementation, so "chosen by the process's assembly" admits one
-chooser; a system builder is assembly's own part, and the client only its adapters use, the
-payment provider's SDK, it builds from the configuration it receives. A driving adapter a framework
-constructs, a server function, has no caller to hand it anything, and one assembly constructs
-before what it calls exists, a hook Payload's config takes before shop's services take the Payload
-instance, cannot be handed it either. These read from a courier. Only assembly fills it, a system
-builder being assembly, or a second place produces instances. The adapter reads it each time it
-runs: a read at module load, or on the first run kept for the rest, holds the first instance for
-the life of the process, and a test that fills the courier with fakes changes nothing the adapter
-already holds. Any other reader, a service function reading a courier kept in the common library,
-receives a dependency nobody handed it, which the sentence refuses: a service locator by another
-name. A courier that carries a store client beside the driving ports puts the store's type into
-every adapter that reads it; it carries what its readers call. A courier filled after its first
-reader runs fails that reader loudly, not with another instance, so the order is assembly's
-concern and not this rule's.
+The third sentence is "assembly hands it". A dependency built in place, or imported ready-made from
+a module that exports an instance beside its factory, is in no signature: the test cannot hand a
+fake, the module that built it runs in every process that loads it, the test run included, and a
+second instance of what exists once appears. Built in place, the breach passes every other check:
+the code sits in the right layer and calls in the right direction. A configuration value is what a
+test varies, a base URL pointed at a stub; read in place from the environment, it fails at first use
+in a process where the variable is unset. The glossary makes assembly one per process and the only
+place a port meets its implementation, so "chosen by the process's assembly" admits one chooser; a
+system builder is assembly's own part, and the client only its adapters use, the payment provider's
+SDK, it builds from the configuration it receives. A driving adapter a framework constructs, a
+server function, has no caller to hand it anything, and one assembly constructs before what it calls
+exists, a hook Payload's config takes before shop's services take the Payload instance, cannot be
+handed it either. These read from a courier. Only assembly fills it, a system builder being
+assembly, or a second place produces instances. The adapter reads it each time it runs: a read at
+module load, or on the first run kept for the rest, holds the first instance for the life of the
+process, and a test that fills the courier with fakes changes nothing the adapter already holds. Any
+other reader, a service function reading a courier kept in the common library, receives a dependency
+nobody handed it, which the sentence refuses: a service locator by another name. A courier that
+carries a store client beside the driving ports puts the store's type into every adapter that reads
+it; it carries what its readers call. A courier filled after its first reader runs fails that reader
+loudly, not with another instance, so the order is assembly's concern and not this rule's.
 
-The third sentence is the property's exception, and the line is behavior, not substitution.
-Telemetry reaches outside the process, a logger to its transport, a tracer to its exporter, and a
-service or an adapter that calls it through a ready-made import behaves the same with no exporter
-registered; a test inspecting spans registers an in-memory exporter globally, without a parameter.
-Handed through every factory, it adds a parameter to every signature for nothing the system's
-behavior depends on. A feature-flag client, whose answer changes what the system does, falls
-outside the MAY and goes through a port and an argument like any other client. So does the
-common library's transaction: whether its commit lands decides whether the use case's writes exist
-and whether it throws. The domain, a shared kernel and a published language are no service and no
-adapter: they load where no telemetry is configured.
+The first sentence's last clause is the property's exception, and the line is behavior, not
+substitution. Telemetry reaches outside the process, a logger to its transport, a tracer to its
+exporter, and a service or an adapter that calls it through a ready-made import behaves the same
+with no exporter registered; a test inspecting spans registers an in-memory exporter globally,
+without a parameter. Handed through every factory, it adds a parameter to every signature for
+nothing the system's behavior depends on. A feature-flag client, whose answer changes what the
+system does, falls outside the exception and goes through a port and an argument like any other
+client. So does the common library's transaction: whether its commit lands decides whether the use
+case's writes exist and whether it throws. The domain, a shared kernel and a published language are
+no service and no adapter: they load where no telemetry is configured.
 
 What this rule does not decide. Which port a driving adapter may call is P4's: a server action
 handed a repository reaches it as a port and passes here, and skipping the service there bypasses
@@ -575,7 +565,7 @@ what is the same everywhere is signature hygiene, not P5's harm; SYS-1, an expor
 harms nothing until reached, and the reach is refused here and found by a linter on import paths
 *Glossary notes:*
 - Outside: say if pure code, a shared kernel, a conformed published language, common library count.
-- Outbox reader: say whether it is an adapter of its system, so adapter rules reach it unnamed.
+
 - Port: carry "in the system's terms" on Port, not only driving port; the Statement drops it.
 - Assembly: "only place where port and implementation meet" is a ruling in a definition; settle.
 - Courier: say assembly fills it; the Statement's "only assembly fills" then goes.
@@ -588,12 +578,13 @@ reach
 *Scope:* a test runs a use case: its service, the driven ports it reaches and what implements
 them, and code it reaches through no port of its system.
 *Statement:* Each driven port MUST have a fake, which the system declaring the port SHOULD provide,
-and a test of a use case SHOULD run its service on fakes for all its driven ports. One suite per
-port, written against the port and parameterized by the implementation it runs on, MUST assert each
-behavior of the port that a test of a use case relies on, on the fake in the default suite and on
-every other implementation against the outside it reaches in the deployed application, set up as it
-is there. Code a use case reaches through no port of its system MUST run without the outside, and
-its absence MUST change neither how the use case acts nor what it answers.
+and a test of a use case SHOULD run its service on fakes for all its driven ports. A fake SHOULD run
+none of the code it stands in for. One suite per port, written against the port and parameterized by
+the implementation it runs on, MUST assert each behavior of the port that a test of a use case
+relies on, on the fake in the default suite and on every other implementation against the outside it
+reaches in the deployed application, set up as it is there. Code a use case reaches through no port
+of its system MUST run without the outside, and its absence MUST change neither how the use case
+acts nor what it answers.
 *Why:* A test that needs a store, a network or another system is slow, needs an environment and
 fails for reasons that are not the code's; the default suite, run on every save because nobody
 has to think about running it, cannot hold it, so it moves to a suite run less, and a broken use
@@ -601,46 +592,48 @@ case is found later or by a customer. The property has two halves, and the State
 sentence for each, plus one for what no port covers.
 
 Running without the outside. P5 delivers that a use case reaches the outside only through ports
-assembly hands it, a configuration value and a store client included (the quarry's ASM-2 and
-SVC-7), and that the clock and the random id are the outside reached through a port like any
-other. What P5 leaves open is whether there is anything to hand in a test. The first sentence
-says there is: every driven port has a fake, a working implementation that reaches nothing
-outside the process (glossary: Fake). The tea shop's checkout runs on an in-memory `Orders`, an
-in-memory outbox, a `Clock` set to a fixed instant, a `PaymentGateway` that answers from a table,
-and a transaction port whose fake commits nothing. A port with one real adapter is not premature:
-the fake is its second implementation. The SHOULD on the test itself is where a test may still
-choose the real store: one that proves the writes of a use case land together, or the message
-with the change, needs the store that commits them, and is an integration test (P7 and P8 deliver
-what it proves). It is not that test's job to show P6; the fakes' existence and the other tests
-are.
+assembly hands it, a configuration value and a store client included, and that the clock and the
+random id are the outside reached through a port like any other. What P5 leaves open is whether
+there is anything to hand in a test. The first sentence says there is: every driven port has a fake,
+a working implementation that reaches nothing outside the process (glossary: Fake). The tea shop's
+checkout runs on an in-memory `Orders`, an in-memory outbox, a `Clock` set to a fixed instant, a
+`PaymentGateway` that answers from a table, and a transaction port whose fake commits nothing. A
+port with one real adapter is not premature: the fake is its second implementation. The SHOULD on
+the test itself is where a test may still choose the real store: one that proves the writes of a use
+case land together, or the message with the change, needs the store that commits them, and is an
+integration test (P7 and P8 deliver what it proves). It is not that test's job to show P6; the
+fakes' existence and the other tests are. A fake built from what it stands in for, the upstream's
+real services on in-memory adapters, reaches nothing outside the process and still lets the test
+fail for the upstream's sake: a change in billing's service breaks shop's test of checkout, and the
+test no longer tells of shop. A fake written for the port fails only where the port's behavior does,
+and the suite of the second sentence holds it to the real one.
 
 Who writes the fake. A driven port a system declares is its own, and so is its fake. A conformist
 declares no port for its upstream: the upstream's driving port type is its driven port (glossary:
-Conformist), so the port is the upstream's, and so is the fake, exported by the upstream and run
-by the upstream's suite on its own service. Two downstreams that each write a fake of billing's
+Conformist), so the port is the upstream's, and so is the fake, exported by the upstream and run by
+the upstream's suite on its own service. Two downstreams that each write a fake of billing's
 `InvoiceQueries` hold two ideas of billing, each passing its own tests, each drifting on its own;
-billing's one fake drifts nowhere, since billing's suite runs on it. The quarry ruled this from
-the second downstream (TST-11); the Statement rules it from the first, as a SHOULD: a downstream
-that writes its own fake anyway has a second implementation of the upstream's port, which the
-upstream's suite then runs on too, or it has a fake no suite holds. An anti-corruption layer
-declares its own driven port, `Invoicing` in shop's terms, and fakes that; the adapter behind it
-is shop's, and so is the suite. An external system offers what it offers (F9) and writes no fake
-for this codebase: the system that declares the driven port writes it.
+billing's one fake drifts nowhere, since billing's suite runs on it. The Statement rules it from the
+first downstream, as a SHOULD: a downstream that writes its own fake anyway has a second
+implementation of the upstream's port, which the upstream's suite then runs on too, or it has a fake
+no suite holds. An anti-corruption layer declares its own driven port, `Invoicing` in shop's terms,
+and fakes that; the adapter behind it is shop's, and so is the suite. An external system offers what
+it offers (F9) and writes no fake for this codebase: the system that declares the driven port writes
+it.
 
-Behaving as the outside does. A fake that differs from the outside where the use case can tell
-makes a passing test prove nothing. The second sentence closes that with one suite per port, run
-on both sides. The quarry's case: the fake `Orders` fails a stale save (TX-23), a test of cancel
-after payment passes on it, and the real adapter, its version missing from the where clause,
-writes over the payment in the deployed application. Asserted in the suite, the stale save fails
-on the real run. The suite asserts what the tests of use cases rely on, not everything the port
-could do: where no test relies on a behavior, the fake and the real adapter may differ, and no
-test claims otherwise; a test that comes to rely on it brings the assertion with it. Errors are
-behavior too: the gateway's fake that answers a disputed charge with a refusal, not a failure
-(TX-45), is held to the provider's test mode answering the same. Two suites, one per
-implementation, drift the way the fake does, so it is one, written against the port.
-Parameterized by the implementation, the real run is a flag away, not an edit: it is what one
-reaches for when a failure makes the fake doubtful, and a run that means editing imports is not
-reached for (the quarry's TST-8).
+Behaving as the outside does. A fake that differs from the outside where the use case can tell makes
+a passing test prove nothing. The second sentence closes that with one suite per port, run on both
+sides. The case: the fake `Orders` fails a stale save, a test of cancel after payment passes on it,
+and the real adapter, its version missing from the where clause, writes over the payment in the
+deployed application. Asserted in the suite, the stale save fails on the real run. The suite asserts
+what the tests of use cases rely on, not everything the port could do: where no test relies on a
+behavior, the fake and the real adapter may differ, and no test claims otherwise; a test that comes
+to rely on it brings the assertion with it. Errors are behavior too: the gateway's fake that answers
+a disputed charge with a refusal, not a failure, is held to the provider's test mode answering the
+same. Two suites, one per implementation, drift the way the fake does, so it is one, written against
+the port. Parameterized by the implementation, the real run is a flag away, not an edit: it is what
+one reaches for when a failure makes the fake doubtful, and a run that means editing imports is not
+reached for.
 
 The real run proves only what it touches. An adapter run on a double of the store is checked
 against the adapter's own idea of the store, which is what is in doubt; a real database whose
@@ -661,9 +654,9 @@ module that opens a pool when it loads, does not: the use case cannot run with n
 and the third sentence refuses it. The domain, a shared kernel and pure code reach nothing
 outside by definition (glossary: Pure) and pass without a word.
 
-Driving adapters are no use case. A test of a use case enters through its driving port, and
-neither the bus nor the courier is needed for it; how a driving adapter is tested is the
-repository's (general rules, Assumptions).
+Driving adapters are no use case. A test of a use case enters through its driving port, and neither
+the bus nor the courier is needed for it; how a driving adapter is tested is the repository's
+(Assumptions).
 *Provenance:* Fakes for every driven port follow Cockburn (Nature of the Solution: the in-memory
 adapter "most importantly"; the application "can be configured to run decoupled … using an
 in-memory oracle, or mock, database replacement; or it can run against the test- or run-time
@@ -753,15 +746,16 @@ repositories inside their own transaction, and the domain decides what the write
 code around the acting call may still do is everything short of a second one: validate, translate,
 ask an answering use case for an argument, who the session belongs to. Several calls that each
 reach a goal of their own are not a split: a bus delivering a batch gives one call per message. Work
-over many items, a scheduled task's or a poll's, is one acting call that writes one message per
-item, and each is handled as a use case of its own that saves its own item.
+over many items a scheduled task finds is one acting call that writes one message per item, and each
+is handled as a use case of its own that saves its own item. A poll's items are messages already
+(P9), and each may be its own acting call.
 
 Rolling back whole means no write of the use case commits once one has failed. A use case that
 catches the failed write, rolls back to a savepoint and commits the rest is the half-done use case
 by another route. A write that does not fail, an insert that does nothing on conflict, is no
 failed write. What the use case answers after the rollback is not this rule's: a save that lost
 to a concurrent one fails the use case so the decision is made afresh (P10 delivers this); a claim
-of a message id already handled answers as the first delivery did (P9 delivers this); a stop no
+of a message id already handled succeeds without writing (P9 delivers this); a stop no
 retry cures is failed and parked rather than committed as an outcome (P17 delivers this).
 
 Exceptions, and why they are none. An answering use case writes nothing and is outside the Scope.
@@ -805,13 +799,14 @@ write left out reaches its second store is P8's; ASM-9, ambient against argument
 is delivered, or another system tells this system of a change before committing it.
 *Statement:* A message a use case writes MUST go into the outbox in its transaction, and a change it
 decides that the transaction does not commit MUST leave it only as such a message asking for the
-change, or as a request to another system for a tentative operation made beside the transaction. The
-outbox MUST keep
-each message until the bus holds it, and the bus through any stop of a process until a handler
-acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
-writes committed. A use case called for such a message MUST make the change, deciding nothing again,
-and a change another system tells of before committing it MUST change nothing in this system beyond
-a record of it as pending until it is confirmed.
+change, or as a request to another system for a tentative operation, which the transaction does not
+carry. The outbox MUST keep each message until the bus holds it, and the bus through any stop of a
+process until a handler acknowledges it, which the handler MUST NOT do before the use case it calls
+has returned with its writes committed. A use case called for such a message MUST make the change,
+deciding nothing again, and a change another system tells of before committing it MUST change
+nothing in this system beyond a record of it as pending until it is confirmed. An external system
+this codebase configures, whose transaction can write a message to an outbox, MUST tell of its
+change by such a message.
 *Why:* A use case's writes are a fact once its transaction commits, and not before; a process can
 stop between any two instructions (F4). What leaves the transaction is not bound to that commit: a
 mail sent, a parcel booked with the 3PL, a command handed to another system, an event published, a
@@ -838,23 +833,22 @@ whose holder is the external system: it stops resending once the hook answers, s
 acknowledgement, and a hook that answers at once and calls its use case afterwards lets go the same
 way. A use case that writes nothing has committed nothing and is done when it returns.
 
-The quarry carried this as several ids, each a case of the first two sentences. TX-6, the message
-about a change, is the first clause applied to an event. TX-3, a change to data another system of
-this codebase owns: calling the owner inside the transaction makes its change before this commit,
-calling it after loses the change on a stop; written as a command in the outbox, the owner's handler
-makes it after. Which system's use case may make that change is P11's; P11 delivers this. TX-22, a
-change no other system of this codebase owns, a mail, a booking, a mirror: the owner of a mail reads
-no bus, so this system's own handler acts for it, and the second sentence says how. That handler is
-TX-37, and it is where the chain ends rather than regresses: it decides nothing, so the first
-sentence does not reach the call it makes beside its own transaction; the decision committed with
-the message. A handler that decides again decides on a later state, with its call still apart from
-its transaction: fulfillment's handler for `BookShipment` checks the reservation, books the 3PL and
-marks the reservation shipped; the mark loses to `OrderCancelled`'s release and rolls back, and the
-booking stands for a reservation that no longer exists. Making the change without deciding, it
-records the owner's answer where there is one, a booking's id. Whether it has made the change
-already it may ask its records; P9 delivers the means. Whether the change is still wanted it may not
-ask: what happened meanwhile, the order cancelled, is the deciding system's to answer by a business
-rule, and P17 delivers that. TX-20, TX-21 and DRV-7 are the three holders of the chain.
+The first two sentences cover several cases. A message about a change is the first clause applied to
+an event. A change to data another system of this codebase owns: calling the owner inside the
+transaction makes its change before this commit, calling it after loses the change on a stop;
+written as a command in the outbox, the owner's handler makes it after. Which system's use case may
+make that change is P11's; P11 delivers this. A change no other system of this codebase owns, a
+mail, a booking, a mirror: the owner of a mail reads no bus, so this system's own handler acts for
+it, and the second sentence says how. That handler is where the chain ends rather than regresses: it
+decides nothing, so the first sentence does not reach the call it makes beside its own transaction;
+the decision committed with the message. A handler that decides again decides on a later state, with
+its call still apart from its transaction: fulfillment's handler for `BookShipment` checks the
+reservation, books the 3PL and marks the reservation shipped; the mark loses to `OrderCancelled`'s
+release and rolls back, and the booking stands for a reservation that no longer exists. Making the
+change without deciding, it records the owner's answer where there is one, a booking's id. Whether
+it has made the change already it may ask its records; P9 delivers the means. Whether the change is
+still wanted it may not ask: what happened meanwhile, the order cancelled, is the deciding system's
+to answer by a business rule, and P17 delivers that.
 
 A tentative operation is the exception, and the Statement says so because nothing final follows from
 one: it gives nothing until it is confirmed (glossary). Checkout asks Stripe for a PaymentIntent by
@@ -870,27 +864,28 @@ The third sentence is the same property seen from the receiving side: another sy
 write is no fact here either. Payload calls catalog's hook before its change commits; the change can
 still roll back after the hook returns, by a later hook, a failed validation, a stop. A use case
 that revalidates the product page or publishes `ProductChanged` from the hook announces a change
-that may never be. Two answers stay safe. A veto answers and changes nothing. Whose rule the
-veto states, and so whose record it is, is P2's, not this sentence's. A record of the change
-as pending, a record of its own or a private message for a handler, leaves the change to a
-confirmation that comes after the external commit: a message the external system publishes, a later
-hook, a read of its state that finds the change there. The handler that acts on the pending record
-as soon as its message arrives acts before the commit one hop later, so it waits for the
-confirmation too (TX-44); a read that finds nothing yet is no refusal, and the use case fails and is
-delivered again. Better still, TX-29: where the external system's transaction can write a message to
+that may never be. Two answers stay safe. A veto answers and changes nothing. Whose rule the veto
+states, and so whose record it is, is P2's, not this sentence's. A record of the change as pending,
+a record of its own or a private message for a handler, leaves the change to a confirmation that
+comes after the external commit: a message the external system publishes, a later hook, a read of
+its state that finds the change there. The handler that acts on the pending record as soon as its
+message arrives acts before the commit one hop later, so it waits for the confirmation too; a read
+that finds nothing yet is no refusal, and the use case fails and is delivered again. The fourth
+sentence closes the gap where it can: where the external system's transaction can write a message to
 an outbox, configured so, the message commits with the change and the relay hands it on after, so
-nothing is pending; the outbox is the external system's, in its store, and assembly hands the relay
-its outbox reader (glossary: Outbox). It is a SHOULD because not every external system's transaction
-can; deviating, the pending clause holds. A hook called after the commit tells of a fact, and the
+nothing is pending and the third sentence is not reached; the outbox is the external system's, in
+its store, and assembly hands the relay its outbox reader (glossary: Outbox). Where it cannot, the
+pending clause holds. The pending record is a tentative operation this system holds, confirmed by
+what follows the external commit (glossary). A hook called after the commit tells of a fact, and the
 first sentence governs what follows from it.
 
 P8 leans on others. P7 delivers that a use case's writes, its outbox message among them, land in one
 transaction, each driven adapter writing inside it. P9 delivers that the repeats this chain brings,
-delivering at least once, change nothing: the key passed to an external system, the business rule
-that accepts a repeated mail. P16 delivers that no transaction is carried into another system, which
-is why a message is the only bridge. P17 delivers that a pending change, a tentative operation and a
-refused request end in a state a business rule allows, and what counts as a message's outcome. P14
-delivers that a message waiting in the outbox across a deploy is read as it was meant.
+delivering at least once, change nothing: the key passed to an external system, and what a business
+rule allows where no key reaches. P16 delivers that no transaction is carried into another system,
+which is why a message is the only bridge. P17 delivers that a pending change, a tentative operation
+and a refused request end in a state a business rule allows, and what counts as a message's outcome.
+P14 delivers that a message waiting in the outbox across a deploy is read as it was meant.
 *Provenance:* The message committed with the change follows Richardson (Transactional outbox),
 Khononov p. 144–146, Helland 2007 p. 137 ("transactional enqueuing of messages is de rigueur"),
 NServiceBus (Outbox) and MS; the outbox as a field of the record follows Richardson and Khononov p.
@@ -926,10 +921,12 @@ TX-3's ruling on who changes another system's data is P11's, only its timing is 
 called with it, or a driving adapter asked another system for it.
 *Statement:* The use case MUST tell a repeat inside the transaction that commits its writes, by the
 message's id claimed there under a key the store refuses twice or by the records it writes there,
-and finding the first delivery's writes committed MUST commit nothing and return as the first
-delivery returned. A change it makes outside that transaction MUST carry to the system that makes it
+and finding the first delivery's writes committed MUST commit nothing and succeed. A change it makes
+outside that transaction MUST carry to the system that makes it
 a key the message carries, the same on every delivery, by which that system answers a repeat. Where
-no such key reaches a repeat, a business rule of its system MUST accept the change made twice.
+no such key reaches a repeat and the change made twice ends otherwise than made once, what follows
+from the repeat MUST be what a business rule of its system allows: the repeat prevented, corrected
+afterwards, or accepted.
 *Why:* The stock reserved twice. A message arrives more than once (F5): the relay hands one over
 again after a stop, the bus delivers again a message whose handler stopped after its use case
 committed, Stripe resends an event for days and at times twice at once, a poll returns items the
@@ -961,48 +958,49 @@ and P18 delivers what becomes of it.
 
 The second clause is "succeeds where the first did". A repeat that finds the order paid and throws
 "already paid" fails: its handler does not acknowledge, and the bus delivers it again and again
-until it parks it, for a change already made. The repeat returns, and returns what the first
-returned: the booking id the first attempt recorded, the second returns. A first delivery that
-failed committed nothing, so the next is no repeat and acts afresh. A first that committed a
-refusal (TX-34) was handled, and its repeat returns without publishing the refusal again. Telling a
-repeat is not deciding again: whether the change was made already is this rule's question, whether
-it is still wanted is not, and P8 delivers that the decision committed with the message stands.
+until it parks it, for a change already made. The repeat succeeds. What it answers is the use
+case's, read from what is committed as a first run reads it: the second finds the booking id the
+first attempt recorded and returns it. A first delivery that failed committed nothing, so the next
+is no repeat and acts afresh. A first that committed a refusal was handled, and its repeat returns
+without publishing the refusal again. Telling a repeat is not deciding again: whether the change was
+made already is this rule's question, whether it is still wanted is not, and P8 delivers that the
+decision committed with the message stands.
 
-A change outside the transaction, a call to another system, a mail, is covered by no claim.
-The 3PL books, the process stops before the commit, nothing is claimed, and the redelivery books
-again; claim first and call after, and a stop between loses the booking. No order of a claim and a
-call closes that gap. The system that makes the change can: handed a key, it answers a repeat with
-the first call's result instead of acting again. The key comes from the message, so it is the same
-on every delivery; a fresh UUID made at the call differs on each attempt and deduplicates nothing.
-The message's id serves, and so does the id of what the change is about, the shipment, the refund.
-Where no key reaches the repeat, the change happens twice: the mail provider takes no key; Stripe
-keeps one for a day, and the message waited longer in a dead-letter queue. That is F9, and whether
-the repeat is acceptable is the business's: a second confirmation mail is accepted; a second parcel
-is not, so the 3PL that takes no key is asked whether a consignment for the shipment exists before
-one is created, the race that remains is accepted in writing, or that 3PL is used for nothing the
-business refuses twice. That rule lives in the domain; P2 delivers this.
+A change outside the transaction, a call to another system, a mail, is covered by no claim. The 3PL
+books, the process stops before the commit, nothing is claimed, and the redelivery books again;
+claim first and call after, and a stop between loses the booking. No order of a claim and a call
+closes that gap. The system that makes the change can: handed a key, it answers a repeat with the
+first call's result instead of acting again. The key comes from the message, so it is the same on
+every delivery; a fresh UUID made at the call differs on each attempt and deduplicates nothing. The
+message's id serves, and so does the id of what the change is about, the shipment, the refund. Where
+no key reaches the repeat, the change happens twice: the mail provider takes no key; Stripe keeps
+one for a day, and the message waited longer in a dead-letter queue. That is F9, and whether the
+repeat is acceptable is the business's: a second confirmation mail is accepted; a second parcel is
+not, so the 3PL that takes no key is asked whether a consignment for the shipment exists before one
+is created, the race that remains is accepted, or that 3PL is used for nothing the business refuses
+twice. A reconciliation that finds the second consignment and cancels it corrects the repeat
+afterwards. Which of these follows is a business rule, so it lives in the domain (P2 delivers this):
+a domain function the use case asks what a change that may be a repeat leads to, whose answer may be
+to go ahead. How a repo writes an acceptance down is the repo's. A change that ends the same made
+twice, a cache refreshed, a status set to what it already is, needs no rule: its repeat is no
+change. Telemetry tells of attempts (P8), and two deliveries are two attempts.
 
-The quarry ruled this as four ids. TX-5, the use case idempotent by a claimed id or by a change
-whose repeat is no change, a hook's delivery included, is the first sentence. TX-46, the polled
-item handed on as a message under the other system's id, is the Scope's third arrival and the
-message's id; its ordering is P18's, its unmatched transfer P17's. TX-31, the external system's
-key taken from the message, is the second sentence. TX-41, no key and a business rule that accepts
-the repeat, is the third. TX-31 also asked the key to be the same on every message asking for one
-change: a reconciliation that asks again for a shipment parked unbooked writes a new message, which
-is no repeated delivery; the shipment's id as key covers it, and the ruling is left to P17.
+A polled item's order is P18's, its unmatched transfer P17's. The key is the same on every delivery
+of one message, not on every message asking for one change: a reconciliation that asks again for a
+shipment parked unbooked writes a new message, which is no repeated delivery; the shipment's id as
+key covers it, and the ruling is left to P17.
 
 Outside the Scope: a request a caller makes through a driving port is no message, and P9 does not
 reach it; an answering use case changes nothing, and a repeat of it changes nothing either.
-*Provenance:* The repeat follows Khononov p. 147 (the outbox "guarantees delivery of the messages
-at least once"). The claimed id follows Richardson (Idempotent consumer: "a consumer must be
+*Provenance:* The repeat follows Khononov p. 147 (the outbox "guarantees delivery of the messages at
+least once"). The claimed id follows Richardson (Idempotent consumer: "a consumer must be
 idempotent", by recording the ids of processed messages), NServiceBus (Outbox: deduplication by
 MessageId), Helland 2007 p. 140 and Khononov p. 245; the change whose repeat is no change follows
 EIP (Idempotent Receiver), Helland 2007 p. 139 and MS, which prefers idempotent handling to
-deduplication. The polled item follows EIP (Polling Consumer); treating it as a delivered message
-is this document's. The external system's key carries NServiceBus's MessageId from the receiver to
-the external system, this document's. The business rule accepting a repeat is this document's,
-from P9. Departs: NServiceBus deduplicates within a retention window; here the store refuses the
-claim twice. Departs from TX-31: the key need be the same on every delivery of one message only.
+deduplication. The polled item follows EIP (Polling Consumer); treating it as a delivered message is
+this document's. The external system's key carries NServiceBus's MessageId from the receiver to the
+external system, this document's. The business rule accepting a repeat is this document's, from P9.
+Departs: NServiceBus deduplicates within a retention window; here the store refuses the claim twice.
 *Absorbs:* TX-5, TX-31, TX-41, TX-46
 *Drops:* TX-37, serves P8 by deciding nothing again; its "made already" test is this rule's means
 *Glossary notes:*
@@ -1026,9 +1024,9 @@ meanwhile. Its writes MUST NOT fail on a change to records that no business rule
 case's goal.
 *Why:* Two checkouts read a stock of one, both decide to reserve, both commit; the later commit
 undoes the earlier and nothing anywhere says so. The harm has one shape: a decision commits after
-what it was made on stopped holding. It comes about wherever the data a decision read and the
-writes that commit it are not held together until the commit, and the cases the quarry ruled one
-by one are each a way to pull them apart.
+what it was made on stopped holding. It comes about wherever the data a decision read and the writes
+that commit it are not held together until the commit, and the cases below are each a way to pull
+them apart.
 
 The check made by another call. A driving adapter asks an answering use case whether the order can
 be cancelled, then calls cancel; what the answer read changes between the two calls (CWE-367). The
@@ -1043,17 +1041,16 @@ holds against others, a row lock, a stricter isolation level. It is a read outsi
 transaction, so the first sentence refuses it. That the writes go inside it is P7's.
 
 The write that compares nothing. A repository that saves a loaded aggregate without comparing its
-version, a method that inserts one cart line rather than saving the cart, an upsert of a
-reservation keyed by its order with nothing loaded: each writes over whatever another use case
-committed meanwhile, and the store fails nothing. The first sentence asks the store to fail the
-writes where the data read changed, or came to exist where the read found none, which is why the
-new aggregate's insert fails on a key already taken. The means are open: a version the aggregate
-carries, compared on save; a lock taken at the read and held to the commit, under which the data
-cannot change; a unique key; an isolation level under which the second commit fails. The cheapest
-is to keep the data a decision reads in the aggregate the use case saves: the stock with its
-reservations in one `Stock`, so the second reservation's save fails, where two `Reservation`s saved
-beside a `Stock` read and not saved both commit. That is the default the quarry preferred; the
-Statement asks for the failure, not for this means.
+version, a method that inserts one cart line rather than saving the cart, an upsert of a reservation
+keyed by its order with nothing loaded: each writes over whatever another use case committed
+meanwhile, and the store fails nothing. The first sentence asks the store to fail the writes where
+the data read changed, or came to exist where the read found none, which is why the new aggregate's
+insert fails on a key already taken. The means are open: a version the aggregate carries, compared
+on save; a lock taken at the read and held to the commit, under which the data cannot change; a
+unique key; an isolation level under which the second commit fails. The cheapest is to keep the data
+a decision reads in the aggregate the use case saves: the stock with its reservations in one
+`Stock`, so the second reservation's save fails, where two `Reservation`s saved beside a `Stock`
+read and not saved both commit. The Statement asks for the failure, not for this means.
 
 The retry inside. A use case whose save fails and that reloads the order and saves its cancel onto
 the new state applies a decision made on an unpaid order to a paid one. The first sentence has it
@@ -1092,21 +1089,21 @@ first is P18's.
 Exceptions: an answering use case commits no decision and falls outside the Scope. A fake that does
 not fail a stale save lets a service test pass on what production writes over; that the fake
 behaves as the store does is P6's: P6 delivers this.
-*Provenance:* The failing save follows Khononov p. 86–87 (the later transaction must not be
-"blindly overwriting the changes committed by the first one"; a version compared on save) and
-Vernon EAD I p. 2 (a version "checked before they are saved"; the stale copy's updates "are
-rejected"); Evans p. 94 locks the purchase order, which the Statement admits. The check in the
-acting call follows Khononov p. 85 and CWE-367. Failing rather than reapplying follows Fowler
-(Optimistic Offline Lock: on a conflict "the transaction is rolled back"); departs from MS, which
-retries inside the use case on a concurrency exception. The data in the saved aggregates follows
-Evans p. 91 and p. 97, Evans Reference p. 16, Vernon EAD I p. 3 and Khononov p. 87; follows Vernon
-EAD I p. 4's one aggregate per transaction. The stale read a business rule accepts follows
-Vernon EAD II p. 9, MS (Domain events: domain experts decide), Helland 2005 §2.5 and Evans p. 91.
-The id and the snapshot follow Vernon EAD II p. 8, Khononov p. 90, Evans p. 97 and Helland 2005
-§5.2; against: Evans p. 91–92 and Fowler (DDD_Aggregate) let objects hold other roots. The write
-left to a handler follows Vernon EAD II p. 9 and MS; that it is MUST where the quarry's TX-15 said
-SHOULD is this rule's, since P10 counts a retry forced by an untied write as a failure. Failing
-each other only where a business rule ties follows Vernon EAD I p. 3 (false invariants).
+*Provenance:* The failing save follows Khononov p. 86–87 (the later transaction must not be "blindly
+overwriting the changes committed by the first one"; a version compared on save) and Vernon EAD I p.
+2 (a version "checked before they are saved"; the stale copy's updates "are rejected"); Evans p. 94
+locks the purchase order, which the Statement admits. The check in the acting call follows Khononov
+p. 85 and CWE-367. Failing rather than reapplying follows Fowler (Optimistic Offline Lock: on a
+conflict "the transaction is rolled back"); departs from MS, which retries inside the use case on a
+concurrency exception. The data in the saved aggregates follows Evans p. 91 and p. 97, Evans
+Reference p. 16, Vernon EAD I p. 3 and Khononov p. 87; follows Vernon EAD I p. 4's one aggregate per
+transaction. The stale read a business rule accepts follows Vernon EAD II p. 9, MS (Domain events:
+domain experts decide), Helland 2005 §2.5 and Evans p. 91. The id and the snapshot follow Vernon EAD
+II p. 8, Khononov p. 90, Evans p. 97 and Helland 2005 §5.2; against: Evans p. 91–92 and Fowler
+(DDD_Aggregate) let objects hold other roots. The write left to a handler follows Vernon EAD II p. 9
+and MS; that it is MUST is this rule's, since P10 counts a retry forced by an untied write as a
+failure. Failing each other only where a business rule ties follows Vernon EAD I p. 3 (false
+invariants).
 *Absorbs:* SVC-2, TX-2, TX-23, TX-49, TX-24, TX-27, SVC-4, DOM-4, TX-15
 *Drops:* TX-24 in part: its SHOULD naming saved aggregates as the means, since the Statement asks
 for the failure and leaves the means open
@@ -1142,28 +1139,26 @@ reads a `status` whose meaning shop's rules decide and the report guesses. Each 
 then changes only where the other lets it, which is F8 from both sides.
 
 The mechanism is the channel, not the location. Every route to the record that is not one of the
-owner's channels is refused alike, whatever it is: a join or a query across a shared store, a
-deep import of the owner's repository, a builder of the owner that hands its repositories out, a
-read of the owner's outbox table (it holds published events, but it is the owner's store, read past
-its published language, and a message there may yet roll back), code in an external system's
+owner's channels is refused alike, whatever it is: a join or a query across a shared store, a deep
+import of the owner's repository, a builder of the owner that hands its repositories out, a read of
+the owner's outbox table (it holds published events, but it is the owner's store, read past its
+published language, and a message there may yet roll back), code in an external system's
 configuration that writes the owner's tables. The owner's channels are its offer on purpose: its
-open host service, in-process a function call, out of process a request; the commands it takes;
-the events it publishes, which reach the reader through the bus, never at rest. A change through
-them runs one of the owner's use cases, so the owner's business rules decide it and may refuse it.
-A read through them is in the owner's published language, which holds still while the model moves
-(P13 delivers that). For an external owner, its API is its open host service and its package its
-published language (Assumptions): shop changes a Stripe PaymentIntent through Stripe's API and
-learns of its change through Stripe's events at its hook, a handler.
+open host service, in-process a function call, out of process a request; the commands it takes; the
+events it publishes, which reach the reader through the bus, never at rest. A change through them
+runs one of the owner's use cases, so the owner's business rules decide it and may refuse it. A read
+through them is in the owner's published language, which holds still while the model moves (P13
+delivers that). For an external owner, its API is its open host service and what that API is typed
+by its published language (Assumptions): shop changes a Stripe PaymentIntent through Stripe's API
+and learns of its change through Stripe's events at its hook, a handler.
 
-The quarry carried this as three ids, by who reaches. TX-3 had a system of this codebase change
-another's data by a message, and TX-12 had it read through the open host service or events
-delivered to its handler: the Statement's first sentence holds both, for every system, external
-owners included. SYS-12 had an external system that keeps this system's record kept from changing
-it by its own admin, its API, or code in its configuration: the second sentence. An external
-system holds none of the properties (F9), so the rule binds what this codebase writes and
-configures, not the vendor: a field an editor cannot change in Payload's admin, an API key that
-cannot write it. Which channel a change takes, a command through the outbox or a call, and when it
-goes against this system's commit, P8 delivers; that the call carries no transaction, P16 delivers.
+The first sentence holds for every system, external owners included. The second keeps an external
+system that keeps this system's record from changing it by its own admin, its API, or code in its
+configuration. An external system holds none of the properties (F9), so the rule binds what this
+codebase writes and configures, not the vendor: a field an editor cannot change in Payload's admin,
+an API key that cannot write it. Which channel a change takes, a command through the outbox or a
+call, and when it goes against this system's commit, P8 delivers; that the call carries no
+transaction, P16 delivers.
 
 What is not reached is not refused. A replica's records are its keeper's (glossary: Owner), filled
 from what the owner publishes or returns to it (glossary: Replica), so reading one's own replica is
@@ -1172,10 +1167,10 @@ moment it is copied. Data the owner hands over, the order lines in a `ReserveSto
 sends fulfillment, a field of an event, is a message in a published language, not a record of the
 owner's store, and the receiver reads it as handed. A reconciliation reads the other system through
 its open host service and repairs the other's record by starting the owner's step, never by writing
-it. A compensating step that undoes another system's, the payment refunded, is asked of its owner.
-A shared kernel is a model shared as code, not records. The relay and the outbox reader are no
-system: the relay reaches each outbox through the reader its owner provides, which ASM-5 rules.
-Tooling, a migration or a one-off script, sits outside the rules (Assumptions).
+it. A compensating step that undoes another system's, the payment refunded, is asked of its owner. A
+shared kernel is a model shared as code, not records. The relay and the outbox reader are no system:
+the relay reaches each outbox through the reader its owner provides. Tooling, a migration or a
+one-off script, sits outside the rules (Assumptions).
 
 The exception is the external keeper. An external system that keeps another system's record
 stores it, shows it, and its configuration reads it where it is kept, since that is what keeping
@@ -1220,63 +1215,60 @@ published), published language, handler, use case
 
 *Scope:* a system talks to an upstream system, an external system included, and its code meets
 that upstream's published language.
-*Statement:* A system MUST record each upstream it conforms to, and take that upstream's terms from
-its published language, not state them again. The published language of an upstream the system does
-not record conforming to MUST be reached, or generated from, only by the system's adapters that
-carry a call or a message between the two. A published language MUST NOT reach another system's
-published language, nor a shared kernel any system's.
+*Statement:* For each upstream, a system MUST either conform to it, taking its terms from its
+published language and not stating them again, or reach that published language, or generate from
+it, only by its adapters that carry a call or a message between the two. A published language MUST
+NOT reach another system's published language, nor a shared kernel any system's.
 *Why:* Every system that talks to another meets its terms: billing's `Invoice`, Stripe's
-`PaymentIntent`, Payload's generated `Product`. The harm is not that those terms enter but that
-nobody decided they would. Shop's domain imports billing's `DunningStage` because a schema was at
-hand; an agent editing the next module (F3) sees it there and uses it again; billing renames a
-stage on its own schedule (F8), and shop's checkout, its routes and its tests change with it, found
-by whoever runs shop next. A reader of shop's domain cannot tell billing's term there from shop's
-own, nor a term shop took on purpose from one that leaked. The glossary gives the two choices a
-downstream has. A conformist takes the upstream as it is: its terms in any layer, the domain
-included, every change there a change here, and that cost accepted (F9: an external system's
-contract is take it or leave it). An anti-corruption layer translates in the adapters that touch
-the upstream, and a change there edits those adapters and nothing behind them. Either is a
-choice. What this rule rules out is the third state, which is no choice: the upstream's terms in
-the domain here, translated in an adapter there, so that the system pays a conformist's cost
-without knowing it and an anti-corruption layer's without its protection.
+`PaymentIntent`, Payload's generated `Product`. The harm is not that those terms enter but that they
+enter halfway. Shop's domain imports billing's `DunningStage` because a schema was at hand; an agent
+editing the next module (F3) sees it there and uses it again; billing renames a stage on its own
+schedule (F8), and shop's checkout, its routes and its tests change with it, found by whoever runs
+shop next. A reader of shop's domain cannot tell billing's term there from shop's own. The glossary
+gives the two choices a downstream has. A conformist takes the upstream as it is: its terms in any
+layer, the domain included, every change there a change here, and that cost accepted (F9: an
+external system's contract is take it or leave it). An anti-corruption layer translates in the
+adapters that touch the upstream, and a change there edits those adapters and nothing behind them.
+Either is a choice. What this rule rules out is the third state, which is no choice: the upstream's
+terms in the domain here, translated in an adapter there, so that the system pays a conformist's
+cost without knowing it and an anti-corruption layer's without its protection.
 
-Recording the choice is what makes it one. Where the record sits is the repository's
-(Assumptions); that it exists is this rule's. With it, the second sentence is checkable from import
-paths and the record alone, as SYS-9's boundary is: shop's domain importing billing's published
-language is a breach unless shop records that it conforms to billing, and a linter shows it in the
-diff. Without it, the glossary's Conformist describes whatever the code does, and every leak is a
-conformist after the fact.
+Which of the two a system is to an upstream shows in its code. The upstream's terms past the
+adapters make it a conformist, and a conformist translates nowhere short of its own published
+language (the second sentence): an adapter that turns billing's `Invoice` into a type of shop's,
+while shop's domain holds billing's `DunningStage`, is the third state. How a repository marks the
+choice, if at all, is its own: a module of the system that re-exports the upstream's published
+language for the rest to import is one way.
 
-The second sentence is the anti-corruption layer stated as a reach. Reach includes what a module is
-typed by (glossary), so `import type` of billing's schema into shop's service, or a driven port
-whose signature returns billing's `Invoice`, is the upstream's term in the service. The adapters it
-lets through are those the two systems talk across: the driven adapter that calls billing's open
-host service, in-process or over HTTP; the driven adapter behind a port of shop's own that turns
-shop's terms into fulfillment's `ReserveStock` and writes it to shop's outbox (SYS-13's
-anti-corruption sender); the handler that parses billing's `InvoicePaid` with billing's schema; the
-hook Stripe calls, which verifies and parses Stripe's event with Stripe's package. Each hands the
-system its own terms, so the domain, the services, the ports and the system's own published language
-never learn the upstream's. A route of shop's that renders billing's `Invoice` type to the browser
-is no such adapter: it carries nothing between shop and billing, and billing's term reaches shop's
-browser through it. A generator that copies billing's enum into shop's domain on every build is the
-import one step removed, as SYS-2 says of the domain copied into a published language: shop's module
-imports nothing, and billing's next value is in shop's model all the same. A replica and a snapshot
-are projected into this system's terms by definition (glossary); the handler or adapter that fills
-one is where the projection happens.
+The anti-corruption layer is stated as a reach. Reach includes what a module is typed by (glossary),
+so `import type` of billing's schema into shop's service, or a driven port whose signature returns
+billing's `Invoice`, is the upstream's term in the service. The adapters it lets through are those
+the two systems talk across: the driven adapter that calls billing's open host service, in-process
+or over HTTP; the driven adapter behind a port of shop's own that turns shop's terms into
+fulfillment's `ReserveStock` and writes it to shop's outbox; the handler that parses billing's
+`InvoicePaid` with billing's schema; the hook Stripe calls, which verifies and parses Stripe's event
+with Stripe's package. Each hands the system its own terms, so the domain, the services, the ports
+and the system's own published language never learn the upstream's. A route of shop's that renders
+billing's `Invoice` type to the browser is no such adapter: it carries nothing between shop and
+billing, and billing's term reaches shop's browser through it. A generator that copies billing's
+enum into shop's domain on every build is the import one step removed, as is the domain copied into
+a published language (P13): shop's module imports nothing, and billing's next value is in shop's
+model all the same. A replica and a snapshot are projected into this system's terms by definition
+(glossary); the handler or adapter that fills one is where the projection happens.
 
-The first sentence's second half is for the conformist. A conformist that restates its upstream's
-schema in its own domain holds a second declaration of it, which drifts on the upstream's schedule:
-billing adds a stage, shop's copy lacks it, and shop finds out at runtime, on a record. Taking the
-terms from the upstream's published language, its export path or an external system's package
-(Assumptions), turns the same change into a compile error in every module that uses it: the change
-there is still a change here, but it is found at once, which is what the choice accepted. An
-external system that offers its published language only as documentation is stated in code once,
-in the module the conformist then reaches; stated a second time, it is restated. An adapter of an
+Taking the terms from the published language is for the conformist. A conformist that restates its
+upstream's schema in its own domain holds a second declaration of it, which drifts on the upstream's
+schedule: billing adds a stage, shop's copy lacks it, and shop finds out at runtime, on a record.
+Taking the terms from the upstream's published language, its export path or an external system's
+package (Assumptions), turns the same change into a compile error in every module that uses it: the
+change there is still a change here, but it is found at once, which is what the choice accepted. An
+external system that offers its published language only as documentation is stated in code once, in
+the module the conformist then reaches; stated a second time, it is restated. An adapter of an
 anti-corruption layer that restates the upstream's schema rather than parsing with it drifts too;
 the drift stops at that adapter, and P14 delivers that a message means the same to all code that
 reads it.
 
-The third sentence keeps one system's choice from becoming another's. Shop conforms to billing and
+The second sentence keeps one system's choice from becoming another's. Shop conforms to billing and
 re-exports billing's `DunningStage` in its own published language; fulfillment, which translates
 shop's terms in its adapters, now holds billing's term it never chose, and changes on billing's
 schedule while believing it depends on shop. A shared kernel that imports billing's `Currency` puts
@@ -1285,39 +1277,29 @@ published language even where it translates nowhere else, and a kernel holds onl
 sharing it agreed on. A shared kernel is itself the third way a model enters by choice (glossary:
 agreed on together); this rule rules nothing else about it.
 
-The quarry carried this as clauses of several lists. DOM-1 let the domain reach "the published
-language of an upstream its system conforms to" and refused the restated schema; SVC-6 let the
-service reach the published language and the open host service of an upstream it conforms to, an
-external system's package included; SVC-8 counted a conformist's ports in its upstream's terms as
-in the system's terms; DRV-8 let any driving adapter reach "the published language of an
-upstream". The Statement keeps the conformist's permission in every layer, ties it to the record,
-and narrows DRV-8: a driving adapter of a system that does not conform reaches the upstream's
-published language only where it carries that upstream's calls or messages. SYS-14 kept a
-published language and a shared kernel off any upstream's published language; that is the third
-sentence. Which layer may reach an upstream's open host service as well as its published language,
-and that each layer stays pure or loads on every runtime, is P1's and P5's to rule; this rule
-says only whose terms may be there. That the upstream offers nothing of its model beyond its
-published language, so that nothing else can enter, P13 delivers this, and P11 delivers that no
-system reads another's records past it. Ports in the system's own terms P5 delivers; this rule says
-when an upstream's terms are the system's own. A conformist's business rules stay its own, written
-in its upstream's terms: P1 and P2 deliver this.
+Which layer may reach an upstream's open host service as well as its published language, and that
+each layer stays pure or loads on every runtime, is P1's and P5's to rule; this rule says only whose
+terms may be there. That the upstream offers nothing of its model beyond its published language, so
+that nothing else can enter, P13 delivers this, and P11 delivers that no system reads another's
+records past it. Ports in the system's own terms P5 delivers; this rule says when an upstream's
+terms are the system's own. A conformist's business rules stay its own, written in its upstream's
+terms: P1 and P2 deliver this.
 *Provenance:* Follows Evans, Ubiquitous Language (p. 26) and Khononov p. 46 ("ubiquitous language
-should be consistent within the scope of its bounded context"); the two choices follow Khononov
-p. 53 (conformist, anticorruption layer, open-host service). Importing the conformist's terms from
-the upstream rather than restating them is DOM-1's. The shared kernel's bounds follow Khononov
-p. 51 ("Ideally, the shared kernel will consist only of integration contracts and data
-structures"). Recording the choice, and the reach that stops at the adapters carrying a call or a
-message, are this document's; where the record sits stays the repository's (Assumptions). Departs:
-Martin (The Dependency Rule) keeps the data formats of an outer circle out of an inner one, against
-the conformist's import into its domain.
+should be consistent within the scope of its bounded context"); the two choices follow Khononov p.
+53 (conformist, anticorruption layer, open-host service). The shared kernel's bounds follow Khononov
+p. 51 ("Ideally, the shared kernel will consist only of integration contracts and data structures").
+The reach that stops at the adapters carrying a call or a message, and the conformist's terms
+imported rather than restated, are this document's. Departs: Martin (The Dependency Rule) keeps the
+data formats of an outer circle out of an inner one, against the conformist's import into its
+domain.
 *Absorbs:* DOM-1, SVC-6, SVC-8, DRV-8, SYS-14
 *Drops:* SVC-1, its conformist declaring no port for its upstream follows from the glossary's
 Conformist, and a conformist's own port in the upstream's terms lets in nothing unchosen; SYS-13,
 which system declares a command is P13's and P3's, its conformist and anti-corruption senders are
 this rule's illustrations; ASM-6, a model in the common library is no system's, so P3's, not
 another system's model entering
-*Glossary notes:* Conformist: tie it to a recorded choice, so a leak is not a conformist by
-definition. Anti-corruption layer: "driven adapters that call the upstream" misses the adapter that
+*Glossary notes:* Anti-corruption layer: "driven adapters that call the upstream" misses the adapter
+that
 writes the upstream's command to an outbox; widen to adapters carrying any call or message.
 Anti-corruption layer: "driving adapters the upstream reaches" uses reach outside Reach's sense; a
 bus delivers, the upstream reaches nothing. Published language: carry the Assumptions' "an external
@@ -1492,21 +1474,21 @@ port out; a message such an in-process upstream writes stays in it. An external 
 change on its schedule (F9) and this rule cannot ask anything of them; how far its terms reach
 into this system is P12's.
 
-Neighbours the quarry tied to deploys but that rule elsewhere: the version a message carries of
-what it tells of, so a receiver keeps the later change, is P18's, not a version of the schema;
-reading another system's store past its published language, broken by the owner's schema change,
-is P11's; a command declared by its sender, waiting in the old shape in the sender's outbox, is
-P12's and P13's; a configuration value or ambient value differing between the old and the new
-image decides differently, it does not read a record differently, and is P2's and P4's.
+Neighbours tied to deploys that rule elsewhere: the version a message carries of what it tells of,
+so a receiver keeps the later change, is P18's, not a version of the schema; reading another
+system's store past its published language, broken by the owner's schema change, is P11's; a command
+declared by its sender, waiting in the old shape in the sender's outbox, is P12's and P13's; a
+configuration value or ambient value differing between the old and the new image decides
+differently, it does not read a record differently, and is P2's and P4's.
 *Provenance:* Follows protobuf (Dos and Don'ts: "Clients and servers are never updated at exactly
 the same time"), Confluent (full compatibility lets producers and consumers upgrade independently;
 an incompatible change as a new topic), Khononov p. 55 ("simultaneously expose multiple versions")
 and p. 243 ("if an event's schema changes, the subscribers' projection logic will fail"), and
 Helland 2005 (stable data has "an unambiguous and unchanging interpretation"; §3.4, a changed
-meaning as a new version). One schema stated once is this document's, DOM-3's for messages; the
-test by what the writer meant, which takes in a field whose absence is read as a fact, is this
-document's. Departs: Confluent defaults to one direction plus an upgrade order; Helland 2005 §3.4
-goes further, every change a new version.
+meaning as a new version). One schema stated once is this document's; the test by what the writer
+meant, which takes in a field whose absence is read as a fact, is this document's. Departs:
+Confluent defaults to one direction plus an upgrade order; Helland 2005 §3.4 goes further, every
+change a new version.
 *Absorbs:* TX-7, TX-42, TX-48
 *Drops:* —
 *Glossary notes:*
@@ -1519,80 +1501,81 @@ goes further, every change a new version.
 ### P15. A use case works while other systems are down or slow, unless a business rule needs another system's answer now
 
 *Scope:* a use case needs to know something another system holds, or needs another system to act.
-*Statement:* A use case MUST wait on another system, behind a port or not, only for an answer a
-business rule of its system needs before the use case returns, or for the change that a message it
-is called for asks of that system. What else it needs to know of another system it MUST read from a
-replica or a snapshot its own store keeps, and what else it needs another system to do it MUST ask
-for by a message.
-*Why:* A use case that waits on another system is down whenever that system is, and slow whenever
-it is: checkout that asks billing for the customer's dunning stage takes no orders while billing
-deploys, and a use case that waits on three systems is up only while all three are. The wait is
-what matters, not where the call sits. Reach stops at a port (glossary: Reach), so a service that
-calls a driven port reaches the port; the adapter behind it that calls billing, or answers from a
-cache and calls billing on a miss, still makes the use case wait, and the Statement holds for it
-as surely as for a call written in the service. An upstream in the same process is no exception:
-its store can be down while this system's is up, and moving it out of process changes assembly
-and nothing in this service (ASM-2), so the rule holds for it from the start.
+*Statement:* A use case not called for a message MUST NOT depend on another system answering while
+it runs, unless a business rule of its system needs that system's current answer. What else it needs
+another system to do it MUST ask for by a message.
+*Why:* A use case that depends on another system answering is down whenever that system is, and slow
+whenever it is: checkout that asks billing for the customer's dunning stage takes no orders while
+billing deploys, and a use case that depends on three systems is up only while all three are. The
+dependency is what matters, not where the call sits. Reach stops at a port (glossary: Reach), so a
+service that calls a driven port reaches the port; the adapter behind it that calls billing, or
+answers from a cache and calls billing on a miss, still makes the use case depend on billing, and
+the Statement holds for it as surely as for a call written in the service. An upstream in the same
+process is no exception: its store can be down while this system's is up, and moving it out of
+process changes assembly and nothing in this service, so the rule holds for it from the start.
 
-The mechanism moves the dependency out of the use case's run. What the use case needs to know of
-another system it finds in this system's own store: a replica, filled from the owner's published
-events or from what the owner returned to this system's own calls (TX-26), or a snapshot an
-aggregate keeps, the price the order was placed at. The replica answers while the owner is down.
-It lags, and whether a decision may rest on what lags is a business rule's to say (TX-27); P10
-delivers this. What the use case needs another system to do goes as a message, which commits with
-the use case and is handled once the other system is back: shop asks fulfillment to reserve stock
-by a command, and checkout succeeds while fulfillment is down. That the message is written in the
-use case's transaction, and is not lost after, is P8's; P8 delivers this.
+The harm is a caller held on another system's answer, so the Statement holds the use cases a caller
+holds on and leaves out the one called for a message: the use case that wrote the message returned
+long before, and nobody is held on the one called for it.
 
-The two exceptions are where waiting is the use case's nature. The first is a business rule that
-needs the other system's answer before the use case returns. The customer pays now, so checkout
-asks Stripe for a PaymentIntent and hands the browser its `client_secret`; at the payment deadline
-a reconciliation asks Stripe whether the order was paid; a handler acting on an external system's
-change recorded as pending reads that system's committed state first (TX-44). Such a use case
-fails while the other system is down, visibly, and is slow while it is slow, and both are
-expected. The line between the first exception and a replica is drawn by how old the business
-rule lets the answer be: where it accepts what the owner said a while ago, through the owner's
-downtime too, the replica serves; where it accepts only what the owner says now, the use case
-calls. Either way the answer can change before the commit, and what follows then is P10's, for
-the live answer as for the replica. The second exception is the use case called for a
-message that asks another system for a change: fulfillment's use case for `BookShipment` books
-the 3PL, a mail is sent for the message that asks for it. Its whole job is the wait. While the
-3PL is down it fails, and the bus keeps the message and delivers it again (TX-21, TX-38); no
-caller waits on it, and the use case that decided the shipment returned long before. Without this
-exception the change could be made nowhere. It covers the change alone: the same use case that
-also asks catalog for the parcel's weight waits on catalog for nothing a business rule needs now,
-and reads the weight from its replica.
+What the use case needs to know of another system it has without asking that system, and how is the
+implementer's: a replica, filled from the owner's published events or from what the owner returned
+to this system's own calls; a snapshot an aggregate keeps, the price the order was placed at; the
+message carrying it; an argument its caller passes. Each answers while the owner is down. Each may
+be older than the owner's state, and whether a decision may rest on it is a business rule's to say;
+P10 delivers this. What the use case needs another system to do goes as a message, which commits
+with the use case and is handled once the other system is back: shop asks fulfillment to reserve
+stock by a command, and checkout succeeds while fulfillment is down. That the message is written in
+the use case's transaction, and is not lost after, is P8's; P8 delivers this.
 
-What the quarry carried. TX-40 had a use case read another system's data from the owner's
-published events where no business rule needs the owner's answer before the use case commits. Its
-Scope is the first exception, read the other way; its Statement is the replica of the second
-sentence, with the snapshot beside it, and "commits" widened to "returns" so that an answering use
-case, which commits nothing, is held too. TX-40's SHOULD, and its deviation in which a system
-calling for data no rule needs now says why, are gone: a deviation is a use case down while its
-owner is, which P15 does not allow, and the reason given changes nothing for the customer. TX-12's
-closing sentence sent the read to TX-40 and is covered with it; TX-12 itself, reading only through
-the open host service or the published events, is P11's. TX-36 lets a use case ask for a
-tentative operation by a call, apart from its outbox; P8 rules that such a call is safe, this rule
-when it is made: only where a business rule needs the answer now. A PaymentIntent nobody needs at
-once, for an invoice mailed tomorrow, is asked for by a message.
+The exception is where the dependency is the use case's nature: a business rule that needs the other
+system's current answer. The customer pays now, so checkout asks Stripe for a PaymentIntent and
+hands the browser its `client_secret`; at the payment deadline a reconciliation asks Stripe whether
+the order was paid. Such a use case fails while the other system is down, visibly, and is slow while
+it is slow, and both are expected. The line between the exception and what the use case has without
+asking is drawn by how old the business rule lets the answer be: where it accepts what the owner
+said a while ago, through the owner's downtime too, a replica serves; where it accepts only what the
+owner says now, the use case calls. Either way the answer can change before the commit, and what
+follows then is P10's, for the live answer as for the replica.
 
-The rule governs the use case. A driving adapter that waits on another system before it calls the
-use case holds the way in the same way; what a driving adapter may reach is P5's, and P5 delivers
-this. A scheduled task that polls a bank for transfers (TX-46) is a driving adapter that waits
-with nobody waiting on it: it hands the transfers to one acting call that writes a message for each
-(P7), and a bank that is down delays the poll, not a caller.
-*Provenance:* Follows Khononov p. 238 (event-carried state transfer: "the consumers can continue
-functioning even if the producer is not available") and p. 246 ("If the components can settle for
-eventually consistent data, use the event-carried state transfer message"), Fowler (What do you
-mean by "Event-Driven"?, Event-Carried State Transfer) and MS (a synchronous call to another
-service counts against its autonomy), as TX-40 did. Asking another system to act by a message
-follows Evans Reference p. 16 ("Across boundaries, handle updates asynchronously") and MS
-(integration events "must be based on asynchronous communication"); the call made by the use case
-called for the message follows Khononov p. 149–150 ("the command execution logic should be moved
-out of the saga itself"). Departs: Fowler finds it "usually easier just to call the sender";
-Khononov's simple saga calls the other context directly (p. 148). Against: EIP (Command Message)
-and Richardson (Messaging) give the synchronous call as the usual alternative. The MUST in place
-of TX-40's SHOULD, and the wait behind a port counted as the use case's, are this document's.
+A use case called for a message may ask another system while it runs. Fulfillment's use case for
+`BookShipment` books the 3PL, and a mail is sent for the message that asks for it: their whole job
+is the other system's answer, and without them the change could be made nowhere. A handler acting on
+an external system's change recorded as pending reads that system's committed state first. A message
+that only tells that a thing changed is answered by asking its sender for the thing's state
+(Khononov p. 246). While the other system is down the use case fails, and the bus keeps the message
+and delivers it again; P9 delivers that the repeat changes nothing, and a message that parks before
+the other system is back is P17's.
+
+Reading another system only through its open host service or its published events is P11's. A
+use case may ask another system for a tentative operation by a call, apart from its outbox; P8 rules
+that such a call is safe, this rule when it is made: where a business rule needs the answer now. A
+PaymentIntent nobody needs at once, for an invoice mailed tomorrow, is asked for by a message.
+
+The rule governs the use case. A driving adapter that depends on another system answering before it
+calls the use case holds the way in the same way; what a driving adapter may reach is P5's, and P5
+delivers this. A scheduled task that polls a bank for transfers is a driving adapter nobody is held
+on: it hands each transfer on as a message (P9), and a bank that is down delays the poll, not a
+caller.
+*Provenance:* The harm follows Richardson (runtime coupling: "the degree to which the availability
+of one service is affected by the availability of another service"; respond "without waiting for the
+response from any other service") and MS ("try not to depend on other internal microservices as part
+of the initial service's HTTP request/response operation"). Having it without asking follows
+Khononov p. 238 (event-carried state transfer: "the consumers can continue functioning even if the
+producer is not available") and p. 246 ("If the components can settle for eventually consistent
+data, use the event-carried state transfer message"), Fowler (What do you mean by "Event-Driven"?,
+Event-Carried State Transfer), Helland 2005 (operands from published reference data) and Evans p. 97
+(the item holds its own price). The exception follows Khononov p. 237 and p. 246 ("If the consumer
+needs to read the last write in the producer's state, issue an event notification message, with a
+subsequent query"). Asking another system to act by a message follows Evans Reference p. 16 ("Across
+boundaries, handle updates asynchronously") and MS (integration events "must be based on
+asynchronous communication"); the call made by the use case called for the message follows Khononov
+p. 149–150 ("the command execution logic should be moved out of the saga itself") and Fowler, who
+finds it "usually easier just to call the sender". Departs: Richardson answers even a business
+rule's need with a pending outcome, not a call; Khononov's simple saga calls the other context
+directly (p. 148). Against: EIP (Command Message) and Richardson (Messaging) give the synchronous
+call as the usual alternative. The dependency behind a port counted as the use case's, and the use
+case called for a message left out, are this document's.
 *Absorbs:* TX-40
 *Drops:* —
 *Glossary notes:*
@@ -1652,18 +1635,15 @@ this. Where the outcomes of the parts diverge, P17 delivers what follows. Writin
 another system's records past its published language is refused by the first sentence and by
 P11, which delivers it whatever transaction it runs in.
 
-The quarry carried this as three ids, one per crossing: the ambient transaction (ASM-9), the
-port that takes one (TX-25), the call into another system that carries one (TX-43). Review 02
-found a fourth that none reached: shop handing its transaction to Payload's Local API, TX-25's
-Scope being a port a system of this codebase declares. The first sentence is the mechanism they
-were cases of, and the crossing it names is any call between systems. TX-25's other harm, a
-port's transaction taking the place of the one its own service opens, is one system's and P7
-delivers it; the port clause costs nothing there, since a port joins the open host service by
-being exported, its declaration unchanged. TX-43 settled a reading where two systems share one
-store, TX-1's "one store" against this; the first sentence settles it the same way and states
-it: one store, two owners, two transactions. No exception: a shared kernel and the common
-library own no records, a conformist takes its upstream's terms, not its transactions, and
-tooling, a migration across two systems' tables, opens no system's transaction (Assumptions).
+Four crossings are cases of the first sentence: the ambient transaction, the port that takes one,
+the call into another system that carries one, and shop handing its transaction to Payload's Local
+API, a port no system of this codebase declares. The crossing it names is any call between systems.
+A port's transaction taking the place of the one its own service opens is one system's harm, and P7
+delivers it; the port clause costs nothing there, since a port joins the open host service by being
+exported, its declaration unchanged. Where two systems share one store, the first sentence settles
+it: one store, two owners, two transactions. No exception: a shared kernel and the common library
+own no records, a conformist takes its upstream's terms, not its transactions, and tooling, a
+migration across two systems' tables, opens no system's transaction (Assumptions).
 *Provenance:* Follows Helland 2007 ("Atomic Transactions Cannot Span Entities") and Richardson
 (Database per service: "A service's transactions only involve its database"). The ambient
 crossing is Node.js (Asynchronous context tracking). The rule on the port, on the caller's side
@@ -1689,10 +1669,15 @@ tentative operation included, from the first step it takes in that work until it
 *Statement:* A business rule of that system MUST decide how its part ends from each state it can
 stand in, on whatever another system can send it there and on none coming, by completing the work,
 by a step that undoes an earlier one, asked of the system that took it, or by accepting the state as
-it stands. Where its part waits on another system, the moment it decides on none coming MUST be held
-in an aggregate of its own. A refusal of a step MUST be committed as the step's outcome and reach
-the system that decided the step, and a failure that neither gave nor refused MUST NOT be committed
-as one.
+it stands. Where its part waits on another system, it MUST hold the moment it stops waiting in an
+aggregate of its own, if:
+- it holds something until the answer comes, a tentative operation it took or asked for
+  included, or
+- a business rule limits how long it may wait.
+
+A status that only shows how far another system has got, with nothing of this system's hanging on
+it, is no wait. A refusal of a step MUST be committed as the step's outcome and reach the system
+that decided the step, and a failure that neither gave nor refused MUST NOT be committed as one.
 *Why:* Each system commits its own part (P16), so the parts diverge. Another system says yes and
 then fails, stops answering, refuses, or answers after this one has moved on. Two harms follow,
 and both are found by a customer. Work that never ends: the tea shop's order waits as "payment
@@ -1712,31 +1697,35 @@ is. Under orchestration that is the process manager's system, whose business rul
 step (glossary: Orchestration); under choreography each system decides for its own part (glossary:
 Choreography). The system an event reaches decides, holding the state the event meets; the step it
 would undo stays the other system's, so undoing is asked of that system, which may refuse, and the
-refusal comes back under the third sentence. The late payment is refunded, asked of payment; or
+refusal comes back under the fourth sentence. The late payment is refunded, asked of payment; or
 the order is reinstated; or the business accepts keeping the money and says so. A use case that
 carries out a change another use case decided does not decide whether it is still wanted: that
 question, and the deadline it hangs on, sit with the system holding the pending change (P8
 delivers the executor's side).
 
 The second sentence makes the waiting end without the other system. The delivery rules reach no
-message the other system stopped sending, and none a dead-letter queue keeps: nothing in this
-system changes until it arrives, unless this system holds what makes it change. A deadline in its
-own aggregate, the order's payment deadline, acts when it passes whatever the other system does. A
+message the other system stopped sending, and none a dead-letter queue keeps: nothing in this system
+changes until it arrives, unless this system holds what makes it change. A deadline in its own
+aggregate, the order's payment deadline, acts when it passes whatever the other system does. A
 deadline is a business fact, a grace period, the hours a hold lasts, so it is held where the
 business's facts are. What starts it once it passes is the clock (Assumptions), which can come late,
 so the use case it starts decides by the aggregate: a deadline the answer already met finds the
-answer there, and one moved since finds the new moment.
-At the deadline the rule may ask the other system, a reconciliation, but it still decides on no
-answer: a reconciliation that asks again forever is the waiting renamed. Held in the aggregate the
-late answer also loads, the deadline and the answer meet on one aggregate, and which of them wins
-is a business rule's, not a race's (P10 delivers the race). Waiting covers every case the quarry
-named: a confirmation of a tentative operation, the PaymentIntent nobody confirmed lapsing or
-accepted as changing nothing; an external system's change recorded as pending until confirmed; an
-answer to a command this system sent; a message the other system was to send. A system that
-publishes an event and waits for nothing has no part to end there and falls outside the second
-sentence.
+answer there, and one moved since finds the new moment. At the deadline the rule may ask the other
+system, a reconciliation, but it still decides on no answer: a reconciliation that asks again
+forever is the waiting renamed. Held in the aggregate the late answer also loads, the deadline and
+the answer meet on one aggregate, and which of them wins is a business rule's, not a race's (P10
+delivers the race). Waiting covers these cases: a confirmation of a tentative operation, the
+PaymentIntent nobody confirmed lapsing or accepted as changing nothing; an external system's change
+recorded as pending until confirmed; an answer to a command this system sent; a message the other
+system was to send. A system that publishes an event and waits for nothing has no part to end there
+and falls outside the second sentence. Nor does a status that only shows another system's progress:
+a ticket issued on account shows "payment open" until billing's event says paid, nothing of
+booking's hangs on it, and billing, which collects, ends the matter on its own deadline. Where
+booking's own rule cancels a ticket unpaid after 14 days, booking waits, and the 14 days are its
+moment. What makes a part wait is what it holds until the answer comes, a seat, stock, a tentative
+operation, or a business rule's limit on how long it may wait.
 
-The third sentence is what lets the first decide on what actually happened. A refusal that throws
+The fourth sentence is what lets the first decide on what actually happened. A refusal that throws
 fails its use case: the handler does not acknowledge, the bus redelivers, the same business rule
 refuses again, the bus parks it, and the sender learns nothing. Shop asked payment for a refund,
 payment refuses it for a disputed charge, and shop tells the customer the money is on its way.
@@ -1753,33 +1742,30 @@ fails instead, commits nothing, and is delivered again (P8 delivers that it is n
 failure no retry cures parks where an operator finds it, and the waiting system's deadline still
 ends that system's part.
 
-The quarry carried this as five ids. TX-30, a business rule ending the wait on a confirmation or
-an answer, is the first sentence on none coming and the second sentence. TX-35, a business rule
-deciding what follows an event that says the part cannot go on, is the first sentence on an event.
-TX-34 and TX-45, a refusal by a business rule and a refusal by another system as an outcome, are
-the third sentence's first clause; TX-38, a stop that is neither, is its last. How the refusal
-reaches the deciding system is left open here: TX-34 had it published as an event of the
-receiver's own published language naming no sender, which keeps the receiver free of its senders
-(P12 delivers this). That a repeated answer changes nothing is P9's; that a message arriving
-before the one it follows does not change the ending is P18's.
+How the refusal reaches the deciding system is left open here: published as an event of the
+receiver's own published language naming no sender, it keeps the receiver free of its senders (P12
+delivers this). That a repeated answer changes nothing is P9's; that a message arriving before the
+one it follows does not change the ending is P18's.
 
 An external system holds none of this (F9): Stripe stops resending when it chooses. The rule
 governs this system's part, which ends whatever the external system does.
 *Provenance:* Follows Helland 2007 p. 140 ("Every tentative operation eventually confirms or
 cancels"; "When an entity agrees to perform a tentative operation, it agrees to let another entity
-decide the outcome") and NServiceBus (Saga timeouts: how long to wait is the business's to say).
-The undo follows Richardson (Saga: a step that "violates a business rule" is undone by compensating
-transactions), Khononov p. 235 ("The only thing that can be done to overturn an event is to issue
-a compensating action") and p. 151 (the process manager "determines the next processing steps"),
-and Vernon EAD II p. 8–9 ("compensate, or at a minimum to report the failure for pending
-intervention"). The refusal as outcome follows Khononov p. 235 (a command "can be rejected") and
-p. 148 (rejection as an event the saga handles); failure retried and parked follows EIP
-(Transactional Client) and NServiceBus (Outbox: the error queue). Departs: Richardson's
-orchestrated participant and NServiceBus reply to the sender; this rule leaves the route open. The
-deadline held in the aggregate follows Evans p. 161 and p. 163 (due date plus grace period, selected
-by the repository once past) and Khononov p. 88 and p. 102 (time left held and checked in the
-aggregate; the payment deadline in the order's event). The closed list of endings and the line
-between a refusal and a failure are this document's.
+decide the outcome") and NServiceBus (Saga timeouts: how long to wait is the business's to say). The
+undo follows Richardson (Saga: a step that "violates a business rule" is undone by compensating
+transactions), Khononov p. 235 ("The only thing that can be done to overturn an event is to issue a
+compensating action") and p. 151 (the process manager "determines the next processing steps"), and
+Vernon EAD II p. 8–9 ("compensate, or at a minimum to report the failure for pending intervention").
+The refusal as outcome follows Khononov p. 235 (a command "can be rejected") and p. 148 (rejection
+as an event the saga handles); failure retried and parked follows EIP (Transactional Client) and
+NServiceBus (Outbox: the error queue). Departs: Richardson's orchestrated participant and
+NServiceBus reply to the sender; this rule leaves the route open. The deadline held in the aggregate
+follows Evans p. 161 and p. 163 (due date plus grace period, selected by the repository once past)
+and Khononov p. 88 and p. 102 (time left held and checked in the aggregate; the payment deadline in
+the order's event). What makes a part wait follows Helland 2007 p. 140 and p. 141 (the tentative
+operation, which holds, against the activity, what one remembers of a partner) and NServiceBus (Saga
+timeouts: "an upper limit on the waiting period that the business dictates"). The closed list of
+endings and the line between a refusal and a failure are this document's.
 *Absorbs:* TX-30, TX-35, TX-34, TX-45, TX-38
 *Drops:* —
 *Glossary notes:*
@@ -1794,12 +1780,11 @@ between a refusal and a failure are this document's.
 *Scope:* messages that tell of the same thing, written by one system or by several, and the use
 cases called for them.
 *Statement:* A use case called for a message MUST leave the records of what it tells of as the
-messages about that thing, applied in the order they were written, would leave them, telling that
-order from what the messages carry and not from when they arrive. Where a later message about one
-thing overrides an earlier, the system that writes them MUST carry on each a version of that thing,
-raised in the transaction that commits the change, and the use case MUST keep the highest. Where
-messages written by different systems conflict over one thing, a business rule of the receiving
-system MUST decide which prevails.
+messages about that thing, applied in the order they were written, would leave them, and MUST NOT
+tell that order from when they arrive. The system that writes messages about one thing MUST let a
+use case called for one tell that order, by what the message carries or by answering what the thing
+is now. Where messages written by different systems conflict over one thing, a business rule of the
+receiving system MUST decide which prevails.
 *Why:* Arrival order is not the order of writing (F5). The relay hands a message over again after
 a crash, the bus retries one that failed and backs off before it does, parks it and retries it
 once the fault is fixed, and a redelivery runs while the first attempt still does; an external
@@ -1811,28 +1796,31 @@ the messages carry, and on nothing the bus promises.
 Two harms follow, and the Statement has a clause for each. The first: a message meets a state its
 predecessor has not made yet. Fulfillment's `OrderCancelled` arrives before the `OrderPlaced` it
 cancels; the use case finds no order, reads "not found" as "already handled" and acknowledges, and
-the reservation made a moment later stays for a dead order. Applied in the order written, the
-cancel would have found the order and the reservation would never stand, so the Statement refuses
-the drop without naming it. Two means meet it. The use case records what the early message says,
-the cancel kept for an order not yet seen, and the `OrderPlaced` that follows meets it and
-reserves nothing. Or the use case fails, commits nothing, and the redelivery runs once the
-predecessor has landed; a predecessor that never comes then parks the message where someone finds
-it, which is a failure a retry may cure (TX-38), not a refusal. Messages that do not override each
-other, a reservation and its release, are ordered this way, by what they say: a release is a
-release whichever arrives first.
+the reservation made a moment later stays for a dead order. Applied in the order written, the cancel
+would have found the order and the reservation would never stand, so the Statement refuses the drop
+without naming it. Two means meet it. The use case records what the early message says, the cancel
+kept for an order not yet seen, and the `OrderPlaced` that follows meets it and reserves nothing. Or
+the use case fails, commits nothing, and the redelivery runs once the predecessor has landed; a
+predecessor that never comes then parks the message where someone finds it, which is a failure a
+retry may cure, not a refusal. Messages that do not override each other, a reservation and its
+release, are ordered this way, by what they say: a release is a release whichever arrives first.
 
-The second harm: messages that override each other, a status, a stage, where the receiver keeps
-the last. The customer pays, billing clears the dunning stage, and shop's replica receives the
-reminder stage, written before the clearing, after it: it keeps that stage and refuses
-pay-by-invoice to a customer who owes nothing. From the message alone the receiver cannot tell the
-older. When it arrived says nothing, and a time on the message is the clock of the process that
-wrote it, which the next process disagrees with; ordered by that time, the records end as no
-order of writing left them, which the first sentence refuses. The writer alone knows the order it
-changed the thing in, so the writer carries it: one counter per thing, raised in the transaction
-that commits the change, the aggregate's version where it carries one (TX-23). The receiver keeps
-the higher and drops the lower. An equal version is the same change delivered again, which P9
-delivers. The version is of the thing the message tells of, not of the message's schema; a
-schema's change is P14's.
+The second harm: messages that override each other, a status, a stage, where the receiver keeps the
+last. The customer pays, billing clears the dunning stage, and shop's replica receives the reminder
+stage, written before the clearing, after it: it keeps that stage and refuses pay-by-invoice to a
+customer who owes nothing. From the message alone the receiver cannot tell the older. When it
+arrived says nothing, and a time on the message is the clock of the process that wrote it, which the
+next process disagrees with; ordered by that time, the records end as no order of writing left them,
+which the first sentence refuses. The writer alone knows the order it changed the thing in, so the
+writer lets the receiver tell it, in one of two ways. It carries a version: one counter per thing,
+raised in the transaction that commits the change, the aggregate's version where it carries one; the
+receiver keeps the higher and drops the lower. Or its message is a notice that the thing changed,
+and the receiver asks it what the thing is now: two notices that arrive out of order both fetch the
+latest, and the order no longer matters. The fetch costs the writer answering while the receiver
+handles the message; a writer that is down fails the delivery, and the bus delivers it again (P15
+leaves a use case called for a message free to ask). An equal version is the same change delivered
+again, which P9 delivers. The version is of the thing the message tells of, not of the message's
+schema; a schema's change is P14's.
 
 Several writers share no counter. Payment and billing both telling shop of the same customer have
 no order of writing between them that either can stamp, so which prevails is the business's, and
@@ -1846,19 +1834,19 @@ after a deadline passed, the payment after the order was cancelled for want of i
 not another message; what follows is P17's.
 
 An external system holds none of the properties (F9): it is outside the rules, and the writer's
-clause cannot bind it. Its messages are still delivered to a use case of this system, and the
-first sentence holds for them. Where they carry no version, the receiver orders them by what they
-say, a status that only moves forward, or takes the thing's current state from the owner when it
-handles one, the message as no more than a notice that it changed. Where this codebase configures
-the external system, a version can be configured in. Items a driving adapter polls from another
-system, a bank's transfers listed in its own order, fall under this rule once they are handed to a
-use case as messages; handing them over as messages with the other system's id is P9's.
+clause cannot bind it. Its messages are still delivered to a use case of this system, and the first
+sentence holds for them: the receiver uses whichever means the external system offers, what its
+messages say, a status that only moves forward, a version, or its API's answer to what the thing is
+now. Where this codebase configures the external system, a version can be configured in, raised in
+the transaction that commits the change. Items a driving adapter polls from another system, a bank's
+transfers listed in its own order, fall under this rule once they are handed to a use case as
+messages; handing them over as messages with the other system's id is P9's.
 *Provenance:* The receiver's clause follows Khononov p. 245 ("Events will arrive out of order"),
 Helland 2007 p. 138 and MS (an older price event overwriting a newer). The writer's clause follows
 Khononov p. 245 ("When publishing messages, ensure that the subscribers will be able to deduplicate
 the messages and identify and reorder out-of-order messages"), which puts the means on the
-publisher. The version as one counter per thing, and the business rule between writers, are this
-document's.
+publisher; the notice answered by asking the writer follows Khononov p. 246. The version as one
+counter per thing, and the business rule between writers, are this document's.
 *Absorbs:* TX-19, TX-32
 *Drops:* TX-46, its mechanism is handing polled items over as messages with the other system's id,
 which is P9's; once handed, their order is this rule's.
@@ -1924,9 +1912,9 @@ new code what it meant to the code that wrote it is P14's, and P14 delivers this
 system's published language holds still while its terms move is P13's, and P13 delivers this.
 *Provenance:* Follows Evans, Ubiquitous Language (p. 26) and Bounded Context (p. 239: "Keep the
 model strictly consistent within these bounds") and Khononov p. 46 ("ubiquitous language should be
-consistent within the scope of its bounded context"), as DOM-8 did. The rule on code, the term
-entered before code uses it, and another system's word named apart are this document's; the last
-follows Khononov p. 53's anti-corruption layer, carried from the model to the names.
+consistent within the scope of its bounded context"). The rule on code, the term entered before code
+uses it, and another system's word named apart are this document's; the last follows Khononov p.
+53's anti-corruption layer, carried from the model to the names.
 *Absorbs:* DOM-8
 *Drops:* —
 *Glossary notes:*
@@ -1938,15 +1926,12 @@ follows Khononov p. 53's anti-corruption layer, carried from the model to the na
 
 ## Conventions
 
-Taste, not property: a repository that does otherwise breaks nothing the world promises. Carried
-from the general rules as they stood; ids are theirs. TST-8, TST-10 and TST-11 were on this list
-and are not here: P6 and P2 absorbed them.
+Taste, not property: a repository that does otherwise breaks nothing the world promises.
 
-- **TST-3.** A business rule is tested: the test SHOULD call the domain function directly.
-- **TST-7.** A test asserts: it SHOULD assert on inputs and observable results.
-- **TST-12.** An end-to-end test SHOULD NOT run automatically.
-- **ASM-10.** A factory needs something the same in every instance, process and test: it SHOULD
-  import it.
+- A business rule is tested: the test SHOULD call the domain function directly.
+- A test asserts: it SHOULD assert on inputs and observable results.
+- An end-to-end test SHOULD NOT run automatically.
+- A factory needs something the same in every instance, process and test: it SHOULD import it.
 
 ## Appendix
 
@@ -1978,13 +1963,16 @@ handled by its declaring system only; P13 dropped it). Each was dropped on purpo
 one writer who said which property owns it, and that property's writer dropped it too. Decide
 each: a sentence in the named rule, a Convention, or gone.
 
+The Conventions carry TST-3, TST-7, TST-12 and ASM-10, in that order; TST-8, TST-10 and TST-11
+were on that list and P6 and P2 absorbed them.
+
 ### Absorbed twice
 
-- DRV-1, one acting call per call handled: P4 sentence 3 and P7 sentence 1 rule it in the same
+- DRV-1, one acting call per call handled: P4 sentence 2 and P7 sentence 1 rule it in the same
   words. One should hold it; P7's reason, the split transaction, is the harm.
 - SVC-2: P4 (the acting service decides, every way in) and P10 (inside the committing
   transaction). The split is clean; both Statements say so.
-- ASM-3, ambient values: P4 sentence 2 and P5's "argument from its caller". P4 rules the
+- ASM-3, ambient values: P4 sentence 1 and P5's "argument from its caller". P4 rules the
   behaviour, P5 the plumbing. Overlap in Why only.
 - SYS-9 and ASM-11, the offer and what builders return: P5 sentence 1 clause 2 and P13 sentence 1.
   P13 binds "code of another system", P5 "anything outside a system"; assembly and the relay fall
@@ -2009,22 +1997,20 @@ each: a sentence in the named rule, a Convention, or gone.
 - P2 sentence 1 allows a business rule in "a shared kernel its domain imports"; P3 sentence 2
   forbids the kernel any rule that decides what a record holds, and any record's schema. P3's Why
   reconciles them (Money's rounding is about any amount); the Statements do not.
-- P12 sentence 1 "MUST record each upstream it conforms to" against Assumptions, "where a system
-  records that it conforms to an upstream is the repository's". P12 reads the Assumption as where,
-  not whether. Settle in the Assumptions block if P12 stands.
+
 - P13 sentence 1 lets another system import "only what is typed by its published language, a
   shared kernel and pure code"; a builder returns driving adapters and outbox readers, typed by
   neither. P13 escapes because assembly is no system. P5 says what builders return. Fragile.
 
 ### New rulings, in no old id
 
-P1 "in no terms of the outside" (a pure ORM type builder is refused); P3 the kernel as values
-only; P6 the fake from the first downstream, and code reached through no port runs without the
-outside; P9 the claim under a key the store refuses twice, inside the transaction; P10 the
-failure asked for, the means left open (TX-24's saved aggregates become one means); P12 the
-recorded choice; P14 the deploy order as the new version (readers first, writer last); P15 MUST
-where TX-40 said SHOULD; P17 the deadline held in the waiting system's own aggregate; P18 one
-counter per thing raised in the committing transaction, and a business rule between writers;
+P1 "in no terms of the outside" (a pure ORM type builder is refused); P3 the kernel as values only;
+P6 the fake from the first downstream, and code reached through no port runs without the outside; P9
+the claim under a key the store refuses twice, inside the transaction; P10 the failure asked for,
+the means left open (TX-24's saved aggregates become one means); P12 the choice made per upstream;
+P14 the deploy order as the new version (readers first, writer last); P15 MUST where TX-40 said
+SHOULD; P17 the deadline held in the waiting system's own aggregate; P18 the writer letting the
+receiver tell the order, by what it carries or by answering, and a business rule between writers;
 P19 a term in the glossary before code uses it, another system's word named apart.
 
 ### Glossary terms no Scope or Statement uses
@@ -2043,7 +2029,7 @@ Each writer's lines, by term. Direction only; no edit this pass.
 - Outside: say whether pure code, a kernel, a conformed published language, the common library
   and a third party's client are of it (P1, P5, P15).
 - Reach: a type reaches its types, not its package's running code (P1); stops at a port, so no
-  term says a use case waits on another system behind one (P15).
+  term says a use case depends on another system behind one (P15).
 - Domain: carry that its terms are the business domain's or a conformed upstream's (P1); that it
   holds all its system's business rules (P2).
 - Business rule: carry the values it decides by (P2).
@@ -2058,7 +2044,7 @@ Each writer's lines, by term. Direction only; no edit this pass.
 - Driving port: all a caller brings (P4); a transaction is the store's (P16).
 - Adapter: "swapping changes nothing" is a ruling held in a definition (P4).
 - Driving adapter: decides nothing, translates (P4).
-- Outbox reader: say whether it is an adapter (P5).
+
 - Assembly: "only place port and implementation meet" is a ruling in a definition (P5).
 - Courier: say assembly fills it (P5).
 - Configuration value: say what it is for (P4).
@@ -2084,7 +2070,7 @@ Each writer's lines, by term. Direction only; no edit this pass.
   external system's package is one (P12).
 - Upstream system / Offer: say what crosses is in the published language; the offer is all another
   system may import (P13).
-- Conformist: tie to a recorded choice (P12); its glossary takes the upstream's terms (P19).
+- Conformist: its glossary takes the upstream's terms (P19).
 - Anti-corruption layer: widen to adapters carrying any call or message; "driving adapters the
   upstream reaches" misuses Reach (P12); the upstream's terms stay the upstream's there (P19).
 - Replica: answers while its owner is unreachable (P15).

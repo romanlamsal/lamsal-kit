@@ -2,7 +2,7 @@
 
 *Draft.* The foundation, with the glossary: what the world does to a system (forces) and what
 holds anyway (properties). It names no mechanism and no rule. Any set of rules that delivers the
-properties builds a repo alike in what holds; the general rules are one such set. A repo may
+properties builds a repo alike in what holds; the property rules are one such set. A repo may
 overrule one of them wherever the properties still hold. This document uses glossary terms only;
 a term it needs enters the glossary first.
 

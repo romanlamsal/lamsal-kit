@@ -163,6 +163,9 @@ returns to it, and lags the owner.
 
 **Record.** What a store holds and a write changes.
 
+**Transaction.** A set of writes that commits whole or not at all. Until it commits, none of its
+writes is seen outside it.
+
 **Store.** What lies behind one or more driven ports whose writes can be committed in one
 transaction. Two clients are one store when one transaction can carry the writes of both, two
 stores until it can.
