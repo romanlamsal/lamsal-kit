@@ -10,10 +10,9 @@ Definitions only, read as a whole. What a term may do is in the rules.
 
 ## System
 
-A system is one bounded context. It is code with its own domain and its own glossary. A code
-repository may hold several. Another bounded context is another system, even when it is
-imported in-process. A module is of the system whose layer or offer it belongs to, wherever the
-repository keeps it.
+A system is one bounded context. It is code with its own domain and its own glossary. A codebase may
+hold several. Another bounded context is another system, even when it is imported in-process. A
+module is of the system whose layer or offer it belongs to, wherever the codebase keeps it.
 
 **Outside.** Other systems and third parties, the operating system among them, whether they
 drive the system or it drives them.
@@ -29,13 +28,13 @@ drive the system or it drives them.
 *answering* one changes nothing. An *acting call* is a call to an acting use case.
 
 - **Domain.** The model; it holds the business rules. It is pure.
-- **Service.** The application layer. It carries out the system's use cases. What it holds is the
-  sequence within one use case.
+- **Service.** The implementation of a driving port. What it holds is the sequence within its use
+  case.
 - **Driven adapters.** Implementations of driven ports.
 - **Driving adapters.** Callers adapted to driving ports.
 
-In DDD vocabulary, domain is the model, service is the application layer, driving adapters are the
-interface layer, driven adapters the infrastructure layer.
+In DDD vocabulary, domain is the model, services make up the application layer, driving adapters are
+the interface layer, driven adapters the infrastructure layer.
 
 **Reach.** A module reaches what running it reads or calls and what it is typed by, however the
 code got hold of it, and what those reach in turn. What it reaches through a port of its system
@@ -47,8 +46,9 @@ caller nothing the caller did not pass.
 **Port.** An interface, never the code behind it.
 
 - A *driven port* is a way out of the system.
-- A *driving port* is the way in. It names one use case the system offers and what a caller must
-  bring, in the system's terms, not its store's. It does not know how it is reached.
+- A *driving port* is the way in; a service implements it. It names one use case the system offers
+  and what a caller must bring, in the system's terms, not its store's. It does not know how it is
+  reached.
 - Who starts the call decides which. Seen from the caller, this system's driving port lies
   behind one of the caller's driven ports.
 
@@ -81,11 +81,9 @@ the outbox readers.
 **Idempotent.** An operation is idempotent when repeating it leaves its system's records as
 performing it once left them, and answers as the first did.
 
-**Tentative operation.** A request to another aggregate or another system for a commitment that
-leaves open the possibility of cancellation. It gives nothing until it is confirmed, by the
-requester or by whoever else the holder takes the confirmation from: its confirmation gives what it
-asks
-for, its cancellation ends it.
+**Tentative operation.** A commitment one aggregate asks of another, in its system or another's, by
+a message, that leaves open its cancellation. The asker holds the right to cancel: releasing it
+confirms, using it cancels; every one eventually confirms or cancels.
 
 **Open host service.** The driving ports a system offers to other systems.
 
@@ -101,36 +99,35 @@ builders.
 another system holds, and repairs this system's record, or starts the step that repairs the
 other's.
 
-**Saga.** A sequence of steps across systems where, when a later step fails, new steps undo the
-earlier ones.
+**Saga.** A sequence of local transactions across systems that either all commit or, when one is
+refused, ends in new ones that undo, in business terms, those already committed.
 
-**Choreography.** Each system reacts to the others' events and decides for itself what to do next.
-No one holds the whole sequence.
+**Choreography.** Work spanning systems where each system reacts to the others' events and decides
+its own next step; no system holds the whole sequence.
 
-**Orchestration.** One system's *process manager* holds the sequence across systems: an aggregate
-whose state is where the sequence stands and whose business rules decide the next step. Each step
-is a use case of that system that sends the commands its process manager decides to the others.
+**Orchestration.** Work spanning systems where one system holds the sequence and tells the others by
+commands which step to take.
 
 ## Other systems
 
-**Upstream system.** Of two systems that talk, the one the other depends on: it offers the open
-host service the other calls, the commands the other sends, the events the other handles, and the
-published language both are written in. It changes on its own terms.
+**Upstream system.** Of two systems that talk, the one whose published language the other depends
+on, for a given call or message: it offers the open host service the other calls, takes the commands
+the other sends, publishes the events the other handles. It changes on its own terms. Two systems
+may each be upstream of the other, for different calls or messages.
 
-**Downstream system.** The one that depends on the upstream: it calls the upstream's open host
-service, sends its commands, handles its events, and adapts to its changes.
+**Downstream system.** The one that depends on the upstream's published language and adapts to its
+changes.
 
 **Conformist.** A downstream system that takes the upstream as it is: its ports become the
 downstream's driven ports and its published language is used untranslated, in any layer including
 the domain.
 
-**Anti-corruption layer.** A downstream system that translates the upstream's published language
-into its own in every adapter that touches the upstream: the driven adapters that call the
-upstream and the driving adapters the upstream reaches. The upstream's terms stop at those
-adapters.
+**Anti-corruption layer.** In a downstream system, the layer that translates between the upstream's
+published language and the system's own terms; the upstream's terms stop at it.
 
-**Shared kernel.** A model several systems of this codebase share as code and agree on together,
-each importing it into its domain. A change to it is a change to each.
+**Shared kernel.** A part of the domain model that several systems of this codebase share as code
+and agree on together; it belongs to each of them, each importing it into its domain. A change to it
+is a change to each.
 
 **Hook.** A driving adapter an external system calls.
 
@@ -150,7 +147,8 @@ owners. A replica's records are its keeper's; what they copy stays the owner's t
 
 **Specification.** A domain function that answers yes or no about one candidate.
 
-**Repository.** A specialized driven port over exactly one aggregate: loads it, saves it, finds it.
+**Repository.** Access to the aggregates of one type: it loads, saves and finds them whole. The
+*repository port* is a driven port; a *repository adapter* is a driven adapter implementing it.
 
 **Snapshot.** A value an aggregate copies when a use case needs it, projected into this system's
 terms, and keeps unchanged as its own fact from then on.
@@ -163,12 +161,11 @@ returns to it, and lags the owner.
 
 **Record.** What a store holds and a write changes.
 
-**Transaction.** A set of writes that commits whole or not at all. Until it commits, none of its
-writes is seen outside it.
+**Transaction.** A group of reads and writes that commits whole or not at all. Until it commits,
+none of its writes is seen outside it.
 
-**Store.** What lies behind one or more driven ports whose writes can be committed in one
-transaction. Two clients are one store when one transaction can carry the writes of both, two
-stores until it can.
+**Store.** What keeps records such that one transaction can carry writes to any of them. Two clients
+are one store when one transaction can carry the writes of both, two stores until it can.
 
 ## Driving adapters
 
@@ -182,8 +179,8 @@ as an argument.
 
 ## Assembly
 
-**Factory.** A function that takes what an implementation needs and returns it. A service is a
-factory for a driving port; an adapter's constructor is a factory for a driven port.
+**Factory.** A function that takes what an implementation needs and returns the implementation,
+typed by its port: a service's factory returns a driving port's, a driven adapter's a driven port's.
 
 **System builder.** The part of assembly a system provides, so that a process's assembly builds
 what it needs of the system without knowing its internals or their defaults: it takes
