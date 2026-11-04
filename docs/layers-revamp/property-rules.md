@@ -565,7 +565,6 @@ what is the same everywhere is signature hygiene, not P5's harm; SYS-1, an expor
 harms nothing until reached, and the reach is refused here and found by a linter on import paths
 *Glossary notes:*
 - Outside: say if pure code, a shared kernel, a conformed published language, common library count.
-
 - Port: carry "in the system's terms" on Port, not only driving port; the Statement drops it.
 - Assembly: "only place where port and implementation meet" is a ruling in a definition; settle.
 - Courier: say assembly fills it; the Statement's "only assembly fills" then goes.
