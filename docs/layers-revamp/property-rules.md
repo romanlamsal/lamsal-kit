@@ -396,7 +396,7 @@ the service still refuses it. A guard the service does not repeat, a role check 
 alone, a webhook that skips events under some amount, is a decision that holds on one way in.
 Translating back is the adapter's too: JSON for the route, a line for the CLI, one answer.
 
-Observation is no input: a logger or tracer reached through a courier, a trace context the adapter puts in
+Observation is no input: a logger or tracer handed in or reached through a courier, a trace context the adapter puts in
 per request and the outbox adapter carries on the envelope, change neither how the use case acts
 nor what it answers, so nothing here refuses them.
 
