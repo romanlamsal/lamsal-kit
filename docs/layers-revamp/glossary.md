@@ -193,7 +193,8 @@ process's driving adapters call into.
 
 **Courier.** How code reaches what assembly produced when assembly cannot hand it over as an
 argument:
-- a driving adapter a framework constructs;
+- a driving adapter nothing can hand it to: one a framework constructs, or one assembly builds
+  before what it calls exists;
 - observation reading a global its library keeps.
 
 **Configuration value.** A value a process is given when it starts and keeps for its life, which

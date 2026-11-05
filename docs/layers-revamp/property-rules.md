@@ -447,10 +447,10 @@ value, configuration value, acting call
 system reaches into it.
 *Statement:* A service MUST reach the outside only as a port of its system in the system's terms,
 and an adapter or an outbox reader only as such a port or as the outside it adapts, each also
-through observation, which reaches the outside only through a courier. Anything outside a system MUST reach into it only through its offer or by a driving
-adapter's way in. A port's implementation, a client of the outside or a configuration value MUST
-reach code of a system as an argument chosen by the process's assembly, or from a courier that only
-assembly fills and that a driving adapter, or observation, reads each time it runs.
+through observation. Anything outside a system MUST reach into it only through its offer or by a
+driving adapter's way in. A port's implementation, a client of the outside, a configuration value or
+observation MUST reach code of a system as an argument chosen by the process's assembly, or from a
+courier that only assembly fills and that a driving adapter, or observation, reads each time it runs.
 *Why:* An agent editing one file sees that file. Where every way out and every way in of a system is
 a port, the ports are a complete list of what the system needs and offers, and swapping what serves
 one, or adding a caller, is an edit at the port's far side and in assembly, nowhere else. Each way
@@ -529,12 +529,14 @@ The first sentence's last clause is the property's exception, and the line is be
 substitution. Observation reaches outside the process, a logger to its transport, a tracer to its
 exporter, and a use case behaves the same with none behind it. Handed through every factory, it adds
 a parameter to every signature for nothing the system's behavior depends on; and a library's own
-tracing, the 3PL SDK's inside its adapter, takes no parameter at all. Its libraries keep a global
-that assembly fills, which is a courier: the OpenTelemetry API reads the registered provider on
-every span, so production assembly registers an exporter, a test registers an in-memory one or none,
-and the SDK's spans go where assembly chose, with no line of the adapter changed. A logger whose
-transport assembly sets, local-only in a test, passes the same way. A logger built at module load
-with a transport from `process.env` does not: assembly chose nothing, and no test can swap it; nor
+tracing, the 3PL SDK's inside its adapter, takes no parameter at all. So observation reaches code as
+an argument or from a courier, as any client does. Its libraries keep a global that assembly fills,
+which is a courier: the OpenTelemetry API's tracers delegate to the provider assembly registers, so
+production assembly registers an exporter, a test registers an in-memory one or none, and the SDK's
+spans go where assembly chose, with no line of the adapter changed. A logger handed in as an
+argument, or one whose transport assembly sets in a courier, local-only in a test, passes the same
+way. A global logger built at module load does not, whether it writes to stdout or to a transport
+from `process.env`: assembly chose nothing, and no test can swap it; nor
 does `const log = getLogger()` taken at module load, which holds the first instance for the life of
 the process. A `Log` driven port is a choice that passes too. A feature-flag client, whose answer
 changes what the system does, is no observation and goes through a port and an argument like any
@@ -658,7 +660,8 @@ That code runs in every test of the use case, with no fake in front of it. The O
 passes: with no SDK registered its spans are no-ops, and the 3PL client that imports the tracer
 behaves the same in a test. A logger whose transport throws when its collector is unreachable, or a
 module that opens a pool when it loads, does not: the use case cannot run with nothing outside,
-and the third sentence refuses it. The domain, a shared kernel and pure code reach nothing
+and the third sentence refuses it. Nor does a logger courier that throws while unfilled: it needs a
+default that reaches nothing, as the OpenTelemetry API's no-op provider does. The domain, a shared kernel and pure code reach nothing
 outside by definition (glossary: Pure) and pass without a word.
 
 Driving adapters are no use case. A test of a use case enters through its driving port, and neither
