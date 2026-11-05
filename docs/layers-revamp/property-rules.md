@@ -953,11 +953,11 @@ succeed. A change it makes outside that transaction, and a call after the commit
 system that makes it an idempotency key, the same on every attempt at the change, whichever use case
 makes it: the id of what the change is about, one derived from the record the transaction committed,
 or the message's id or the call's idempotency key where it alone asks for the change; by that key
-that system answers a repeat. Where neither an idempotency key nor its records tell a repeat, what
-the repeat does MUST be what a business rule of its system allows. Where no idempotency key reaches
-the system that makes a change outside, and the change made twice ends otherwise than made once,
-what follows from the repeat MUST be what a business rule of its system allows: the repeat
-prevented, corrected afterwards, or accepted.
+that system answers a repeat. Where neither the message's id, an idempotency key nor its records
+tell a repeat, what the repeat does MUST be what a business rule of its system allows. Where no
+idempotency key reaches the system that makes a change outside, and the change made twice ends
+otherwise than made once, what follows from the repeat MUST be what a business rule of its system
+allows: the repeat prevented, corrected afterwards, or accepted.
 *Why:* The stock reserved twice. A message arrives more than once (F5): the relay hands one over
 again after a stop, the bus delivers again a message whose handler stopped after its use case
 committed, Stripe resends an event for days and at times twice at once, a poll returns items the
@@ -1546,9 +1546,10 @@ change a new version.
 
 *Scope:* a use case needs to know something another system holds, or needs another system to act.
 *Statement:* A use case not called for a message MUST NOT depend on another system answering while
-it runs, unless a business rule of its system, or of a caller waiting synchronously for its
-response, needs that system's answer now, to a read or to an act, for what the use case answers or
-decides before it returns. What else it needs another system to do it MUST ask for by a message.
+it runs, unless a business rule of its system, or of a caller that waits for its answer, on the open
+request or by polling for it, needs that system's answer now, to a read or to an act, for what the
+use case answers or decides before it returns. What else it needs another system to do it MUST ask
+for by a message.
 *Why:* A use case that depends on another system answering is down whenever that system is, and slow
 whenever it is: checkout that asks billing for the customer's dunning stage takes no orders while
 billing deploys, and a use case that depends on three systems is up only while all three are. The
@@ -1599,10 +1600,10 @@ the other system is back is P17's.
 Reading another system only through its open host service or its published events is P11's. A use
 case may call another system after its transaction commits; P8 rules that such a call is safe, P9
 that its repeat changes nothing, and this rule when it is made: where a business rule needs the
-answer now. A use case a caller waits on synchronously answers to that caller's rule too: payment,
-called by checkout for the `client_secret`, opens the intent at Stripe while checkout's caller
-waits, and the rule it answers to is checkout's. A PaymentIntent nobody needs at once, for an
-invoice mailed tomorrow, is asked for by a message.
+answer now. A use case a caller waits on, on the request or by polling, answers to that caller's
+rule too: payment, called by checkout for the `client_secret`, opens the intent at Stripe while
+checkout's caller waits, and the rule it answers to is checkout's. A PaymentIntent nobody needs at
+once, for an invoice mailed tomorrow, is asked for by a message.
 
 The rule governs the use case. A driving adapter that depends on another system answering before it
 calls the use case holds the way in the same way; what a driving adapter may reach is P5's, and P5
@@ -1720,8 +1721,8 @@ P11's read past the published language, and this Statement refuses it without th
 orchestration, a tentative operation included, from the first business process step it takes in it
 until its part ends.
 *Statement:* A business rule of that system MUST decide how its part ends from each state it can
-stand in, on whatever another system can send it there and on none coming, by completing the
-business process, by a business process step that undoes an earlier one, asked of the system that
+stand in, on whatever another system can send it there and on none coming, by completing its part,
+by a business process step that undoes an earlier one, asked of the system that
 took it, or by accepting the state as it stands. Where its part waits on another system, it MUST
 hold the moment it stops waiting in an aggregate of its own, if:
 - it holds something until the answer comes, a tentative operation it took or asked for
@@ -1730,7 +1731,8 @@ hold the moment it stops waiting in an aggregate of its own, if:
 
 A status that only shows how far another system has got, with nothing of this system's hanging on
 it, is no wait. A refusal of a business process step MUST be committed as its outcome and reach the
-system that decided it, and a failure that neither gave nor refused MUST NOT be committed as one.
+system that decided the business process step, and a failure that neither gave nor refused MUST NOT
+be committed as one.
 *Why:* Each system commits its own part (P16), so the parts diverge. Another system says yes and
 then fails, stops answering, refuses, or answers after this one has moved on. Two harms follow,
 and both are found by a customer. Work that never ends: the tea shop's order waits as "payment
