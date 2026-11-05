@@ -1547,7 +1547,7 @@ change a new version.
 *Scope:* a use case needs to know something another system holds, or needs another system to act.
 *Statement:* A use case not called for a message MUST NOT depend on another system answering while
 it runs, unless a business rule of its system, or of a caller that waits for its answer, on the open
-request or by polling for it, needs that system's answer now, to a read or to an act, for what the
+call or by polling for it, needs that system's answer now, to a read or to an act, for what the
 use case answers or decides before it returns. What else it needs another system to do it MUST ask
 for by a message.
 *Why:* A use case that depends on another system answering is down whenever that system is, and slow
@@ -1600,7 +1600,7 @@ the other system is back is P17's.
 Reading another system only through its open host service or its published events is P11's. A use
 case may call another system after its transaction commits; P8 rules that such a call is safe, P9
 that its repeat changes nothing, and this rule when it is made: where a business rule needs the
-answer now. A use case a caller waits on, on the request or by polling, answers to that caller's
+answer now. A use case a caller waits on, on the open call or by polling, answers to that caller's
 rule too: payment, called by checkout for the `client_secret`, opens the intent at Stripe while
 checkout's caller waits, and the rule it answers to is checkout's. A PaymentIntent nobody needs at
 once, for an invoice mailed tomorrow, is asked for by a message.
