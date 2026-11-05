@@ -451,7 +451,8 @@ and an adapter or an outbox reader only as such a port or as the outside it adap
 through observation. Anything outside a system MUST reach into it only through its offer or by a
 driving adapter's way in. A port's implementation, a client of the outside, a configuration value or
 observation MUST reach code of a system as an argument chosen by the process's assembly, or from a
-courier that only assembly fills and that a driving adapter, or observation, reads each time it runs.
+courier that only assembly fills, that reaches nothing until it does, and that a driving adapter, or
+observation, reads each time it runs.
 *Why:* An agent editing one file sees that file. Where every way out and every way in of a system is
 a port, the ports are a complete list of what the system needs and offers, and swapping what serves
 one, or adding a caller, is an edit at the port's far side and in assembly, nowhere else. Each way
