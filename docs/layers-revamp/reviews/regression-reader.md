@@ -1,106 +1,97 @@
 # Regression reader
 
-One subagent, run after a change to `glossary.md`, `the-world.md` or `general-rules.md` lands,
-before the next step. It answers one question: against the last review's cooperative findings,
-did this change resolve, leave or break anything. It discovers nothing; the Implementer and the
-Fresh repo readers do that, once per spec (README, Testing). Tiers:
+One subagent, run after each change round to `glossary.md`, `the-world.md` or `property-rules.md`,
+before the next round. Fast, where a Fresh draft is slow: it proves the round closed what it
+targeted and broke nothing, anywhere in the docs, not only in the entries the round touched. It
+discovers nothing new; the Fresh drafts do that, once per review (`reviews/NN/`).
 
-1. `node docs/layers-revamp/affected.mjs <base> <head>`: the affected set, mechanical. Stored as
-   `reviews/NN/regression/${ISSUE}-affected.md`.
-2. This reader, over the affected set. Stored as `reviews/NN/regression/${ISSUE}.md`.
-3. The regular readers, once per spec, as `reviews/NN+1/`.
+Broken means one of:
+- a build that complied now breaches, or one that breached now complies;
+- a property of the world the rules delivered that they no longer deliver: a build that now
+  complies and violates it (a loosened rule);
+- two rules or a rule and the glossary that now contradict, or a term a binding text uses that
+  lost its meaning;
+- the distilled output itself: a field, heading or rule dropped, or undistilled text leaked in.
 
 ## Setup, in the requester's session
 
-Placeholders: `${ROOT}` the absolute path of `docs/layers-revamp`; `${ISSUE}` the issue file's
-basename without `.md`, `20-glossary-sweep`; `${NN}` the last review, the highest
-`reviews/NN/`; `${BASE}`, `${HEAD}` shas.
+Placeholders: `${ROOT}` the absolute path of `docs/layers-revamp`; `${NAME}` the round's topic,
+`p13-kernel-crossing`; `${NN}` the last review, the highest `reviews/NN/`; `${BASE}` the head of
+the previous regression file (its first line), `${HEAD}` the round's commit.
 
-1. Tree clean.
-2. `${HEAD}`: the commit that closed the issue,
-   `git log --format=%h -S'**Status:** closed' -- ${ROOT}/issues/${ISSUE}.md`; one sha. Not
-   necessarily the current HEAD.
-3. `${BASE}`: the last state judged. The `Head` sha in the newest file of
-   `${ROOT}/reviews/${NN}/regression/` that is not an `-affected.md`; none yet, the sha
-   `reviews/${NN}/SUMMARY.md` cites as the state it read. Where `${BASE}` is not an ancestor of
-   `${HEAD}`'s parent, say so and use `${HEAD}^`.
-4. `node ${ROOT}/affected.mjs ${BASE} ${HEAD} > ${ROOT}/reviews/${NN}/regression/${ISSUE}-affected.md`.
-5. The reader, below. It writes `${ROOT}/reviews/${NN}/regression/${ISSUE}.md`, first line
-   `Base ${BASE}, head ${HEAD}.`; the next run reads it in step 3.
-6. Commit the two files: `docs(layers-revamp): regression, issue <N>`.
+1. The round committed; tree clean.
+2. `node ${ROOT}/affected.mjs ${BASE} ${HEAD} > ${ROOT}/reviews/${NN}/regression/${NAME}-affected.md`.
+3. `${ROOT}/distill-properties.mjs` run at `${HEAD}` (a worktree) into
+   `${ROOT}/reviews/${NN}/regression/${NAME}-distilled.md`.
+4. The reader, below; Opus, effort high, in the background. The requester goes on meanwhile.
+5. Commit the three files and the report: `docs(layers-revamp): regression, ${NAME}`.
 
 ## Prompt
 
-Fill the placeholders. Absolute paths; the agent does not `cd`. Opus, effort high.
+Fill the placeholders. `${FINDINGS}` lists the ids the round targets and where their details are.
+Name no intent beyond that and ask no leading question: the reader works out from the diff what
+the round does.
 
 ```
-You check whether a change to a set of rules resolved known findings, and whether it broke
-anything that held. You discover nothing new: a problem the change did not cause is not yours
-to report.
+You check whether a change to a set of rules closed the findings it targets, and whether it broke
+anything anywhere in the rules. You discover nothing new: a gap the change did not cause is not
+yours to report.
+
+ROOT = ${ROOT}. Absolute paths; do not cd.
 
 Read whole, in this order:
-1. ${ROOT}/reviews/${NN}/distilled.md — the rules as the last review read them.
-2. The diff: run `git -C ${ROOT}/../.. diff ${BASE} ${HEAD} -- docs/layers-revamp/glossary.md
-   docs/layers-revamp/the-world.md docs/layers-revamp/general-rules.md`.
-3. ${ROOT}/reviews/${NN}/regression/${ISSUE}-affected.md — the affected set.
-4. ${ROOT}/reviews/${NN}/checklist.md — the findings, one id each.
-5. ${ROOT}/issues/${ISSUE}.md — what the change meant to do (Decision).
-6. The previous builds, for the systems the change touches:
-   ${ROOT}/reviews/${NN}/raw-implementer.md, section "How the fixture is built";
-   ${ROOT}/reviews/${NN}/dist-implementer.md, the same section.
-7. Every example file the affected set names, under ${ROOT}/examples/.
-8. ${ROOT}/domain.md, for the fixture's facts.
+1. ${ROOT}/reviews/${NN}/regression/${NAME}-distilled.md: the rules at head, whole.
+2. The diff: `git -C ${ROOT}/../.. diff --word-diff ${BASE} ${HEAD} -- docs/layers-revamp/glossary.md
+   docs/layers-revamp/the-world.md docs/layers-revamp/property-rules.md`.
+3. ${ROOT}/reviews/${NN}/regression/${NAME}-affected.md: where the changed text and terms occur.
+   Mechanical: a rule can be affected without sharing a word.
+4. The targeted findings: ${FINDINGS}.
+5. The builds ${ROOT}/reviews/${NN}/dist-fresh-a.md and ${ROOT}/reviews/${NN}/dist-fresh-b.md, whole.
+6. ${ROOT}/reviews/${NN}/brief.md, for facts.
 
-Judge from Scope and Statement of the rules as they now stand (the diff applied to the
-distilled), with the glossary as it now stands. Why, Relies on and Provenance bind nobody.
-Read as a well-meaning implementer who tries to build what makes sense. A split is two readings
-such an implementer could plausibly build either way; a reading that needs ignoring what the rule
-plainly asks for, or what the code could plainly see, is not a split and not a finding.
+Judge from Heading, Scope and Statement as they now stand, with the glossary and the world's
+headings and Except. Why, Relies on and Provenance bind nobody. Read as a well-meaning implementer
+who tries to build what makes sense. A split is two readings such an implementer could plausibly
+build either way; a reading that needs ignoring what the rule plainly asks for, or what the code
+could plainly see, is not a split.
 
-Write ${ROOT}/reviews/${NN}/regression/${ISSUE}.md. First line: `Base ${BASE}, head ${HEAD}.`
+Broken means: a build that complied now breaches, or that breached now complies; a property of
+the world the rules delivered that a complying build can now violate; two binding texts that now
+contradict; a term a binding text uses that lost its meaning; the distilled output damaged.
 
-## Checklist
-One line per checklist id, every id, in order: `- R${NN}-k: resolved | unchanged | newly broken |
-out of scope — <one sentence why, naming the rule or term>`. "Out of scope" means the change
-touched nothing the item hangs on. "Resolved" means the code or situation the item names now
-satisfies the rules as written, or the rule no longer holds for it; say which.
+Write ${ROOT}/reviews/${NN}/regression/${NAME}.md. First line `Base ${BASE}, head ${HEAD}.`, then
+`Changed: ...`, one line, in your words.
 
-## Examples in the affected set
-One line per file: `- <file>: holds | breach | scope fails — <rule, one sentence>`. An ok file
-is judged against every rule, not the ones it lists. A breach file that now reads as ok is a
-loosened rule, or your misreading; say which you believe and why. If more than two breach files
-flip, stop and report that your judgement may have drifted.
+## Targeted findings
+Per id: resolved | unchanged | newly split, one sentence naming the rule or term.
 
-## Previous builds
-Per changed rule or term, what in the two builds' code for the touched systems now breaches
-or now complies that did not before. Cite the system and the snippet's heading.
+## Every rule
+One line per rule P1–P19, per world property, per glossary entry: `unaffected` or
+`affected: <why, one sentence>; holds | broken`. For each affected, say what a build could do
+before and after.
+
+## Builds
+Fresh A, Fresh B: what now breaches or complies that did not before, citing the section.
 
 ## Newly broken
-Everything marked newly broken above, each with the smallest code that shows it, as an example
-file body (front matter `breaches`, `satisfies`, `situation`, `finding: regression`). Nothing
-else: a gap you noticed that the change did not cause goes in one line under "Noticed", at most
-five lines, no example.
+Each broken item with the smallest code that shows it, as an example body (front matter
+`breaches`, `satisfies`, `situation`, `finding: regression`). "none" if none.
 
 ## Noticed
-See above.
+At most four lines: gaps the change did not cause.
 
-Be terse. Cite rule ids and glossary terms as spelled. Do not propose rewordings.
+Terse. Cite rule ids and glossary terms as spelled. Do not propose rewordings.
 ```
 
-## Fresh session
+## Calibration
 
-> Run the regression reader per `docs/layers-revamp/reviews/regression-reader.md` for issue <N>.
-> Setup, then the reader; show me its Checklist section and stop before committing.
-
-The session reads the README first (Working here, 1), then this file. It derives the shas; the
-requester names only the issue.
+Now and then the requester runs the reader on a canary: a commit, on no branch, that breaks
+something known, described to the reader like any round. A reader that reports the canary clean
+is too friendly; the prompt is fixed before the next real round.
 
 ## After it runs
 
-- `newly broken` items are fixed before the step is checked, or opened in the next issue by
-  name; neither silently.
-- `resolved` items need no edit anywhere: the checklist keeps the line, the regression file is
-  the record.
-- A glossary or world change also gets two Fresh repo drafts over the regenerated distilled
-  glossary and world (README, Peer review), since a term's second reading shows in a draft, not
-  in a re-judged example. A rules-tier change does not.
+- Newly broken items are fixed in the next round, or named in the next review; neither silently.
+- Resolved items need no edit: the regression file is the record.
+- The Fresh drafts run again before the next review, over the rules as they then stand, not after
+  every round.
