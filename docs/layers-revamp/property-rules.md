@@ -710,8 +710,8 @@ and a driving adapter is no use case
 
 *Scope:* a caller reaches a goal through a system, and reaching it writes the system's records.
 *Statement:* A use case MUST save at most one aggregate, or several only where a business rule ties
-them, in one transaction that its service opens, that carries every write the use case makes, and
-that its service commits once after the last write. The same transaction MUST carry the messages the
+them, in one transaction that its service opens, that carries every write the use case makes, and that its service commits once after the last write. Each driven port that writes MUST take that
+transaction as an argument. The same transaction MUST carry the messages the
 use case writes to the outbox, and what else its goal
 needs MUST be asked for by such a message, or by the call after the commit that P8 allows. Where a
 write in it fails, the transaction MUST roll back whole.
@@ -789,9 +789,8 @@ transaction, since a transaction is one store's (glossary: Store): if the goal n
 records belong in one store or the goal is cut again; if it does not, a message asks for it, and
 P8 delivers that the message is neither premature nor lost. That the outbox's message commits
 with the change it tells of is P8's too; here the outbox write is one write among the others.
-Whether the transaction travels as an argument or as an ambient value, and through which port the
-service opens it, matter for other reasons, P16's and P5's; this rule needs only that every write
-is carried by it.
+The transaction travels as an argument of each port that writes, so a write left out of it is a type
+error and shows in every signature an edit touches; through which port the service opens it is P5's.
 *Provenance:* The service holding the transaction follows Fowler (Service Layer: "controlling
 transactions"), Evans p. 111 ("Leave transaction control to the client"; the repository "will
 ordinarily not commit anything"), Khononov p. 86 n. 7 and p. 122–123, Vernon EAD I p. 3 and MS (the
@@ -1650,8 +1649,7 @@ case's, and the use case called for a message left out, are this document's.
 *Scope:* a transaction a system opens, and each call between two systems, in either direction,
 in-process or not.
 *Statement:* A transaction MUST read and write only records owned by the system that opened it.
-It MUST travel only as an argument, never as an ambient value, and a call into another system,
-through a driving port or an external system's API, MUST NOT carry it. A driving port MUST NOT
+A call into another system, through a driving port or an external system's API, MUST NOT carry it. A driving port MUST NOT
 take a transaction, nor anything else that reaches a store, whatever type it is declared as.
 *Why:* A transaction two systems share commits only where both systems' business rules and code let
 it, so neither changes alone. Shop's rollback undoes what billing decided inside it; billing decides
@@ -1669,12 +1667,11 @@ billing's repository adapter writing billing's records in shop's transaction, an
 writing shop's records in a transaction Payload opened, both put two owners' records into one
 commit. Replicas, the outbox and the record of handled messages are the keeper's own and stay in.
 
-The second and third sentences are how a transaction gets across, and both ends are shut. A
-transaction kept ambient, in `AsyncLocalStorage`, is "accessible to any asynchronous operations
+A transaction kept ambient, in `AsyncLocalStorage`, is "accessible to any asynchronous operations
 created within the callback": shop's checkout calls billing's open host service in-process, and
 billing's repository adapters find shop's client and read the uncommitted order, with no signature
-saying so. Handed only as an argument, it is visible in every signature it crosses and stops where a
-call into another system takes none. On the callee's side, a driving port is the way in (glossary:
+saying so; the first sentence refuses it, whoever's code reads it. The second and third sentences
+shut both ends of a call. On the callee's side, a driving port is the way in (glossary:
 Port), so a port that takes no transaction lets none in; the clause is on the declaration so that
 the compiler holds it, and on "anything else that reaches a store" because a Drizzle transaction is
 assignable to the database type a port asks for. On the caller's side, an external system declares
