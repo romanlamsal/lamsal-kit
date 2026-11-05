@@ -1329,10 +1329,10 @@ module, adapter, message, shared kernel
 service, handles its events or sends it commands.
 *Statement:* Code of another system MUST import of a system only its offer, and of that only what is
 typed by its published language, a shared kernel or pure code of no system. What crosses between two
-systems, by a call or in a message, MUST be of the upstream system's published language. The modules
-that declare a published language MUST reach nothing of their system outside it but a shared kernel
-that each of its downstream systems shares, nor be generated from the rest of it, and MAY state in
-their own terms what a business rule of the domain also states.
+systems, by a call or in a message, MUST be of the upstream system's published language, or of a
+shared kernel both share. The modules that declare a published language MUST reach nothing of their
+system outside it, nor be generated from the rest of it, and MAY state in their own terms what a
+business rule of the domain also states.
 *Why:* A downstream system breaks at a refactoring of its upstream's model wherever its code, or
 what it receives, names that model. There are three ways it comes to: the downstream imports the
 model, the upstream hands the model across, or the contract is the model under another name. The
@@ -1388,33 +1388,38 @@ driving adapter that restates the domain's schema beside it is a second statemen
 rule, which P2 delivers against.
 
 What the Statement leaves alone, and why. A shared kernel is part of each sharing system's domain
-model, and a change to it is a change to each by definition (glossary: Shared kernel); a published
-message may carry its `Money`, and that coupling is chosen together. A conformist takes its
-upstream's published language into its own domain; its downstream reliance is still on the
-upstream's published language, never on the upstream's model, so the upstream's model moves freely,
-and a change to that published language reaches the conformist by its own choice (P12). Assembly and
-tooling are no system: assembly reaches a system through its builders, and tooling reaches past the
-offer at its own risk. The system's own driving adapters are the system's code wherever a framework
-wants the file (glossary: System), and its own browser code rendering a form from the domain's
-schema is the system's too: neither is another system. What another system reads of the records this
-system owns is P11's: P11 delivers this. What loads along with the offer, a store client in a
-browser bundle, a fake in a production process, changes no downstream code when the model moves, and
-is not ruled here.
+model, and a change to it is a change to each by definition (glossary: Shared kernel); between its
+sharers, what crosses may be of it instead of a published language, and that coupling is chosen
+together. A published language carries none of it: it is open to every downstream, and one that
+shares no kernel would receive a part of the host's model. A conformist takes its upstream's
+published language into its own domain; its downstream reliance is still on the upstream's published
+language, never on the upstream's model, so the upstream's model moves freely, and a change to that
+published language reaches the conformist by its own choice (P12). Assembly and tooling are no
+system: assembly reaches a system through its builders, and tooling reaches past the offer at its
+own risk. The system's own driving adapters are the system's code wherever a framework wants the
+file (glossary: System), and its own browser code rendering a form from the domain's schema is the
+system's too: neither is another system. What another system reads of the records this system owns
+is P11's: P11 delivers this. What loads along with the offer, a store client in a browser bundle, a
+fake in a production process, changes no downstream code when the model moves, and is not ruled
+here.
 *Provenance:* The open host service holding still while the model moves follows Khononov p. 55 ("the
 freedom to evolve its implementation without affecting the downstream contexts"; the supplier
 decouples the implementation model from the public interface) and p. 41 (each bounded context
 "implemented, evolved, and versioned independently"), with intrusive coupling (coupling.dev,
 Integration strength). The published language apart from the model follows Evans p. 278 ("do not
-equate the interchange language and the model of the host"), p. 264 (a model used as the
-interchange "essentially becomes frozen"), Reference p. 36, Khononov p. 140 ("a common mistake to
-design and expose a published language for the model's objects"), p. 229 and p. 244, and MS (domain
-and integration events: "their implementation must be different"). The command as the receiver's
-follows NServiceBus (a command "Has one logical owner") and Khononov p. 235. The contract's own
-constraint follows Evans p. 278 and MS (two-step validation). The offer as the only import, its
-linter, the private message, and the MAY against a business rule stated once are this document's.
-Departs: Khononov p. 207 makes the open host service conditional when retrofitting; Evans p. 263 has
-it pay off only with many integrations, where this rule asks it of every downstream; MS advises
-against a shared library of integration events, where the offer exports the published language.
+equate the interchange language and the model of the host"), p. 264 (a model used as the interchange
+"essentially becomes frozen"), Reference p. 36, Khononov p. 140 ("a common mistake to design and
+expose a published language for the model's objects"), p. 229 and p. 244, and MS (domain and
+integration events: "their implementation must be different"). The command as the receiver's follows
+NServiceBus (a command "Has one logical owner") and Khononov p. 235. The contract's own constraint
+follows Evans p. 278 and MS (two-step validation). The shared kernel as its sharers' contract
+follows Khononov p. 51 ("integration contracts and data structures that are intended to be passed
+across the bounded contexts' boundaries") and p. 50 (cooperation), and Evans p. 251. The offer as
+the only import, its linter, the private message, and the MAY against a business rule stated once
+are this document's. Departs: Khononov p. 207 makes the open host service conditional when
+retrofitting; Evans p. 263 has it pay off only with many integrations, where this rule asks it of
+every downstream; MS advises against a shared library of integration events, where the offer exports
+the published language.
 *Absorbs:* SYS-1, SYS-2, SYS-9, SYS-13, SYS-16, ASM-11, TX-39
 *Drops:* TX-7, TX-48 — keep the published language readable when it does change; P14 delivers
 this. TX-42 — a message's schema stated once is P14's; its published-language-apart clause is in
