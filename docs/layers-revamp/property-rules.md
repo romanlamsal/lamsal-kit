@@ -936,19 +936,21 @@ TX-3's ruling on who changes another system's data is P11's, only its timing is 
 - Handler: "acknowledge" is used across the rules, defined nowhere; Handler could name it.
 *Terms used:* use case, message, outbox, bus, handler, system, external system
 
-### P9. A repeated delivery or call changes no record of the system it reaches, and succeeds where the first did
+### P9. A repeated delivery or call changes no record of this system, and succeeds where the first did
 
 *Scope:* an acting use case is called for a message, whether the bus delivered it, a hook was called
-with it, or a driving adapter asked another system for it, or is called by a call its caller may
-repeat; or a use case calls another system after its commit (P8).
+with it, or a driving adapter asked another system for it, or is called through a driving adapter
+that a caller outside its process reaches; or a use case calls another system after its commit (P8).
 *Statement:* The use case MUST tell a repeat inside the transaction that commits its writes, by the
 message's id or the call's key claimed there under a key the store refuses twice, or by the records
 it writes there, and finding the first's writes committed MUST commit nothing and succeed. A change
 it makes outside that transaction, and a call after the commit, MUST carry to the system that makes
-it a key the same on every repeat, the message's, the call's or one derived from the committed
-record, by which that system answers a repeat. Where no such key reaches a repeat and the change
-made twice ends otherwise than made once, what follows from the repeat MUST be what a business rule
-of its system allows: the repeat prevented, corrected afterwards, or accepted.
+it a key that names the change, the same on every attempt at it by whichever message or step: the id
+of what the change is about, one derived from the record the transaction committed, or the message's
+or the call's where it alone asks for the change; by that key that system answers a repeat. Where
+neither a key nor its records tell a repeat, or no such key reaches the system that makes a change,
+and the change made twice ends otherwise than made once, what follows from the repeat MUST be what a
+business rule of its system allows: the repeat prevented, corrected afterwards, or accepted.
 *Why:* The stock reserved twice. A message arrives more than once (F5): the relay hands one over
 again after a stop, the bus delivers again a message whose handler stopped after its use case
 committed, Stripe resends an event for days and at times twice at once, a poll returns items the
@@ -992,19 +994,22 @@ A change outside the transaction, a call to another system, a mail, is covered b
 books, the process stops before the commit, nothing is claimed, and the redelivery books again;
 claim first and call after, and a stop between loses the booking. No order of a claim and a call
 closes that gap. The system that makes the change can: handed a key, it answers a repeat with the
-first call's result instead of acting again. The key comes from the message, so it is the same on
-every delivery; a fresh UUID made at the call differs on each attempt and deduplicates nothing. The
-message's id serves, and so does the id of what the change is about, the shipment, the refund. Where
-no key reaches the repeat, the change happens twice: the mail provider takes no key; Stripe keeps
-one for a day, and the message waited longer in a dead-letter queue. That is F9, and whether the
-repeat is acceptable is the business's: a second confirmation mail is accepted; a second parcel is
-not, so the 3PL that takes no key is asked whether a consignment for the shipment exists before one
-is created, the race that remains is accepted, or that 3PL is used for nothing the business refuses
-twice. A reconciliation that finds the second consignment and cancels it corrects the repeat
-afterwards. Which of these follows is a business rule, so it lives in the domain (P2 delivers this):
-a domain function the use case asks what a change that may be a repeat leads to, whose answer may be
-to go ahead. How a codebase writes an acceptance down is the codebase's. A change that ends the same
-made twice, a cache refreshed, a status set to what it already is, needs no rule: its repeat is no
+first call's result instead of acting again. The key names the change, so it is the same on every
+attempt at it; a fresh UUID made at the call differs on each attempt and deduplicates nothing. The
+id of what the change is about serves, the shipment, the refund, and so does the message's id where
+that message alone asks for the change. Where a later step repeats a call another made, it carries
+the key the first carried: payment's step that reopens the intent sends Stripe the key derived from
+the `Payment`, not its own message's id, or Stripe opens a second intent. Where no key reaches the
+repeat, the change happens twice: the mail provider takes no key; Stripe keeps one for a day, and
+the message waited longer in a dead-letter queue. That is F9, and whether the repeat is acceptable
+is the business's: a second confirmation mail is accepted; a second parcel is not, so the 3PL that
+takes no key is asked whether a consignment for the shipment exists before one is created, the race
+that remains is accepted, or that 3PL is used for nothing the business refuses twice. A
+reconciliation that finds the second consignment and cancels it corrects the repeat afterwards.
+Which of these follows is a business rule, so it lives in the domain (P2 delivers this): a domain
+function the use case asks what a change that may be a repeat leads to, whose answer may be to go
+ahead. How a codebase writes an acceptance down is the codebase's. A change that ends the same made
+twice, a cache refreshed, a status set to what it already is, needs no rule: its repeat is no
 change. Telemetry tells of attempts (P8), and two deliveries are two attempts.
 
 A polled item's order is P18's, its unmatched transfer P17's. The key is the same on every delivery
@@ -1016,9 +1021,13 @@ A call repeats too. A caller that stopped or timed out after the call does not k
 through, and repeats it: P8's later step after a commit, a browser that resubmits checkout. The call
 carries a key its caller keeps the same, and the use case it reaches claims it as it would a
 message's id: payment, called again for the same order, finds its `Payment` and answers with the
-intent it first opened. A caller that repeats under a fresh key makes a new request, which no rule
-here tells from a repeat. An answering use case changes nothing, and a repeat of it changes nothing
-either.
+intent it first opened. Where the call carries no key, the records may: the second `register` finds
+the customer with that email, and where what the first committed matches the request, it returns the
+same customer; with another name it is a new request, and refused. Where neither tells, what follows
+is a business rule's: a second empty cart, `setCartLine` called again with no cart, is accepted; a
+second order is not, so checkout takes the cart's id as its key. A caller in the same process knows
+whether its call returned; one outside does not, so the Scope reaches the driving adapters outside
+callers reach. An answering use case changes nothing, and a repeat of it changes nothing either.
 *Provenance:* The repeat follows Khononov p. 147 (the outbox "guarantees delivery of the messages at
 least once"). The claimed id follows Richardson (Idempotent consumer: "a consumer must be
 idempotent", by recording the ids of processed messages), NServiceBus (Outbox: deduplication by

@@ -128,8 +128,10 @@ left, so a stop in between loses nothing.
 events are committed in the same atomic transaction." Helland, Life beyond Distributed
 Transactions: tentative operations.
 
-### P9. A repeated delivery or call changes no record of the system it reaches, and succeeds where the first did
+### P9. A repeated delivery or call changes no record of this system, and succeeds where the first did
 
+*Except:* a repeat that nothing it carries or left tells from a new request, where a business rule
+allows what follows from it.
 *Against:* F5, F9.
 *Why:* The stock reserved twice. Delivery repeats, and so does a call whose caller stopped or timed
 out not knowing whether it went through, so every handling tolerates a second arrival, one
