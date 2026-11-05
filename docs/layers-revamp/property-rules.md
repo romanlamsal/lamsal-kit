@@ -288,25 +288,25 @@ fulfillment's rule stated in shop. A rule decides what a record holds when it is
 it. A rule that decides no record, what an answering use case answers, is of the system whose use
 case it is, and P2 delivers its place. A shared kernel is imported into several domains, and a
 change to it is a change to each (glossary): value types and what computes with them from arguments,
-`Money` and its rounding, change when the value's meaning changes, which every importer shares; a rule about
-a record changes when that record's owner's business changes, which the other importers do not
-share. So the kernel holds none, a record's schema included, since a schema is the rule about a
-record's shape, and offers the values the owners' rules decide by. The common library belongs to no
-system and is written for every system to import (glossary): a business rule there is in no system's
-domain, and a change made for one system's reason reaches all of them; a value several systems share
-goes to a shared kernel they agree on. The envelope the relay and the bus carry is the common
-library's and holds no system's shape, so no business rule. Left to others: a published language
-that states a constraint the domain also states is the contract's own statement, two by design, and
-P2 and P13 deliver whether it may; a replica's record holds what its owner's rules decided, the
-keeper deciding which copy it keeps, never a value the owner did not decide (glossary: Replica).
-Business rules about a record an external system keeps for this system are this system's, in its
-domain; one in the external system's configuration about such a record is a second statement, and
-one about a record the external system owns is the external system's own. A conformist states its
-own rules in its upstream's terms (P1's Except); the upstream's rules about the upstream's records
-stay upstream. Rules that change together and stand apart from the rest, gathered under one owner,
-show where a system splits once the business domain is better known; splitting a system where one
-term comes to mean two things: P19 delivers this. Which records form one aggregate within a system:
-P10 delivers this.
+`Money` and its rounding, change when the value's meaning changes, which every importer shares; a
+rule about a record changes when that record's owner's business changes, which the other importers
+do not share. So the kernel holds none, a record's schema included, since a schema is the rule about
+a record's shape, and offers the value types the owners' rules compute with. The common library
+belongs to no system and is written for every system to import (glossary): a business rule there is
+in no system's domain, and a change made for one system's reason reaches all of them; a value
+several systems share goes to a shared kernel they agree on. The envelope the relay and the bus
+carry is the common library's and holds no system's shape, so no business rule. Left to others: a
+published language that states a constraint the domain also states is the contract's own statement,
+two by design, and P2 and P13 deliver whether it may; a replica's record holds what its owner's
+rules decided, the keeper deciding which copy it keeps, never a value the owner did not decide
+(glossary: Replica). Business rules about a record an external system keeps for this system are this
+system's, in its domain; one in the external system's configuration about such a record is a second
+statement, and one about a record the external system owns is the external system's own. A
+conformist states its own rules in its upstream's terms (P1's Except); the upstream's rules about
+the upstream's records stay upstream. Rules that change together and stand apart from the rest,
+gathered under one owner, show where a system splits once the business domain is better known;
+splitting a system where one term comes to mean two things: P19 delivers this. Which records form
+one aggregate within a system: P10 delivers this.
 *Provenance:* Grouping by bounded context follows Khononov p. 160 (changes "not encapsulated in a
 single bounded context signal ineffective design") and p. 161 (start with wider boundaries). The
 owner's logic alone deciding its data follows Helland 2005 §1.3. The common library follows MS
@@ -548,13 +548,12 @@ and no adapter: they load where no observation is configured.
 
 What this rule does not decide. Which port a driving adapter may call is P4's: a server action
 handed a repository reaches it as a port and passes here, and skipping the service there bypasses
-the business rules for one way in, P4 delivers this. A driven adapter that calls a service has a
-use case inside an adapter, P4 delivers this too. A per-request ambient value, the current user
-for a permission, is no reach of the outside; that a use case responds the same whoever calls it
-is P4's. A driving port that takes a transaction, a transaction made ambient, one call carrying a
-transaction into another system: P16 delivers this. Where in a system a port is declared, the
-service layer rather than the domain, is P1's. A business rule's number read from configuration is
-P2's.
+the business rules for one way in, P4 delivers this. A driven adapter that calls a service has a use
+case inside an adapter, P4 delivers this too. A per-request ambient value, the current user for a
+permission, is no reach of the outside; that a use case responds the same whoever calls it is P4's.
+A driving port that takes a transaction, one call carrying a transaction into another system: P16
+delivers this; a transaction made ambient, P7. Where in a system a port is declared, the service
+layer rather than the domain, is P1's. A business rule's number read from configuration is P2's.
 *Provenance:* Follows Cockburn (Intent: the application "blissfully ignorant" of what lies on the
 other side of its ports; "A port identifies a purposeful conversation"; "code pertaining to the
 inside part should not leak into the outside part"), Garrido §2.3 ("Ports are interfaces that the
@@ -710,11 +709,12 @@ and a driving adapter is no use case
 
 *Scope:* a caller reaches a goal through a system, and reaching it writes the system's records.
 *Statement:* A use case MUST save at most one aggregate, or several only where a business rule ties
-them, in one transaction that its service opens, that carries every write the use case makes, and that its service commits once after the last write. Each driven port that writes MUST take that
-transaction as an argument. The same transaction MUST carry the messages the
-use case writes to the outbox, and what else its goal
-needs MUST be asked for by such a message, or by the call after the commit that P8 allows. Where a
-write in it fails, the transaction MUST roll back whole.
+them, in one transaction that its service opens, that carries every write the use case makes, and
+that its service commits once after the last write. Each driven port that writes MUST be handed that
+transaction as an argument, to its methods or to what builds it inside the use case. The same
+transaction MUST carry the messages the use case writes to the outbox, and what else its goal needs
+MUST be asked for by such a message, or by the call after the commit that P8 allows. Where a write
+in it fails, the transaction MUST roll back whole.
 *Why:* A process can stop between any two instructions (F4), and a write can fail where the one
 before it succeeded. Between two writes that each commit on their own, the stop leaves records no
 business rule allows: a booking saved and the message asking for its invoice not, so no invoice ever
@@ -782,15 +782,15 @@ of a message id already handled succeeds without writing (P9 delivers this); a s
 retry cures is failed and parked rather than committed as an outcome (P17 delivers this).
 
 Exceptions, and why they are none. An answering use case writes nothing and is outside the Scope.
-Another system's records are not this system's: where two systems keep their records in one
-store, the call into the other system takes no transaction, and P16 delivers this. A record of
-this system kept in a second store, or mirrored into an external system, cannot be in this
-transaction, since a transaction is one store's (glossary: Store): if the goal needs it, the
-records belong in one store or the goal is cut again; if it does not, a message asks for it, and
-P8 delivers that the message is neither premature nor lost. That the outbox's message commits
-with the change it tells of is P8's too; here the outbox write is one write among the others.
-The transaction travels as an argument of each port that writes, so a write left out of it is a type
-error and shows in every signature an edit touches; through which port the service opens it is P5's.
+Another system's records are not this system's: where two systems keep their records in one store,
+the call into the other system takes no transaction, and P16 delivers this. A record of this system
+kept in a second store, or mirrored into an external system, cannot be in this transaction, since a
+transaction is one store's (glossary: Store): if the goal needs it, the records belong in one store
+or the goal is cut again; if it does not, a message asks for it, and P8 delivers that the message is
+neither premature nor lost. That the outbox's message commits with the change it tells of is P8's
+too; here the outbox write is one write among the others. The transaction travels as an argument to
+each port that writes, or to what builds it, so a write left out of it is a type error and shows in
+every signature an edit touches; through which port the service opens it is P5's.
 *Provenance:* The service holding the transaction follows Fowler (Service Layer: "controlling
 transactions"), Evans p. 111 ("Leave transaction control to the client"; the repository "will
 ordinarily not commit anything"), Khononov p. 86 n. 7 and p. 122–123, Vernon EAD I p. 3 and MS (the
@@ -824,13 +824,14 @@ is delivered, or another system tells this system of a change before committing 
 *Statement:* A message a use case writes MUST go into the outbox in its transaction, and a change it
 decides that the transaction does not commit MUST leave it only as such a message asking for the
 change, or as a call to another system after the commit, made from a record the transaction
-committed, from which a later use case repeats the call or ends the change. The outbox MUST keep each
-message until the bus holds it, and the bus through any stop of a process until a handler
+committed, from which a later use case repeats the call or ends the change. The outbox MUST keep
+each message until the bus holds it, and the bus through any stop of a process until a handler
 acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
-writes committed. A use case called for such a message MUST act on the change, deciding nothing again,
-and a change another system tells of before committing it MUST change nothing in this system beyond
-a provisional record of it until it is confirmed. An external system this codebase configures, whose
-transaction can write a message to an outbox, MUST tell of its change by such a message.
+writes committed. A use case called for such a message MUST act on the change, deciding nothing
+again, and a change another system tells of before committing it MUST change nothing in this system
+beyond a provisional record of it until it is confirmed. An external system this codebase
+configures, whose transaction can write a message to an outbox, MUST tell of its change by such a
+message.
 *Why:* A use case's writes are a fact once its transaction commits, and not before; a process can
 stop between any two instructions (F4). What leaves the transaction is not bound to that commit: a
 mail sent, a parcel booked with the 3PL, a command handed to another system, an event published, a
@@ -1648,9 +1649,10 @@ case's, and the use case called for a message left out, are this document's.
 
 *Scope:* a transaction a system opens, and each call between two systems, in either direction,
 in-process or not.
-*Statement:* A transaction MUST read and write only records owned by the system that opened it.
-A call into another system, through a driving port or an external system's API, MUST NOT carry it. A driving port MUST NOT
-take a transaction, nor anything else that reaches a store, whatever type it is declared as.
+*Statement:* A transaction MUST read and write only records owned by the system that opened it. A
+call into another system, through a driving port or an external system's API, MUST NOT carry it. A
+driving port MUST NOT take a transaction, nor anything else that reaches a store, whatever type it
+is declared as.
 *Why:* A transaction two systems share commits only where both systems' business rules and code let
 it, so neither changes alone. Shop's rollback undoes what billing decided inside it; billing decides
 what to invoice by an order shop has not committed and may roll back a line later; the upstream's
