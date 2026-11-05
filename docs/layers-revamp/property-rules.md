@@ -263,8 +263,8 @@ is no business rule, P14's
 *Scope:* a business rule is stated anywhere in this codebase, a shared kernel and the common
 library included.
 *Statement:* A business rule that decides what a record holds MUST be stated in the domain of the
-record's owner. A shared kernel MUST hold no such rule and no record's schema, only values and what
-computes values from arguments.
+record's owner. A shared kernel MUST hold no such rule and no record's schema, only value types and
+what computes with them from arguments.
 *Why:* The harm is a business change that has to be made in code that does not know it belongs to
 it, or a change made for one system's reason that lands in another. Two routes lead there. One is a
 rule stated in the wrong system: fulfillment's reservation holds stock for thirty minutes, and shop
@@ -287,8 +287,8 @@ fulfillment's rule stated in shop. A rule decides what a record holds when it is
 `Money`'s rounding is about any amount and reaches a record only through the owner's rule that calls
 it. A rule that decides no record, what an answering use case answers, is of the system whose use
 case it is, and P2 delivers its place. A shared kernel is imported into several domains, and a
-change to it is a change to each (glossary): values and what computes them from arguments, `Money`
-and its rounding, change when the value's meaning changes, which every importer shares; a rule about
+change to it is a change to each (glossary): value types and what computes with them from arguments,
+`Money` and its rounding, change when the value's meaning changes, which every importer shares; a rule about
 a record changes when that record's owner's business changes, which the other importers do not
 share. So the kernel holds none, a record's schema included, since a schema is the rule about a
 record's shape, and offers the values the owners' rules decide by. The common library belongs to no
@@ -828,7 +828,7 @@ change, or as a call to another system after the commit, made from a record the 
 committed, from which a later use case repeats the call or ends the change. The outbox MUST keep each
 message until the bus holds it, and the bus through any stop of a process until a handler
 acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
-writes committed. A use case called for such a message MUST make the change, deciding nothing again,
+writes committed. A use case called for such a message MUST act on the change, deciding nothing again,
 and a change another system tells of before committing it MUST change nothing in this system beyond
 a provisional record of it until it is confirmed. An external system this codebase configures, whose
 transaction can write a message to an outbox, MUST tell of its change by such a message.
@@ -1371,8 +1371,7 @@ given in the same terms. A system builder is in the offer for assembly. Assembly
 a downstream that imports a builder holds whatever it returns: a builder that returns shop's
 repositories "for the dashboard" hands the dashboard shop's aggregates, and shop changes its model
 by changing its downstream. The line is drawn on import paths, so a linter holds it and the breach
-shows in the diff. The downstream's own tests are code of the downstream too, and fake the upstream
-through the fake the offer exports.
+shows in the diff.
 
 The second sentence is about what crosses at runtime, which no import shows. A route that serves
 another system and serializes the aggregate it got from the domain sends the model over the wire:
