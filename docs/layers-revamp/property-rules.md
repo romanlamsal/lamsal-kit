@@ -1330,9 +1330,9 @@ service, handles its events or sends it commands.
 *Statement:* Code of another system MUST import of a system only its offer, and of that only what is
 typed by its published language, a shared kernel or pure code of no system. What crosses between two
 systems, by a call or in a message, MUST be of the upstream system's published language. The modules
-that declare a published language MUST reach nothing of their system outside it but a shared kernel,
-nor be generated from the rest of it, and MAY state in their own terms what a business rule of the
-domain also states.
+that declare a published language MUST reach nothing of their system outside it but a shared kernel
+that each of its downstream systems shares, nor be generated from the rest of it, and MAY state in
+their own terms what a business rule of the domain also states.
 *Why:* A downstream system breaks at a refactoring of its upstream's model wherever its code, or
 what it receives, names that model. There are three ways it comes to: the downstream imports the
 model, the upstream hands the model across, or the contract is the model under another name. The
