@@ -732,10 +732,11 @@ needs follows by message and lands with the aggregates of the use case that hand
 looks like a tie and is none. Where the caller has to see one change at once, nothing ties the rest:
 the use case saves that aggregate and the rest follows; the traveller sees the seat held, and the
 invoice follows from its message. A write the goal does not need, a statistic, goes the same way.
-One case looks like none and is a tie. Where one aggregate must not commit before another agrees, a
-rule ties them, and within the system they are saved together; where the other is another system's,
-no transaction reaches it (P16), and the first asks it for a tentative operation and later confirms
-or cancels it: P8 and P15 deliver how it is asked, P17 that the waiting ends.
+One case looks like none and is a tie. Where one aggregate must not reach its final state before
+another agrees, a rule ties them, and within the system they are saved together; where the other is
+another system's, no transaction reaches it (P16): the first commits its intent, then asks the other
+for a tentative operation, by a message or by the call after the commit that P8 allows, and later
+confirms or cancels it; P17 delivers that it ends.
 
 Second, who holds the transaction: the service. It is the only code that sees the whole use case
 (glossary: Service, the sequence within its use case), so it alone knows which writes land together.
@@ -790,10 +791,10 @@ ordinarily not commit anything"), Khononov p. 86 n. 7 and p. 122–123, Vernon E
 command handler commits). One aggregate per transaction as the default follows Vernon EAD I p. 4,
 Khononov p. 87 and p. 93, Evans Reference p. 16, Fowler (DDD_Aggregate) and Helland 2007 p. 135. The
 rest by message follows Vernon EAD II p. 9 (each subscriber "in a separate transaction"; whose job
-the consistency is). The tentative operation between systems follows Helland 2007 p. 140. A nested
-call recording no intent follows Helland 2007 p. 138. One acting call per goal and no service
-calling another are this document's; no source rules on them. Departs: Khononov p. 122 and p. 124
-make the service layer optional; MS runs domain-event handlers inside the command handler's
+the consistency is). The tentative operation, between aggregates or systems, follows Helland 2007 p.
+140. A nested call recording no intent follows Helland 2007 p. 138. One acting call per goal and no
+service calling another are this document's; no source rules on them. Departs: Khononov p. 122 and
+p. 124 make the service layer optional; MS runs domain-event handlers inside the command handler's
 transaction, one piece of application code driving another, and its IdentifiedCommand handler
 re-dispatches. Departs, where no business rule ties the aggregates, from Vernon EAD II p. 10, which
 breaks the rule for a batch created at once, and from MS ("valid in many business cases"). Departs,
@@ -816,15 +817,15 @@ write left out reaches its second store is P8's; ASM-9, ambient against argument
 is delivered, or another system tells this system of a change before committing it.
 *Statement:* A message a use case writes MUST go into the outbox in its transaction, and a change it
 decides that the transaction does not commit MUST leave it only as such a message asking for the
-change, or, where its caller needs an external system's answer before the use case returns, as a
-call to that system after the commit, idempotent by a record the transaction committed, from which a
-later step repeats the call or ends the change. The outbox MUST keep each message until the bus
-holds it, and the bus through any stop of a process until a handler acknowledges it, which the
-handler MUST NOT do before the use case it calls has returned with its writes committed. A use case
-called for such a message MUST make the change, deciding nothing again, and a change another system
-tells of before committing it MUST change nothing in this system beyond a provisional record of it
-until it is confirmed. An external system this codebase configures, whose transaction can write a
-message to an outbox, MUST tell of its change by such a message.
+change, or, where its caller needs another system's answer before the use case returns, as a call to
+that system after the commit, idempotent by a record the transaction committed, from which a later
+step repeats the call or ends the change. The outbox MUST keep each message until the bus holds it,
+and the bus through any stop of a process until a handler acknowledges it, which the handler MUST
+NOT do before the use case it calls has returned with its writes committed. A use case called for
+such a message MUST make the change, deciding nothing again, and a change another system tells of
+before committing it MUST change nothing in this system beyond a provisional record of it until it
+is confirmed. An external system this codebase configures, whose transaction can write a message to
+an outbox, MUST tell of its change by such a message.
 *Why:* A use case's writes are a fact once its transaction commits, and not before; a process can
 stop between any two instructions (F4). What leaves the transaction is not bound to that commit: a
 mail sent, a parcel booked with the 3PL, a command handed to another system, an event published, a
@@ -868,14 +869,15 @@ it has made the change already it may ask its records; P9 delivers the means. Wh
 still wanted it may not ask: what happened meanwhile, the order cancelled, is the deciding system's
 to answer by a business rule, and P17 delivers that.
 
-A call after the commit is the exception, where the caller needs the external system's answer before
-the use case returns, which no handler could give in time: booking commits its hold record, then
-asks the airline's API to hold the seat under a key derived from that record's id, and shows the
-traveller the hold now. The committed record is what makes the call safe. A stop before the call or
-after it leaves the record, and a later step repeats the call, which the airline answers as it did
-the first (glossary: Idempotent), or ends the hold by a business rule (P17). The key is one way the
-record makes the call idempotent; another is the airline's hold looked up by the record's id before
-the repeat. Where the external system offers neither, no repeat is safe, the exception does not
+A call after the commit is the exception, where the caller needs another system's answer before the
+use case returns, which no handler could give in time: checkout commits the order, then asks payment
+for the card payment and hands the browser its `client_secret`; booking commits its hold record,
+then asks the airline's API to hold the seat under a key derived from that record's id, and shows
+the traveller the hold now. The committed record is what makes the call safe. A stop before the call
+or after it leaves the record, and a later step repeats the call, which the airline answers as it
+did the first (glossary: Idempotent), or ends the hold by a business rule (P17). The key is one way
+the record makes the call idempotent; another is the airline's hold looked up by the record's id
+before the repeat. Where the other system offers neither, no repeat is safe, the exception does not
 hold, and the call is made at most once and repaired by a reconciliation. Made before the commit or
 beside the transaction, the call stands when the transaction rolls back, with no record that it was
 made, and the first sentence refuses it. An answering call beside the transaction changes nothing,
@@ -1328,9 +1330,9 @@ service, handles its events or sends it commands.
 *Statement:* Code of another system MUST import of a system only its offer, and of that only what is
 typed by its published language, a shared kernel or pure code of no system. What crosses between two
 systems, by a call or in a message, MUST be of the upstream system's published language. The modules
-that declare a published language MUST reach nothing of their system outside it, nor be generated
-from the rest of it, and MAY state in their own terms what a business rule of the domain also
-states.
+that declare a published language MUST reach nothing of their system outside it but a shared kernel,
+nor be generated from the rest of it, and MAY state in their own terms what a business rule of the
+domain also states.
 *Why:* A downstream system breaks at a refactoring of its upstream's model wherever its code, or
 what it receives, names that model. There are three ways it comes to: the downstream imports the
 model, the upstream hands the model across, or the contract is the model under another name. The
@@ -1516,7 +1518,7 @@ change a new version.
 *Scope:* a use case needs to know something another system holds, or needs another system to act.
 *Statement:* A use case not called for a message MUST NOT depend on another system answering while
 it runs, unless a business rule of its system needs that system's current answer. What else it needs
-another system to do it MUST ask for by a message.
+another system to do it MUST ask for by a message, or by the call after the commit that P8 allows.
 *Why:* A use case that depends on another system answering is down whenever that system is, and slow
 whenever it is: checkout that asks billing for the customer's dunning stage takes no orders while
 billing deploys, and a use case that depends on three systems is up only while all three are. The
@@ -1538,8 +1540,9 @@ message carrying it; an argument its caller passes. Each answers while the owner
 be older than the owner's state, and whether a decision may rest on it is a business rule's to say;
 P10 delivers this. What the use case needs another system to do goes as a message, which commits
 with the use case and is handled once the other system is back: shop asks fulfillment to reserve
-stock by a command, and checkout succeeds while fulfillment is down. That the message is written in
-the use case's transaction, and is not lost after, is P8's; P8 delivers this.
+stock by a command, a tentative operation shop cancels when the order is cancelled, and checkout
+succeeds while fulfillment is down. That the message is written in the use case's transaction, and
+is not lost after, is P8's; P8 delivers this.
 
 The exception is where the dependency is the use case's nature: a business rule that needs the other
 system's current answer. The customer pays now, so checkout asks Stripe for a PaymentIntent and
@@ -1709,7 +1712,7 @@ so undoing is asked of that system, which may refuse, and the refusal comes back
 sentence. The late payment is refunded, asked of payment; or the order is reinstated; or the
 business accepts keeping the money and says so. A use case that carries out a change another use
 case decided does not decide whether it is still wanted: that question, and the deadline it hangs
-on, sit with the system holding the pending change (P8 delivers the executor's side).
+on, sit with the system that decided the change (P8 delivers the executor's side).
 
 The second sentence makes the waiting end without the other system. The delivery rules reach no
 message the other system stopped sending, and none a dead-letter queue keeps: nothing in this system

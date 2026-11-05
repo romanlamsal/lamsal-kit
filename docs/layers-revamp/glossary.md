@@ -81,9 +81,9 @@ the outbox readers.
 **Idempotent.** An operation is idempotent when repeating it leaves its system's records as
 performing it once left them, and answers as the first did.
 
-**Tentative operation.** A commitment one aggregate asks of another, in its system or another's, by
-a message, that leaves open its cancellation. The asker holds the right to cancel: releasing it
-confirms, using it cancels; every one eventually confirms or cancels.
+**Tentative operation.** A commitment one aggregate asks of another aggregate or another system, by
+a message or a call, that leaves open its cancellation. The asker holds the right to cancel:
+releasing it confirms, using it cancels; every one eventually confirms or cancels.
 
 **Open host service.** The driving ports a system offers to other systems.
 

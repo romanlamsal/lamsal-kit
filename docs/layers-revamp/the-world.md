@@ -120,10 +120,10 @@ transaction to ensure that a proper response is generated in case of an error."
 ### P8. An uncommitted write is not yet a fact: nothing final follows from it before it commits, and nothing that follows from it is lost after
 
 *Against:* F4.
-*Why:* A message or a mail sent before the commit announces what may never happen; one sent after
-it is lost to a stop in between. Either way someone acts on a world the records contradict. What
-is asked of another system, or of this one, before the commit stays tentative, confirmed only
-after it.
+*Why:* A message or a mail sent before the commit announces what may never happen; one sent after it
+is lost to a stop in between. Either way someone acts on a world the records contradict. Nothing is
+asked of another system before the commit; what is asked after it is asked from what the commit
+left, so a stop in between loses nothing.
 *Provenance:* Khononov, Outbox (p. 145): "Both the updated aggregate's state and the new domain
 events are committed in the same atomic transaction." Helland, Life beyond Distributed
 Transactions: tentative operations.
