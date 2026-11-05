@@ -84,6 +84,9 @@ the outbox readers.
 **Idempotent.** An operation is idempotent when repeating it leaves its system's records as
 performing it once left them, and answers as the first did.
 
+**Idempotency key.** What a call carries so that its receiver can tell a repeat: it names the change
+the call asks for, the same on every attempt at it. A message's id does this for the message.
+
 **Tentative operation.** A commitment one aggregate asks of another aggregate or another system, by
 a message or a call, that leaves open its cancellation. The asker holds the right to cancel:
 releasing it confirms, using it cancels; every one eventually confirms or cancels.
@@ -99,17 +102,23 @@ language, the driving port types of its open host service and their fakes, and i
 builders.
 
 **Reconciliation.** A use case that compares, after the fact, what this system recorded with what
-another system holds, and repairs this system's record, or starts the step that repairs the
-other's.
+another system holds, and repairs this system's record, or starts the business process step that
+repairs the other's.
 
-**Saga.** A sequence of local transactions across systems that either all commit or, when one is
-refused, ends in new ones that undo, in business terms, those already committed.
+**Business process.** A sequence of use cases that together reach what one business case asks, the
+order placed, paid, shipped and invoiced, each committing its own transaction. It may run in one
+system, by private messages, or span several; spanning systems, no transaction holds it whole.
 
-**Choreography.** Work spanning systems where each system reacts to the others' events and decides
-its own next step; no system holds the whole sequence.
+**Business process step.** One use case of a business process, with what it asks of the next.
 
-**Orchestration.** Work spanning systems where one system holds the sequence and tells the others by
-commands which step to take.
+**Saga.** A business process spanning systems whose steps either all commit or, when one is refused,
+end in new ones that undo, in business terms, those already committed.
+
+**Choreography.** A business process spanning systems where each system reacts to the others' events
+and decides its own next step; no system holds the whole sequence.
+
+**Orchestration.** A business process spanning systems where one system holds the sequence and tells
+the others by commands which step to take.
 
 ## Other systems
 

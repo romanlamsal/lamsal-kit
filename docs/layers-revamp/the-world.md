@@ -210,7 +210,7 @@ functioning even if the producer is not available."
 let it, so neither changes alone.
 *Provenance:* Helland, Life beyond Distributed Transactions.
 
-### P17. Work spanning systems ends, and only in a state a business rule allows
+### P17. A business process spanning systems ends, and only in a state a business rule allows
 
 *Against:* F4, F7.
 *Why:* Each system commits its own part (P16), so the outcomes can diverge: another system fails
