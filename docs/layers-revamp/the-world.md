@@ -88,8 +88,7 @@ run-time devices and databases."
 
 ### P5. A system reaches the outside, and is reached from it, only through ports assembly hands it; each port speaks the system's terms
 
-*Except:* the outside reached through code of the common library that a service or an adapter
-calls, where its output changes neither how a use case acts nor what it answers.
+*Except:* observation, where the process's assembly chooses what lies behind it.
 *Against:* F1, F3, F8.
 *Why:* An agent editing one file sees that file, not the architecture. Where everything the
 system needs and offers passes a port, the ports tell all of it, and an edit that reaches past

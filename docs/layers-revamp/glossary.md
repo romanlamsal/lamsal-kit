@@ -17,6 +17,9 @@ module is of the system whose layer or offer it belongs to, wherever the codebas
 **Outside.** Other systems and third parties, the operating system among them, whether they
 drive the system or it drives them.
 
+**Observation.** Code that reaches the outside and changes neither how a use case acts nor what it
+answers: logs, traces, metrics, error reports, profiling.
+
 **Tooling.** Code that runs in no process of the deployed application.
 
 **Probe.** Code a process runs to report on itself rather than on a system.
@@ -174,9 +177,6 @@ are one store when one transaction can carry the writes of both, two stores unti
 **Ambient value.** A value a function reads without receiving it as an argument. Two scopes: per
 process, set once for the process's life; per request, what the current request carries.
 
-**Courier.** How a driving adapter reaches what assembly produced when assembly cannot hand it over
-as an argument.
-
 ## Assembly
 
 **Factory.** A function that takes what an implementation needs and returns the implementation,
@@ -191,11 +191,17 @@ what assembly hands on. A system may have several, and one may return one thing 
 place where port and implementation meet. It calls the system builders and produces what the
 process's driving adapters call into.
 
+**Courier.** How code reaches what assembly produced when assembly cannot hand it over as an
+argument:
+- a driving adapter a framework constructs;
+- observation reading a global its library keeps.
+
 **Configuration value.** A value a process is given when it starts and keeps for its life, which
 no record holds.
 
-**Common library.** A package of this codebase that belongs to no system, written for every
-system to import.
+**Common library.** Code of this codebase that belongs to no system, shared so that systems need not
+each write it. It has no layers and holds no business rule; code of a system that runs it is judged
+as if it were written there.
 
 ## Tests
 

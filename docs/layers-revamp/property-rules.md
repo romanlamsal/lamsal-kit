@@ -21,8 +21,8 @@ too. That is this document's choice. The sources pick the architecture per subdo
 logic read and write the store directly; here no system is judged simple enough, and none is
 rewritten when it grows business rules.
 
-Not everything gets a layer. Assembly, a system's offer and the common library sit outside the
-layers. So do probes.
+Not everything gets a layer. Assembly and a system's offer sit outside the layers. So do probes.
+The common library has none: code that runs it is judged in its own layer.
 
 Tooling sits outside the layers and the rules. It builds systems through their builders or replaces
 their internals. What it reaches past the offer a system changes without notice.
@@ -92,10 +92,10 @@ enter the domain.
 
 Four cases, and how the Statement covers them:
 - A store's row type in the domain is refused by the Statement's "in no terms of the outside".
-- The common library. Its modules are judged as any library's: its logger reaches outside the
-  process and a courier kept there hands the domain a value no caller passed, so both fail purity; a
-  pure helper in no terms of the outside passes, as a validation library does. It holds no model, so
-  passing it brings in none.
+- The common library. The domain running its code is judged as if that code were written there:
+  its logger reaches outside the process and a courier kept there hands the domain a value no caller
+  passed, so both fail purity; a pure helper in no terms of the outside passes, as a validation
+  library does. It holds no business rule, so passing it brings in none.
 - A shared kernel is part of the model, agreed with the systems that share it, not something that
   serves the domain: `Money` in an `Order`. A `Money` that imports the common library's logger to
   report a rounding, is the domain reaching the logger through the kernel: refused here, in
@@ -217,8 +217,7 @@ copies what it needs and is not asked. Who may change such a record is P11's.
 
 A shared kernel holds the rules several systems agree on, stated once and imported into each
 domain; a change to it is a change to each (glossary). Which rules belong there is P3's. The
-common library is no domain, so it holds no business rule; that it holds no schema and no
-aggregate either is P3's. A conformist states its business rules in its upstream's terms, still
+common library holds none (glossary). A conformist states its business rules in its upstream's terms, still
 in its own domain (P1 and P12 deliver this).
 
 Not ruled here is where a decision is enforced and on what state. A driving adapter that asks
@@ -397,7 +396,7 @@ the service still refuses it. A guard the service does not repeat, a role check 
 alone, a webhook that skips events under some amount, is a decision that holds on one way in.
 Translating back is the adapter's too: JSON for the route, a line for the CLI, one answer.
 
-Telemetry is no input: a logger or tracer imported ready-made, a trace context the adapter puts in
+Observation is no input: a logger or tracer reached through a courier, a trace context the adapter puts in
 per request and the outbox adapter carries on the envelope, change neither how the use case acts
 nor what it answers, so nothing here refuses them.
 
@@ -448,11 +447,10 @@ value, configuration value, acting call
 system reaches into it.
 *Statement:* A service MUST reach the outside only as a port of its system in the system's terms,
 and an adapter or an outbox reader only as such a port or as the outside it adapts, each also
-through code of the common library whose output changes neither how a use case acts nor what it
-answers. Anything outside a system MUST reach into it only through its offer or by a driving
+through observation, which reaches the outside only through a courier. Anything outside a system MUST reach into it only through its offer or by a driving
 adapter's way in. A port's implementation, a client of the outside or a configuration value MUST
 reach code of a system as an argument chosen by the process's assembly, or from a courier that only
-assembly fills and a driving adapter reads each time it runs.
+assembly fills and that a driving adapter, or observation, reads each time it runs.
 *Why:* An agent editing one file sees that file. Where every way out and every way in of a system is
 a port, the ports are a complete list of what the system needs and offers, and swapping what serves
 one, or adding a caller, is an edit at the port's far side and in assembly, nowhere else. Each way
@@ -468,10 +466,9 @@ sentences close those three gaps: what code reaches, what may reach in, and how 
 
 The first sentence is the seam. Reach is the glossary's: it counts what code is typed by, and stops
 at a port of its system and nowhere else. So a store client's type in a port's signature is the
-store reached, and an interface the common library exports is no port of the system: a service
-calling the store through a common-library `Sql`, or opening its transaction through the common
-library's interface, reaches the store and is refused; it opens, commits and rolls back through a
-driven port of its own, which the common library may implement by shape and assembly hands in. The
+store reached, and so is a common-library `Sql` a service calls, or a transaction it opens through
+the common library: refused. It opens, commits and rolls back through a driven port of its own, in
+its terms, which its adapter implements, whatever code that adapter runs, and assembly hands in. The
 clock, the random id and the environment are the operating system's, which is the outside: a service
 takes the time through a `Clock` port, or as an argument of its driving port, and a per-process
 value it reads ambiently, `TZ` deciding a payment deadline's hour, is the outside reached through no
@@ -521,22 +518,29 @@ handed it either. These read from a courier. Only assembly fills it, a system bu
 assembly, or a second place produces instances. The adapter reads it each time it runs: a read at
 module load, or on the first run kept for the rest, holds the first instance for the life of the
 process, and a test that fills the courier with fakes changes nothing the adapter already holds. Any
-other reader, a service function reading a courier kept in the common library, receives a dependency
+other reader but observation, a service function reading a courier kept in the common library,
+receives a dependency
 nobody handed it, which the sentence refuses: a service locator by another name. A courier that
 carries a store client beside the driving ports puts the store's type into every adapter that reads
 it; it carries what its readers call. A courier filled after its first reader runs fails that reader
 loudly, not with another instance, so the order is assembly's concern and not this rule's.
 
 The first sentence's last clause is the property's exception, and the line is behavior, not
-substitution. Telemetry reaches outside the process, a logger to its transport, a tracer to its
-exporter, and a service or an adapter that calls it through a ready-made import behaves the same
-with no exporter registered; a test inspecting spans registers an in-memory exporter globally,
-without a parameter. Handed through every factory, it adds a parameter to every signature for
-nothing the system's behavior depends on. A feature-flag client, whose answer changes what the
-system does, falls outside the exception and goes through a port and an argument like any other
-client. So does the common library's transaction: whether its commit lands decides whether the use
-case's writes exist and whether it throws. The domain, a shared kernel and a published language are
-no service and no adapter: they load where no telemetry is configured.
+substitution. Observation reaches outside the process, a logger to its transport, a tracer to its
+exporter, and a use case behaves the same with none behind it. Handed through every factory, it adds
+a parameter to every signature for nothing the system's behavior depends on; and a library's own
+tracing, the 3PL SDK's inside its adapter, takes no parameter at all. Its libraries keep a global
+that assembly fills, which is a courier: the OpenTelemetry API reads the registered provider on
+every span, so production assembly registers an exporter, a test registers an in-memory one or none,
+and the SDK's spans go where assembly chose, with no line of the adapter changed. A logger whose
+transport assembly sets, local-only in a test, passes the same way. A logger built at module load
+with a transport from `process.env` does not: assembly chose nothing, and no test can swap it; nor
+does `const log = getLogger()` taken at module load, which holds the first instance for the life of
+the process. A `Log` driven port is a choice that passes too. A feature-flag client, whose answer
+changes what the system does, is no observation and goes through a port and an argument like any
+other client. So does a transaction: whether its commit lands decides whether the use case's writes
+exist and whether it throws. The domain, a shared kernel and a published language are no service
+and no adapter: they load where no observation is configured.
 
 What this rule does not decide. Which port a driving adapter may call is P4's: a server action
 handed a repository reaches it as a port and passes here, and skipping the service there bypasses
@@ -555,8 +559,8 @@ application offers to the outside world"), §3 (Configurable Dependency, passed 
 Seemann ("Composition Root"; "Service Locator is an Anti-Pattern", comments of 2010-02-04: the
 framework-created object pulls from the container, in its constructor, not at load) and Fowler
 (Inversion of Control: instantiating directly "stops the finder from being a plugin"). Reach
-through the offer follows Khononov p. 41 and coupling.dev (intrusive coupling). Telemetry through
-no port follows the OpenTelemetry JS API. Departs: Seemann lists Ambient Context, logging its
+through the offer follows Khononov p. 41 and coupling.dev (intrusive coupling). Observation through
+a courier follows the OpenTelemetry JS API (a global provider, no-op until registered). Departs: Seemann lists Ambient Context, logging its
 example, among the DI anti-patterns (DIPPP ch. 5); Khononov p. 128 binds ports by injection or
 bootstrapping alike; Google SWE ch. 13 finds injection "less important" in JavaScript. Against: MS
 (IOrderQueries runs SQL on a connection string it holds, past any driven port); Evans p. 78,
@@ -574,7 +578,7 @@ harms nothing until reached, and the reach is refused here and found by a linter
 - Assembly: "only place where port and implementation meet" is a ruling in a definition; settle.
 - Courier: say assembly fills it; the Statement's "only assembly fills" then goes.
 *Terms used:* system, outside, port, adapter, outbox reader, pure, offer, system builder, driving
-port, driving adapter, configuration value, assembly, courier, service, common library, use case,
+port, driving adapter, configuration value, assembly, courier, service, observation, use case,
 reach
 
 ### P6. Every use case can run with nothing outside the process, in a test
@@ -649,11 +653,10 @@ where the outside runs (glossary); it falls outside the default suite either way
 runs is not this property's. For a conformist's port, the other implementation is the upstream's
 service, run against the upstream's store as its migrations set it up.
 
-What no port covers. P5 lets a use case reach some code of the common library through no port,
-where its output changes neither how the use case acts nor what it answers: telemetry. That code
-runs in every test of the use case, with no fake in front of it. The OpenTelemetry API passes:
-with no SDK registered its spans are no-ops, and the 3PL client that imports the tracer behaves
-the same in a test. A logger whose transport throws when its collector is unreachable, or a
+What no port covers. P5 lets a use case reach the outside through observation, behind no port.
+That code runs in every test of the use case, with no fake in front of it. The OpenTelemetry API
+passes: with no SDK registered its spans are no-ops, and the 3PL client that imports the tracer
+behaves the same in a test. A logger whose transport throws when its collector is unreachable, or a
 module that opens a pool when it loads, does not: the use case cannot run with nothing outside,
 and the third sentence refuses it. The domain, a shared kernel and pure code reach nothing
 outside by definition (glossary: Pure) and pass without a word.
@@ -2023,8 +2026,8 @@ were on that list and P6 and P2 absorbed them.
 - The layer reach lists SVC-6, DRV-8, DVN-4 have no single home: P5 (the outside and ports), P1
   (the domain), P12 (an upstream's terms), P2 (no restated schema). P12 narrows DRV-8: a driving
   adapter of a non-conforming system reaches an upstream's published language only where it
-  carries that upstream's calls or messages. Whether the service may import the common library at
-  all now follows from P5's MAY alone.
+  carries that upstream's calls or messages. Whether the service may import the common library
+  follows from what the imported code reaches (P5), as for any code.
 - DOM-1, SYS-14: P1 and P12 both rule the conformist takes the upstream's terms from its published
   language and restates nothing; P1 in Why, P12 in Statement.
 - TX-2: P7 (writes inside the handed transaction) and P10 (reads inside it). Clean split.
