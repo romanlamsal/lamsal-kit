@@ -38,9 +38,10 @@ messages it writes are typed by, the types generated from this codebase's config
 included, the published language.
 
 Not covered, and the codebase's: where UI code goes; library, framework and file-naming conventions;
-whether a module that straddles two layers should be split now; how a driving adapter is tested, and
-when the integration suite runs; how the bus finds a message's handlers, by its type or by each
-handler filtering; how telemetry crosses a message, a trace context on the envelope.
+whether a module that straddles two layers should be split now; how a driving adapter is tested, how
+a test stands in for assembly, couriers included, and when the integration suite runs; how the bus
+finds a message's handlers, by its type or by each handler filtering; how telemetry crosses a message,
+a trace context on the envelope.
 
 
 ## Rules
@@ -660,9 +661,8 @@ code runs in every test of the use case, with no fake in front of it. The OpenTe
 with no SDK registered its spans are no-ops, and the 3PL client that imports the tracer behaves the
 same in a test. A logger whose transport throws when its collector is unreachable, or a module that
 opens a pool when it loads, does not: the use case cannot run with nothing outside, and the third
-sentence refuses it. Nor does a logger courier that throws while unfilled: it needs a default that
-reaches nothing, as the OpenTelemetry API's no-op provider does. The domain, a shared kernel and
-pure code reach nothing outside by definition (glossary: Pure) and pass without a word.
+sentence refuses it. The domain, a shared kernel and pure code reach nothing outside by definition
+(glossary: Pure) and pass without a word.
 
 Driving adapters are no use case. A test of a use case enters through its driving port, and neither
 the bus nor the courier is needed for it; how a driving adapter is tested is the codebase's
