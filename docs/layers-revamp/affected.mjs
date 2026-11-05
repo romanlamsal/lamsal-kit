@@ -508,6 +508,7 @@ section(
 const reviewsDir = `${DIR}reviews/`
 const lastReview = readdirSync(reviewsDir)
     .filter(d => /^\d+$/.test(d))
+    .filter(d => readdirSync(`${reviewsDir}${d}/`).some(f => /^dist-.*\.md$/.test(f)))
     .sort((a, b) => Number(a) - Number(b))
     .pop()
 if (lastReview) {
