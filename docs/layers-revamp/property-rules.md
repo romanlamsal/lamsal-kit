@@ -100,7 +100,7 @@ Four cases, and how the Statement covers them:
   serves the domain: `Money` in an `Order`. A `Money` that imports the common library's logger to
   report a rounding, is the domain reaching the logger through the kernel: refused here, in
   whichever module the import was written. What a kernel or a published language may reach for its
-  other importers, a downstream's adapter or a browser, is not P1's.
+  other importers, another sharer or a browser, is not P1's.
 - The conformist, P1's one exception. Its domain is written in its upstream's terms (glossary:
   Conformist): its business rules take the upstream's schemas as arguments, imported from the
   upstream's export path; a schema restated beside them is a second declaration drifting on the
@@ -1348,9 +1348,9 @@ module, adapter, message, shared kernel
 service, handles its events or sends it commands.
 *Statement:* Code of another system MUST import of a system only its offer, and of that only what is
 typed by its published language or pure code of no system. What crosses between two systems, by a
-call or in a message, MUST be of the upstream system's published language. The modules that declare a published language MUST reach nothing of their
-system outside it, nor be generated from the rest of it, and MAY state in their own terms what a
-business rule of the domain also states.
+call or in a message, MUST be of the upstream system's published language. The modules that declare
+a published language MUST reach nothing of their system outside it, nor be generated from the rest
+of it, and MAY state in their own terms what a business rule of the domain also states.
 *Why:* A downstream system breaks at a refactoring of its upstream's model wherever its code, or
 what it receives, names that model. There are three ways it comes to: the downstream imports the
 model, the upstream hands the model across, or the contract is the model under another name. The
