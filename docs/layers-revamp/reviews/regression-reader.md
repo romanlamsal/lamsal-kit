@@ -53,6 +53,9 @@ Read whole, in this order:
 
 Judge from Scope and Statement of the rules as they now stand (the diff applied to the
 distilled), with the glossary as it now stands. Why, Relies on and Provenance bind nobody.
+Read as a well-meaning implementer who tries to build what makes sense. A split is two readings
+such an implementer could plausibly build either way; a reading that needs ignoring what the rule
+plainly asks for, or what the code could plainly see, is not a split and not a finding.
 
 Write ${ROOT}/reviews/${NN}/regression/${ISSUE}.md. First line: `Base ${BASE}, head ${HEAD}.`
 
