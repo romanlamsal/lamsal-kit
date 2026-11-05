@@ -711,7 +711,7 @@ and a driving adapter is no use case
 *Statement:* A use case MUST save at most one aggregate, or several only where a business rule ties
 them, in one transaction that its service opens, that carries every write the use case makes, and
 that its service commits once after the last write. The same transaction MUST carry the messages the
-use case writes to the outbox and the record of the message it is called for, and what else its goal
+use case writes to the outbox, and what else its goal
 needs MUST be asked for by such a message, or by the call after the commit that P8 allows. Where a
 write in it fails, the transaction MUST roll back whole.
 *Why:* A process can stop between any two instructions (F4), and a write can fail where the one
@@ -1578,7 +1578,7 @@ is not lost after, is P8's; P8 delivers this.
 The exception is where the dependency is the use case's nature: a business rule that needs the other
 system's answer now, to a read or to an act. The customer pays now, so checkout asks Stripe for a
 PaymentIntent and hands the browser its `client_secret`; at the payment deadline a reconciliation
-asks Stripe whether the order was paid. Such a use case fails while the other system is down,
+may ask Stripe whether the order was paid. Such a use case fails while the other system is down,
 visibly, and is slow while it is slow, and both are expected. For an act, the line is whether what
 the use case answers or decides hangs on the act's outcome: the card charged or refused before the
 order is confirmed; a confirmation mail hangs on nothing and goes by message. For a read, the line

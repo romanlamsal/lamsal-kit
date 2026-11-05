@@ -60,7 +60,7 @@ caller nothing the caller did not pass.
 - A *driven adapter* implements a driven port. A port may have several. Swapping one changes
   nothing on the system's side of the port.
 - A *driving adapter* adapts one way in to the driving ports it calls, translating in both
-  directions. There are as many driving adapters as there are ways into the process.
+  directions.
 
 ## Between systems
 
