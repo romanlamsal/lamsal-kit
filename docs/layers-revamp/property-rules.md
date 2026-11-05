@@ -938,9 +938,8 @@ TX-3's ruling on who changes another system's data is P11's, only its timing is 
 
 ### P9. A repeated delivery or call changes no record of this system, and succeeds where the first did
 
-*Scope:* an acting use case is called for a message, whether the bus delivered it, a hook was called
-with it, or a driving adapter asked another system for it, or is called through a driving adapter
-that a caller outside its process reaches; or a use case calls another system after its commit (P8).
+*Scope:* an acting use case, called by a call or for a message, whether the bus delivered it, a hook
+was called with it, or a driving adapter asked another system for it.
 *Statement:* The use case MUST tell a repeat inside the transaction that commits its writes, by the
 message's id or the call's key claimed there under a key the store refuses twice, or by the records
 it writes there, and finding the first's writes committed MUST commit nothing and succeed. A change
@@ -948,9 +947,10 @@ it makes outside that transaction, and a call after the commit, MUST carry to th
 it a key that names the change, the same on every attempt at it by whichever message or step: the id
 of what the change is about, one derived from the record the transaction committed, or the message's
 or the call's where it alone asks for the change; by that key that system answers a repeat. Where
-neither a key nor its records tell a repeat, or no such key reaches the system that makes a change,
-and the change made twice ends otherwise than made once, what follows from the repeat MUST be what a
-business rule of its system allows: the repeat prevented, corrected afterwards, or accepted.
+neither a key nor its records tell a repeat, what the repeat does MUST be what a business rule of
+its system allows. Where no such key reaches the system that makes a change outside, and the change
+made twice ends otherwise than made once, what follows from the repeat MUST be what a business rule
+of its system allows: the repeat prevented, corrected afterwards, or accepted.
 *Why:* The stock reserved twice. A message arrives more than once (F5): the relay hands one over
 again after a stop, the bus delivers again a message whose handler stopped after its use case
 committed, Stripe resends an event for days and at times twice at once, a poll returns items the
@@ -1025,9 +1025,10 @@ intent it first opened. Where the call carries no key, the records may: the seco
 the customer with that email, and where what the first committed matches the request, it returns the
 same customer; with another name it is a new request, and refused. Where neither tells, what follows
 is a business rule's: a second empty cart, `setCartLine` called again with no cart, is accepted; a
-second order is not, so checkout takes the cart's id as its key. A caller in the same process knows
-whether its call returned; one outside does not, so the Scope reaches the driving adapters outside
-callers reach. An answering use case changes nothing, and a repeat of it changes nothing either.
+second order is not, so checkout takes the cart's id as its key. Any caller can repeat, one in the
+same process included: the later step a stop interrupted runs again in a new process and calls
+payment again, so the Scope reaches every acting use case, not only those outside callers reach. An
+answering use case changes nothing, and a repeat of it changes nothing either.
 *Provenance:* The repeat follows Khononov p. 147 (the outbox "guarantees delivery of the messages at
 least once"). The claimed id follows Richardson (Idempotent consumer: "a consumer must be
 idempotent", by recording the ids of processed messages), NServiceBus (Outbox: deduplication by
