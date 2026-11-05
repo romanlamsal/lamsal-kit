@@ -817,15 +817,14 @@ write left out reaches its second store is P8's; ASM-9, ambient against argument
 is delivered, or another system tells this system of a change before committing it.
 *Statement:* A message a use case writes MUST go into the outbox in its transaction, and a change it
 decides that the transaction does not commit MUST leave it only as such a message asking for the
-change, or, where its caller needs another system's answer before the use case returns, as a call to
-that system after the commit, idempotent by a record the transaction committed, from which a later
-step repeats the call or ends the change. The outbox MUST keep each message until the bus holds it,
-and the bus through any stop of a process until a handler acknowledges it, which the handler MUST
-NOT do before the use case it calls has returned with its writes committed. A use case called for
-such a message MUST make the change, deciding nothing again, and a change another system tells of
-before committing it MUST change nothing in this system beyond a provisional record of it until it
-is confirmed. An external system this codebase configures, whose transaction can write a message to
-an outbox, MUST tell of its change by such a message.
+change, or as a call to another system after the commit, made from a record the transaction
+committed, from which a later step repeats the call or ends the change. The outbox MUST keep each
+message until the bus holds it, and the bus through any stop of a process until a handler
+acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
+writes committed. A use case called for such a message MUST make the change, deciding nothing again,
+and a change another system tells of before committing it MUST change nothing in this system beyond
+a provisional record of it until it is confirmed. An external system this codebase configures, whose
+transaction can write a message to an outbox, MUST tell of its change by such a message.
 *Why:* A use case's writes are a fact once its transaction commits, and not before; a process can
 stop between any two instructions (F4). What leaves the transaction is not bound to that commit: a
 mail sent, a parcel booked with the 3PL, a command handed to another system, an event published, a
@@ -869,20 +868,18 @@ it has made the change already it may ask its records; P9 delivers the means. Wh
 still wanted it may not ask: what happened meanwhile, the order cancelled, is the deciding system's
 to answer by a business rule, and P17 delivers that.
 
-A call after the commit is the exception, where the caller needs another system's answer before the
-use case returns, which no handler could give in time: checkout commits the order, then asks payment
-for the card payment and hands the browser its `client_secret`; booking commits its hold record,
-then asks the airline's API to hold the seat under a key derived from that record's id, and shows
-the traveller the hold now. The committed record is what makes the call safe. A stop before the call
-or after it leaves the record, and a later step repeats the call, which the airline answers as it
-did the first (glossary: Idempotent), or ends the hold by a business rule (P17). The key is one way
-the record makes the call idempotent; another is the airline's hold looked up by the record's id
-before the repeat. Where the other system offers neither, no repeat is safe, the exception does not
-hold, and the call is made at most once and repaired by a reconciliation. Made before the commit or
-beside the transaction, the call stands when the transaction rolls back, with no record that it was
-made, and the first sentence refuses it. An answering call beside the transaction changes nothing,
-so nothing follows from it. Telemetry beside the transaction tells of an attempt, not a fact, and
-its output changes neither how a use case acts nor what it answers.
+A call after the commit is the other way out, for a use case P15 lets wait on another system's
+answer, which no handler could give in time: checkout commits the order, then asks payment for the
+card payment and hands the browser its `client_secret`; booking commits its hold record, then asks
+the airline's API to hold the seat under a key derived from that record's id, and shows the
+traveller the hold now. The committed record is what makes the call safe. A stop before the call or
+after it leaves the record, and a later step repeats the call, or ends the hold by a business rule
+(P17). That the repeat changes nothing, by a key derived from the record or the hold looked up by
+its id, is P9's, and so is what follows where the other system offers neither. Made before the
+commit or beside the transaction, the call stands when the transaction rolls back, with no record
+that it was made, and the first sentence refuses it. An answering call beside the transaction
+changes nothing, so nothing follows from it. Telemetry beside the transaction tells of an attempt,
+not a fact, and its output changes neither how a use case acts nor what it answers.
 
 The third sentence is the same property seen from the receiving side: another system's uncommitted
 write is no fact here either. Payload calls catalog's hook before its change commits; the change can
@@ -904,12 +901,12 @@ governs what follows from it.
 
 P8 leans on others. P7 delivers that a use case's writes, its outbox message among them, land in one
 transaction, each driven adapter writing inside it. P9 delivers that the repeats this chain brings,
-delivering at least once, change nothing: the key passed to an external system, and what a business
-rule allows where no key reaches. P16 delivers that no transaction is carried into another system,
-which is why a message is the only bridge. P17 delivers that a provisional record, a change asked by
-a call after the commit and a refused request end in a state a business rule allows, and what counts
-as a message's outcome. P14 delivers that a message waiting in the outbox across a deploy is read as
-it was meant.
+delivering at least once and the call after the commit repeated, change nothing: the key passed to
+an external system, and what a business rule allows where no key reaches. P16 delivers that no
+transaction is carried into another system, which is why a message is the only bridge. P17 delivers
+that a provisional record, a change asked by a call after the commit and a refused request end in a
+state a business rule allows, and what counts as a message's outcome. P14 delivers that a message
+waiting in the outbox across a deploy is read as it was meant.
 *Provenance:* The message committed with the change follows Richardson (Transactional outbox),
 Khononov p. 144–146, Helland 2007 p. 137 ("transactional enqueuing of messages is de rigueur"),
 NServiceBus (Outbox) and MS; the outbox as a field of the record follows Richardson and Khononov p.
@@ -918,14 +915,16 @@ Richardson ("no guarantee that it won't crash before sending the message"). The 
 Khononov p. 145 and p. 147 (marked "upon successful publishing"; "at least once"), EIP (Guaranteed
 Delivery; Transactional Client; Dead Letter Channel), Vernon EAD II p. 9 ("retried if the subscriber
 does not acknowledge success") and NServiceBus (the error queue, retried "once the error is
-resolved"). The executor follows Khononov p. 149–150 ("the command execution logic should be moved
-out of the saga itself", his saga the coordinating component, not the glossary's sequence) and p.
-293 (the outbox "for sending email messages"). Departs: Khononov p. 150 has the relay execute
-commands, which the glossary's relay does not; EIP (Event Message) finds guaranteed delivery
-"usually not very helpful with events". Against: EIP (Command Message) and Richardson (Messaging),
-the synchronous call. This document's: deciding nothing again; the call after the commit, idempotent
-by the committed record; the hook before the commit; the message in an external system's
-transaction; the holders as one chain.
+resolved"). The call after the commit, made from a committed record and pushed on by a later step,
+follows Brandur (Idempotency keys: "Atomic phases should be safely committed before initiating any
+foreign state mutation"; a completer pushes unfinished requests "through to completion") and Helland
+2007 p. 138 (the intent to invoke recorded). The executor follows Khononov p. 149–150 ("the command
+execution logic should be moved out of the saga itself", his saga the coordinating component, not
+the glossary's sequence) and p. 293 (the outbox "for sending email messages"). Departs: Khononov p.
+150 has the relay execute commands, which the glossary's relay does not; EIP (Event Message) finds
+guaranteed delivery "usually not very helpful with events". Against: EIP (Command Message) and
+Richardson (Messaging), the synchronous call. This document's: deciding nothing again; the hook
+before the commit; the message in an external system's transaction; the holders as one chain.
 *Absorbs:* TX-6, TX-3, TX-22, TX-37, TX-36, TX-20, TX-21, DRV-7, TX-28, TX-44, TX-29
 *Drops:* TX-2, the outbox written inside the handed transaction, is P7's one transaction; TX-31 and
 TX-41, repeated external effects, are P9's; TX-30, the waiting that ends, is P17's; TX-38 and TX-45,
@@ -937,18 +936,19 @@ TX-3's ruling on who changes another system's data is P11's, only its timing is 
 - Handler: "acknowledge" is used across the rules, defined nowhere; Handler could name it.
 *Terms used:* use case, message, outbox, bus, handler, system, external system
 
-### P9. A repeated delivery changes no record of this system, and succeeds where the first did
+### P9. A repeated delivery or call changes no record of the system it reaches, and succeeds where the first did
 
-*Scope:* an acting use case is called for a message, whether the bus delivered it, a hook was
-called with it, or a driving adapter asked another system for it.
+*Scope:* an acting use case is called for a message, whether the bus delivered it, a hook was called
+with it, or a driving adapter asked another system for it, or is called by a call its caller may
+repeat; or a use case calls another system after its commit (P8).
 *Statement:* The use case MUST tell a repeat inside the transaction that commits its writes, by the
-message's id claimed there under a key the store refuses twice or by the records it writes there,
-and finding the first delivery's writes committed MUST commit nothing and succeed. A change it makes
-outside that transaction MUST carry to the system that makes it
-a key the message carries, the same on every delivery, by which that system answers a repeat. Where
-no such key reaches a repeat and the change made twice ends otherwise than made once, what follows
-from the repeat MUST be what a business rule of its system allows: the repeat prevented, corrected
-afterwards, or accepted.
+message's id or the call's key claimed there under a key the store refuses twice, or by the records
+it writes there, and finding the first's writes committed MUST commit nothing and succeed. A change
+it makes outside that transaction, and a call after the commit, MUST carry to the system that makes
+it a key the same on every repeat, the message's, the call's or one derived from the committed
+record, by which that system answers a repeat. Where no such key reaches a repeat and the change
+made twice ends otherwise than made once, what follows from the repeat MUST be what a business rule
+of its system allows: the repeat prevented, corrected afterwards, or accepted.
 *Why:* The stock reserved twice. A message arrives more than once (F5): the relay hands one over
 again after a stop, the bus delivers again a message whose handler stopped after its use case
 committed, Stripe resends an event for days and at times twice at once, a poll returns items the
@@ -1012,8 +1012,13 @@ of one message, not on every message asking for one change: a reconciliation tha
 shipment parked unbooked writes a new message, which is no repeated delivery; the shipment's id as
 key covers it, and the ruling is left to P17.
 
-Outside the Scope: a request a caller makes through a driving port is no message, and P9 does not
-reach it; an answering use case changes nothing, and a repeat of it changes nothing either.
+A call repeats too. A caller that stopped or timed out after the call does not know whether it went
+through, and repeats it: P8's later step after a commit, a browser that resubmits checkout. The call
+carries a key its caller keeps the same, and the use case it reaches claims it as it would a
+message's id: payment, called again for the same order, finds its `Payment` and answers with the
+intent it first opened. A caller that repeats under a fresh key makes a new request, which no rule
+here tells from a repeat. An answering use case changes nothing, and a repeat of it changes nothing
+either.
 *Provenance:* The repeat follows Khononov p. 147 (the outbox "guarantees delivery of the messages at
 least once"). The claimed id follows Richardson (Idempotent consumer: "a consumer must be
 idempotent", by recording the ids of processed messages), NServiceBus (Outbox: deduplication by
@@ -1022,7 +1027,11 @@ EIP (Idempotent Receiver), Helland 2007 p. 139 and MS, which prefers idempotent 
 deduplication. The polled item follows EIP (Polling Consumer); treating it as a delivered message is
 this document's. The external system's key carries NServiceBus's MessageId from the receiver to the
 external system, this document's. The business rule accepting a repeat is this document's, from P9.
-Departs: NServiceBus deduplicates within a retention window; here the store refuses the claim twice.
+The repeated call follows Helland 2007 p. 139 ("if a reply is required, the same reply must be
+returned"), Stripe (Idempotent requests: retries with the same key "return the saved response") and
+Brandur (Idempotency keys: "Pass through our own unique ID rather than the value transmitted to
+us"). Departs: NServiceBus deduplicates within a retention window; here the store refuses the claim
+twice.
 *Absorbs:* TX-5, TX-31, TX-41, TX-46
 *Drops:* TX-37, serves P8 by deciding nothing again; its "made already" test is this rule's means
 *Glossary notes:*
@@ -1522,8 +1531,9 @@ change a new version.
 
 *Scope:* a use case needs to know something another system holds, or needs another system to act.
 *Statement:* A use case not called for a message MUST NOT depend on another system answering while
-it runs, unless a business rule of its system needs that system's current answer. What else it needs
-another system to do it MUST ask for by a message, or by the call after the commit that P8 allows.
+it runs, unless a business rule of its system, or of a caller held on it, needs that system's answer
+now, to a read or to an act, for what the use case answers or decides before it returns. What else
+it needs another system to do it MUST ask for by a message.
 *Why:* A use case that depends on another system answering is down whenever that system is, and slow
 whenever it is: checkout that asks billing for the customer's dunning stage takes no orders while
 billing deploys, and a use case that depends on three systems is up only while all three are. The
@@ -1550,14 +1560,17 @@ succeeds while fulfillment is down. That the message is written in the use case'
 is not lost after, is P8's; P8 delivers this.
 
 The exception is where the dependency is the use case's nature: a business rule that needs the other
-system's current answer. The customer pays now, so checkout asks Stripe for a PaymentIntent and
-hands the browser its `client_secret`; at the payment deadline a reconciliation asks Stripe whether
-the order was paid. Such a use case fails while the other system is down, visibly, and is slow while
-it is slow, and both are expected. The line between the exception and what the use case has without
-asking is drawn by how old the business rule lets the answer be: where it accepts what the owner
-said a while ago, through the owner's downtime too, a replica serves; where it accepts only what the
-owner says now, the use case calls. Either way the answer can change before the commit, and what
-follows then is P10's, for the live answer as for the replica.
+system's answer now, to a read or to an act. The customer pays now, so checkout asks Stripe for a
+PaymentIntent and hands the browser its `client_secret`; at the payment deadline a reconciliation
+asks Stripe whether the order was paid. Such a use case fails while the other system is down,
+visibly, and is slow while it is slow, and both are expected. For an act, the line is whether what
+the use case answers or decides hangs on the act's outcome: the card charged or refused before the
+order is confirmed; a confirmation mail hangs on nothing and goes by message. For a read, the line
+between the exception and what the use case has without asking is drawn by how old the business rule
+lets the answer be: where it accepts what the owner said a while ago, through the owner's downtime
+too, a replica serves; where it accepts only what the owner says now, the use case calls. Either way
+the answer can change before the commit, and what follows then is P10's, for the live answer as for
+the replica.
 
 A use case called for a message may ask another system while it runs. Fulfillment's use case for
 `BookShipment` books the 3PL, and a mail is sent for the message that asks for it: their whole job
@@ -1569,10 +1582,12 @@ and delivers it again; P9 delivers that the repeat changes nothing, and a messag
 the other system is back is P17's.
 
 Reading another system only through its open host service or its published events is P11's. A use
-case may call an external system after its transaction commits, idempotent by what it committed; P8
-rules that such a call is safe, this rule when it is made: where a business rule needs the answer
-now. A PaymentIntent nobody needs at once, for an invoice mailed tomorrow, is asked for by a
-message.
+case may call another system after its transaction commits; P8 rules that such a call is safe, P9
+that its repeat changes nothing, and this rule when it is made: where a business rule needs the
+answer now. A use case called by one held on it is held too: payment, called by checkout for the
+`client_secret`, opens the intent at Stripe while checkout's caller waits, and the rule it answers
+to is checkout's. A PaymentIntent nobody needs at once, for an invoice mailed tomorrow, is asked for
+by a message.
 
 The rule governs the use case. A driving adapter that depends on another system answering before it
 calls the use case holds the way in the same way; what a driving adapter may reach is P5's, and P5
@@ -1593,11 +1608,16 @@ subsequent query"). Asking another system to act by a message follows Evans Refe
 boundaries, handle updates asynchronously") and MS (integration events "must be based on
 asynchronous communication"); the call made by the use case called for the message follows Khononov
 p. 149–150 ("the command execution logic should be moved out of the saga itself") and Fowler, who
-finds it "usually easier just to call the sender". Departs: Richardson answers even a business
-rule's need with a pending outcome, not a call; Khononov's simple saga calls the other context
-directly (p. 148). Against: EIP (Command Message) and Richardson (Messaging) give the synchronous
-call as the usual alternative. The dependency behind a port counted as the use case's, and the use
-case called for a message left out, are this document's.
+finds it "usually easier just to call the sender". The act's need follows Brandur (Idempotency keys:
+a caller that "needs to know in-band whether it went through so that it can decide whether to
+proffer some good or service"). Departs: Richardson answers even a business rule's need with a
+pending outcome, not a call, and keeps every service self-contained; MS keeps request/response "only
+from the client apps to the front-end services"; Udi Dahan puts two entities that "just HAVE to have
+request/response communication" in one service: here a system of this codebase is called as any
+other, the dependency ruled by the need, not by who wrote the callee; Khononov's simple saga calls
+the other context directly (p. 148). Against: EIP (Command Message) and Richardson (Messaging) give
+the synchronous call as the usual alternative. The dependency behind a port counted as the use
+case's, and the use case called for a message left out, are this document's.
 *Absorbs:* TX-40
 *Drops:* —
 *Glossary notes:*

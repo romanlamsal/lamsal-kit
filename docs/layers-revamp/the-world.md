@@ -27,8 +27,8 @@ Out of scope: throughput and load, security, user interfaces.
 - **F4. Processes stop and are replaced.** A process can stop between any two of its
   instructions. A deploy replaces processes one at a time, and
   records and messages outlive the code that wrote them.
-- **F5. Delivery repeats and reorders.** A message can arrive more than once, a redelivery while
-  the first attempt still runs, and after one sent later.
+- **F5. Delivery repeats and reorders.** A message or a call can arrive more than once, a redelivery
+  or a retry while the first attempt still runs, and a message after one sent later.
 - **F6. Callers overlap.** Two use cases can run against the same records at once.
 - **F7. Other systems fail.** Another system can be down, slow, or fail after it said yes.
 - **F8. Other systems change.** Another system's model and published language change on its
@@ -128,14 +128,15 @@ left, so a stop in between loses nothing.
 events are committed in the same atomic transaction." Helland, Life beyond Distributed
 Transactions: tentative operations.
 
-### P9. A repeated delivery changes no record of this system, and succeeds where the first did
+### P9. A repeated delivery or call changes no record of the system it reaches, and succeeds where the first did
 
 *Against:* F5, F9.
-*Why:* The stock reserved twice. Delivery repeats, so every handling tolerates a second arrival,
-one overlapping the first included. A repeat that fails where the first succeeded, the order
-already paid, is delivered again and again until it parks, for a change already made. Outside the
-system this may not hold: a mail provider may send twice (F9). Where an effect outside can
-repeat, a business rule allows the repeat.
+*Why:* The stock reserved twice. Delivery repeats, and so does a call whose caller stopped or timed
+out not knowing whether it went through, so every handling tolerates a second arrival, one
+overlapping the first included. A repeat that fails where the first succeeded, the order already
+paid, is delivered again and again until it parks, for a change already made. Outside the system
+this may not hold: a mail provider may send twice (F9). Where an effect outside can repeat, a
+business rule allows the repeat.
 *Provenance:* Khononov (p. 147): the outbox "guarantees delivery of the messages at least once".
 EIP, Idempotent Receiver.
 
