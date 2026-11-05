@@ -59,6 +59,18 @@ Broken means: a build that complied now breaches, or that breached now complies;
 the world the rules delivered that a complying build can now violate; two binding texts that now
 contradict; a term a binding text uses that lost its meaning; the distilled output damaged.
 
+The world states properties; each rule exists to deliver one, and every sentence of it should serve
+that property. A sentence filed under a property it does not serve sits beside rules that do, looks
+at home, and is judged against the wrong neighbours; the property it does serve has rules elsewhere,
+and the two contradict without sharing a word. A sentence removed or weakened can leave a property
+no Statement delivers, again without sharing a word with the rule that names it. So judge each
+change by what it delivers, not by where it sits or which words it shares. The way to go about it,
+in general: for each changed sentence, name the property it delivers; where that is not its rule's
+property, it is misplaced: report it, and judge it against the rules of the property it delivers.
+For each sentence removed or weakened, name what it delivered and which Statement still does; where
+none does, that property is broken. Use your own measure where this way misses what the reason
+asks.
+
 Write ${ROOT}/reviews/${NN}/regression/${NAME}.md. First line `Base ${BASE}, head ${HEAD}.`, then
 `Changed: ...`, one line, in your words.
 
@@ -67,8 +79,10 @@ Per id: resolved | unchanged | newly split, one sentence naming the rule or term
 
 ## Every rule
 One line per rule P1–P19, per world property, per glossary entry: `unaffected` or
-`affected: <why, one sentence>; holds | broken`. For each affected, say what a build could do
-before and after.
+`affected: <why, one sentence>; holds | broken`. A rule is affected where it shares a word with a
+change, or a property with a changed sentence, or delivered what a removed one delivered. For each
+affected, say what a build could do before and after. A misplaced sentence near the change that the
+change did not cause goes under Noticed.
 
 ## Builds
 Fresh A, Fresh B: what now breaches or complies that did not before, citing the section.
