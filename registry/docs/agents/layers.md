@@ -1,4 +1,4 @@
-# Layers, distilled
+# Layers
 
 The glossary, the world and the property rules. Read whole.
 
