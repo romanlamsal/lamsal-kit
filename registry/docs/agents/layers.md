@@ -343,7 +343,8 @@ That pure code MUST be in no terms of the outside and MUST load on every runtime
 *Statement:* A business rule of a system MUST be stated once, in its domain or in a shared kernel
 that domain imports, with every value it decides by that is the same for every candidate and that no
 record holds. Code anywhere else that needs what it decides MUST get it from that statement,
-directly or through the system, and MUST NOT state it again.
+directly or through the system, and MUST NOT state it again. A test MUST NOT put a double in its
+place.
 
 ### P3. Business rules that change together sit together; rules that change for different reasons stay apart
 
@@ -362,8 +363,9 @@ behind its driven ports serves it.
 *Statement:* How a use case acts and what it answers MUST be decided by its service and its domain
 from the arguments its driving port takes and what its driven ports return, and an ambient value or
 a configuration value MUST NOT change either, whether the service reads it or code behind a port
-does. A driving adapter MUST reach the system only through its driving ports, with at most one
-acting call per call or message it handles, and MUST NOT withhold a call the service would accept.
+does, a value the business decides on being part of how it acts. A driving adapter MUST reach the
+system only through its driving ports, with at most one acting call per call or message it handles,
+and MUST NOT withhold a call the service would accept.
 
 ### P5. A system reaches the outside, and is reached from it, only through ports assembly hands it; each port speaks the system's terms
 
@@ -413,12 +415,12 @@ decides that the transaction does not commit MUST leave it only as such a messag
 change, or as a call to another system after the commit, made from a record the transaction
 committed, from which a later use case repeats the call or ends the change. The outbox MUST keep
 each message until the bus holds it, and the bus through any stop of a process until a handler
-acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
-writes committed. A use case called for such a message MUST act on the change, deciding nothing
-again, and a change another system tells of before committing it MUST change nothing in this system
-beyond a provisional record of it until it is confirmed. An external system this codebase
-configures, whose transaction can write a message to an outbox, MUST tell of its change by such a
-message.
+acknowledges it, and a driving adapter MUST NOT answer a call or acknowledge a message it handles
+before the use case it calls has returned with its writes committed. A use case called for such a
+message MUST act on the change, deciding nothing again, and a change another system tells of before
+committing it MUST change nothing in this system beyond a provisional record of it until it is
+confirmed. An external system this codebase configures, whose transaction can write a message to an
+outbox, MUST tell of its change by such a message.
 
 ### P9. A repeated delivery or call changes no record of this system, and succeeds where the first did
 
@@ -540,9 +542,9 @@ cases called for them.
 *Statement:* A use case called for a message MUST leave the records of what it tells of as the
 messages about that thing, applied in the order they were written, would leave them, and MUST NOT
 tell that order from when they arrive. The system that writes messages about one thing MUST let a
-use case called for one tell that order, by what the message carries or by answering what the thing
-is now. Where messages written by different systems conflict over one thing, a business rule of the
-receiving system MUST decide which prevails.
+use case called for one tell that order, by what the message carries other than a time, or by
+answering what the thing is now. Where messages written by different systems conflict over one
+thing, a business rule of the receiving system MUST decide which prevails.
 
 ### P19. Within one system, each term has one meaning
 
