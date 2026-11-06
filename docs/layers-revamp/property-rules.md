@@ -746,7 +746,7 @@ Second, who holds the transaction: the service. It is the only code that sees th
 (glossary: Service, the sequence within its use case), so it alone knows which writes land together.
 A repository adapter that opened and committed its own transaction would decide that for writes it
 does not see, and commit its aggregate while the next one fails. Every call that writes records of
-the system takes the transaction: repositories, the outbox port, the record of handled messages. A
+the system takes the transaction: repositories, an outbox port, the record of handled messages. A
 write made beside it commits on its own and stays when the transaction rolls back: through the
 store's global client in a driven adapter handed a transaction, through a transaction the adapter
 opens itself, in a loop with one write per iteration on the client, in a helper that reaches for the
@@ -1857,7 +1857,9 @@ writer lets the receiver tell it, in one of two ways. It carries a version: one 
 raised in the transaction that commits the change, the aggregate's version where it carries one; the
 receiver keeps the higher and drops the lower. Or its message is a notice that the thing changed,
 and the receiver asks it what the thing is now: two notices that arrive out of order both fetch the
-latest, and the order no longer matters. The fetch costs the writer answering while the receiver
+latest, and the order no longer matters, where the receiver fetches and saves them one at a time,
+or the answer carries a version: two fetches at once overtake each other as two messages do, and
+the slower saves the older answer last. The fetch costs the writer answering while the receiver
 handles the message; a writer that is down fails the delivery, and the bus delivers it again (P15
 leaves a use case called for a message free to ask). An equal version is the same change delivered
 again, which P9 delivers. The version is of the thing the message tells of, not of the message's
