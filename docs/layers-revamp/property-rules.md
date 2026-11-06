@@ -13,8 +13,7 @@ was read, or where a record with the same key exists. It assumes no isolation be
 beyond reading committed writes: a transaction may read what another commits while it runs.
 
 It also assumes the clock can start a use case once a moment has passed: a message held back until
-then, or a sweep run on the clock. Which one is the architecture's. Either can come late, never
-early.
+then, or a sweep run on the clock. Either can come late, never early.
 
 Every system gets the same architecture: domain, services, repositories and adapters, a simple one
 too. That is this document's choice. The sources pick the architecture per subdomain and let simple
@@ -552,7 +551,7 @@ the business rules for one way in, P4 delivers this. A driven adapter that calls
 case inside an adapter, P4 delivers this too. A per-request ambient value, the current user for a
 permission, is no reach of the outside; that a use case responds the same whoever calls it is P4's.
 A driving port that takes a transaction, one call carrying a transaction into another system: P16
-delivers this; a transaction made ambient, P7. Where in a system a port is declared, the service
+delivers this. Where in a system a port is declared, the service
 layer rather than the domain, is P1's. A business rule's number read from configuration is P2's.
 *Provenance:* Follows Cockburn (Intent: the application "blissfully ignorant" of what lies on the
 other side of its ports; "A port identifies a purposeful conversation"; "code pertaining to the
@@ -607,8 +606,8 @@ assembly hands it, a configuration value and a store client included, and that t
 random id are the outside reached through a port like any other. What P5 leaves open is whether
 there is anything to hand in a test. The first sentence says there is: every driven port has a fake,
 a working implementation that reaches nothing outside the process (glossary: Fake). The tea shop's
-checkout runs on an in-memory `Orders`, an in-memory outbox, a `Clock` set to a fixed instant, a
-`PaymentGateway` that answers from a table, and a transaction port whose fake commits nothing. A
+checkout runs on an in-memory `Orders`, an in-memory outbox, a `Clock` set to a fixed instant, and a
+`PaymentGateway` that answers from a table. A
 port with one real adapter is not premature: the fake is its second implementation. The SHOULD on
 the test itself is where a test may still choose the real store: one that proves the writes of a use
 case land together, or the message with the change, needs the store that commits them, and is an

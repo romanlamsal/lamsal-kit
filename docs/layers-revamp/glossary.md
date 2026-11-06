@@ -69,8 +69,8 @@ every delivery of it. An *event* says something happened; no receiver can refuse
 says do this, to the one system that offers it, which may refuse. *Published*: meant for other
 systems. *Private*: meant only for the system that wrote it.
 
-**Outbox.** Where a system's outgoing messages wait until they are delivered. The *outbox port* is
-the driven port a service writes messages through. The *outbox reader* is what the relay reads the
+**Outbox.** Where a system's outgoing messages wait until they are delivered. An *outbox port* is
+a driven port a service writes messages through. The *outbox reader* is what the relay reads the
 outbox through, and marks it by; the system provides it, and for an external system's outbox,
 assembly does.
 
