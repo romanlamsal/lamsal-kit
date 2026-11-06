@@ -120,11 +120,3 @@ The cost of a change rises with the tier.
 3. Another document refers to a rule by id, never by restating it.
 4. A gap closes in a Scope or a Statement, never in a Why. A rule with no property behind it means
    a property is missing, not the other way round.
-
-## Source material
-
-`registry/docs/agents/layers-revised.md`, `layers-revised-examples.md`, `layers-revised-review.md`
-and `layers-revised-provenance.md` are the pass-1 translation of the old document: deduplicated,
-with ids, but still in the old vocabulary and with general and specialized rules in one file. They
-are the source the documents here are extracted from, and they go once extracted. Nothing here
-references them otherwise.

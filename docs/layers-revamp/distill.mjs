@@ -24,7 +24,7 @@ function stripRules(text) {
 }
 
 const parts = [
-  "# Layers, distilled\n\nThe glossary, the world and the property rules. Read whole.",
+  "# Layers\n\nThe glossary, the world and the property rules. Read whole.",
   read("glossary.md"),
   read("the-world.md").replace(/^\*Draft\.\* /m, ""),
   stripRules(read("property-rules.md")),

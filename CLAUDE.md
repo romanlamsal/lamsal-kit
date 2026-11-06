@@ -1,3 +1,4 @@
 @registry/CLAUDE-general.md
 
-To change `registry/docs/agents/layers.md`, follow `docs/extending-layers.md` first.
+`registry/docs/agents/layers.md` is generated: change `docs/layers-revamp/` per its README, then
+`node docs/layers-revamp/distill.mjs > registry/docs/agents/layers.md`.
