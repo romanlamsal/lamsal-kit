@@ -107,4 +107,16 @@ service calling a service; B S17 P4 webhook event types without a port.
 3. Recurring, same reading every time: P7 s1 with P8, P17 "holds something", P1 runtimes. They
    cost each draft a pick but split nothing; candidates for a shorter Statement, not for more text.
 
-Nothing folded.
+## Fold
+
+Folded straight into the rules, no issue opened (9ee3e03, d41482d): R07-1, 2, 5, 6, 7, 13 (Why
+pointer), 14. Closed with no change: R07-3, 4, 8, 9, 10, 11, 12, 13, 15. States per item in
+`checklist.md`; regression `regression/r07-fold.md`.
+
+## Persona reviews
+
+Added after the regular review, on request: two readers judging drafts A and B as Khononov, Evans,
+Cockburn and Helland would, plus buildability. Input: `brief.md`, the glossary, and each draft
+through its directory tree only (`persona-input-a.md`, `persona-input-b.md`: no property mapping,
+no D or S list), so the readers judge the build, not the rules' reading. Web allowed. Output
+`persona-a.md`, `persona-b.md`. The glossary changed (9ee3e03) while they ran. Not yet folded.
