@@ -141,8 +141,7 @@ Conformist, Pure, Outside
 *Statement:* A business rule of a system MUST be stated once, in its domain or in a shared kernel
 that domain imports, with every value it decides by that is the same for every candidate and that no
 record holds. Code anywhere else that needs what it decides MUST get it from that statement,
-directly or through the system, and MUST NOT state it again. A test MUST NOT put a double in its
-place.
+directly or through the system, and MUST NOT state it again.
 *Why:* A business rule stated twice is two rules the first time it changes. The edit lands where
 its author looked, an agent having read one file (F3), and the other statement stays; the system
 then decides one way through one path and another way through the next, and nothing fails,
@@ -372,9 +371,12 @@ into a date by the process's `TZ` returns what depends on which process ran it. 
 only by what its port returned, and the use case still answers by who called or which process ran,
 so the value is refused wherever it is read. A configuration value that chooses what lies behind a
 port, a key, a URL, a pool size, changes nothing for the same records: a test that points the URL at
-a stub has swapped what serves the use case, which is P4's case and not its breach. The user an
-audit column records and the locale a mail is rendered in arrive as arguments, and a handler that
-needs a value of the request that wrote its message gets it in the message, or by a query the
+a stub has swapped what serves the use case, which is P4's case and not its breach. A value the
+business decides on is part of how the use case acts: the sender a customer is meant to see on a
+mail is the business's, and is held in the domain or a record; a sender that only names the
+deployment to its mail provider changes nothing. What the use case records goes the same way: the
+user an audit column records and the locale a mail is rendered in arrive as arguments, and a handler
+that needs a value of the request that wrote its message gets it in the message, or by a query the
 message points to, or not at all.
 
 The second sentence is the driving adapter's side. A driving adapter that makes two acting calls
@@ -821,8 +823,8 @@ decides that the transaction does not commit MUST leave it only as such a messag
 change, or as a call to another system after the commit, made from a record the transaction
 committed, from which a later use case repeats the call or ends the change. The outbox MUST keep
 each message until the bus holds it, and the bus through any stop of a process until a handler
-acknowledges it. A driving adapter MUST NOT answer a call or acknowledge a message it handles before
-the use case it calls has returned with its writes committed. A use case called for such a message MUST act on the change, deciding nothing
+acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
+writes committed. A use case called for such a message MUST act on the change, deciding nothing
 again, and a change another system tells of before committing it MUST change nothing in this system
 beyond a provisional record of it until it is confirmed. An external system this codebase
 configures, whose transaction can write a message to an outbox, MUST tell of its change by such a
@@ -848,8 +850,8 @@ it again until a handler acknowledges; the handler acknowledges only once its us
 committed. A relay that marks first, a bus held in memory, a queue client that acknowledges on
 receipt, a handler that catches the use case's error and returns: each lets the message go while
 nothing holds it. Again need not be at once: a bus that backs off and parks the message in a
-dead-letter queue still holds it; one that drops it from there has let it go. A hook's holder is the
-external system: it stops resending once the hook answers, so the answer is the
+dead-letter queue still holds it; one that drops it from there has let it go. A hook is a handler
+whose holder is the external system: it stops resending once the hook answers, so the answer is the
 acknowledgement, and a hook that answers at once and calls its use case afterwards lets go the same
 way. A use case that writes nothing has committed nothing and is done when it returns.
 
@@ -1820,7 +1822,7 @@ orchestration, tentative operation, aggregate
 cases called for them.
 *Statement:* A use case called for a message MUST leave the records of what it tells of as the
 messages about that thing, applied in the order they were written, would leave them, and MUST NOT
-tell that order from when they arrive or from a time they carry. The system that writes messages about one thing MUST let a
+tell that order from when they arrive. The system that writes messages about one thing MUST let a
 use case called for one tell that order, by what the message carries or by answering what the thing
 is now. Where messages written by different systems conflict over one thing, a business rule of the
 receiving system MUST decide which prevails.
