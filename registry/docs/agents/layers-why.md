@@ -327,12 +327,9 @@ into a date by the process's `TZ` returns what depends on which process ran it. 
 only by what its port returned, and the use case still answers by who called or which process ran,
 so the value is refused wherever it is read. A configuration value that chooses what lies behind a
 port, a key, a URL, a pool size, changes nothing for the same records: a test that points the URL at
-a stub has swapped what serves the use case, which is P4's case and not its breach. A value the
-business decides on is part of how the use case acts: the sender a customer is meant to see on a
-mail is the business's, and is held in the domain or a record; a sender that only names the
-deployment to its mail provider changes nothing. What the use case records goes the same way: the
-user an audit column records and the locale a mail is rendered in arrive as arguments, and a handler
-that needs a value of the request that wrote its message gets it in the message, or by a query the
+a stub has swapped what serves the use case, which is P4's case and not its breach. The user an
+audit column records and the locale a mail is rendered in arrive as arguments, and a handler that
+needs a value of the request that wrote its message gets it in the message, or by a query the
 message points to, or not at all.
 
 The second sentence is the driving adapter's side. A driving adapter that makes two acting calls
@@ -764,8 +761,8 @@ it again until a handler acknowledges; the handler acknowledges only once its us
 committed. A relay that marks first, a bus held in memory, a queue client that acknowledges on
 receipt, a handler that catches the use case's error and returns: each lets the message go while
 nothing holds it. Again need not be at once: a bus that backs off and parks the message in a
-dead-letter queue still holds it; one that drops it from there has let it go. A hook is a handler
-whose holder is the external system: it stops resending once the hook answers, so the answer is the
+dead-letter queue still holds it; one that drops it from there has let it go. A hook's holder is the
+external system: it stops resending once the hook answers, so the answer is the
 acknowledgement, and a hook that answers at once and calls its use case afterwards lets go the same
 way. A use case that writes nothing has committed nothing and is done when it returns.
 
