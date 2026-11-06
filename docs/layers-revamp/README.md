@@ -5,8 +5,8 @@ until changing one sentence made an unrelated paragraph stale: rules were restat
 places, exceptions were carved out at the rule and again at the exception, provenance and
 examples sat inside the rules. This folder rebuilds it as several small documents, each with one
 job, and no sentence stated twice. The documents here are the input: what gets checked for gaps,
-inconsistencies and contradictions. A repository receives the output of `distill.mjs` and the
-example files, nothing else of this folder.
+inconsistencies and contradictions. A repository receives the output of `distill.mjs`, nothing else
+of this folder.
 
 ## Documents
 
@@ -14,199 +14,112 @@ example files, nothing else of this folder.
   tells the term from a neighbouring term; one that says what the thing must or must not do
   beyond that is a rule and leaves.
 - `the-world.md`: forces, what the world does to a system, and properties, what holds anyway. It
-  names no mechanism and no rule; the general rules are one set that delivers the properties.
+  names no mechanism and no rule; the property rules are one set that delivers the properties.
   Glossary vocabulary.
-- `general-rules.md`: rules whose scope is any system. Glossary vocabulary.
-- `<group>.md`: rules whose scope is one kind of situation — an external system, messaging between
-  systems. Groups emerge while the rules are written; none is fixed in advance.
-- `choices.md`: choices the documents leave to a repository, one entry each with a stable id,
-  found where a review's drafts differ and each holds every property. Internal: `distill.mjs`
-  leaves it out, no reader receives it, and a repository is told nothing of it.
+- `property-rules.md`: one rule per property of the world, read whole. Glossary vocabulary.
 - `domain.md`: the fixture. A made-up shop with the situations the rules are tested against.
-  Situations only, no rulings.
-- `examples/<id>.md`: one example per file, so a reader opens one and not all. File name
-  `<rule>-<ok|breach>-<slug>.md`. Front matter: `breaches` and `satisfies`, the rule ids;
-  `situation`, the fixture situation in a few words; `finding`, present on a reader's finding
-  only: `cannot-comply`, `gap`, `contradiction`, `adversarial`. Then a title, a code snippet, and
-  what makes it a breach or ok. A rule references an example by file and never restates it.
+  Situations only, no rulings. The brief of each review is built from it.
 - `issues/NN-<slug>.md`: work items. `**Status:**` line; Context and Problem when opened,
   Decision and Consequences when closed, closed with the commit that landed it. The issue files
   are the only record of decisions; there is no index.
 - `specs/NN-<slug>.md`: an order to work issues in, as numbered steps. A session told "the next
   in the spec" works the first unchecked step and checks it in the commit that lands it.
-- `distill.mjs`: generates what a repository receives: the glossary, the world's Scope and Forces
-  and the rules' Assumptions whole; of a property its heading, Except and Against; of a rule its
-  Scope, Statement and Examples. `node docs/layers-revamp/distill.mjs > distilled.md`.
+- `distill.mjs`: generates what a repository receives: the glossary and the world whole, then
+  `property-rules.md` without its author-only parts (Absorbs, Drops, Glossary notes, Terms used,
+  the Appendix). `node docs/layers-revamp/distill.mjs > distilled.md`.
 - `reviews/NN/`: what a review's readers wrote, and the distilled they read. The issues are the
   record of what the requester accepted. `reviews/NN/checklist.md`: the review's cooperative
   findings, one id each; `reviews/NN/regression/`: what the regression reader found after each
   step that followed the review.
-  `reviews/regular-review.md`: how a review is run, the six reader prompts verbatim; a fresh
-  session runs one from it. `reviews/regression-reader.md`: the cheaper check between reviews.
+  `reviews/regular-review.md`: how a review is run, regular (two Fresh drafts) or fat (six
+  readers), the prompts verbatim; a fresh session runs one from it.
+  `reviews/regression-reader.md`: the cheaper check between reviews.
 - `affected.mjs`: the affected set of a change, mechanical: changed terms, properties and rules,
-  and the Relies-on lines, example files and rule texts below them.
+  where each changed term is used, and the last review's example bodies whose rule changed.
   `node docs/layers-revamp/affected.mjs <base> <head>`.
 
 ## Rule shape
 
-One rule is one entry with labeled parts. Scope and Statement are the rule, read as one unit, by
-people and by scripts; a Statement is never judged alone. The other parts serve them.
+One rule per property of the world, under the property's heading. Scope and Statement are the
+rule, read as one unit; a Statement is never judged alone.
 
-- **Id.** Stable for life: never renumbered, never reused; a removed rule retires its id.
-  Numbers are labels, not positions.
-- **Scope.** The situation the rule governs, in prose: "a use case of this system changes data
-  another system owns". Where the Scope does not hold, the rule says nothing.
-- **Statement.** One ruling, with one modal verb, capitalized: MUST, MUST NOT, SHOULD, SHOULD NOT,
-  MAY. No other modal, no "always", "never", "only", "by default". Two rulings are two rules.
-- **Relies on.** What the rule takes as given from other rules, the chain a session changing one
-  of them follows: one line per rule, its id and
-  what that rule's Scope and Statement guarantee, in its terms, never what its Why argues:
-  `- TX-5: a repeated delivery changes nothing.` Direct only, not what the named rule relies on
-  in turn; no glossary terms, whose changes sweep every tier anyway. `—` where the rule relies on
-  none. A rule that needs what only another rule's Why says has found a gap in that rule's
-  Statement, and an issue records it. A line is no second statement of the named rule: it states
-  what this rule assumes, and where the two disagree, the named rule stands and the line is the
-  finding.
-- **Why.** The harm the rule prevents and how it comes about, as long as that takes, for a
-  session changing the rule. It takes the Relies-on lines as given and argues this rule alone.
-  Contains no ruling: no modal verb, no "only" or "never"; a Why that rules is a Statement in
-  hiding. Breach examples show the harm happening. Required.
+- **Scope.** The situation the rule governs, in prose. Where the Scope does not hold, the rule
+  says nothing.
+- **Statement.** The rulings that deliver the property, each with a capitalized modal verb: MUST,
+  MUST NOT, SHOULD, SHOULD NOT, MAY. Every sentence serves the rule's property; one that serves
+  another property belongs in that property's rule.
+- **Why.** The harm the rule prevents and how it comes about, for a session changing the rule.
+  Contains no ruling; a Why that rules is a Statement in hiding. Required.
 - **Provenance.** Sources outside this repo: what the rule follows, where it departs from them.
   Never this repo's own history; that lives in git and the issues.
-- **Examples.** At least one breach and one ok, as `breach examples/<id>.md · ok
-  examples/<id>.md`. Where the compliant shape leaves the Scope, the value passed as an argument
-  where the rule forbids an ambient one, the ok example shows that shape and says the Scope no
-  longer holds.
+- Author-only, dropped by the distiller: Absorbs, Drops, Glossary notes, Terms used, and the
+  Appendix.
 
 ### What binds
 
-A repository reads the distilled output, so what a rule rules is derivable from its Scope and
-Statement alone, and what a property holds from its heading, Except and Against. Why and Relies
-on bind nobody: the Why gives a session the rule's context, the Relies-on lines the chain through
-the other rules, and a gap never closes in either. The test for a Why: a reader given Scope and
-Statement alone refuses every breach the Why describes; a breach only the Why refuses is a gap in
-the Statement.
+A repository reads the distilled output. What binds is the glossary, the world's headings and
+Except, and the rules' Heading, Scope and Statement. Why and Provenance bind nobody, and a gap
+never closes in either. The test for a Why: a reader given Scope and Statement alone refuses every
+breach the Why describes; a breach only the Why refuses is a gap in the Statement.
 
-Nothing the distiller keeps names instances of what it speaks of: not after a colon, not in a
-series, not one. A list in a ruling goes stale and reads as closed. A series whose members can
-each be swapped for another of their kind is a list of instances. One whose members together are
-the whole of what the term means, so that dropping one changes the meaning, is the definition and
-stays. An instance worth showing is an example file, named from the Examples field. Why,
-Provenance, `choices.md` and `domain.md` may name instances.
+Nothing that binds names instances of what it speaks of: not after a colon, not in a series, not
+one. A list in a ruling goes stale and reads as closed. A series whose members can each be swapped
+for another of their kind is a list of instances. One whose members together are the whole of what
+the term means, so that dropping one changes the meaning, is the definition and stays. Why,
+Provenance and `domain.md` may name instances.
 
 ### Strength
 
-The modal verb is the rule's strength.
+The modal verb is the ruling's strength.
 
 - **MUST**, **MUST NOT**: no deviation. A codebase that cannot comply changes the rule, through
   an issue.
 - **SHOULD**, **SHOULD NOT**: the default; a codebase deviates. A deviation that recurs reopens
   the rule.
-- **MAY**: a permission. It exists where another rule would otherwise forbid; its Relies on names
-  that rule.
+- **MAY**: a permission where another ruling would otherwise forbid.
 
-### Exceptions
+## Reviews
 
-A rule has no exceptions inline. Where a situation needs a different ruling, that is another rule
-with a narrower Scope, usually a MAY. Where the Scopes of two rules both hold, the narrower Scope
-governs: a MAY against a MUST is not a deviation, it is the more specific ruling. The MAY
-announces itself as an exception.
+Only when one is requested, and before each next review is due; `reviews/regular-review.md` has
+the prompts. A reader is a subagent given only the files its prompt lists, never the conversation,
+the issues or the other documents; it writes what it finds to `reviews/NN/`. A finding the
+requester accepts goes into an issue.
 
-### Testing
-
-Examples are how the rules are checked. A rule without a breach and an ok example is unfinished.
-A reviewer who finds a problem writes the example that shows it, not prose.
-
-The fixture is `domain.md`: a made-up shop whose systems carry the situations the rules have to
-place. It holds situations, never rulings. Testing a draft is an agent running several readers
-over the fixture and the distilled output, each producing example files:
-
-- **Implementer.** Builds the fixture under the rules. Produces the ok examples, and a finding
-  wherever a rule cannot be followed. Runs first; the others need its examples.
-- **Gap.** Finds a situation in the fixture that no Scope holds for. Produces an example with
-  empty front matter.
-- **Contradiction.** Finds one situation where complying with one rule is the breach of another,
-  and no code satisfies both. Produces the pair of examples that shows it, each satisfying one
-  rule and breaching the other. No script checks this; an example that happens to satisfy one
-  rule and breach another is a defect, not a contradiction.
-- **Adversarial.** Satisfies a Statement while a property fails to hold. Produces a breach
-  example the Statement alone would call ok. Given the input files instead, it also tests the
-  harm each Why describes and checks each Relies-on line against the Scope and Statement of the
-  rule it names; a line that rule does not guarantee is a finding.
-
-The Implementer is the regular reader, both sets: it measures whether a cooperative agent can
-build the fixture under the rules. Gap, Contradiction and Adversarial are optional, run on request
-or once after a tier change. Review 03 showed their findings grow with each new or changed term
-faster than the text closes them (`reviews/03/SUMMARY.md`).
-
-Between reviews, a change to a tier is checked in two cheaper tiers before the next step
-(`reviews/regression-reader.md`): `affected.mjs` lists what the change touches below itself, and
-one regression reader re-judges that set against the last review's checklist, marking each
-finding resolved, unchanged or newly broken. It discovers nothing; the regular readers do, once
-per spec. A glossary or world change also gets two Fresh repo drafts.
+- **Regular: Fresh repo, twice.** Two subagents each get the distilled set and the same product
+  brief: the fixture's capabilities and technologies, never its systems or edge cases. Each
+  drafts an architecture and lists every decision the document left to it and every sentence it
+  had to pick a reading for. Where the drafts differ and each holds every property, the document
+  left it open; where a sentence reads two ways, a finding.
+- **Fat: six readers.** The two Fresh drafts, two more over the raw files, and the Implementer
+  over each set: it builds the fixture, `domain.md`, under the rules, and a finding is wherever a
+  rule cannot be followed.
+- **Between reviews:** the regression reader (`reviews/regression-reader.md`). `affected.mjs`
+  lists what a change touches; one reader proves the change closed what it targeted and broke
+  nothing anywhere in the rules. It discovers nothing; the reviews do.
 
 ## Tiers
 
-The documents depend downward: the glossary and `the-world.md` on top; general rules use both;
-group rules use the general rules too; examples are referenced from the rules. The cost of a
-change rises with the tier.
+The documents depend downward: the glossary and `the-world.md` on top, the property rules below.
+The cost of a change rises with the tier.
 
-- **Glossary.** Adding a term is cheap. Changing one —
-  rewording, narrowing, dropping — is an issue, and a fresh session works it: it sweeps every
-  lower tier for the term and re-decides whatever the change touched, inside that issue. The
-  sweep starts with a grep for the term and its old wording over every document, and the issue
-  lists the hits before any edit.
-- **The world.** Changing a force or a property is an issue. No rule names the property it serves,
-  so the issue reads every rule, general or group, against the change.
-- **General rules.** Changing a rule's Scope or Statement is an issue that also visits every
-  rule, general or group, whose Relies on names it, and re-reads the rule's own examples.
-  Changing Relies on, Why, Provenance or Examples is not.
-- **Group rules.** Changeable without touching the tiers above. Where a situation cannot be ruled
-  without changing a general rule or a term, the same issue makes that change, upward, under the
-  rules of the tier it touches.
-
-## Peer review
-
-Only when one is requested. Each type has one goal; a request names the goal, and only that type
-runs. A reviewer is a subagent given only the files its type lists, never the conversation, the
-issues or the other documents; it writes what it finds to `reviews/NN/`. The requester reads
-`choices.md` before accepting; a finding it accepts goes into an issue.
-
-- **Fresh repo, twice.** Goal: tell where `the-world.md` leaves a choice open on purpose from
-  where a reader can take it two ways. Two subagents each get the distilled glossary and world,
-  that both draw on Evans, Cockburn and Khononov, and the same product brief: the fixture's
-  capabilities and technologies, never its systems or edge cases. Each drafts an architecture:
-  systems and what each owns, ports and adapters, calls and messages, processes, a directory
-  tree, how each property holds, and every decision the two documents left to it. Where the
-  drafts differ and each holds every property, it is a choice, in `choices.md` already or entered
-  there; where one of the world's sentences reads two ways, a finding.
-- **Red team.** Goal: find what `the-world.md` should rule out and does not. One subagent gets
-  the distilled glossary and world and designs architectures that hold every property and are
-  plainly bad: a distributed monolith, every system reading one shared schema, one system owning
-  everything. Each design that holds is a finding: a force or a property missing.
-
-The Fresh repo readers run with every regular review, beside the Implementer. The Red team is
-optional: on request, or once after a change to `the-world.md`.
+- **Glossary.** Adding a term is cheap. Changing one, rewording, narrowing, dropping, sweeps
+  every lower tier for the term and its old wording, starting with `affected.mjs`, and re-decides
+  whatever the change touched.
+- **The world.** Changing a force or a property reads every rule against the change.
+- **Property rules.** Changing a Scope or Statement is checked by the regression reader before the
+  next change. Changing a Why or Provenance is not.
 
 ## Working here
 
-1. Read `glossary.md`, `the-world.md`, `general-rules.md` and `choices.md` whole before anything
-   else; group files for the situation at hand. Never the issue files, unless working one.
+1. Read `glossary.md`, `the-world.md` and `property-rules.md` whole before anything else. Never
+   the issue files, unless working one.
 2. Terms are used exactly as the glossary spells them. No synonyms, no second word for the
    same thing. A word with meaning the glossary does not give it appears only if it is common
    language or a source's well-known term. A rule that needs a new word adds it to the glossary,
    as a definition, first.
-3. One ruling per rule. Another document refers to a rule by id, never by restating it; a
-   Relies-on line is no restatement (Rule shape).
-4. Changing a rule's Scope or Statement, find every Relies-on line that names it and ask of each
-   whether the changed rule still guarantees it; each no is part of the same issue. Writing or
-   changing a rule, check that its own Relies-on lines still hold, and add one for each rule its
-   new text leans on.
-5. Work in batches, not sentence by sentence: one session drafts a tier whole, one runs the
-   readers over it. A draft is done when every rule has its examples and the readers produce no
-   new example.
-6. A gap closes in a Scope, a Statement or a new rule, never in a Why or a Relies-on line. A rule
-   that closes a listed choice closes its entry in `choices.md` in the same issue.
+3. Another document refers to a rule by id, never by restating it.
+4. A gap closes in a Scope or a Statement, never in a Why. A rule with no property behind it means
+   a property is missing, not the other way round.
 
 ## Source material
 

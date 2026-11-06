@@ -1,7 +1,7 @@
 // @ts-check
 
 // The affected set of a change: what a diff of glossary.md, the-world.md and property-rules.md
-// touches, read as distill-properties.mjs distills them: the glossary and the world whole,
+// touches, read as distill.mjs distills them: the glossary and the world whole,
 // property-rules.md without Absorbs, Drops, Glossary notes, Terms used and the Appendix.
 // - Changed rule fields, per rule of property-rules.md (P-ids, the sections Assumptions,
 //   Conventions and the preamble), distilled fields only; changes to undistilled fields are noted
@@ -34,7 +34,7 @@ const DIR = fileURLToPath(new URL(".", import.meta.url))
 const REL = "docs/layers-revamp/"
 const [base = "HEAD", head] = process.argv.slice(2)
 
-/** Fields distill-properties.mjs drops. */
+/** Fields distill.mjs drops. */
 const DROPPED = ["Absorbs", "Drops", "Glossary notes", "Terms used"]
 /** Fields that bind, per document; every other distilled field is reasoning. */
 const BINDING = {
@@ -138,7 +138,7 @@ const parseRules = (text, doc) => {
             }
             continue
         } else if (afterBlank && !field.kept) {
-            // distill-properties.mjs resumes keeping at a blank line inside a dropped field
+            // distill.mjs resumes keeping at a blank line inside a dropped field
             field = addField(block, `${field.name} (after a blank line, distilled)`, true)
         }
         afterBlank = false

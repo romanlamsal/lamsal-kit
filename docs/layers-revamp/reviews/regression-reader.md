@@ -21,7 +21,7 @@ the previous regression file (its first line), `${HEAD}` the round's commit.
 
 1. The round committed; tree clean.
 2. `node ${ROOT}/affected.mjs ${BASE} ${HEAD} > ${ROOT}/reviews/${NN}/regression/${NAME}-affected.md`.
-3. `${ROOT}/distill-properties.mjs` run at `${HEAD}` (a worktree) into
+3. `${ROOT}/distill.mjs` run at `${HEAD}` (a worktree) into
    `${ROOT}/reviews/${NN}/regression/${NAME}-distilled.md`.
 4. The reader, below; Opus, effort high, in the background. The requester goes on meanwhile.
 5. Commit the three files and the report: `docs(layers-revamp): regression, ${NAME}`.
