@@ -19,9 +19,7 @@ Check if everything is good by running
 - typechecks
 - linter (biome or eslint)
 
-When you are finished implementing, do not commit immediately after finishing a phase. Instead, tell me that you are
-done and that you wait for my approval.
-After I approved your changes, you may commit your changes using conventional commit messages and a phase description in
+Commit your changes using conventional commit messages and a phase description in
 the commit body. Make sure to not commit any unstaged files that you have not actually changed during that phase/plan.
 
 ## Type-Safety
@@ -40,6 +38,8 @@ that's still better than using `any`.
 
 
 # Testing
+
+Follow this section unless other coding standards exist on this repository.
 
 - tests for files in the main source directory should be placed at the exact same path but in ./test, 
 e.g. the test file for `./src/lib/foo/bar.ts` should be `./test/lib/foo/bar.test.ts`

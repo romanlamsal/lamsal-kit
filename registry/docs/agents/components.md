@@ -7,8 +7,8 @@ performed at the route). Without the router, only "Components split when they ta
 
 **Terms.** A *controller* is a boundary adapter: it receives a request, resolves what is
 needed, calls into one thing, and returns. It holds no rules of its own. This document applies
-that role to route files. `layers.md` applies the same role on the server; the two differ in one
-respect, stated below.
+that role to route files. `layers.md` applies the same role on the server, as a *driving adapter*;
+the two differ in one respect, stated below.
 
 ## Routes are controllers
 
@@ -40,8 +40,7 @@ Calling a server operation directly from a region declares nothing. Nothing can 
 it works only for as long as something else on the screen refreshes everything. When that
 refresh is removed, the region shows stale data and nothing about the code looks wrong.
 
-Which reads a write invalidates is asked of the code performing the write. `layers.md` question 4
-is the server-side form of the same question.
+Which reads a write invalidates is asked of the code performing the write.
 
 ## Never refresh twice
 

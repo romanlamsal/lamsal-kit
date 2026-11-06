@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 test-output
 build
+
+# book and web text for the layers revamp, local only
+docs/layers-sources/
