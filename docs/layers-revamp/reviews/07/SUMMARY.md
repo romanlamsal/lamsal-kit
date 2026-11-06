@@ -119,4 +119,23 @@ Added after the regular review, on request: two readers judging drafts A and B a
 Cockburn and Helland would, plus buildability. Input: `brief.md`, the glossary, and each draft
 through its directory tree only (`persona-input-a.md`, `persona-input-b.md`: no property mapping,
 no D or S list), so the readers judge the build, not the rules' reading. Web allowed. Output
-`persona-a.md`, `persona-b.md`. The glossary changed (9ee3e03) while they ran. Not yet folded.
+`persona-a.md`, `persona-b.md`. The glossary changed (9ee3e03) while they ran.
+
+Both: buildable; the framework fights (prerender before the courier fills, `register()` on the
+edge runtime, pg-boss queues, pool sizes) are ordinary fixes, none from a rule. Folded:
+
+- The rules' recorded departures, kept: one architecture for every system and no core domain
+  (Assumptions); tied aggregates in one commit (P7); a driving port per use case (glossary); the
+  transaction on every writing port (P7 s2); ports in the service layer (P1, P5); product rules in
+  Payload's config (glossary External system).
+- Blanket anti-corruption layer: the drafters' choice, P12 asks per upstream; kept, a conformist is
+  argued per repository.
+- A's 3PL `lookUpFirst` race "accepted" against the brief: the drafter's; P9 s4 made it visible.
+- B's catalog replica fetched concurrently with no version: breaches P18 s1. P18's Why claimed
+  notice and fetch makes order not matter; now only where the receiver fetches one at a time or
+  the answer carries a version (1356f65). Statement unchanged.
+- Regression r07-fold Noticed, an ambient transaction behind `transactionPort.current()` for a
+  reading port: not changed; the transaction travels as an argument, a `current()` is plain to see.
+- Drafters' modelling choices (invoice as document and account, events built by services, refunds
+  in three systems, polling in driving adapters, no reconciliation, naming drift, VAT rounding in
+  the kernel): no rule involved.
