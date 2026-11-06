@@ -9,14 +9,14 @@ true; this one says what to type. Anything here that names a library or a filena
 
 | suffix | holds |
 | --- | --- |
-| `<service>.fn.ts` | server functions — controllers in the sense of `layers.md` |
+| `<service>.fn.ts` | server functions — driving adapters in the sense of `layers.md` |
 | `<service>.schema.ts` | validators for those server functions' inputs |
 | `<service>.queries.ts` | `queryOptions` and `mutationOptions` factories for one service |
 
 A `.fn.ts` reads its service inside the server function's body, from the registry or the server
-function's middleware context (a courier, `layers.md` Terms); it imports neither a service
-instance nor `assembly.ts` (`layers.md`, Ports and factories). A `.schema.ts` composes domain schemas — pick, extend — and declares no rule of
-its own (`layers.md` question 3).
+function's middleware context (a courier, `layers.md` Glossary); it imports neither a service
+instance nor `assembly.ts` (`layers.md` P5). A `.schema.ts` composes domain schemas — pick, extend — and declares no rule of
+its own (`layers.md` P2).
 
 One `.queries.ts` per service, and it is the only place cache keys are written. A route file is
 not a layer: it is the route definition plus one controller component (`components.md`).
@@ -40,7 +40,7 @@ data as props; they do not each open their own query for the same rows.
 ## Writes
 
 A write is a `mutationOptions` factory next to the read, naming every key its service made
-stale (`layers.md` question 4).
+stale.
 
 ```ts
 // order.queries.ts
