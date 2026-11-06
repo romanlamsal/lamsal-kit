@@ -711,9 +711,7 @@ and a driving adapter is no use case
 *Statement:* A use case MUST save at most one aggregate, or several only where a business rule ties
 them, in one transaction that its service opens, that carries every write the use case makes, and
 that its service commits once after the last write. Each driven port that writes MUST be handed that
-transaction as an argument, to its methods or to what builds it inside the use case. The same
-transaction MUST carry the messages the use case writes to the outbox, and what else its goal needs
-MUST be asked for by such a message, or by the call after the commit that P8 allows. Where a write
+transaction as an argument, to its methods or to what builds it inside the use case. Where a write
 in it fails, the transaction MUST roll back whole.
 *Why:* A process can stop between any two instructions (F4), and a write can fail where the one
 before it succeeded. Between two writes that each commit on their own, the stop leaves records no
@@ -1721,17 +1719,12 @@ orchestration, a tentative operation included, from the first business process s
 until its part ends.
 *Statement:* A business rule of that system MUST decide how its part ends from each state it can
 stand in, on whatever another system can send it there and on none coming, by completing its part,
-by a business process step that undoes an earlier one, asked of the system that
-took it, or by accepting the state as it stands. Where its part waits on another system, it MUST
-hold the moment it stops waiting in an aggregate of its own, if:
-- it holds something until the answer comes, a tentative operation it took or asked for
-  included, or
-- a business rule limits how long it may wait.
-
-A status that only shows how far another system has got, with nothing of this system's hanging on
-it, is no wait. A refusal of a business process step MUST be committed as its outcome and reach the
-system that decided the business process step, and a failure that neither gave nor refused MUST NOT
-be committed as one.
+by a business process step that undoes an earlier one, asked of the system that took it, or by
+accepting the state as it stands. Where its part waits on another system, it MUST hold the moment it
+stops waiting in an aggregate of its own. A status that only shows how far another system has got,
+with nothing of this system's hanging on it, is no wait. A refusal of a business process step MUST
+be committed as its outcome and reach the system that decided the business process step, and a
+failure that neither gave nor refused MUST NOT be committed as one.
 *Why:* Each system commits its own part (P16), so the parts diverge. Another system says yes and
 then fails, stops answering, refuses, or answers after this one has moved on. Two harms follow,
 and both are found by a customer. Work that never ends: the tea shop's order waits as "payment
@@ -1774,9 +1767,7 @@ that publishes an event and waits for nothing has no part to end there and falls
 sentence. Nor does a status that only shows another system's progress: a ticket issued on account
 shows "payment open" until billing's event says paid, nothing of booking's hangs on it, and billing,
 which collects, ends the matter on its own deadline. Where booking's own rule cancels a ticket
-unpaid after 14 days, booking waits, and the 14 days are its moment. What makes a part wait is what
-it holds until the answer comes, a seat, stock, a tentative operation, or a business rule's limit on
-how long it may wait.
+unpaid after 14 days, booking waits, and the 14 days are its moment.
 
 The fourth sentence is what lets the first decide on what actually happened. A refusal that throws
 fails its use case: the handler does not acknowledge, the bus redelivers, the same business rule
@@ -1815,7 +1806,7 @@ and p. 148 (rejection as an event the saga handles); failure retried and parked 
 participant and NServiceBus reply to the sender; this rule leaves the route open. The deadline held
 in the aggregate follows Evans p. 161 and p. 163 (due date plus grace period, selected by the
 repository once past) and Khononov p. 88 and p. 102 (time left held and checked in the aggregate;
-the payment deadline in the order's event). What makes a part wait follows Helland 2007 p. 140 and
+the payment deadline in the order's event). What counts as a wait follows Helland 2007 p. 140 and
 p. 141 (the tentative operation, which holds, against the activity, what one remembers of a partner)
 and NServiceBus (Saga timeouts: "an upper limit on the waiting period that the business dictates").
 The closed list of endings and the line between a refusal and a failure are this document's.

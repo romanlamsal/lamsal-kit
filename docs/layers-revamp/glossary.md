@@ -179,8 +179,7 @@ none of its writes is seen outside it.
 **Store.** What keeps records such that one transaction can carry writes to any of them. Two clients
 are one store when one transaction can carry the writes of both, two stores until it can.
 
-**Transaction port.** The driven port a service opens a transaction on one store through. It returns
-the transaction, typed in the system's terms.
+**Transaction port.** The driven port a service opens a transaction on one store through.
 
 ## Driving adapters
 
