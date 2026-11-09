@@ -863,7 +863,7 @@ transaction makes its change before this commit, calling it after loses the chan
 written as a command in the outbox, the owner's handler makes it after. Which system's use case may
 make that change is P11's; P11 delivers this. A change no other system of this codebase owns, a
 mail, a booking, a mirror: the owner of a mail reads no bus, so this system's own handler acts for
-it, and the second sentence says how. That handler is where the chain ends rather than regresses: it
+it, and the third sentence says how. That handler is where the chain ends rather than regresses: it
 decides nothing, so the first sentence does not reach the call it makes beside its own transaction;
 the decision committed with the message. A handler that decides again decides on a later state, with
 its call still apart from its transaction: fulfillment's handler for `BookShipment` checks the
@@ -1918,7 +1918,7 @@ writes down. The mechanism is one register per system. A system is one bounded c
 own glossary (glossary: System); that glossary is where a term's meaning is stated, once, and
 every module reads the word as the glossary has it. A meaning that changes (F2) changes in the
 glossary first, and every module that uses the term follows; a partial edit that moves the
-meaning in one module and leaves the rest is the breach the second sentence names. A word the
+meaning in one module and leaves the rest is the breach the first sentence names. A word the
 glossary does not hold is common language, read in its ordinary sense, or the system's next term,
 entered before the code uses it; a word the code gives a meaning the glossary has not stated is a
 meaning only the module that coined it knows. Where one word has to mean two things, one meaning
@@ -1926,7 +1926,7 @@ is renamed: checkout's order stays `Order`, billing's becomes `InvoiceableOrder`
 meanings belong to rules that change for different reasons, the system is split where they part;
 P3 delivers where that split goes.
 
-Other systems' words enter every system that talks to them, and the third sentence keeps them
+Other systems' words enter every system that talks to them, and the second sentence keeps them
 from becoming a second meaning of a word here. Shop's anti-corruption layer reads billing's
 `Order` in the driven adapter that calls billing; shop's own `Order` is another thing. The adapter
 names billing's apart, `billing.Order` or `BillingOrder`; a local `order` holding billing's breaks
@@ -1951,7 +1951,7 @@ the concert a `Show` or the messages without the suffix.
 Exceptions, and why they are exceptions. An external system's configuration is its own, in its
 terms, even where this codebase writes it (glossary: External system): it is another bounded
 context, and its words mean what its vendor says; what this system's code does with it falls under
-the third sentence. Tooling runs in no process of the deployed application and sits outside the
+the second sentence. Tooling runs in no process of the deployed application and sits outside the
 rules. Meaning across time is not this rule's: that a stored record or a waiting message means to
 new code what it meant to the code that wrote it is P14's, and P14 delivers this; that this
 system's published language holds still while its terms move is P13's, and P13 delivers this.
