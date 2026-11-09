@@ -141,7 +141,8 @@ Conformist, Pure, Outside
 *Statement:* A business rule of a system MUST be stated once, in its domain or in a shared kernel
 that domain imports, with every value it decides by that is the same for every candidate and that no
 record holds. Code anywhere else that needs what it decides MUST get it from that statement,
-directly or through the system, and MUST NOT state it again.
+directly or through the system, and MUST NOT state it again. A test MUST NOT put a double in its
+place.
 *Why:* A business rule stated twice is two rules the first time it changes. The edit lands where
 its author looked, an agent having read one file (F3), and the other statement stays; the system
 then decides one way through one path and another way through the next, and nothing fails,
@@ -334,8 +335,9 @@ behind its driven ports serves it.
 *Statement:* How a use case acts and what it answers MUST be decided by its service and its domain
 from the arguments its driving port takes and what its driven ports return, and an ambient value or
 a configuration value MUST NOT change either, whether the service reads it or code behind a port
-does. A driving adapter MUST reach the system only through its driving ports, with at most one
-acting call per call or message it handles, and MUST NOT withhold a call the service would accept.
+does, a value the business decides on being part of how it acts. A driving adapter MUST reach the
+system only through its driving ports, with at most one acting call per call or message it handles,
+and MUST NOT withhold a call the service would accept.
 *Why:* A tea shop's checkout is reached by a server function, a CLI the staff use, a handler and
 a test; its records are served by Postgres in production and by a fake in the test. P4 holds where
 all of them meet one computation, the service and the domain, fed by two inputs: what the caller
@@ -823,12 +825,12 @@ decides that the transaction does not commit MUST leave it only as such a messag
 change, or as a call to another system after the commit, made from a record the transaction
 committed, from which a later use case repeats the call or ends the change. The outbox MUST keep
 each message until the bus holds it, and the bus through any stop of a process until a handler
-acknowledges it, which the handler MUST NOT do before the use case it calls has returned with its
-writes committed. A use case called for such a message MUST act on the change, deciding nothing
-again, and a change another system tells of before committing it MUST change nothing in this system
-beyond a provisional record of it until it is confirmed. An external system this codebase
-configures, whose transaction can write a message to an outbox, MUST tell of its change by such a
-message.
+acknowledges it, and a driving adapter MUST NOT answer a call or acknowledge a message it handles
+before the use case it calls has returned with its writes committed. A use case called for such a
+message MUST act on the change, deciding nothing again, and a change another system tells of before
+committing it MUST change nothing in this system beyond a provisional record of it until it is
+confirmed. An external system this codebase configures, whose transaction can write a message to an
+outbox, MUST tell of its change by such a message.
 *Why:* A use case's writes are a fact once its transaction commits, and not before; a process can
 stop between any two instructions (F4). What leaves the transaction is not bound to that commit: a
 mail sent, a parcel booked with the 3PL, a command handed to another system, an event published, a
@@ -861,7 +863,7 @@ transaction makes its change before this commit, calling it after loses the chan
 written as a command in the outbox, the owner's handler makes it after. Which system's use case may
 make that change is P11's; P11 delivers this. A change no other system of this codebase owns, a
 mail, a booking, a mirror: the owner of a mail reads no bus, so this system's own handler acts for
-it, and the second sentence says how. That handler is where the chain ends rather than regresses: it
+it, and the third sentence says how. That handler is where the chain ends rather than regresses: it
 decides nothing, so the first sentence does not reach the call it makes beside its own transaction;
 the decision committed with the message. A handler that decides again decides on a later state, with
 its call still apart from its transaction: fulfillment's handler for `BookShipment` checks the
@@ -1823,9 +1825,9 @@ cases called for them.
 *Statement:* A use case called for a message MUST leave the records of what it tells of as the
 messages about that thing, applied in the order they were written, would leave them, and MUST NOT
 tell that order from when they arrive. The system that writes messages about one thing MUST let a
-use case called for one tell that order, by what the message carries or by answering what the thing
-is now. Where messages written by different systems conflict over one thing, a business rule of the
-receiving system MUST decide which prevails.
+use case called for one tell that order, by what the message carries other than a time, or by
+answering what the thing is now. Where messages written by different systems conflict over one
+thing, a business rule of the receiving system MUST decide which prevails.
 *Why:* Arrival order is not the order of writing (F5). The relay hands a message over again after
 a crash, the bus retries one that failed and backs off before it does, parks it and retries it
 once the fault is fixed, and a redelivery runs while the first attempt still does; an external
@@ -1916,7 +1918,7 @@ writes down. The mechanism is one register per system. A system is one bounded c
 own glossary (glossary: System); that glossary is where a term's meaning is stated, once, and
 every module reads the word as the glossary has it. A meaning that changes (F2) changes in the
 glossary first, and every module that uses the term follows; a partial edit that moves the
-meaning in one module and leaves the rest is the breach the second sentence names. A word the
+meaning in one module and leaves the rest is the breach the first sentence names. A word the
 glossary does not hold is common language, read in its ordinary sense, or the system's next term,
 entered before the code uses it; a word the code gives a meaning the glossary has not stated is a
 meaning only the module that coined it knows. Where one word has to mean two things, one meaning
@@ -1924,7 +1926,7 @@ is renamed: checkout's order stays `Order`, billing's becomes `InvoiceableOrder`
 meanings belong to rules that change for different reasons, the system is split where they part;
 P3 delivers where that split goes.
 
-Other systems' words enter every system that talks to them, and the third sentence keeps them
+Other systems' words enter every system that talks to them, and the second sentence keeps them
 from becoming a second meaning of a word here. Shop's anti-corruption layer reads billing's
 `Order` in the driven adapter that calls billing; shop's own `Order` is another thing. The adapter
 names billing's apart, `billing.Order` or `BillingOrder`; a local `order` holding billing's breaks
@@ -1949,7 +1951,7 @@ the concert a `Show` or the messages without the suffix.
 Exceptions, and why they are exceptions. An external system's configuration is its own, in its
 terms, even where this codebase writes it (glossary: External system): it is another bounded
 context, and its words mean what its vendor says; what this system's code does with it falls under
-the third sentence. Tooling runs in no process of the deployed application and sits outside the
+the second sentence. Tooling runs in no process of the deployed application and sits outside the
 rules. Meaning across time is not this rule's: that a stored record or a waiting message means to
 new code what it meant to the code that wrote it is P14's, and P14 delivers this; that this
 system's published language holds still while its terms move is P13's, and P13 delivers this.

@@ -31,7 +31,7 @@ Root: ${ROOT}
 Use absolute paths for every read and write. Do not cd.
 
 READ ONLY these files, whole, and nothing else in the repository (no README, no glossary.md, no the-world.md, no property-rules.md, no issues/, no other reviews, no domain.md, no repo search):
-- ${ROOT}/reviews/${NN}/distilled.md  (glossary, the world: forces and properties, then the property rules: Scope, Statement, Why, Provenance)
+- ${ROOT}/reviews/${NN}/distilled.md  (layers.md: glossary, the world's forces, each property with its rule's Scope and Statement; then layers-why.md: each property's and rule's Why and Provenance)
 - ${ROOT}/reviews/${NN}/brief.md  (the product brief)
 
 The document draws on Evans (DDD), Cockburn (hexagonal architecture) and Khononov (Learning DDD); bring that background. Use the glossary's terms exactly as it spells them; where you need a name that is not a glossary term, mark it as a code name in backticks.

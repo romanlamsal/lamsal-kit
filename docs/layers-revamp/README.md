@@ -24,9 +24,12 @@ of this folder.
   are the only record of decisions; there is no index.
 - `specs/NN-<slug>.md`: an order to work issues in, as numbered steps. A session told "the next
   in the spec" works the first unchecked step and checks it in the commit that lands it.
-- `distill.mjs`: generates what a repository receives: the glossary and the world whole, then
-  `property-rules.md` without its author-only parts (Absorbs, Drops, Glossary notes, Terms used,
-  the Appendix). `node docs/layers-revamp/distill.mjs > distilled.md`.
+- `distill.mjs`: generates what a repository receives, without `property-rules.md`'s author-only
+  parts (Absorbs, Drops, Glossary notes, Terms used, the Appendix): `layers.md`, what binds (the
+  glossary, the world's scope and forces, each property's heading, Except and Against with its
+  rule's Scope and Statement), and `layers-why.md`, each property's and rule's Why and Provenance
+  by id. `node docs/layers-revamp/distill.mjs <dir>` writes both; with no argument it prints both
+  in one, for a review.
 - `reviews/NN/`: what a review's readers wrote, and the distilled they read. The issues are the
   record of what the requester accepted. `reviews/NN/checklist.md`: the review's cooperative
   findings, one id each; `reviews/NN/regression/`: what the regression reader found after each
